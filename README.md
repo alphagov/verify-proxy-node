@@ -4,7 +4,7 @@ This repository contains the eIDAS Proxy node implementation
 
 ## Running tests
 
-To run the tests manually, execute: `./java-tests.sh`.
+To run the tests manually, execute: `mvn clean test`.
 For the tests to run automatically every time you commit, install [pre-commit](https://pre-commit.com)
 via Homebrew and run `pre-commit install` in this repo.
 

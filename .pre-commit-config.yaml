@@ -2,6 +2,7 @@
   hooks:
     - id: java-tests
       name: Run Java tests
-      entry: java-tests.sh
-      language: script
+      entry: mvn clean test
+      language: system
       files: \.java$
+      pass_filenames: false
