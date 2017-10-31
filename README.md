@@ -1,5 +1,7 @@
 # eIDAS Notification
 
+This repository contains the eIDAS Proxy node implementation 
+
 ## How to start the eidas-proxy-node application
 
 1. Run `mvn clean install` to build your application
