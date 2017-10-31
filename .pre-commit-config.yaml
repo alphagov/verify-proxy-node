@@ -1,0 +1,7 @@
+- repo: local
+  hooks:
+    - id: java-tests
+      name: Run Java tests
+      entry: java-tests.sh
+      language: script
+      files: \.java$
