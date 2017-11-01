@@ -1,14 +1,20 @@
-package uk.gov.ida;
+package uk.gov.ida.notification;
 
 import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import uk.gov.ida.resources.VerifyResource;
+import uk.gov.ida.notification.resources.VerifyResource;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
     public static void main(final String[] args) throws Exception {
-        new EidasProxyNodeApplication().run(args);
+        if (args == null || args.length == 0) {
+            new EidasProxyNodeApplication().run("server", System.getenv("CONFIG_FILE"));
+        } else {
+            new EidasProxyNodeApplication().run(args);
+        }
     }
 
     @Override
@@ -18,7 +24,11 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     @Override
     public void initialize(final Bootstrap<EidasProxyNodeConfiguration> bootstrap) {
-        // TODO: application initialization
+        bootstrap.setConfigurationSourceProvider(
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
+                        new EnvironmentVariableSubstitutor(false)
+                )
+        );
     }
 
     @Override

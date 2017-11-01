@@ -1,0 +1,62 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'uk.gov.ida.notification.EidasProxyNodeApplication'
+
+buildscript {
+    repositories {
+        maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+    }
+}
+
+project.ext {
+    dropwizardVersion = '1.1.4'
+}
+
+repositories {
+    maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+}
+
+dependencies {
+    compile ( 
+        "io.dropwizard:dropwizard-core:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-jetty:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-assets:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-client:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-configuration:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-logging:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-views:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-metrics-graphite:${dropwizardVersion}",
+    )
+    testCompile(
+        'junit:junit:4.12',
+        "io.dropwizard:dropwizard-testing:${dropwizardVersion}",
+        'org.mockito:mockito-core:2.7.22'
+    )
+}
+
+task pushToPaas(type: Exec) {
+    commandLine 'cf', 'push'
+}
+
+pushToPaas.dependsOn distZip
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '3.3'
+}
+
+// Configure the jar task to build a fat jar
+jar {
+  from {
+    (configurations.compile).collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
+  manifest {
+    attributes("Main-Class": mainClassName)
+  }
+}
+
+run {
+  args 'server', './src/dist/config.yml'
+}

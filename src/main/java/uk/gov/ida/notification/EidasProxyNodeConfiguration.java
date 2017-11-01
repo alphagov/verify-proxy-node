@@ -1,4 +1,4 @@
-package uk.gov.ida;
+package uk.gov.ida.notification;
 
 import io.dropwizard.Configuration;
 

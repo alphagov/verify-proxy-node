@@ -1,0 +1,8 @@
+---
+applications:
+  - name: eidas-proxy-node
+    memory: 1G
+    buildpack: java_buildpack
+    path: ./build/distributions/verify-eidas-notification.zip
+    env:
+      CONFIG_FILE: /app/verify-eidas-notification/config.yml

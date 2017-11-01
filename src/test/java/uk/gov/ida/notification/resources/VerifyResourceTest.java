@@ -1,4 +1,4 @@
-package uk.gov.ida.resources;
+package uk.gov.ida.notification.resources;
 
 import org.junit.Test;
 

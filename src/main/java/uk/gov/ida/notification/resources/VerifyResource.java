@@ -1,4 +1,4 @@
-package uk.gov.ida.resources;
+package uk.gov.ida.notification.resources;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
