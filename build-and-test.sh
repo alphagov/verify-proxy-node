@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
 
-mvn clean install
-mvn test
+set -e
+
+./gradlew clean build
