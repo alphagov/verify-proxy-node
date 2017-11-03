@@ -1,6 +1,6 @@
 ---
 applications:
-  - name: eidas-proxy-node
+  - name: verify-eidas-notification
     memory: 1G
     buildpack: java_buildpack
     path: ./build/distributions/verify-eidas-notification.zip
