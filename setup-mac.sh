@@ -19,15 +19,28 @@ function install_cloudfoundry() {
 	colour_print $GREEN "Cloud Foundry installation complete!"
 }
 
+function install_pre_commit() {
+	brew update && brew install pre-commit
+  pre-commit install
+	colour_print $GREEN "pre-commit installation complete!"
+}
+
 colour_print $ORANGE "========================="
-colour_print $GREEN "Installing Cloud Foundry"
-colour_print $ORANGE "========================="
-if cf -v; then
-	colour_print $GREEN "Cloud Foundry already exists! Doing nothing"
+colour_print $YELLOW "Installing Cloud Foundry"
+if command -v cf >/dev/null; then
+	colour_print $GRAY "Cloud Foundry already exists! Doing nothing"
 else
 	install_cloudfoundry
 fi
+echo
 
 colour_print $ORANGE "========================="
+colour_print $YELLOW "Installing pre-commit"
+if command -v pre-commit >/dev/null; then
+	colour_print $GRAY "pre-commit already exists! Doing nothing"
+else
+	install_pre_commit
+fi
+echo
+
 colour_print $GREEN "Setup Complete!!"
-colour_print $ORANGE "========================="
