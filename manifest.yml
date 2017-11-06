@@ -6,3 +6,4 @@ applications:
     path: ./build/distributions/verify-eidas-notification.zip
     env:
       CONFIG_FILE: /app/verify-eidas-notification/config.yml
+      HUB_URL: https://verify-eidas-notification.cloudapps.digital/stub-hub

@@ -7,3 +7,5 @@ logging:
   level: INFO
   loggers:
     uk.gov.ida: DEBUG
+
+hubUrl: ${HUB_URL:-http://localhost:6600/stub-hub}

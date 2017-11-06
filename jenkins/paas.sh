@@ -29,3 +29,4 @@ else
 fi
 
 ./gradlew -x test pushToPaas
+./jenkins/acceptance.sh

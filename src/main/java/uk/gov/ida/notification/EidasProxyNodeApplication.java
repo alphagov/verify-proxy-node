@@ -1,6 +1,7 @@
 package uk.gov.ida.notification;
 
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -41,7 +42,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) {
-        environment.jersey().register(new VerifyResource());
+        environment.jersey().register(new VerifyResource(
+                new JerseyClientBuilder(environment).build("hub-client"),
+                configuration
+        ));
         environment.jersey().register(new StubHubResource());
     }
 

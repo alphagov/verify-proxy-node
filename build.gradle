@@ -20,11 +20,12 @@ repositories {
 dependencies {
     compile ( 
         "io.dropwizard:dropwizard-core:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-client:${dropwizardVersion}",
     )
     testCompile(
         'junit:junit:4.12',
         "io.dropwizard:dropwizard-testing:${dropwizardVersion}",
-        'org.mockito:mockito-core:2.7.22'
+        'com.github.tomakehurst:wiremock-standalone:2.10.1'
     )
 }
 
@@ -40,4 +41,24 @@ task wrapper(type: Wrapper) {
 
 run {
   args 'server', './src/dist/config.yml'
+}
+
+// Acceptance Tests
+sourceSets {
+    acceptanceTest {
+        java.srcDir file('src/acceptance-test/java')
+        resources.srcDir file('src/acceptance-test/resources')
+        compileClasspath += main.output + test.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+task acceptanceTest(type: Test) {
+    description = 'Runs the acceptance tests'
+    group = 'verification'
+    testClassesDir = sourceSets.acceptanceTest.output.classesDir
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
+    reports.junitXml.destination = '$buildDir/acceptance-test-results'
+    reports.html.destination = '$buildDir/reports/acceptance-test'
+    dependsOn(test)
 }
