@@ -5,6 +5,7 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import uk.gov.ida.notification.resources.StubHubResource;
 import uk.gov.ida.notification.resources.VerifyResource;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
@@ -34,8 +35,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) {
-        final VerifyResource resource = new VerifyResource();
-        environment.jersey().register(resource);
+        environment.jersey().register(new VerifyResource());
+        environment.jersey().register(new StubHubResource());
     }
 
 }
