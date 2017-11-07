@@ -20,13 +20,6 @@ repositories {
 dependencies {
     compile ( 
         "io.dropwizard:dropwizard-core:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-jetty:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-assets:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-client:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-configuration:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-logging:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-views:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-metrics-graphite:${dropwizardVersion}",
     )
     testCompile(
         'junit:junit:4.12',
@@ -43,18 +36,6 @@ pushToPaas.dependsOn distZip
 
 task wrapper(type: Wrapper) {
   gradleVersion = '3.3'
-}
-
-// Configure the jar task to build a fat jar
-jar {
-  from {
-    (configurations.compile).collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
-  }
-  manifest {
-    attributes("Main-Class": mainClassName)
-  }
 }
 
 run {
