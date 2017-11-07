@@ -12,7 +12,13 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     public static void main(final String[] args) throws Exception {
         if (args == null || args.length == 0) {
-            new EidasProxyNodeApplication().run("server", System.getenv("CONFIG_FILE"));
+            String configFile = System.getenv("CONFIG_FILE");
+
+            if (configFile == null) {
+                throw new RuntimeException("CONFIG_FILE environment variable should be set with path to configuration file");
+            }
+
+            new EidasProxyNodeApplication().run("server", configFile);
         } else {
             new EidasProxyNodeApplication().run(args);
         }
