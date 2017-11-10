@@ -5,22 +5,26 @@ mainClassName = 'uk.gov.ida.notification.EidasProxyNodeApplication'
 
 buildscript {
     repositories {
-        maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+        mavenCentral()
     }
 }
 
 project.ext {
-    dropwizardVersion = '1.1.4'
+    dropwizardVersion = '1.2.0'
+    openSamlVersion = '3.3.0'
 }
 
 repositories {
-    maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+    mavenCentral()
 }
 
 dependencies {
     compile ( 
         "io.dropwizard:dropwizard-core:${dropwizardVersion}",
         "io.dropwizard:dropwizard-client:${dropwizardVersion}",
+        "org.opensaml:opensaml-core:${openSamlVersion}",
+        "org.opensaml:opensaml-saml-impl:${openSamlVersion}",
+        "se.litsec.eidas:eidas-opensaml3:1.0.4"
     )
     testCompile(
         'junit:junit:4.12',
