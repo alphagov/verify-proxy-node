@@ -1,1 +1,23 @@
-../../dist/config.yml
+server:
+  applicationConnectors:
+    - type: http
+      port: 0
+  adminConnectors:
+    - type: http
+      port: 0
+
+logging:
+  level: INFO
+  loggers:
+    uk.gov.ida: DEBUG
+  appenders:
+    - type: console
+    - type: file
+      currentLogFilename: logs/proxy-node.test.log
+      archive: false
+
+hubUrl: http://verify.example.com
+
+hubClient:
+  timeout: 20s
+  connectionTimeout: 20s

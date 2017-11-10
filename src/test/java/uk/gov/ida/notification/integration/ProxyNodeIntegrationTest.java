@@ -32,14 +32,18 @@ public class ProxyNodeIntegrationTest {
     public void shouldRespondAfterPostingToHub() {
         mockHub.stubVerifiedByHubResponse("Hello");
 
-        Client client = new JerseyClientBuilder(proxyNodeTestSupport.getEnvironment()).build("test-client");
-        Response response = postToProxyNode(client, "Hello");
+        Response response = postToProxyNode("Hello");
 
         assertEquals(200, response.getStatus());
         assertEquals("Hello - Verified By Hub", response.readEntity(String.class));
     }
 
-    private Response postToProxyNode(Client client, String requestBody) {
+    private Response postToProxyNode(String requestBody) {
+        Client client = new JerseyClientBuilder(proxyNodeTestSupport.getEnvironment())
+                .withProperty("timeout", "20s")
+                .withProperty("connectionTimeout", "20s")
+                .build("test-client");
+
         return client.target(
                     String.format("http://localhost:%d/verify-uk", proxyNodeTestSupport.getLocalPort()))
                     .request()

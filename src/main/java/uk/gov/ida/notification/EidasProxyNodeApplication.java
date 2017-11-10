@@ -43,7 +43,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) {
         environment.jersey().register(new VerifyResource(
-                new JerseyClientBuilder(environment).build("hub-client"),
+                new JerseyClientBuilder(environment).using(configuration.getHubClient()).build("hub-client"),
                 configuration
         ));
         environment.jersey().register(new StubHubResource());
