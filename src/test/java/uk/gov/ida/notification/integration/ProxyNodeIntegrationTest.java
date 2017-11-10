@@ -1,9 +1,9 @@
 package uk.gov.ida.notification.integration;
 
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import io.dropwizard.client.JerseyClientBuilder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import javax.ws.rs.client.Client;
@@ -16,21 +16,15 @@ public class ProxyNodeIntegrationTest {
     @ClassRule
     public static final MockHub mockHub = new MockHub();
 
-    private static final ProxyNodeTestSupport proxyNodeTestSupport = new ProxyNodeTestSupport(mockHub);
+    @Rule
+    public MockHub mockHubInstance = mockHub;
 
-    @BeforeClass
-    public static void bodger() {
-        proxyNodeTestSupport.before();
-    }
-
-    @AfterClass
-    public static void badger() {
-        proxyNodeTestSupport.after();
-    }
+    @Rule
+    public final ProxyNodeAppRule proxyNodeTestSupport = new ProxyNodeAppRule(mockHub);
 
     @Test
-    public void shouldRespondAfterPostingToHub() {
-        mockHub.stubVerifiedByHubResponse("Hello");
+    public void shouldRespondAfterPostingToHub() throws InterruptedException {
+        mockHubInstance.stubVerifiedByHubResponse("Hello");
 
         Response response = postToProxyNode("Hello");
 
