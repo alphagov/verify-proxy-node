@@ -1,0 +1,24 @@
+<style>
+    body {
+        font-family: sans-serif;
+        font-size: 20pt;
+        padding: 40px;
+    }
+    label {
+        background: #c0c0c0;
+        padding: 20px;
+    }
+    input[type=submit] {
+        vertical-align: middle;
+        font-size: 14pt;
+        margin: 10px;
+    }
+</style>
+
+<form action={{postUrl}} method=post name=saml-form>
+    <input type=hidden name={{samlMessageType}} value={{encodedSamlMessage}}>
+    <label>
+        {{submitText}}:
+        <input type=submit name=submit value=Submit>
+    </label>
+</form>

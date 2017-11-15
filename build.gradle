@@ -10,7 +10,8 @@ buildscript {
 }
 
 project.ext {
-    dropwizardVersion = '1.1.4'
+    dropwizardVersion = '1.2.0'
+    openSamlVersion = '3.3.0'
 }
 
 repositories {
@@ -21,11 +22,15 @@ dependencies {
     compile ( 
         "io.dropwizard:dropwizard-core:${dropwizardVersion}",
         "io.dropwizard:dropwizard-client:${dropwizardVersion}",
+        "io.dropwizard:dropwizard-views-mustache:${dropwizardVersion}",
+        "org.opensaml:opensaml-core:${openSamlVersion}",
+        "org.opensaml:opensaml-saml-impl:${openSamlVersion}",
+        "se.litsec.eidas:eidas-opensaml3:1.0.5",
+        'net.sourceforge.htmlunit:htmlunit:2.28'
     )
     testCompile(
         'junit:junit:4.12',
         "io.dropwizard:dropwizard-testing:${dropwizardVersion}",
-        'com.github.tomakehurst:wiremock-standalone:2.10.1'
     )
 }
 
@@ -58,7 +63,7 @@ task acceptanceTest(type: Test) {
     group = 'verification'
     testClassesDir = sourceSets.acceptanceTest.output.classesDir
     classpath = sourceSets.acceptanceTest.runtimeClasspath
-    reports.junitXml.destination = '$buildDir/acceptance-test-results'
-    reports.html.destination = '$buildDir/reports/acceptance-test'
+    reports.junitXml.destination = "$buildDir/acceptance-test-results"
+    reports.html.destination = "$buildDir/reports/acceptance-test"
     dependsOn(test)
 }
