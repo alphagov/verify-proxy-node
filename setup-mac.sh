@@ -43,4 +43,14 @@ else
 fi
 echo
 
+colour_print $ORANGE "========================="
+colour_print $YELLOW "Installing adr-tools"
+if   brew ls --versions adr-tools >/dev/null; then
+	colour_print $GRAY "adr-tools already exists! Doing nothing"
+else
+	brew update && brew install adr-tools
+	colour_print $GREEN "adr-tools installation complete!"
+fi
+echo
+
 colour_print $GREEN "Setup Complete!!"
