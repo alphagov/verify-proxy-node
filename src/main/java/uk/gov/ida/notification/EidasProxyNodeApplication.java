@@ -5,9 +5,11 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.views.ViewBundle;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
+import uk.gov.ida.notification.resources.TestSamlResource;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,6 +56,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         } catch(InitializationException e) {
             throw new RuntimeException(e);
         }
+
+        // Views
+        bootstrap.addBundle(new ViewBundle<>());
     }
 
     @Override
@@ -66,6 +71,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
             throw new RuntimeException(e);
         }
         environment.jersey().register(new EidasAuthnRequestResource(samlParser));
+        environment.jersey().register(new TestSamlResource());
     }
 
 }

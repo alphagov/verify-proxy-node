@@ -15,15 +15,9 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.ida.notification.helpers.FileHelpers.readFileAsString;
 
-public class ProxyNodeIntegrationTest {
-    @ClassRule
-    public static final MockHub mockHub = new MockHub();
-
+public class EidasProxyNodeIntegrationTest {
     @Rule
-    public MockHub mockHubInstance = mockHub;
-
-    @Rule
-    public final ProxyNodeAppRule proxyNodeTestSupport = new ProxyNodeAppRule(mockHub);
+    public final ProxyNodeAppRule proxyNodeTestSupport = new ProxyNodeAppRule();
 
     @Test
     public void shouldHandleAuthnRequestPost() throws InterruptedException, IOException {

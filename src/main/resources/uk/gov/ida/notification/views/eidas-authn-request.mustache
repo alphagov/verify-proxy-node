@@ -1,0 +1,39 @@
+<style>
+    body {
+        font-family: sans-serif;
+        font-size: 20pt;
+        padding: 40px;
+    }
+    td {
+        border: 1px solid black;
+        vertical-align: top;
+        padding: 20px 20px 40px 20px;
+    }
+    td:first-child {
+        font-weight: bold;
+    }
+</style>
+
+<h1>eIDAS Authn Request Received</h1>
+<table>
+    <tr><td>Issuer</td><td id=issuer>{{issuer}}</td></tr>
+    <tr><td>Destination</td><td id=destination>{{destination}}</td></tr>
+    <tr><td>Service Provider Type</td><td>{{spType}}</td></tr>
+    <tr>
+        <td>Requested Attributes</td>
+        <td>
+            {{#requestedAttributes}}
+            {{requestedAttribute}}<br>
+            {{/requestedAttributes}}
+        </td>
+    </tr>
+    <tr><td>Requested Authn Context Comparison</td><td>{{authnContextComparison}}</td></tr>
+    <tr>
+        <td>Authn Context Class Refs</td>
+        <td>
+            {{#authnContextClassRefs}}
+            {{levelOfAssurance}}<br>
+            {{/authnContextClassRefs}}
+        </td>
+    </tr>
+</table>
