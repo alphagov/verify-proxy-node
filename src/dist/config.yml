@@ -16,4 +16,4 @@ logging:
       currentLogFilename: logs/proxy-node.log
       archive: false
 
-hubUrl: ${HUB_URL:-http://localhost:6600/stub-hub}
+hubUrl: ${HUB_URL:-http://stub-idp}

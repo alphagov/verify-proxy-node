@@ -3,6 +3,8 @@ package uk.gov.ida.notification.views;
 import io.dropwizard.views.View;
 
 public class SamlFormView extends View {
+    public static final String SAML_REQUEST = "SAMLRequest";
+
     private final String postUrl;
     private final String samlMessageType;
     private final String encodedSamlMessage;

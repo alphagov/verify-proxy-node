@@ -2,30 +2,46 @@ package uk.gov.ida.notification;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.ida.notification.integration.ProxyNodeAppRule;
+import uk.gov.ida.notification.views.SamlFormView;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class EidasProxyNodeAcceptanceTests {
+    private static final String SAML_FORM = "saml-form";
+    private static final String SUBMIT_BUTTON = "submit";
+    private static final String CONNECTOR_NODE = "/test-saml/eidas-authn-request";
+
     @ClassRule
     public static ProxyNodeAppRule proxyNodeAppRule = new ProxyNodeAppRule();
 
     @Test
     public void shouldHandleEidasAuthnRequest() throws Exception {
         try (final WebClient webClient = new WebClient()) {
-            HtmlPage testSamlPage = webClient.getPage(proxyNodeUrl("/test-saml/eidas-authn-request"));
-            HtmlForm authnRequestForm = testSamlPage.getFormByName("saml-form");
-            HtmlPage authnRequestReceivedPage = authnRequestForm.getInputByName("submit").click();
+            HtmlPage testSamlPage = webClient.getPage(proxyNodeUrl(CONNECTOR_NODE));
+            HtmlForm authnRequestForm = testSamlPage.getFormByName(SAML_FORM);
+            HtmlPage nextPage = authnRequestForm.getInputByName(SUBMIT_BUTTON).click();
 
-            assertEquals("https://connector-node.eu", authnRequestReceivedPage.getElementById("issuer").getTextContent());
-            assertEquals("https://proxy-node.uk/SAML2/SSO/POST", authnRequestReceivedPage.getElementById("destination").getTextContent());
+            authnRequestForm = nextPage.getFormByName(SAML_FORM);
+            HtmlInput samlRequest = authnRequestForm.getInputByName(SamlFormView.SAML_REQUEST);
+
+            assertEquals(hubUrl(), authnRequestForm.getActionAttribute());
+            assertNotNull(samlRequest);
         }
+    }
+
+    private String hubUrl() {
+        return System.getenv().getOrDefault(
+                "HUB_URL", proxyNodeAppRule.getConfiguration().getHubUrl().toString()
+        );
     }
 
     private String proxyNodeUrl(String path) throws URISyntaxException {

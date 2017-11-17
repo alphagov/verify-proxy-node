@@ -70,7 +70,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        environment.jersey().register(new EidasAuthnRequestResource(samlParser));
+        environment.jersey().register(new EidasAuthnRequestResource(configuration.getHubUrl()));
         environment.jersey().register(new TestSamlResource());
     }
 

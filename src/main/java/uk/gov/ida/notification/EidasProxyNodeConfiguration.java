@@ -15,15 +15,8 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @NotNull
     private URI hubUrl;
 
-    @JsonProperty
-    @Valid
-    private JerseyClientConfiguration hubClient = new JerseyClientConfiguration();
-
     public URI getHubUrl() {
         return hubUrl;
     }
 
-    public JerseyClientConfiguration getHubClient() {
-        return hubClient;
-    }
 }

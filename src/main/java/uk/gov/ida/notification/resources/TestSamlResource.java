@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/test-saml")
 @Produces(MediaType.TEXT_HTML)
 public class TestSamlResource {
+
     private AuthnRequestFactory authnRequestFactory = new AuthnRequestFactory();
     private SamlMarshaller samlMarshaller = new SamlMarshaller();
 
@@ -30,6 +31,6 @@ public class TestSamlResource {
         String authnRequestString = samlMarshaller.samlObjectToString(authnRequest);
         String encodedAuthnRequest = Base64.encodeAsString(authnRequestString);
 
-        return new SamlFormView("/SAML2/SSO/POST", "SAMLRequest", encodedAuthnRequest, "POST eIDAS AuthnRequest to Proxy Node");
+        return new SamlFormView("/SAML2/SSO/POST", SamlFormView.SAML_REQUEST, encodedAuthnRequest, "POST eIDAS AuthnRequest to Proxy Node");
     }
 }
