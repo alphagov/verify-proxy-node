@@ -2,7 +2,7 @@
   hooks:
     - id: java-tests
       name: Run Java tests
-      entry: ./gradlew clean test
+      entry: ./gradlew clean test acceptanceTest
       language: system
       files: \.java$
       pass_filenames: false

@@ -11,12 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @Path("/stub-idp")
 @Produces(MediaType.TEXT_HTML)
@@ -30,8 +25,8 @@ public class StubIdpResource {
 
     @POST
     @Path("/request")
-    public SamlFormView hubAuthnRequest() throws URISyntaxException, IOException {
-        URI proxyNodeIdpResponseUri = configuration.getProxyNodeIdpResponseUri();
+    public SamlFormView hubAuthnRequest() throws IOException {
+        String proxyNodeIdpResponseUri = configuration.getProxyNodeIdpResponseUri().toString();
         String samlResponse = SamlMessageType.SAML_RESPONSE;
         String encodedIdpResponse = buildEncodedIdpResponse();
         String submitText = "POST IDP SAML to PROXY NODE";

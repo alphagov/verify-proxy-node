@@ -32,7 +32,7 @@ public class StubConnectorNodeResource {
     @GET
     @Path("/eidas-authn-request")
     public SamlFormView eidasAuthnRequest() throws URISyntaxException {
-        URI proxyNodeAuthnUri = configuration.getProxyNodeAuthnRequestUri();
+        String proxyNodeAuthnUri = configuration.getProxyNodeAuthnRequestUri().toString();
         String samlRequest = SamlMessageType.SAML_REQUEST;
         String encodedAuthnRequest = buildEncodedAuthnRequest();
         String submitText = "POST eIDAS AuthnRequest to Proxy Node";

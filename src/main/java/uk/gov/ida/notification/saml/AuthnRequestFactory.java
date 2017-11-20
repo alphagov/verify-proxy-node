@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.saml;
 
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.util.XMLObjectSupport;
@@ -18,9 +19,18 @@ import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
+import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
 public class AuthnRequestFactory {
-    private final SecureRandomIdentifierGenerationStrategy strategy = new SecureRandomIdentifierGenerationStrategy();
+    private final IdentifierGenerationStrategy strategy;
+
+    public AuthnRequestFactory() {
+        this(new SecureRandomIdentifierGenerationStrategy());
+    }
+
+    public AuthnRequestFactory(IdentifierGenerationStrategy strategy) {
+        this.strategy = strategy;
+    }
 
     public AuthnRequest createEidasAuthnRequest(String issuerEntityId, String destination, DateTime issueInstant) {
         AuthnRequest authnRequest = (AuthnRequest) XMLObjectSupport.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
@@ -30,25 +40,28 @@ public class AuthnRequestFactory {
 
         authnRequest.setIssuer(createIssuer(issuerEntityId));
         authnRequest.setExtensions(createEidasExtensions());
-        authnRequest.setNameIDPolicy(createEidasNameIDPolicy());
-        authnRequest.setRequestedAuthnContext(createEidasRequestedAuthnContext());
+        authnRequest.setNameIDPolicy(createNameIDPolicy());
+        authnRequest.setRequestedAuthnContext(createRequestedAuthnContext(
+                AuthnContextComparisonTypeEnumeration.MINIMUM,
+                EidasConstants.EIDAS_LOA_HIGH));
 
         return authnRequest;
     }
 
-    private RequestedAuthnContext createEidasRequestedAuthnContext() {
+    private RequestedAuthnContext createRequestedAuthnContext(AuthnContextComparisonTypeEnumeration comparisonType, String loa) {
         RequestedAuthnContext requestedAuthnContext = (RequestedAuthnContext) XMLObjectSupport.buildXMLObject(RequestedAuthnContext.DEFAULT_ELEMENT_NAME);
-        requestedAuthnContext.setComparison(AuthnContextComparisonTypeEnumeration.MINIMUM);
+        requestedAuthnContext.setComparison(comparisonType);
 
         AuthnContextClassRef authnContextClassRef = (AuthnContextClassRef) XMLObjectSupport.buildXMLObject(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
-        authnContextClassRef.setAuthnContextClassRef(EidasConstants.EIDAS_LOA_HIGH);
+        authnContextClassRef.setAuthnContextClassRef(loa);
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);
         return requestedAuthnContext;
     }
 
-    private NameIDPolicy createEidasNameIDPolicy() {
+    private NameIDPolicy createNameIDPolicy() {
         NameIDPolicy nameIDPolicy = (NameIDPolicy) XMLObjectSupport.buildXMLObject(NameIDPolicy.DEFAULT_ELEMENT_NAME);
         nameIDPolicy.setAllowCreate(true);
+        nameIDPolicy.setFormat(NameIDType.PERSISTENT);
         return nameIDPolicy;
     }
 

@@ -51,7 +51,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         // by the InitializationService
         try {
             InitializationService.initialize();
-        } catch (InitializationException e) {
+        } catch(InitializationException e) {
             throw new RuntimeException(e);
         }
 

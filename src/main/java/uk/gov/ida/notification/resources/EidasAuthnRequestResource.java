@@ -16,26 +16,26 @@ import java.net.URI;
 
 @Path("/SAML2/SSO")
 public class EidasAuthnRequestResource {
-    private final URI connectorNodeUrl;
-    private final URI idpUrl;
+    private final String connectorNodeUrl;
+    private final String idpUrl;
     private final String SUBMIT_TEXT = "Submit";
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration) {
-        this.idpUrl = configuration.getIdpUrl();
-        this.connectorNodeUrl = configuration.getConnectorNodeUrl();
+        this.idpUrl = configuration.getIdpUrl().toString();
+        this.connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
     }
 
     @GET
     @Path("/Redirect")
     public View handleRedirectBinding(@QueryParam(SamlMessageType.SAML_REQUEST) String encodedAuthnRequest) {
-        return handleAuthnRequest();
+        return handleAuthnRequest(encodedAuthnRequest);
     }
 
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View handlePostBinding(@FormParam(SamlMessageType.SAML_REQUEST) String encodedAuthnRequest) {
-        return handleAuthnRequest();
+        return handleAuthnRequest(encodedAuthnRequest);
     }
 
     @POST
@@ -49,5 +49,9 @@ public class EidasAuthnRequestResource {
     private View handleAuthnRequest() {
         String hubAuthnRequest = "Encoded Hub Authn Request";
         return new SamlFormView(idpUrl, SamlMessageType.SAML_REQUEST, hubAuthnRequest, SUBMIT_TEXT);
+    }
+
+    private View handleAuthnRequest(String encodedAuthnRequest) {
+        return new SamlFormView(idpUrl, SamlMessageType.SAML_REQUEST, encodedAuthnRequest,"Submit");
     }
 }

@@ -17,11 +17,13 @@ import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class EidasProxyNodeAcceptanceTests {
     public static final String PROXY_NODE_HUB_RESPONSE = "/SAML2/SSO/idp-response";
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
+    private static final String FIXED_ID = "_0ac6a8af9fed04143875c565d97aed6b";
     private static final String CONNECTOR_NODE = "/connector-node/eidas-authn-request";
     private static final String IDP_URL = "/stub-idp/request";
 
