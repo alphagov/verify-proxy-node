@@ -2,7 +2,6 @@ package uk.gov.ida.notification.integration;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import org.glassfish.jersey.internal.util.Base64;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
