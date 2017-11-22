@@ -16,32 +16,32 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @NotNull
     private URI idpUrl;
 
-    public URI getIdpUrl() {
-        return idpUrl;
-    }
-
     @JsonProperty
     @Valid
     @NotNull
     private URI connectorNodeUrl;
-
-    public URI getConnectorNodeUrl() {
-        return connectorNodeUrl;
-    }
 
     @JsonProperty
     @Valid
     @NotNull
     private StubIdpConfiguration stubIdpConfiguration;
 
-    public StubIdpConfiguration getStubIdpConfiguration() {
-        return stubIdpConfiguration;
-    }
-
     @JsonProperty
     @Valid
     @NotNull
     private StubConnectorNodeConfiguration stubConnectorNodeConfiguration;
+
+    public URI getIdpUrl() {
+        return idpUrl;
+    }
+
+    public URI getConnectorNodeUrl() {
+        return connectorNodeUrl;
+    }
+
+    public StubIdpConfiguration getStubIdpConfiguration() {
+        return stubIdpConfiguration;
+    }
 
     public StubConnectorNodeConfiguration getStubConnectorNodeConfiguration() {
         return stubConnectorNodeConfiguration;

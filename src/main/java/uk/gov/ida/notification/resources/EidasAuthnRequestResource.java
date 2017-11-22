@@ -5,7 +5,12 @@ import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 

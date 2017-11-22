@@ -8,7 +8,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.ida.notification.integration.ProxyNodeAppRule;
 import uk.gov.ida.notification.saml.SamlMessageType;
-import uk.gov.ida.notification.views.SamlFormView;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,12 +16,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class EidasProxyNodeAcceptanceTests {
+    public static final String PROXY_NODE_HUB_RESPONSE = "/SAML2/SSO/idp-response";
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
     private static final String CONNECTOR_NODE = "/connector-node/eidas-authn-request";
     private static final String IDP_URL = "/stub-idp/request";
-
-    public static final String PROXY_NODE_HUB_RESPONSE = "/SAML2/SSO/idp-response";
     @ClassRule
     public static ProxyNodeAppRule proxyNodeAppRule = new ProxyNodeAppRule();
 
@@ -57,8 +55,8 @@ public class EidasProxyNodeAcceptanceTests {
     }
 
     private String hubUrl() throws URISyntaxException {
-        String hubUrlDefaultValue = proxyNodeBase(IDP_URL) ;
-        return getEnvVariableOrDefault("HUB_URL", hubUrlDefaultValue);
+        String hubUrlDefaultValue = proxyNodeBase(IDP_URL);
+        return getEnvVariableOrDefault("IDP_URL", hubUrlDefaultValue);
     }
 
     private String proxyNodeBase(String path) throws URISyntaxException {

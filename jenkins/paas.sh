@@ -28,5 +28,5 @@ else
   cf target -o "$CF_ORG" -s "$CF_SPACE"
 fi
 
-./gradlew -x test pushToPaas
+./gradlew -x pushToPaas
 ./jenkins/acceptance-test.sh

@@ -17,5 +17,4 @@ public class StubIdpConfiguration extends Configuration {
     public URI getProxyNodeIdpResponseUri() {
         return proxyNodeIdpResponseUri;
     }
-
 }
