@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml;
+package uk.gov.ida.stubs.saml;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

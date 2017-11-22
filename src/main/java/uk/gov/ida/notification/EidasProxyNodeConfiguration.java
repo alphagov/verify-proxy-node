@@ -2,7 +2,8 @@ package uk.gov.ida.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-import io.dropwizard.client.JerseyClientConfiguration;
+import uk.gov.ida.stubs.StubConnectorNodeConfiguration;
+import uk.gov.ida.stubs.StubIdpConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -13,10 +14,36 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI hubUrl;
+    private URI idpUrl;
 
-    public URI getHubUrl() {
-        return hubUrl;
+    public URI getIdpUrl() {
+        return idpUrl;
     }
 
+    @JsonProperty
+    @Valid
+    @NotNull
+    private URI connectorNodeUrl;
+
+    public URI getConnectorNodeUrl() {
+        return connectorNodeUrl;
+    }
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private StubIdpConfiguration stubIdpConfiguration;
+
+    public StubIdpConfiguration getStubIdpConfiguration() {
+        return stubIdpConfiguration;
+    }
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private StubConnectorNodeConfiguration stubConnectorNodeConfiguration;
+
+    public StubConnectorNodeConfiguration getStubConnectorNodeConfiguration() {
+        return stubConnectorNodeConfiguration;
+    }
 }

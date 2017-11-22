@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml;
+package uk.gov.ida.stubs.saml;
 
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.core.xml.io.MarshallingException;

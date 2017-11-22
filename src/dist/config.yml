@@ -16,4 +16,11 @@ logging:
       currentLogFilename: logs/proxy-node.log
       archive: false
 
-hubUrl: ${HUB_URL:-http://stub-idp}
+idpUrl: ${IDP_URL:-http://localhost:6600/stub-idp/request}
+connectorNodeUrl: ${CONNECTOR_NODE_URL:-http://localhost:6600/connector-node/eidas-authn-request}
+
+stubIdpConfiguration:
+  proxyNodeIdpResponseUri: ${PROXY_NODE_IDP_RESPONSE_URI:-"http://localhost:6600/SAML2/SSO/idp-response"}
+
+stubConnectorNodeConfiguration:
+  proxyNodeAuthnRequestUri: ${PROXY_NODE_AUTHN_REQUEST_URI:-"http://localhost:6600/SAML2/SSO/POST"}

@@ -65,5 +65,4 @@ task acceptanceTest(type: Test) {
     classpath = sourceSets.acceptanceTest.runtimeClasspath
     reports.junitXml.destination = "$buildDir/acceptance-test-results"
     reports.html.destination = "$buildDir/reports/acceptance-test"
-    dependsOn(test)
 }

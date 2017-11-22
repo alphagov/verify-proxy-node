@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml;
+package uk.gov.ida.stubs.saml;
 
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;

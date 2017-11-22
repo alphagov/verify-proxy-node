@@ -2,17 +2,17 @@ package uk.gov.ida.notification.views;
 
 import io.dropwizard.views.View;
 
-public class SamlFormView extends View {
-    public static final String SAML_REQUEST = "SAMLRequest";
+import java.net.URI;
 
+public class SamlFormView extends View {
     private final String postUrl;
     private final String samlMessageType;
     private final String encodedSamlMessage;
     private final String submitText;
 
-    public SamlFormView(String postUrl, String samlMessageType, String encodedSamlMessage, String submitText) {
+    public SamlFormView(URI postUrl, String samlMessageType, String encodedSamlMessage, String submitText) {
         super("saml-form.mustache");
-        this.postUrl = postUrl;
+        this.postUrl = postUrl.toString();
         this.samlMessageType = samlMessageType;
         this.encodedSamlMessage = encodedSamlMessage;
         this.submitText = submitText;
