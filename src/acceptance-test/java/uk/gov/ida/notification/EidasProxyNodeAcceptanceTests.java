@@ -4,11 +4,14 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.glassfish.jersey.internal.util.Base64;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.ida.notification.helpers.FileHelpers;
 import uk.gov.ida.notification.integration.ProxyNodeAppRule;
 import uk.gov.ida.notification.saml.SamlMessageType;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -41,7 +44,7 @@ public class EidasProxyNodeAcceptanceTests {
             HtmlForm idpSamlResponseForm = idpSamlResponsePage.getFormByName(SAML_FORM);
             HtmlInput idpSamlResponse = idpSamlResponseForm.getInputByName(SamlMessageType.SAML_RESPONSE);
             assertEquals(proxyNodeBase(PROXY_NODE_HUB_RESPONSE), idpSamlResponseForm.getActionAttribute());
-            assertNotNull(idpSamlResponse);
+            idpSamlShouldBeAsExpected(idpSamlResponse);
 
             HtmlPage eIdasSamlResponsePage = idpSamlResponseForm.getInputByName(SUBMIT_BUTTON).click();
             HtmlForm eIdasSamlResponseForm = eIdasSamlResponsePage.getFormByName(SAML_FORM);
@@ -49,6 +52,18 @@ public class EidasProxyNodeAcceptanceTests {
             assertEquals(connectorNodeUrl(), eIdasSamlResponseForm.getActionAttribute());
             assertNotNull(eIdasSamlResponse);
         }
+    }
+
+    private void idpSamlShouldBeAsExpected(HtmlInput idpSamlResponse) throws IOException {
+        String expectedIdpResponseSaml = buildExpectedIdpResposeSaml();
+        String idpSaml = idpSamlResponse.getAttributes().getNamedItem("value").getNodeValue();
+        assertEquals(idpSaml, expectedIdpResponseSaml);
+    }
+
+    private String buildExpectedIdpResposeSaml() throws IOException {
+        String expectedIdpSamlFileName = "verify_idp_response.xml";
+        String idpSaml = FileHelpers.readFileAsString(expectedIdpSamlFileName);
+        return Base64.encodeAsString(idpSaml);
     }
 
     private String connectorNodeUrl() throws URISyntaxException {

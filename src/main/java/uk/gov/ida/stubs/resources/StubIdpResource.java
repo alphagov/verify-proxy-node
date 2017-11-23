@@ -9,8 +9,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @Path("/stub-idp")
 @Produces(MediaType.TEXT_HTML)
@@ -24,11 +28,24 @@ public class StubIdpResource {
 
     @POST
     @Path("/request")
-    public SamlFormView hubAuthnRequest() throws URISyntaxException {
+    public SamlFormView hubAuthnRequest() throws URISyntaxException, IOException {
         URI proxyNodeIdpResponseUri = configuration.getProxyNodeIdpResponseUri();
         String samlResponse = SamlMessageType.SAML_RESPONSE;
-        String encodedAuthnResponse = Base64.encodeAsString("hub idp response");
-        String submitText = "POST IDP SAML to HUB";
-        return new SamlFormView(proxyNodeIdpResponseUri, samlResponse, encodedAuthnResponse, submitText);
+        String encodedIdpResponse = buildEncodedIdpResponse();
+        String submitText = "POST IDP SAML to PROXY NODE";
+        return new SamlFormView(proxyNodeIdpResponseUri, samlResponse, encodedIdpResponse, submitText);
     }
+
+    private String buildEncodedIdpResponse() throws IOException {
+        String staticIdpResponseFileName = "verify_idp_response.xml";
+        String samlResponse = getResourceFileContent(staticIdpResponseFileName);
+        return Base64.encodeAsString(samlResponse);
+    }
+
+    private String getResourceFileContent(String fileName) throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
+        return new String(Files.readAllBytes(Paths.get(file.toString())));
+    }
+
 }

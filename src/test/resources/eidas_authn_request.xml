@@ -1,44 +1,52 @@
 <?xml version="1.0"  encoding="UTF-8" ?>
-<saml2p:AuthnRequest Destination="https://eidas-service.eu/post" ID="_171ccc6b39b1e8f6e762c2e4ee4ded3a" IssueInstant="2015-04-30T19:25:14.273Z" Version="2.0" xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:eidas="http://eidas.europa.eu/saml-extensions" >
-  <saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" >
-    https://eidas-connector.eu
-	</saml2:Issuer>
-	<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
-		<ds:SignedInfo>
-			<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
-			<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
-			<ds:Reference URI="#_171ccc6b39b1e8f6e762c2e4ee4ded3a" >
-				<ds:Transforms>
-					<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
-					<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
-				</ds:Transforms>
-				<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-				<ds:DigestValue>EFe8x1Gvm5RVmrBaWM5RrQm81xk=</ds:DigestValue>
-			</ds:Reference>
-		</ds:SignedInfo>
-		<ds:SignatureValue>SaO8==</ds:SignatureValue>
-		<ds:KeyInfo>
-			<ds:KeyValue>
-				<ds:RSAKeyValue>
-					<ds:Modulus>nEPz==</ds:Modulus>
-					<ds:Exponent>AQAB</ds:Exponent>
-				</ds:RSAKeyValue>
-			</ds:KeyValue>
-		</ds:KeyInfo>
-	</ds:Signature>
-	<saml2p:Extensions>
-		<eidas:SPType>public</eidas:SPType>
-		<eidas:RequestedAttributes>
-			<eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
-			<eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
-			<eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
-			<eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/DateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
-		</eidas:RequestedAttributes>
-	</saml2p:Extensions>
-	<saml2p:NameIDPolicy AllowCreate="true" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" />
-	<saml2p:RequestedAuthnContext Comparison="minimum" >
-    <saml2:AuthnContextClassRef xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" >
-      http://eidas.europa.eu/LoA/high
-		</saml2:AuthnContextClassRef>
-	</saml2p:RequestedAuthnContext>
+<saml2p:AuthnRequest Destination="https://eidas-service.eu/post" ID="_171ccc6b39b1e8f6e762c2e4ee4ded3a"
+                     IssueInstant="2015-04-30T19:25:14.273Z" Version="2.0"
+                     xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
+                     xmlns:eidas="http://eidas.europa.eu/saml-extensions">
+    <saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity"
+                  xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+        https://eidas-connector.eu
+    </saml2:Issuer>
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+            <ds:Reference URI="#_171ccc6b39b1e8f6e762c2e4ee4ded3a">
+                <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                </ds:Transforms>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                <ds:DigestValue>EFe8x1Gvm5RVmrBaWM5RrQm81xk=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>SaO8==</ds:SignatureValue>
+        <ds:KeyInfo>
+            <ds:KeyValue>
+                <ds:RSAKeyValue>
+                    <ds:Modulus>nEPz==</ds:Modulus>
+                    <ds:Exponent>AQAB</ds:Exponent>
+                </ds:RSAKeyValue>
+            </ds:KeyValue>
+        </ds:KeyInfo>
+    </ds:Signature>
+    <saml2p:Extensions>
+        <eidas:SPType>public</eidas:SPType>
+        <eidas:RequestedAttributes>
+            <eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"
+                                      NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true"/>
+            <eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName"
+                                      NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true"/>
+            <eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName"
+                                      NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true"/>
+            <eidas:RequestedAttribute Name="http://eidas.europa.eu/attributes/naturalperson/DateOfBirth"
+                                      NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true"/>
+        </eidas:RequestedAttributes>
+    </saml2p:Extensions>
+    <saml2p:NameIDPolicy AllowCreate="true" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"/>
+    <saml2p:RequestedAuthnContext Comparison="minimum">
+        <saml2:AuthnContextClassRef xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+            http://eidas.europa.eu/LoA/high
+        </saml2:AuthnContextClassRef>
+    </saml2p:RequestedAuthnContext>
 </saml2p:AuthnRequest>
