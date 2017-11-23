@@ -6,6 +6,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import uk.gov.ida.notification.saml.AuthnRequestFactory;
 
 import static org.junit.Assert.assertEquals;
 

@@ -7,8 +7,8 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.stubs.StubConnectorNodeConfiguration;
-import uk.gov.ida.stubs.saml.AuthnRequestFactory;
-import uk.gov.ida.stubs.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.AuthnRequestFactory;
+import uk.gov.ida.notification.saml.SamlMarshaller;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

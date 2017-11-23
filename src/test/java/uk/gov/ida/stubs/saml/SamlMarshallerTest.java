@@ -7,6 +7,7 @@ import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameIDType;
 import uk.gov.ida.notification.helpers.FileHelpers;
+import uk.gov.ida.notification.saml.SamlMarshaller;
 
 import static org.junit.Assert.assertEquals;
 
