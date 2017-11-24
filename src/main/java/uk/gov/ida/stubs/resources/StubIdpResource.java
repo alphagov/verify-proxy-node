@@ -1,5 +1,7 @@
 package uk.gov.ida.stubs.resources;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -43,9 +45,7 @@ public class StubIdpResource {
     }
 
     private String getResourceFileContent(String fileName) throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(fileName).getFile());
-        return new String(Files.readAllBytes(Paths.get(file.toString())));
+        return Resources.toString(Resources.getResource(fileName), Charsets.UTF_8);
     }
 
 }
