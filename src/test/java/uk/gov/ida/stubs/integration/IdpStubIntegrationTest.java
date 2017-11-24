@@ -7,6 +7,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.ida.notification.integration.ProxyNodeAppRule;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,12 +38,18 @@ public class IdpStubIntegrationTest {
 
     private Response postToIdpStub(String hubAuthnRequest) {
         String idpStubRequestUrl = "http://localhost:%d/stub-idp/request";
-        return new JerseyClientBuilder(proxyNodeAppRule.getEnvironment())
-                    .build("test-client")
-                    .target(
-                        String.format(idpStubRequestUrl, proxyNodeAppRule.getLocalPort()))
+        Client client = buildJerseyClient();
+        return client
+                    .target( String.format(idpStubRequestUrl, proxyNodeAppRule.getLocalPort()))
                     .request()
                     .post(Entity.text(hubAuthnRequest));
+    }
+
+    private Client buildJerseyClient() {
+        return new JerseyClientBuilder(proxyNodeAppRule.getEnvironment())
+                .withProperty("timeout", "20s")
+                .withProperty("connectionTimeout", "20s")
+                .build("test-client");
     }
 
     private String buildExpectedIdpResponse() throws IOException {
