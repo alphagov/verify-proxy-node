@@ -52,20 +52,32 @@ public class EidasProxyNodeAcceptanceTests {
             HtmlForm eIdasSamlResponseForm = eIdasSamlResponsePage.getFormByName(SAML_FORM);
             HtmlInput eIdasSamlResponse = eIdasSamlResponseForm.getInputByName(SamlMessageType.SAML_RESPONSE);
             assertEquals(connectorNodeUrl(), eIdasSamlResponseForm.getActionAttribute());
-            assertNotNull(eIdasSamlResponse);
+            eidasResponseShouldBeAsExpected(eIdasSamlResponse);
         }
     }
 
     private void idpSamlShouldBeAsExpected(HtmlInput idpSamlResponse) throws IOException {
-        String expectedIdpResponseSaml = buildExpectedIdpResposeSaml();
+        String expectedIdpResponseSaml = buildExpectedIdpResponseSaml();
         String idpSaml = idpSamlResponse.getAttributes().getNamedItem("value").getNodeValue();
-        assertEquals(idpSaml, expectedIdpResponseSaml);
+        assertEquals(expectedIdpResponseSaml, idpSaml);
     }
 
-    private String buildExpectedIdpResposeSaml() throws IOException {
+    private void eidasResponseShouldBeAsExpected(HtmlInput eidasResponse) throws IOException {
+        String expectedEidasResponseSaml = buildExpectedEidasResponseSaml();
+        String eIdasSaml = eidasResponse.getAttributes().getNamedItem("value").getNodeValue();
+        assertEquals(expectedEidasResponseSaml, eIdasSaml);
+    }
+
+    private String buildExpectedIdpResponseSaml() throws IOException {
         String expectedIdpSamlFileName = "verify_idp_response.xml";
         String idpSaml = FileHelpers.readFileAsString(expectedIdpSamlFileName);
         return Base64.encodeAsString(idpSaml);
+    }
+
+    private String buildExpectedEidasResponseSaml() throws IOException {
+        String expectedEidasSamlFileName = "eidas_idp_response.xml";
+        String eidasSaml = FileHelpers.readFileAsString(expectedEidasSamlFileName);
+        return Base64.encodeAsString(eidasSaml);
     }
 
     private String connectorNodeUrl() throws URISyntaxException {

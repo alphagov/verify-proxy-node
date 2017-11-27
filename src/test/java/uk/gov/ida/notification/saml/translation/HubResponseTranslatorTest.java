@@ -26,28 +26,26 @@ public class HubResponseTranslatorTest {
     public void shouldTranslateHubResponseToEidasResponse() throws Exception {
         Response hubResponse = getResponse("idp_response.xml");
         Response expectedEidasResponse = getResponse("eidas_response.xml");
-
         HubResponseTranslator translator = new HubResponseTranslator();
+
+
         Response actualEidasResponse = translator.translate(hubResponse);
+
 
         String expectedStatusCode = getStatusCode(expectedEidasResponse);
         String actualStatusCode = getStatusCode(actualEidasResponse);
-
         assertEquals(expectedStatusCode, actualStatusCode);
 
         String expectedLoa = getLoa(expectedEidasResponse);
         String actualLoa = getLoa(actualEidasResponse);
-
         assertEquals(expectedLoa, actualLoa);
 
         String expectedPid = getPid(expectedEidasResponse);
         String actualPid = getPid(expectedEidasResponse);
-
         assertEquals(expectedPid, actualPid);
 
         List<String> expectedAttributes = getAttributes(expectedEidasResponse);
         List<String> actualAttributes = getAttributes(actualEidasResponse);
-
         assertThat(actualAttributes, containsInAnyOrder(expectedAttributes.toArray()));
     }
 
@@ -79,5 +77,4 @@ public class HubResponseTranslatorTest {
                 FileHelpers.readFileAsString(resourceFilename)
         );
     }
-
 }
