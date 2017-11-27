@@ -19,7 +19,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/SAML2/Response")
 public class HubResponseResource {
     private final String connectorNodeUrl;
-    private final String SUBMIT_TEXT = "Submit";
+    private final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
     private SamlParser samlParser;
     private HubResponseTranslator hubResponseTranslator;
     private SamlMarshaller samlMarshaller;
@@ -35,9 +35,9 @@ public class HubResponseResource {
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedHubResponse) {
-        String idpResponseSamlString = Base64.decodeAsString(encodedHubResponse);
-        Response idpResponse = (Response) samlParser.parseSamlString(idpResponseSamlString);
-        Response eidasResponse = hubResponseTranslator.translate(idpResponse);
+        String hubResponseSamlString = Base64.decodeAsString(encodedHubResponse);
+        Response hubResponse = (Response) samlParser.parseSamlString(hubResponseSamlString);
+        Response eidasResponse = hubResponseTranslator.translate(hubResponse);
         String eidasSamlString = samlMarshaller.samlObjectToString(eidasResponse);
         String encodedEidasResponse = Base64.encodeAsString(eidasSamlString);
         return new SamlFormView(connectorNodeUrl, SamlMessageType.SAML_RESPONSE, encodedEidasResponse, SUBMIT_TEXT);

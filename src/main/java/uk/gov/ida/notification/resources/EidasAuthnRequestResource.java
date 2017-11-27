@@ -11,11 +11,11 @@ import javax.ws.rs.core.MediaType;
 @Path("/SAML2/SSO")
 public class EidasAuthnRequestResource {
 
-    private final String idpUrl;
-    private final String SUBMIT_TEXT = "Submit";
+    private final String hubUrl;
+    private final String SUBMIT_TEXT = "Post Verify Authn Request to Hub";
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration) {
-        this.idpUrl = configuration.getIdpUrl().toString();
+        this.hubUrl = configuration.getHubUrl().toString();
     }
 
     @GET
@@ -32,6 +32,6 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedAuthnRequest) {
-        return new SamlFormView(idpUrl, SamlMessageType.SAML_REQUEST, encodedAuthnRequest,SUBMIT_TEXT);
+        return new SamlFormView(hubUrl, SamlMessageType.SAML_REQUEST, encodedAuthnRequest,SUBMIT_TEXT);
     }
 }

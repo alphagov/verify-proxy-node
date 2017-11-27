@@ -12,10 +12,10 @@ public class StubConnectorNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI proxyNodeAuthnRequestUri;
+    private URI proxyNodeAuthnRequestUrl;
 
-    public URI getProxyNodeAuthnRequestUri() {
-        return proxyNodeAuthnRequestUri;
+    public URI getProxyNodeAuthnRequestUrl() {
+        return proxyNodeAuthnRequestUrl;
     }
 
 }

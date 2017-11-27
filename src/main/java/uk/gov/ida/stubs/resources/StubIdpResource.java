@@ -26,16 +26,16 @@ public class StubIdpResource {
     @POST
     @Path("/request")
     public SamlFormView hubAuthnRequest() throws IOException {
-        String proxyNodeIdpResponseUri = configuration.getProxyNodeIdpResponseUri().toString();
+        String proxyNodeHubResponseUrl = configuration.getProxyNodeHubResponseUrl().toString();
         String samlResponse = SamlMessageType.SAML_RESPONSE;
-        String encodedIdpResponse = buildEncodedIdpResponse();
-        String submitText = "POST IDP SAML to PROXY NODE";
-        return new SamlFormView(proxyNodeIdpResponseUri, samlResponse, encodedIdpResponse, submitText);
+        String encodedHubResponse = buildEncodedHubResponse();
+        String submitText = "POST HUB SAML to PROXY NODE";
+        return new SamlFormView(proxyNodeHubResponseUrl, samlResponse, encodedHubResponse, submitText);
     }
 
-    private String buildEncodedIdpResponse() throws IOException {
-        String staticIdpResponseFileName = "verify_idp_response.xml";
-        String samlResponse = getResourceFileContent(staticIdpResponseFileName);
+    private String buildEncodedHubResponse() throws IOException {
+        String staticHubResponseFileName = "verify_idp_response.xml";
+        String samlResponse = getResourceFileContent(staticHubResponseFileName);
         return Base64.encodeAsString(samlResponse);
     }
 

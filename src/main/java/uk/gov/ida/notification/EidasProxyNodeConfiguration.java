@@ -14,7 +14,7 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI idpUrl;
+    private URI hubUrl;
 
     @JsonProperty
     @Valid
@@ -31,8 +31,8 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @NotNull
     private StubConnectorNodeConfiguration stubConnectorNodeConfiguration;
 
-    public URI getIdpUrl() {
-        return idpUrl;
+    public URI getHubUrl() {
+        return hubUrl;
     }
 
     public URI getConnectorNodeUrl() {

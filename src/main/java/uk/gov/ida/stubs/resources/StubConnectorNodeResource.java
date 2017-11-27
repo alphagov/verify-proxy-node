@@ -14,7 +14,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 @Path("/connector-node")
@@ -32,11 +31,11 @@ public class StubConnectorNodeResource {
     @GET
     @Path("/eidas-authn-request")
     public SamlFormView eidasAuthnRequest() throws URISyntaxException {
-        String proxyNodeAuthnUri = configuration.getProxyNodeAuthnRequestUri().toString();
+        String proxyNodeAuthnUrl = configuration.getProxyNodeAuthnRequestUrl().toString();
         String samlRequest = SamlMessageType.SAML_REQUEST;
         String encodedAuthnRequest = buildEncodedAuthnRequest();
         String submitText = "POST eIDAS AuthnRequest to Proxy Node";
-        return new SamlFormView(proxyNodeAuthnUri, samlRequest, encodedAuthnRequest, submitText);
+        return new SamlFormView(proxyNodeAuthnUrl, samlRequest, encodedAuthnRequest, submitText);
     }
 
     private String buildEncodedAuthnRequest() {

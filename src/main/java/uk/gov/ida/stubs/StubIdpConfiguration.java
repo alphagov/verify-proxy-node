@@ -12,9 +12,9 @@ public class StubIdpConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI proxyNodeIdpResponseUri;
+    private URI proxyNodeHubResponseUrl;
 
-    public URI getProxyNodeIdpResponseUri() {
-        return proxyNodeIdpResponseUri;
+    public URI getProxyNodeHubResponseUrl() {
+        return proxyNodeHubResponseUrl;
     }
 }

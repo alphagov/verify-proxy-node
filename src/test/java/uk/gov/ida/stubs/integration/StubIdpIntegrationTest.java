@@ -18,7 +18,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static uk.gov.ida.notification.helpers.FileHelpers.readFileAsString;
 
-public class IdpStubIntegrationTest {
+public class StubIdpIntegrationTest {
 
     @ClassRule
     public static ProxyNodeAppRule proxyNodeAppRule = new ProxyNodeAppRule();
@@ -28,19 +28,19 @@ public class IdpStubIntegrationTest {
 
         String hubAuthnRequest = "any input text";
 
-        Response response = postToIdpStub(hubAuthnRequest);
+        Response response = postToStubIdp(hubAuthnRequest);
 
         assertEquals(HttpStatus.OK_200 , response.getStatus());
         String responseAsText = response.readEntity(String.class);
-        String expectedResponse = buildExpectedIdpResponse();
+        String expectedResponse = buildExpectedHubResponse();
         assertThat(responseAsText, containsString(expectedResponse));
     }
 
-    private Response postToIdpStub(String hubAuthnRequest) {
-        String idpStubRequestUrl = "http://localhost:%d/stub-idp/request";
+    private Response postToStubIdp(String hubAuthnRequest) {
+        String stubIdpRequestUrl = "http://localhost:%d/stub-idp/request";
         Client client = buildJerseyClient();
         return client
-                    .target( String.format(idpStubRequestUrl, proxyNodeAppRule.getLocalPort()))
+                    .target( String.format(stubIdpRequestUrl, proxyNodeAppRule.getLocalPort()))
                     .request()
                     .post(Entity.text(hubAuthnRequest));
     }
@@ -52,7 +52,7 @@ public class IdpStubIntegrationTest {
                 .build("test-client");
     }
 
-    private String buildExpectedIdpResponse() throws IOException {
+    private String buildExpectedHubResponse() throws IOException {
         return Base64.encodeAsString(readFileAsString("verify_idp_response.xml"));
     }
 }

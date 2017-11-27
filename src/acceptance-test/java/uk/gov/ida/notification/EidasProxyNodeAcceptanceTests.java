@@ -17,15 +17,14 @@ import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class EidasProxyNodeAcceptanceTests {
-    public static final String PROXY_NODE_HUB_RESPONSE = "/SAML2/Response/POST";
+    private static final String PROXY_NODE_HUB_RESPONSE = "/SAML2/Response/POST";
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
     private static final String FIXED_ID = "_0ac6a8af9fed04143875c565d97aed6b";
     private static final String CONNECTOR_NODE = "/connector-node/eidas-authn-request";
-    private static final String IDP_URL = "/stub-idp/request";
+    private static final String HUB_URL = "/stub-idp/request";
 
     @ClassRule
     public static ProxyNodeAppRule proxyNodeAppRule = new ProxyNodeAppRule();
@@ -39,16 +38,16 @@ public class EidasProxyNodeAcceptanceTests {
             HtmlPage verifyAuthnRequestPage = authnRequestForm.getInputByName(SUBMIT_BUTTON).click();
             HtmlForm verifyAuthnRequestForm = verifyAuthnRequestPage.getFormByName(SAML_FORM);
             HtmlInput verifyAuthnRequestSAML = verifyAuthnRequestForm.getInputByName(SamlMessageType.SAML_REQUEST);
-            assertEquals(idpUrl(), verifyAuthnRequestForm.getActionAttribute());
+            assertEquals(hubUrl(), verifyAuthnRequestForm.getActionAttribute());
             assertNotNull(verifyAuthnRequestSAML);
 
-            HtmlPage idpSamlResponsePage = verifyAuthnRequestForm.getInputByName(SUBMIT_BUTTON).click();
-            HtmlForm idpSamlResponseForm = idpSamlResponsePage.getFormByName(SAML_FORM);
-            HtmlInput idpSamlResponse = idpSamlResponseForm.getInputByName(SamlMessageType.SAML_RESPONSE);
-            assertEquals(proxyNodeBase(PROXY_NODE_HUB_RESPONSE), idpSamlResponseForm.getActionAttribute());
-            idpSamlShouldBeAsExpected(idpSamlResponse);
+            HtmlPage hubSamlResponsePage = verifyAuthnRequestForm.getInputByName(SUBMIT_BUTTON).click();
+            HtmlForm hubSamlResponseForm = hubSamlResponsePage.getFormByName(SAML_FORM);
+            HtmlInput hubSamlResponse = hubSamlResponseForm.getInputByName(SamlMessageType.SAML_RESPONSE);
+            assertEquals(proxyNodeBase(PROXY_NODE_HUB_RESPONSE), hubSamlResponseForm.getActionAttribute());
+            hubSamlShouldBeAsExpected(hubSamlResponse);
 
-            HtmlPage eIdasSamlResponsePage = idpSamlResponseForm.getInputByName(SUBMIT_BUTTON).click();
+            HtmlPage eIdasSamlResponsePage = hubSamlResponseForm.getInputByName(SUBMIT_BUTTON).click();
             HtmlForm eIdasSamlResponseForm = eIdasSamlResponsePage.getFormByName(SAML_FORM);
             HtmlInput eIdasSamlResponse = eIdasSamlResponseForm.getInputByName(SamlMessageType.SAML_RESPONSE);
             assertEquals(connectorNodeUrl(), eIdasSamlResponseForm.getActionAttribute());
@@ -56,10 +55,10 @@ public class EidasProxyNodeAcceptanceTests {
         }
     }
 
-    private void idpSamlShouldBeAsExpected(HtmlInput idpSamlResponse) throws IOException {
-        String expectedIdpResponseSaml = buildExpectedIdpResponseSaml();
-        String idpSaml = idpSamlResponse.getAttributes().getNamedItem("value").getNodeValue();
-        assertEquals(expectedIdpResponseSaml, idpSaml);
+    private void hubSamlShouldBeAsExpected(HtmlInput hubResponse) throws IOException {
+        String expectedIdpResponseSaml = buildExpectedHubResponseSaml();
+        String hubSaml = hubResponse.getAttributes().getNamedItem("value").getNodeValue();
+        assertEquals(expectedIdpResponseSaml, hubSaml);
     }
 
     private void eidasResponseShouldBeAsExpected(HtmlInput eidasResponse) throws IOException {
@@ -68,10 +67,10 @@ public class EidasProxyNodeAcceptanceTests {
         assertEquals(expectedEidasResponseSaml, eIdasSaml);
     }
 
-    private String buildExpectedIdpResponseSaml() throws IOException {
+    private String buildExpectedHubResponseSaml() throws IOException {
         String expectedIdpSamlFileName = "verify_idp_response.xml";
-        String idpSaml = FileHelpers.readFileAsString(expectedIdpSamlFileName);
-        return Base64.encodeAsString(idpSaml);
+        String hubSaml = FileHelpers.readFileAsString(expectedIdpSamlFileName);
+        return Base64.encodeAsString(hubSaml);
     }
 
     private String buildExpectedEidasResponseSaml() throws IOException {
@@ -84,9 +83,9 @@ public class EidasProxyNodeAcceptanceTests {
         return proxyNodeBase(CONNECTOR_NODE);
     }
 
-    private String idpUrl() throws URISyntaxException {
-        String hubUrlDefaultValue = proxyNodeBase(IDP_URL);
-        return getEnvVariableOrDefault("IDP_URL", hubUrlDefaultValue);
+    private String hubUrl() throws URISyntaxException {
+        String hubUrlDefaultValue = proxyNodeBase(HUB_URL);
+        return getEnvVariableOrDefault("HUB_URL", hubUrlDefaultValue);
     }
 
     private String proxyNodeBase(String path) throws URISyntaxException {
