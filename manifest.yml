@@ -8,5 +8,5 @@ applications:
       CONFIG_FILE: /app/verify-eidas-notification/config.yml
       IDP_URL: https://verify-eidas-notification.cloudapps.digital/stub-idp/request
       CONNECTOR_NODE_URL: https://verify-eidas-notification.cloudapps.digital/connector-node/eidas-authn-request
-      PROXY_NODE_IDP_RESPONSE_URI: https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/idp-response
+      PROXY_NODE_IDP_RESPONSE_URI: https://verify-eidas-notification.cloudapps.digital/SAML2/Response/POST
       PROXY_NODE_AUTHN_REQUEST_URI: https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST

@@ -9,8 +9,14 @@ import io.dropwizard.views.ViewBundle;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
+import uk.gov.ida.notification.resources.HubResponseResource;
+import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
 import uk.gov.ida.stubs.resources.StubIdpResource;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
@@ -61,10 +67,12 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
-                    final Environment environment) {
+                    final Environment environment) throws ParserConfigurationException {
         environment.jersey().register(new EidasAuthnRequestResource(configuration));
+        environment.jersey().register(new HubResponseResource(configuration, new SamlParser(), new HubResponseTranslator(), new SamlMarshaller()));
         environment.jersey().register(new StubConnectorNodeResource(configuration.getStubConnectorNodeConfiguration()));
         environment.jersey().register(new StubIdpResource(configuration.getStubIdpConfiguration()));
+
     }
 
 }
