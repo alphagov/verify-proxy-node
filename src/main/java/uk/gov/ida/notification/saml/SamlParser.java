@@ -15,12 +15,23 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING;
+
+/**
+ * Due to security requirements, {@link javax.xml.parsers.DocumentBuilder} and
+ * {@link javax.xml.parsers.DocumentBuilderFactory} should *only* be used via
+ * the utility methods in this class.  For more information on the vulnerabilities
+ * identified, see the tests.
+ * @see uk.gov.ida.notification.saml.SamlParserTest
+ */
 public class SamlParser {
     private final DocumentBuilder documentBuilder;
     private final UnmarshallerFactory unmarshallerFactory;
 
     public SamlParser() throws ParserConfigurationException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature(FEATURE_SECURE_PROCESSING, true);
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         dbf.setNamespaceAware(true);
         documentBuilder = dbf.newDocumentBuilder();
         unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
