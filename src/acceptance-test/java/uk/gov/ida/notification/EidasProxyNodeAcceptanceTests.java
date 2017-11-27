@@ -23,7 +23,8 @@ public class EidasProxyNodeAcceptanceTests {
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
     private static final String FIXED_ID = "_0ac6a8af9fed04143875c565d97aed6b";
-    private static final String CONNECTOR_NODE = "/connector-node/eidas-authn-request";
+    private static final String CONNECTOR_NODE_REQUEST = "/connector-node/eidas-authn-request";
+    private static final String CONNECTOR_NODE_RESPONSE = "/connector-node/eidas-authn-response";
     private static final String HUB_URL = "/stub-idp/request";
 
     @ClassRule
@@ -32,7 +33,7 @@ public class EidasProxyNodeAcceptanceTests {
     @Test
     public void shouldHandleEidasAuthnRequest() throws Exception {
         try (final WebClient webClient = new WebClient()) {
-            HtmlPage testSamlPage = webClient.getPage(connectorNodeUrl());
+            HtmlPage testSamlPage = webClient.getPage(connectorNodeRequestUrl());
             HtmlForm authnRequestForm = testSamlPage.getFormByName(SAML_FORM);
 
             HtmlPage verifyAuthnRequestPage = authnRequestForm.getInputByName(SUBMIT_BUTTON).click();
@@ -50,7 +51,7 @@ public class EidasProxyNodeAcceptanceTests {
             HtmlPage eIdasSamlResponsePage = hubSamlResponseForm.getInputByName(SUBMIT_BUTTON).click();
             HtmlForm eIdasSamlResponseForm = eIdasSamlResponsePage.getFormByName(SAML_FORM);
             HtmlInput eIdasSamlResponse = eIdasSamlResponseForm.getInputByName(SamlMessageType.SAML_RESPONSE);
-            assertEquals(connectorNodeUrl(), eIdasSamlResponseForm.getActionAttribute());
+            assertEquals(connectorNodeResponseUrl(), eIdasSamlResponseForm.getActionAttribute());
             eidasResponseShouldBeAsExpected(eIdasSamlResponse);
         }
     }
@@ -79,8 +80,12 @@ public class EidasProxyNodeAcceptanceTests {
         return Base64.encodeAsString(eidasSaml);
     }
 
-    private String connectorNodeUrl() throws URISyntaxException {
-        return proxyNodeBase(CONNECTOR_NODE);
+    private String connectorNodeRequestUrl() throws URISyntaxException {
+        return proxyNodeBase(CONNECTOR_NODE_REQUEST);
+    }
+
+    private String connectorNodeResponseUrl() throws URISyntaxException {
+        return proxyNodeBase(CONNECTOR_NODE_RESPONSE);
     }
 
     private String hubUrl() throws URISyntaxException {

@@ -4,13 +4,15 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import uk.gov.ida.notification.saml.AuthnRequestFactory;
+import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.stubs.StubConnectorNodeConfiguration;
-import uk.gov.ida.notification.saml.AuthnRequestFactory;
-import uk.gov.ida.notification.saml.SamlMarshaller;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -26,6 +28,12 @@ public class StubConnectorNodeResource {
 
     public StubConnectorNodeResource(StubConnectorNodeConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    @POST
+    @Path("/eidas-authn-response")
+    public String eidasAuthnResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedEidasResponse) {
+        return Base64.decodeAsString(encodedEidasResponse);
     }
 
     @GET
