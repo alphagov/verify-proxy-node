@@ -12,6 +12,7 @@ import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
 import uk.gov.ida.stubs.resources.StubIdpResource;
@@ -68,11 +69,14 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
-        environment.jersey().register(new EidasAuthnRequestResource(configuration));
-        environment.jersey().register(new HubResponseResource(configuration, new SamlParser(), new HubResponseTranslator(), new SamlMarshaller()));
-        environment.jersey().register(new StubConnectorNodeResource(configuration.getStubConnectorNodeConfiguration()));
-        environment.jersey().register(new StubIdpResource(configuration.getStubIdpConfiguration()));
 
+        SamlParser samlParser = new SamlParser();
+        SamlMarshaller samlMarshaller = new SamlMarshaller();
+
+        environment.jersey().register(new EidasAuthnRequestResource(configuration, new EidasAuthnRequestTranslator(), samlParser, samlMarshaller));
+        environment.jersey().register(new HubResponseResource(configuration, samlParser, new HubResponseTranslator(), samlMarshaller));
+        environment.jersey().register(new StubConnectorNodeResource());
+        environment.jersey().register(new StubIdpResource());
     }
 
 }

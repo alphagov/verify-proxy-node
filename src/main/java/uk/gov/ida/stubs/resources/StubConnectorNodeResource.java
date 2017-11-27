@@ -4,15 +4,14 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.saml.AuthnRequestFactory;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
-import uk.gov.ida.stubs.StubConnectorNodeConfiguration;
+import uk.gov.ida.stubs.EidasAuthnRequestFactory;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -21,14 +20,8 @@ import java.net.URISyntaxException;
 @Path("/connector-node")
 @Produces(MediaType.TEXT_HTML)
 public class StubConnectorNodeResource {
-
-    private AuthnRequestFactory authnRequestFactory = new AuthnRequestFactory();
+    private EidasAuthnRequestFactory eidasAuthnRequestFactory = new EidasAuthnRequestFactory();
     private SamlMarshaller samlMarshaller = new SamlMarshaller();
-    private StubConnectorNodeConfiguration configuration;
-
-    public StubConnectorNodeResource(StubConnectorNodeConfiguration configuration) {
-        this.configuration = configuration;
-    }
 
     @POST
     @Path("/eidas-authn-response")
@@ -39,7 +32,7 @@ public class StubConnectorNodeResource {
     @GET
     @Path("/eidas-authn-request")
     public SamlFormView eidasAuthnRequest() throws URISyntaxException {
-        String proxyNodeAuthnUrl = configuration.getProxyNodeAuthnRequestUrl().toString();
+        String proxyNodeAuthnUrl = "/SAML2/SSO/POST";
         String samlRequest = SamlMessageType.SAML_REQUEST;
         String encodedAuthnRequest = buildEncodedAuthnRequest();
         String submitText = "POST eIDAS AuthnRequest to Proxy Node";
@@ -47,7 +40,7 @@ public class StubConnectorNodeResource {
     }
 
     private String buildEncodedAuthnRequest() {
-        AuthnRequest authnRequest = authnRequestFactory.createEidasAuthnRequest(
+        AuthnRequest authnRequest = eidasAuthnRequestFactory.createEidasAuthnRequest(
                 "any issuer entity id",
                 "any destination",
                 new DateTime(DateTimeZone.UTC)

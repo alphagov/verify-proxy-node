@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml;
+package uk.gov.ida.stubs;
 
 import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
@@ -19,16 +19,15 @@ import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
-import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
-public class AuthnRequestFactory {
+public class EidasAuthnRequestFactory {
     private final IdentifierGenerationStrategy strategy;
 
-    public AuthnRequestFactory() {
+    public EidasAuthnRequestFactory() {
         this(new SecureRandomIdentifierGenerationStrategy());
     }
 
-    public AuthnRequestFactory(IdentifierGenerationStrategy strategy) {
+    public EidasAuthnRequestFactory(IdentifierGenerationStrategy strategy) {
         this.strategy = strategy;
     }
 
@@ -43,7 +42,7 @@ public class AuthnRequestFactory {
         authnRequest.setNameIDPolicy(createNameIDPolicy());
         authnRequest.setRequestedAuthnContext(createRequestedAuthnContext(
                 AuthnContextComparisonTypeEnumeration.MINIMUM,
-                EidasConstants.EIDAS_LOA_HIGH));
+                EidasConstants.EIDAS_LOA_SUBSTANTIAL));
 
         return authnRequest;
     }

@@ -5,7 +5,6 @@ import com.google.common.io.Resources;
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
-import uk.gov.ida.stubs.StubIdpConfiguration;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -16,17 +15,10 @@ import java.io.IOException;
 @Path("/stub-idp")
 @Produces(MediaType.TEXT_HTML)
 public class StubIdpResource {
-
-    private StubIdpConfiguration configuration;
-
-    public StubIdpResource(StubIdpConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
     @POST
     @Path("/request")
     public SamlFormView hubAuthnRequest() throws IOException {
-        String proxyNodeHubResponseUrl = configuration.getProxyNodeHubResponseUrl().toString();
+        String proxyNodeHubResponseUrl = "/SAML2/Response/POST";
         String samlResponse = SamlMessageType.SAML_RESPONSE;
         String encodedHubResponse = buildEncodedHubResponse();
         String submitText = "POST HUB SAML to PROXY NODE";
@@ -42,5 +34,4 @@ public class StubIdpResource {
     private String getResourceFileContent(String fileName) throws IOException {
         return Resources.toString(Resources.getResource(fileName), Charsets.UTF_8);
     }
-
 }
