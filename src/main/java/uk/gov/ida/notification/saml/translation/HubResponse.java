@@ -3,7 +3,6 @@ package uk.gov.ida.notification.saml.translation;
 import org.opensaml.core.xml.schema.impl.XSAnyImpl;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
-import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Response;
 
 import java.util.Map;
@@ -14,7 +13,9 @@ public class HubResponse {
     private final Assertion authnAssertion;
     private final String pid;
     private final String statusCode;
-    private final AuthnStatement authnStatement;
+    private final String providedLoa;
+    private final String responseId;
+    private final String inResponseTo;
     private final Map<String, String> mdsAttributes;
 
     public HubResponse(Response response) {
@@ -22,17 +23,17 @@ public class HubResponse {
                 .stream()
                 .filter(a -> !a.getAuthnStatements().isEmpty())
                 .findFirst()
-                .orElseThrow(HubResponseException::new);
+                .orElseThrow(() -> new HubResponseException("Hub Response has no authn assertion"));
 
         mdsAssertion = response.getAssertions()
                 .stream()
                 .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
                 .findFirst()
-                .orElseThrow(HubResponseException::new);
+                .orElseThrow(() -> new HubResponseException("Hub Response has no MDS assertion"));
 
         pid = authnAssertion.getSubject().getNameID().getValue();
 
-        authnStatement = authnAssertion.getAuthnStatements().get(0);
+        providedLoa = authnAssertion.getAuthnStatements().get(0).getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
 
         mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes()
                 .stream()
@@ -43,6 +44,10 @@ public class HubResponse {
                 );
 
         statusCode = response.getStatus().getStatusCode().getValue();
+
+        responseId = response.getID();
+
+        inResponseTo = response.getInResponseTo();
     }
 
     public Assertion getMdsAssertion() {
@@ -61,11 +66,19 @@ public class HubResponse {
         return mdsAttributes.get(key);
     }
 
-    public AuthnStatement getAuthnStatement() {
-        return authnStatement;
-    }
-
     public String getStatusCode() {
         return statusCode;
+    }
+
+    public String getProvidedLoa() {
+        return providedLoa;
+    }
+
+    public String getInResponseTo() {
+        return inResponseTo;
+    }
+
+    public String getResponseId() {
+        return responseId;
     }
 }

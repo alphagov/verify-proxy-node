@@ -2,11 +2,8 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
 import org.glassfish.jersey.internal.util.Base64;
-import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
-import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -20,15 +17,11 @@ import javax.ws.rs.core.MediaType;
 public class HubResponseResource {
     private final String connectorNodeUrl;
     private final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
-    private SamlParser samlParser;
     private HubResponseTranslator hubResponseTranslator;
-    private SamlMarshaller samlMarshaller;
 
-    public HubResponseResource(EidasProxyNodeConfiguration configuration, SamlParser samlParser, HubResponseTranslator hubResponseTranslator, SamlMarshaller samlMarshaller) {
+    public HubResponseResource(EidasProxyNodeConfiguration configuration, HubResponseTranslator hubResponseTranslator) {
         this.connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
-        this.samlParser = samlParser;
         this.hubResponseTranslator = hubResponseTranslator;
-        this.samlMarshaller = samlMarshaller;
     }
 
     @POST
@@ -36,9 +29,7 @@ public class HubResponseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedHubResponse) {
         String hubResponseSamlString = Base64.decodeAsString(encodedHubResponse);
-        Response hubResponse = (Response) samlParser.parseSamlString(hubResponseSamlString);
-        Response eidasResponse = hubResponseTranslator.translate(hubResponse);
-        String eidasSamlString = samlMarshaller.samlObjectToString(eidasResponse);
+        String eidasSamlString = hubResponseTranslator.translate(hubResponseSamlString);
         String encodedEidasResponse = Base64.encodeAsString(eidasSamlString);
         return new SamlFormView(connectorNodeUrl, SamlMessageType.SAML_RESPONSE, encodedEidasResponse, SUBMIT_TEXT);
     }

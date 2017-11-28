@@ -37,8 +37,8 @@
 	</saml2p:Extensions>
 	<saml2p:NameIDPolicy AllowCreate="true" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" />
 	<saml2p:RequestedAuthnContext Comparison="minimum" >
-    <saml2:AuthnContextClassRef xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" >
-      http://eidas.europa.eu/LoA/substantial
+    	<saml2:AuthnContextClassRef xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" >
+      		http://eidas.europa.eu/LoA/substantial
 		</saml2:AuthnContextClassRef>
 	</saml2p:RequestedAuthnContext>
 </saml2p:AuthnRequest>

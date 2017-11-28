@@ -11,16 +11,46 @@ import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.saml.SamlBuilder;
+import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
+import java.util.logging.Logger;
+
 public class EidasAuthnRequestTranslator {
+    private static final Logger LOG = Logger.getLogger(EidasAuthnRequestTranslator.class.getName());
 
-    public AuthnRequest translate(AuthnRequest eidasAuthnRequest, String issuerEntityId, String destination) {
-        String id = eidasAuthnRequest.getID();
-        String eidasLoa = eidasAuthnRequest.getRequestedAuthnContext().getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
-        String verifyLoa = mapLoa(eidasLoa);
+    private final String proxyNodeEntityId;
+    private final String hubUrl;
+    private final SamlParser samlParser;
+    private final SamlMarshaller samlMarshaller;
 
-        return createVerifyAuthnRequest(issuerEntityId, destination, DateTime.now(), id, verifyLoa);
+    public EidasAuthnRequestTranslator(String proxyNodeEntityId, String hubUrl, SamlParser samlParser, SamlMarshaller samlMarshaller) {
+        this.proxyNodeEntityId = proxyNodeEntityId;
+        this.hubUrl = hubUrl;
+        this.samlParser = samlParser;
+        this.samlMarshaller = samlMarshaller;
+    }
+
+    public String translate(String decodedEidasAuthnRequestXml) {
+        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest((AuthnRequest) samlParser.parseSamlString(decodedEidasAuthnRequestXml));
+
+        LOG.info("[eIDAS AuthnRequest] Request ID: " + eidasAuthnRequest.getRequestId());
+        LOG.info("[eIDAS AuthnRequest] Issuer: " + eidasAuthnRequest.getIssuer());
+        LOG.info("[eIDAS AuthnRequest] Destination: " + eidasAuthnRequest.getDestination());
+        LOG.info("[eIDAS AuthnRequest] SPType: " + eidasAuthnRequest.getSpType());
+        LOG.info("[eIDAS AuthnRequest] Requested level of assurance: " + eidasAuthnRequest.getRequestedLoa());
+
+        eidasAuthnRequest.getRequestedAttributes()
+                .stream()
+                .forEach((attr) -> LOG.info("[eIDAS AuthnRequest] Requested attribute: " + attr.getName()));
+
+        AuthnRequest verifyAuthnRequest = createVerifyAuthnRequest(
+                DateTime.now(),
+                eidasAuthnRequest.getRequestId(),
+                mapLoa(eidasAuthnRequest.getRequestedLoa()));
+
+        return samlMarshaller.samlObjectToString(verifyAuthnRequest);
     }
 
     private String mapLoa(String eidasLoa) {
@@ -32,15 +62,13 @@ public class EidasAuthnRequestTranslator {
         }
     }
 
-    private AuthnRequest createVerifyAuthnRequest(
-            String issuerEntityId, String destination, DateTime issueInstant, String requestId, String loa
-    ) {
+    private AuthnRequest createVerifyAuthnRequest(DateTime issueInstant, String requestId, String loa) {
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(requestId);
-        authnRequest.setDestination(destination);
+        authnRequest.setDestination(hubUrl);
         authnRequest.setIssueInstant(issueInstant);
 
-        authnRequest.setIssuer(createIssuer(issuerEntityId));
+        authnRequest.setIssuer(createIssuer(proxyNodeEntityId));
         authnRequest.setNameIDPolicy(createNameIDPolicy());
         authnRequest.setRequestedAuthnContext(createRequestedAuthnContext(
                 AuthnContextComparisonTypeEnumeration.EXACT,

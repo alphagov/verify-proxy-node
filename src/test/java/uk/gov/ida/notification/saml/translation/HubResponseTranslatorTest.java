@@ -6,6 +6,7 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import uk.gov.ida.notification.helpers.FileHelpers;
+import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import java.util.List;
@@ -24,12 +25,16 @@ public class HubResponseTranslatorTest {
 
     @Test
     public void shouldTranslateHubResponseToEidasResponse() throws Exception {
-        Response hubResponse = getResponse("idp_response.xml");
+        SamlParser samlParser = new SamlParser();
+        SamlMarshaller samlMarshaller = new SamlMarshaller();
+        HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, samlMarshaller);
+
+        String hubResponseXml = FileHelpers.readFileAsString("idp_response.xml");
+
         Response expectedEidasResponse = getResponse("eidas_response.xml");
-        HubResponseTranslator translator = new HubResponseTranslator();
 
-
-        Response actualEidasResponse = translator.translate(hubResponse);
+        String actualEidasResponseXml = translator.translate(hubResponseXml);
+        Response actualEidasResponse = (Response) samlParser.parseSamlString(actualEidasResponseXml);
 
 
         String expectedStatusCode = getStatusCode(expectedEidasResponse);
@@ -41,8 +46,10 @@ public class HubResponseTranslatorTest {
         assertEquals(expectedLoa, actualLoa);
 
         String expectedPid = getPid(expectedEidasResponse);
-        String actualPid = getPid(expectedEidasResponse);
+        String actualPid = getPid(actualEidasResponse);
         assertEquals(expectedPid, actualPid);
+
+        assertEquals(expectedEidasResponse.getInResponseTo(), actualEidasResponse.getInResponseTo());
 
         List<String> expectedAttributes = getAttributes(expectedEidasResponse);
         List<String> actualAttributes = getAttributes(actualEidasResponse);

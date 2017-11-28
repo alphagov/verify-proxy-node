@@ -1,7 +1,10 @@
 package uk.gov.ida.notification.saml.translation;
 
 import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeValue;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import uk.gov.ida.notification.saml.SamlBuilder;
 
@@ -22,14 +25,16 @@ public class EidasAttributeBuilder {
     }
 
     public Attribute build(HubResponse hubResponse) {
+        XMLObjectBuilder<? extends EidasAttributeValueType> eidasTypeBuilder = (XMLObjectBuilder<? extends EidasAttributeValueType>) XMLObjectSupport.getBuilder(attributeValueTypeName);
         Attribute attribute = SamlBuilder.build(Attribute.DEFAULT_ELEMENT_NAME);
-        EidasAttributeValueType attributeValueType = SamlBuilder.build(attributeValueTypeName);
+        EidasAttributeValueType attributeValue = eidasTypeBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, attributeValueTypeName);
 
-        attributeValueType.parseStringValue(attributeMapper.apply(hubResponse));
-        attribute.getAttributeValues().add((XMLObject) attributeValueType);
+        attributeValue.parseStringValue(attributeMapper.apply(hubResponse));
+
         attribute.setName(attributeName);
         attribute.setFriendlyName(attributeFriendlyName);
         attribute.setNameFormat(Attribute.URI_REFERENCE);
+        attribute.getAttributeValues().add((XMLObject) attributeValue);
 
         return attribute;
     }

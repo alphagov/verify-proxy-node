@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.helpers.FileHelpers;
+import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
@@ -19,11 +20,12 @@ public class EidasAuthnRequestTranslatorTest {
 
     @Test
     public void shouldBuildHubAuthnRequestWithSameId() throws Exception {
-        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator();
+        SamlParser samlParser = new SamlParser();
+        SamlMarshaller samlMarshaller = new SamlMarshaller();
+        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://verify-hub.uk", samlParser, samlMarshaller);
         String eidasAuthnRequestXml = FileHelpers.readFileAsString("eidas_authn_request.xml");
-        AuthnRequest eidasAuthnRequest = (AuthnRequest) new SamlParser().parseSamlString(eidasAuthnRequestXml);
-
-        AuthnRequest hubAuthnRequest = translator.translate(eidasAuthnRequest, "Proxy Node", "Hub");
+        String hubAuthnRequestXml = translator.translate(eidasAuthnRequestXml);
+        AuthnRequest hubAuthnRequest = (AuthnRequest) samlParser.parseSamlString(hubAuthnRequestXml);
 
         assertEquals("_171ccc6b39b1e8f6e762c2e4ee4ded3a", hubAuthnRequest.getID());
         assertEquals(IdaAuthnContext.LEVEL_2_AUTHN_CTX, getLoa(hubAuthnRequest));
