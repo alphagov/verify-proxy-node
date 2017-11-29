@@ -34,7 +34,7 @@ public class HubResponseTranslatorTest {
         Response expectedEidasResponse = getResponse("eidas_response.xml");
 
         String actualEidasResponseXml = translator.translate(hubResponseXml);
-        Response actualEidasResponse = (Response) samlParser.parseSamlString(actualEidasResponseXml);
+        Response actualEidasResponse = samlParser.parseSamlString(actualEidasResponseXml, Response.class);
 
 
         String expectedStatusCode = getStatusCode(expectedEidasResponse);
@@ -80,8 +80,7 @@ public class HubResponseTranslatorTest {
 
     private Response getResponse(String resourceFilename) throws Exception {
         SamlParser parser = new SamlParser();
-        return (Response) parser.parseSamlString(
-                FileHelpers.readFileAsString(resourceFilename)
-        );
+        String xmlString = FileHelpers.readFileAsString(resourceFilename);
+        return parser.parseSamlString(xmlString, Response.class);
     }
 }

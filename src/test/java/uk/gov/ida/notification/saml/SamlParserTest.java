@@ -3,7 +3,10 @@ package uk.gov.ida.notification.saml;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
+import org.opensaml.saml.saml2.core.impl.ResponseImpl;
 import org.xml.sax.SAXParseException;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
@@ -12,16 +15,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class SamlParserTest {
+
+    private static SamlParser parser;
+
     @BeforeClass
     public static void setup() throws Exception {
         InitializationService.initialize();
+        parser = new SamlParser();
     }
 
     @Test
     public void shouldParseAuthnRequest() throws Exception {
-        SamlParser parser = new SamlParser();
         String testXML = FileHelpers.readFileAsString("eidas_authn_request.xml");
-        assertEquals(AuthnRequestImpl.class, parser.parseSamlString(testXML).getClass());
+
+        AuthnRequestImpl authnRequest = parser.parseSamlString(testXML, AuthnRequestImpl.class);
+
+        assertEquals(AuthnRequestImpl.class, authnRequest.getClass());
+    }
+
+    @Test
+    public void shouldParseAuthnResponse() throws Exception {
+        String testXML = FileHelpers.readFileAsString("verify_idp_response.xml");
+
+        Response authnResponse = parser.parseSamlString(testXML, ResponseImpl.class);
+
+        assertEquals(ResponseImpl.class, authnResponse.getClass());
     }
 
     /**
@@ -47,8 +65,8 @@ public class SamlParserTest {
                 "<lolz>&lol9;</lolz>";
 
         try {
-            SamlParser parser = new SamlParser();
-            parser.parseSamlString(xmlString);
+            parser.parseSamlString(xmlString, XMLObject.class);
+
             fail("expected exception not thrown");
         } catch(RuntimeException e) {
             assertThat(e.getCause()).isInstanceOf(SAXParseException.class);
@@ -67,8 +85,8 @@ public class SamlParserTest {
                 "  <!ELEMENT foo ANY >" +
                 "  <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]><foo>&xxe;</foo>";
         try {
-            SamlParser parser = new SamlParser();
-            parser.parseSamlString(xmlString);
+            parser.parseSamlString(xmlString, XMLObject.class);
+
             fail("expected exception not thrown");
         } catch(RuntimeException e) {
             assertThat(e.getCause()).isInstanceOf(SAXParseException.class);

@@ -25,7 +25,7 @@ public class EidasAuthnRequestTranslatorTest {
         EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://verify-hub.uk", samlParser, samlMarshaller);
         String eidasAuthnRequestXml = FileHelpers.readFileAsString("eidas_authn_request.xml");
         String hubAuthnRequestXml = translator.translate(eidasAuthnRequestXml);
-        AuthnRequest hubAuthnRequest = (AuthnRequest) samlParser.parseSamlString(hubAuthnRequestXml);
+        AuthnRequest hubAuthnRequest = samlParser.parseSamlString(hubAuthnRequestXml, AuthnRequest.class);
 
         assertEquals("_171ccc6b39b1e8f6e762c2e4ee4ded3a", hubAuthnRequest.getID());
         assertEquals(IdaAuthnContext.LEVEL_2_AUTHN_CTX, getLoa(hubAuthnRequest));

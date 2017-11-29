@@ -33,7 +33,7 @@ public class EidasAuthnRequestTranslator {
     }
 
     public String translate(String decodedEidasAuthnRequestXml) {
-        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest((AuthnRequest) samlParser.parseSamlString(decodedEidasAuthnRequestXml));
+        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest( samlParser.parseSamlString(decodedEidasAuthnRequestXml, AuthnRequest.class));
 
         LOG.info("[eIDAS AuthnRequest] Request ID: " + eidasAuthnRequest.getRequestId());
         LOG.info("[eIDAS AuthnRequest] Issuer: " + eidasAuthnRequest.getIssuer());

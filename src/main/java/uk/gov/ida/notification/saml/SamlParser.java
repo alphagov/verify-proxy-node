@@ -37,14 +37,14 @@ public class SamlParser {
         unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
     }
 
-    public XMLObject parseSamlString(String xmlString) {
+    public <T extends XMLObject> T parseSamlString(String xmlString, Class<T> clazz) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(xmlString.getBytes());
 
         try {
             Document document = documentBuilder.parse(inputStream);
             Element element = document.getDocumentElement();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
-            return unmarshaller.unmarshall(element);
+            return (T) unmarshaller.unmarshall(element);
         } catch (SAXException | IOException | UnmarshallingException e) {
             throw new RuntimeException(e);
         }
