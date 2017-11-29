@@ -33,24 +33,18 @@ public class EidasAuthnRequestTranslator {
     }
 
     public String translate(String decodedEidasAuthnRequestXml) {
-        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest( samlParser.parseSamlString(decodedEidasAuthnRequestXml, AuthnRequest.class));
-
-        LOG.info("[eIDAS AuthnRequest] Request ID: " + eidasAuthnRequest.getRequestId());
-        LOG.info("[eIDAS AuthnRequest] Issuer: " + eidasAuthnRequest.getIssuer());
-        LOG.info("[eIDAS AuthnRequest] Destination: " + eidasAuthnRequest.getDestination());
-        LOG.info("[eIDAS AuthnRequest] SPType: " + eidasAuthnRequest.getSpType());
-        LOG.info("[eIDAS AuthnRequest] Requested level of assurance: " + eidasAuthnRequest.getRequestedLoa());
-
-        eidasAuthnRequest.getRequestedAttributes()
-                .stream()
-                .forEach((attr) -> LOG.info("[eIDAS AuthnRequest] Requested attribute: " + attr.getName()));
-
-        AuthnRequest verifyAuthnRequest = createVerifyAuthnRequest(
-                DateTime.now(),
-                eidasAuthnRequest.getRequestId(),
-                mapLoa(eidasAuthnRequest.getRequestedLoa()));
-
+        AuthnRequest authnRequest = samlParser.parseSamlString(decodedEidasAuthnRequestXml, AuthnRequest.class);
+        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest(authnRequest);
+        logAuthnRequestInformation(eidasAuthnRequest);
+        AuthnRequest verifyAuthnRequest = buildVerifyAuthnRequest(eidasAuthnRequest);
         return samlMarshaller.samlObjectToString(verifyAuthnRequest);
+    }
+
+    private AuthnRequest buildVerifyAuthnRequest(EidasAuthnRequest eidasAuthnRequest) {
+        DateTime now = DateTime.now();
+        String requestId = eidasAuthnRequest.getRequestId();
+        String loa = mapLoa(eidasAuthnRequest.getRequestedLoa());
+        return createVerifyAuthnRequest(now, requestId, loa);
     }
 
     private String mapLoa(String eidasLoa) {
@@ -63,18 +57,17 @@ public class EidasAuthnRequestTranslator {
     }
 
     private AuthnRequest createVerifyAuthnRequest(DateTime issueInstant, String requestId, String loa) {
+        RequestedAuthnContext requestedAuthnContext = createRequestedAuthnContext(
+                AuthnContextComparisonTypeEnumeration.EXACT,
+                loa
+        );
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(requestId);
         authnRequest.setDestination(hubUrl);
         authnRequest.setIssueInstant(issueInstant);
-
         authnRequest.setIssuer(createIssuer(proxyNodeEntityId));
         authnRequest.setNameIDPolicy(createNameIDPolicy());
-        authnRequest.setRequestedAuthnContext(createRequestedAuthnContext(
-                AuthnContextComparisonTypeEnumeration.EXACT,
-                loa
-        ));
-
+        authnRequest.setRequestedAuthnContext(requestedAuthnContext);
         return authnRequest;
     }
 
@@ -100,5 +93,16 @@ public class EidasAuthnRequestTranslator {
         authnContextClassRef.setAuthnContextClassRef(loa);
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);
         return requestedAuthnContext;
+    }
+
+    private void logAuthnRequestInformation(EidasAuthnRequest eidasAuthnRequest) {
+        LOG.info("[eIDAS AuthnRequest] Request ID: " + eidasAuthnRequest.getRequestId());
+        LOG.info("[eIDAS AuthnRequest] Issuer: " + eidasAuthnRequest.getIssuer());
+        LOG.info("[eIDAS AuthnRequest] Destination: " + eidasAuthnRequest.getDestination());
+        LOG.info("[eIDAS AuthnRequest] SPType: " + eidasAuthnRequest.getSpType());
+        LOG.info("[eIDAS AuthnRequest] Requested level of assurance: " + eidasAuthnRequest.getRequestedLoa());
+        eidasAuthnRequest.getRequestedAttributes()
+                .stream()
+                .forEach((attr) -> LOG.info("[eIDAS AuthnRequest] Requested attribute: " + attr.getName()));
     }
 }
