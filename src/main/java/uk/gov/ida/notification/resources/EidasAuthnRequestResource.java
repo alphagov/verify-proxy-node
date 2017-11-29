@@ -3,9 +3,7 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.views.View;
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
-import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -14,16 +12,17 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 @Path("/SAML2/SSO")
 public class EidasAuthnRequestResource {
-    private final String hubUrl;
+    private EidasProxyNodeConfiguration configuration;
     private final EidasAuthnRequestTranslator authnRequestTranslator;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration, EidasAuthnRequestTranslator authnRequestTranslator) {
-        this.hubUrl = configuration.getHubUrl().toString();
+        this.configuration = configuration;
         this.authnRequestTranslator = authnRequestTranslator;
     }
 
@@ -42,10 +41,15 @@ public class EidasAuthnRequestResource {
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest) {
         String decodedEidasAuthnRequest = Base64.decodeAsString(encodedEidasAuthnRequest);
-        String encodedHubAuthnRequest = Base64.encodeAsString(authnRequestTranslator.translate(decodedEidasAuthnRequest));
+        String hubAuthnRequest = authnRequestTranslator.translate(decodedEidasAuthnRequest);
+        return buildSamlFormView(hubAuthnRequest);
+    }
 
-        return new SamlFormView(
-                hubUrl, SamlMessageType.SAML_REQUEST, encodedHubAuthnRequest, "Post Verify Authn Request to Hub"
-        );
+    private SamlFormView buildSamlFormView(String hubAuthnRequest) {
+        String encodedHubAuthnRequest = Base64.encodeAsString(hubAuthnRequest);
+        String hubUrl = configuration.getHubUrl().toString();
+        String submitText = "Post Verify Authn Request to Hub";
+        String samlRequest = SamlMessageType.SAML_REQUEST;
+        return new SamlFormView( hubUrl, samlRequest, encodedHubAuthnRequest, submitText  );
     }
 }
