@@ -21,7 +21,7 @@ public class EidasAuthnRequest {
     private final String requestedLoa;
     private final List<RequestedAttribute> requestedAttributes;
 
-    public EidasAuthnRequest(AuthnRequest request) {
+    public EidasAuthnRequest(AuthnRequest request)  {
         requestId = request.getID();
         issuer = request.getIssuer().getValue();
         destination = request.getDestination();
@@ -29,7 +29,7 @@ public class EidasAuthnRequest {
 
         XMLObject spTypeObj = request.getExtensions().getOrderedChildren()
                 .stream()
-                .filter(obj -> obj.getClass() == SPTypeImpl.class)
+                .filter(obj -> obj  instanceof  SPTypeImpl)
                 .findFirst()
                 .orElseThrow(() -> new EidasAuthnRequestException("eIDAS AuthnRequest has no SPType"));
 

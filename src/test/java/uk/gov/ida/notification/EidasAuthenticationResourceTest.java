@@ -15,7 +15,7 @@ import static org.glassfish.jersey.internal.util.Base64.encodeAsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class EidasAuthenticatiobResourceTest {
+public class EidasAuthenticationResourceTest {
 
     private final String eidasAuthnRequest = "eidas authnrequest";
     private final String hubAuthnResponse = "hub authnrequest";

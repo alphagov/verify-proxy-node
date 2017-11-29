@@ -88,7 +88,6 @@ public class EidasAuthnRequestTranslator {
     private RequestedAuthnContext createRequestedAuthnContext(AuthnContextComparisonTypeEnumeration comparisonType, String loa) {
         RequestedAuthnContext requestedAuthnContext = (RequestedAuthnContext) XMLObjectSupport.buildXMLObject(RequestedAuthnContext.DEFAULT_ELEMENT_NAME);
         requestedAuthnContext.setComparison(comparisonType);
-
         AuthnContextClassRef authnContextClassRef = (AuthnContextClassRef) XMLObjectSupport.buildXMLObject(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
         authnContextClassRef.setAuthnContextClassRef(loa);
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);

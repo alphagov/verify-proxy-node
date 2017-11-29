@@ -3,13 +3,22 @@ package uk.gov.ida.notification.saml.translation;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.helpers.FileHelpers;
+import org.opensaml.saml.saml2.core.Extensions;
+import se.litsec.eidas.opensaml.common.EidasConstants;
+import uk.gov.ida.notification.helpers.ConnectorNodeIssuer;
+import uk.gov.ida.notification.helpers.ConnectorNodeSPType;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class EidasAuthnRequestTranslatorTest {
 
@@ -20,16 +29,35 @@ public class EidasAuthnRequestTranslatorTest {
 
     @Test
     public void shouldBuildHubAuthnRequestWithSameId() throws Exception {
-        SamlParser samlParser = new SamlParser();
+        String requestId = "any id";
+        String eidasAuthnRequestXml = "eidas authnrequest";
+
+        SamlParser samlParser = mock(SamlParser.class);
         SamlMarshaller samlMarshaller = new SamlMarshaller();
-        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://verify-hub.uk", samlParser, samlMarshaller);
-        String eidasAuthnRequestXml = FileHelpers.readFileAsString("eidas_authn_request.xml");
+        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("any", "other", samlParser, samlMarshaller);
+
+        AuthnRequest eidasAuthnRequest = buildEidasAuthnRequest(requestId);
+        when(samlParser.parseSamlString(eidasAuthnRequestXml, AuthnRequest.class)).thenReturn(eidasAuthnRequest);
 
         String hubAuthnRequestXml = translator.translate(eidasAuthnRequestXml);
 
-        AuthnRequest hubAuthnRequest = samlParser.parseSamlString(hubAuthnRequestXml, AuthnRequest.class);
-        assertEquals("_171ccc6b39b1e8f6e762c2e4ee4ded3a", hubAuthnRequest.getID());
+        AuthnRequest hubAuthnRequest = new SamlParser().parseSamlString(hubAuthnRequestXml, AuthnRequest.class);
+        assertEquals(requestId, hubAuthnRequest.getID());
         assertEquals(IdaAuthnContext.LEVEL_2_AUTHN_CTX, getLoa(hubAuthnRequest));
+    }
+
+    private AuthnRequest buildEidasAuthnRequest(String requestId) {
+        String loa = EidasConstants.EIDAS_LOA_SUBSTANTIAL;
+        AuthnRequest authnRequest = mock(AuthnRequest.class, RETURNS_DEEP_STUBS);
+        when(authnRequest.getIssuer()).thenReturn(new ConnectorNodeIssuer());
+        when(authnRequest.getRequestedAuthnContext().getAuthnContextClassRefs().get(0).getAuthnContextClassRef()).thenReturn(loa);
+        Extensions extentions = mock(Extensions.class);
+        ArrayList<XMLObject> extentionChildren = new ArrayList<>();
+        extentionChildren.add(new ConnectorNodeSPType());
+        when(extentions.getOrderedChildren()).thenReturn(extentionChildren);
+        when(authnRequest.getExtensions()).thenReturn(extentions);
+        when(authnRequest.getID()).thenReturn(requestId);
+        return authnRequest;
     }
 
     private static String getLoa(AuthnRequest hubAuthnRequest) {
