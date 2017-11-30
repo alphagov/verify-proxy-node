@@ -9,6 +9,7 @@ import io.dropwizard.views.ViewBundle;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
+import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -90,6 +91,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 samlFormViewMapper,
                 eidasAuthnRequestMapper));
         environment.jersey().register(new HubResponseResource(configuration, hubResponseTranslator));
+        environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());
     }
