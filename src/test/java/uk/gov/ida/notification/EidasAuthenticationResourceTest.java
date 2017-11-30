@@ -15,24 +15,28 @@ import java.net.URI;
 import static junit.framework.TestCase.assertEquals;
 import static org.glassfish.jersey.internal.util.Base64.encodeAsString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 public class EidasAuthenticationResourceTest {
 
     private final String eidasAuthnRequestAsString = "eidas authnrequest";
     private final String hubAuthnRequestAsString = "hub authnrequest";
+    private final String expectedEndodedSamlMessage = encodeAsString(hubAuthnRequestAsString);
     private final String hubUrl = "http://hello.com";
-    private EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
+    private final String expectedSubmitText = "Post Verify Authn Request to Hub";
+    private String samlRequest = SamlMessageType.SAML_REQUEST;
 
+    private EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
     private final AuthnRequest hubAuthnRequest = mock(AuthnRequest.class);
     private final AuthnRequest eidasAuthnRequest = mock(AuthnRequest.class);
     private EidasAuthnRequestTranslator eidasAuthnRequestTranslator = mock(EidasAuthnRequestTranslator.class);
-    private SamlMarshaller marshaller = mock(SamlMarshaller.class);
+    private SamlFormViewMapper samlFormViewMapper = mock(SamlFormViewMapper.class);
     private SamlParser parser = mock(SamlParser.class);
     private EidasAuthnRequestResource eidasAuthnRequestResource = new EidasAuthnRequestResource(
             configuration,
             eidasAuthnRequestTranslator,
-            marshaller,
+            samlFormViewMapper,
             parser);
 
     @Test
@@ -56,14 +60,14 @@ public class EidasAuthenticationResourceTest {
     private void SetupResourceDepenciesForSuccess() {
         when(configuration.getHubUrl()).thenReturn(URI.create(hubUrl));
         when(eidasAuthnRequestTranslator.translate(eidasAuthnRequest)).thenReturn(hubAuthnRequest);
-        when(marshaller.samlObjectToString(hubAuthnRequest)).thenReturn(hubAuthnRequestAsString);
         when(parser.parseSamlString(eidasAuthnRequestAsString, AuthnRequest.class)).thenReturn(eidasAuthnRequest);
+        when(samlFormViewMapper.map(hubUrl, samlRequest, hubAuthnRequest, expectedSubmitText)).thenReturn(new SamlFormView(hubUrl, samlRequest, expectedEndodedSamlMessage, expectedSubmitText));
     }
 
     private void ViewShouldHaveHubAuthnRequest(SamlFormView view) {
-        assertEquals(view.getSamlMessageType(), SamlMessageType.SAML_REQUEST);
-        assertEquals(view.getEncodedSamlMessage(), encodeAsString(hubAuthnRequestAsString));
+        assertEquals(view.getSamlMessageType(), samlRequest);
+        assertEquals(view.getEncodedSamlMessage(), expectedEndodedSamlMessage);
         assertEquals(view.getPostUrl(), hubUrl);
-        assertEquals(view.getSubmitText(), "Post Verify Authn Request to Hub");
+        assertEquals(view.getSubmitText(), expectedSubmitText);
     }
 }

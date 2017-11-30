@@ -81,10 +81,11 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 samlParser,
                 samlMarshaller
         );
+        SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(samlMarshaller);
 
         environment.jersey().register(new EidasAuthnRequestResource(configuration,
                 eidasAuthnRequestTranslator,
-                samlMarshaller,
+                samlFormViewMapper,
                 samlParser));
         environment.jersey().register(new HubResponseResource(configuration, hubResponseTranslator));
         environment.jersey().register(new StubConnectorNodeResource());
