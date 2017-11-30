@@ -1,12 +1,11 @@
 package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
-import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import uk.gov.ida.notification.EidasAuthnRequestMapper;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.SamlFormViewMapper;
 import uk.gov.ida.notification.saml.SamlMessageType;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -24,16 +23,16 @@ public class EidasAuthnRequestResource {
     private EidasProxyNodeConfiguration configuration;
     private final EidasAuthnRequestTranslator authnRequestTranslator;
     private SamlFormViewMapper samlFormViewMapper;
-    private SamlParser parser;
+    private EidasAuthnRequestMapper eidasAuthnRequestMapper;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
                                      EidasAuthnRequestTranslator authnRequestTranslator,
                                      SamlFormViewMapper samlFormViewMapper,
-                                     SamlParser parser) {
+                                     EidasAuthnRequestMapper eidasAuthnRequestMapper) {
         this.configuration = configuration;
         this.authnRequestTranslator = authnRequestTranslator;
         this.samlFormViewMapper = samlFormViewMapper;
-        this.parser = parser;
+        this.eidasAuthnRequestMapper = eidasAuthnRequestMapper;
     }
 
     @GET
@@ -50,15 +49,9 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest) {
-        EidasAuthnRequest eidasAuthnRequest = getEidasAuthnRequest(encodedEidasAuthnRequest);
+        EidasAuthnRequest eidasAuthnRequest = eidasAuthnRequestMapper.map(encodedEidasAuthnRequest);
         AuthnRequest hubAuthnRequest = authnRequestTranslator.translate(eidasAuthnRequest);
         return buildSamlFormView(hubAuthnRequest);
-    }
-
-    private EidasAuthnRequest getEidasAuthnRequest(String encodedEidasAuthnRequest) {
-        String decodedEidasAuthnRequest = Base64.decodeAsString(encodedEidasAuthnRequest);
-        AuthnRequest authnRequest = parser.parseSamlString(decodedEidasAuthnRequest, AuthnRequest.class);
-        return new EidasAuthnRequest(authnRequest);
     }
 
     private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest) {

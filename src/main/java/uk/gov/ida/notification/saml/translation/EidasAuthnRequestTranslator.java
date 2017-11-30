@@ -13,11 +13,7 @@ import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
-import java.util.logging.Logger;
-
 public class EidasAuthnRequestTranslator {
-    private static final Logger LOG = Logger.getLogger(EidasAuthnRequestTranslator.class.getName());
-
     private final String proxyNodeEntityId;
     private final String hubUrl;
 
@@ -27,11 +23,6 @@ public class EidasAuthnRequestTranslator {
     }
 
     public AuthnRequest translate(EidasAuthnRequest eidasAuthnRequest) {
-        logAuthnRequestInformation(eidasAuthnRequest);
-        return buildVerifyAuthnRequest(eidasAuthnRequest);
-    }
-
-    private AuthnRequest buildVerifyAuthnRequest(EidasAuthnRequest eidasAuthnRequest) {
         DateTime now = DateTime.now();
         String requestId = eidasAuthnRequest.getRequestId();
         String loa = mapLoa(eidasAuthnRequest.getRequestedLoa());
@@ -83,16 +74,5 @@ public class EidasAuthnRequestTranslator {
         authnContextClassRef.setAuthnContextClassRef(loa);
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);
         return requestedAuthnContext;
-    }
-
-    private void logAuthnRequestInformation(EidasAuthnRequest eidasAuthnRequest) {
-        LOG.info("[eIDAS AuthnRequest] Request ID: " + eidasAuthnRequest.getRequestId());
-        LOG.info("[eIDAS AuthnRequest] Issuer: " + eidasAuthnRequest.getIssuer());
-        LOG.info("[eIDAS AuthnRequest] Destination: " + eidasAuthnRequest.getDestination());
-        LOG.info("[eIDAS AuthnRequest] SPType: " + eidasAuthnRequest.getSpType());
-        LOG.info("[eIDAS AuthnRequest] Requested level of assurance: " + eidasAuthnRequest.getRequestedLoa());
-        eidasAuthnRequest.getRequestedAttributes()
-                .stream()
-                .forEach((attr) -> LOG.info("[eIDAS AuthnRequest] Requested attribute: " + attr.getName()));
     }
 }
