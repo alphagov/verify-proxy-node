@@ -9,7 +9,6 @@ import org.opensaml.saml.saml2.core.Extensions;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.helpers.ConnectorNodeIssuer;
 import uk.gov.ida.notification.helpers.ConnectorNodeSPType;
-import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
@@ -33,15 +32,13 @@ public class EidasAuthnRequestTranslatorTest {
         String eidasAuthnRequestXml = "eidas authnrequest";
 
         SamlParser samlParser = mock(SamlParser.class);
-        SamlMarshaller samlMarshaller = new SamlMarshaller();
-        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("any", "other", samlParser, samlMarshaller);
+        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("any", "other", samlParser);
 
         AuthnRequest eidasAuthnRequest = buildEidasAuthnRequest(requestId);
         when(samlParser.parseSamlString(eidasAuthnRequestXml, AuthnRequest.class)).thenReturn(eidasAuthnRequest);
 
-        String hubAuthnRequestXml = translator.translate(eidasAuthnRequestXml);
+        AuthnRequest hubAuthnRequest = translator.translate(eidasAuthnRequestXml);
 
-        AuthnRequest hubAuthnRequest = new SamlParser().parseSamlString(hubAuthnRequestXml, AuthnRequest.class);
         assertEquals(requestId, hubAuthnRequest.getID());
         assertEquals(IdaAuthnContext.LEVEL_2_AUTHN_CTX, getLoa(hubAuthnRequest));
     }

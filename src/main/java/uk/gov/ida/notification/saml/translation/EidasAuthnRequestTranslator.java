@@ -11,7 +11,6 @@ import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
@@ -23,21 +22,18 @@ public class EidasAuthnRequestTranslator {
     private final String proxyNodeEntityId;
     private final String hubUrl;
     private final SamlParser samlParser;
-    private final SamlMarshaller samlMarshaller;
 
-    public EidasAuthnRequestTranslator(String proxyNodeEntityId, String hubUrl, SamlParser samlParser, SamlMarshaller samlMarshaller) {
+    public EidasAuthnRequestTranslator(String proxyNodeEntityId, String hubUrl, SamlParser samlParser) {
         this.proxyNodeEntityId = proxyNodeEntityId;
         this.hubUrl = hubUrl;
         this.samlParser = samlParser;
-        this.samlMarshaller = samlMarshaller;
     }
 
-    public String translate(String decodedEidasAuthnRequestXml) {
+    public AuthnRequest translate(String decodedEidasAuthnRequestXml) {
         AuthnRequest authnRequest = samlParser.parseSamlString(decodedEidasAuthnRequestXml, AuthnRequest.class);
         EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest(authnRequest);
         logAuthnRequestInformation(eidasAuthnRequest);
-        AuthnRequest verifyAuthnRequest = buildVerifyAuthnRequest(eidasAuthnRequest);
-        return samlMarshaller.samlObjectToString(verifyAuthnRequest);
+        return buildVerifyAuthnRequest(eidasAuthnRequest);
     }
 
     private AuthnRequest buildVerifyAuthnRequest(EidasAuthnRequest eidasAuthnRequest) {
