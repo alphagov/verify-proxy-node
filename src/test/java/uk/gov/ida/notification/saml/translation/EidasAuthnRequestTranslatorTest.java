@@ -29,15 +29,12 @@ public class EidasAuthnRequestTranslatorTest {
     @Test
     public void shouldBuildHubAuthnRequestWithSameId() throws Exception {
         String requestId = "any id";
-        String eidasAuthnRequestXml = "eidas authnrequest";
 
-        SamlParser samlParser = mock(SamlParser.class);
-        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("any", "other", samlParser);
+        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("any", "other");
 
         AuthnRequest eidasAuthnRequest = buildEidasAuthnRequest(requestId);
-        when(samlParser.parseSamlString(eidasAuthnRequestXml, AuthnRequest.class)).thenReturn(eidasAuthnRequest);
 
-        AuthnRequest hubAuthnRequest = translator.translate(eidasAuthnRequestXml);
+        AuthnRequest hubAuthnRequest = translator.translate(eidasAuthnRequest);
 
         assertEquals(requestId, hubAuthnRequest.getID());
         assertEquals(IdaAuthnContext.LEVEL_2_AUTHN_CTX, getLoa(hubAuthnRequest));

@@ -6,6 +6,7 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -22,13 +23,15 @@ public class EidasAuthnRequestResource {
     private EidasProxyNodeConfiguration configuration;
     private final EidasAuthnRequestTranslator authnRequestTranslator;
     private SamlMarshaller marshaller;
+    private SamlParser parser;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
                                      EidasAuthnRequestTranslator authnRequestTranslator,
-                                     SamlMarshaller marshaller) {
+                                     SamlMarshaller marshaller, SamlParser parser) {
         this.configuration = configuration;
         this.authnRequestTranslator = authnRequestTranslator;
         this.marshaller = marshaller;
+        this.parser = parser;
     }
 
     @GET
@@ -46,7 +49,8 @@ public class EidasAuthnRequestResource {
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest) {
         String decodedEidasAuthnRequest = Base64.decodeAsString(encodedEidasAuthnRequest);
-        AuthnRequest hubAuthnRequest = authnRequestTranslator.translate(decodedEidasAuthnRequest);
+        AuthnRequest authnRequest = parser.parseSamlString(decodedEidasAuthnRequest, AuthnRequest.class);
+        AuthnRequest hubAuthnRequest = authnRequestTranslator.translate(authnRequest);
         return buildSamlFormView(hubAuthnRequest);
     }
 

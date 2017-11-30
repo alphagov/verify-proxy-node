@@ -11,7 +11,6 @@ import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
 import java.util.logging.Logger;
@@ -21,16 +20,13 @@ public class EidasAuthnRequestTranslator {
 
     private final String proxyNodeEntityId;
     private final String hubUrl;
-    private final SamlParser samlParser;
 
-    public EidasAuthnRequestTranslator(String proxyNodeEntityId, String hubUrl, SamlParser samlParser) {
+    public EidasAuthnRequestTranslator(String proxyNodeEntityId, String hubUrl) {
         this.proxyNodeEntityId = proxyNodeEntityId;
         this.hubUrl = hubUrl;
-        this.samlParser = samlParser;
     }
 
-    public AuthnRequest translate(String decodedEidasAuthnRequestXml) {
-        AuthnRequest authnRequest = samlParser.parseSamlString(decodedEidasAuthnRequestXml, AuthnRequest.class);
+    public AuthnRequest translate(AuthnRequest authnRequest) {
         EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest(authnRequest);
         logAuthnRequestInformation(eidasAuthnRequest);
         return buildVerifyAuthnRequest(eidasAuthnRequest);

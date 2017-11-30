@@ -5,6 +5,7 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -18,24 +19,27 @@ import static org.mockito.Mockito.when;
 
 public class EidasAuthenticationResourceTest {
 
-    private final String eidasAuthnRequest = "eidas authnrequest";
+    private final String eidasAuthnRequestAsString = "eidas authnrequest";
     private final String hubAuthnRequestAsString = "hub authnrequest";
     private final String hubUrl = "http://hello.com";
     private EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
 
     private final AuthnRequest hubAuthnRequest = mock(AuthnRequest.class);
+    private final AuthnRequest eidasAuthnRequest = mock(AuthnRequest.class);
     private EidasAuthnRequestTranslator eidasAuthnRequestTranslator = mock(EidasAuthnRequestTranslator.class);
     private SamlMarshaller marshaller = mock(SamlMarshaller.class);
+    private SamlParser parser = mock(SamlParser.class);
     private EidasAuthnRequestResource eidasAuthnRequestResource = new EidasAuthnRequestResource(
             configuration,
             eidasAuthnRequestTranslator,
-            marshaller);
+            marshaller,
+            parser);
 
     @Test
     public void shouldGetViewWithHubRequestFromPost() throws IOException {
         SetupResourceDepenciesForSuccess();
 
-        SamlFormView view = (SamlFormView) eidasAuthnRequestResource.handlePostBinding(encodeAsString(eidasAuthnRequest));
+        SamlFormView view = (SamlFormView) eidasAuthnRequestResource.handlePostBinding(encodeAsString(eidasAuthnRequestAsString));
 
         ViewShouldHaveHubAuthnRequest(view);
     }
@@ -44,7 +48,7 @@ public class EidasAuthenticationResourceTest {
     public void shouldGetViewWithHubRequestFromRedirect() throws IOException {
         SetupResourceDepenciesForSuccess();
 
-        SamlFormView view = (SamlFormView) eidasAuthnRequestResource.handleRedirectBinding(encodeAsString(eidasAuthnRequest));
+        SamlFormView view = (SamlFormView) eidasAuthnRequestResource.handleRedirectBinding(encodeAsString(eidasAuthnRequestAsString));
 
         ViewShouldHaveHubAuthnRequest(view);
     }
@@ -53,6 +57,7 @@ public class EidasAuthenticationResourceTest {
         when(configuration.getHubUrl()).thenReturn(URI.create(hubUrl));
         when(eidasAuthnRequestTranslator.translate(eidasAuthnRequest)).thenReturn(hubAuthnRequest);
         when(marshaller.samlObjectToString(hubAuthnRequest)).thenReturn(hubAuthnRequestAsString);
+        when(parser.parseSamlString(eidasAuthnRequestAsString, AuthnRequest.class)).thenReturn(eidasAuthnRequest);
     }
 
     private void ViewShouldHaveHubAuthnRequest(SamlFormView view) {
