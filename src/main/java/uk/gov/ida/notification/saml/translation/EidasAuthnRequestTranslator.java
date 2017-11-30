@@ -26,8 +26,7 @@ public class EidasAuthnRequestTranslator {
         this.hubUrl = hubUrl;
     }
 
-    public AuthnRequest translate(AuthnRequest authnRequest) {
-        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest(authnRequest);
+    public AuthnRequest translate(EidasAuthnRequest eidasAuthnRequest) {
         logAuthnRequestInformation(eidasAuthnRequest);
         return buildVerifyAuthnRequest(eidasAuthnRequest);
     }

@@ -7,6 +7,7 @@ import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.SamlFormViewMapper;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -49,10 +50,15 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest) {
+        EidasAuthnRequest eidasAuthnRequest = getEidasAuthnRequest(encodedEidasAuthnRequest);
+        AuthnRequest hubAuthnRequest = authnRequestTranslator.translate(eidasAuthnRequest);
+        return buildSamlFormView(hubAuthnRequest);
+    }
+
+    private EidasAuthnRequest getEidasAuthnRequest(String encodedEidasAuthnRequest) {
         String decodedEidasAuthnRequest = Base64.decodeAsString(encodedEidasAuthnRequest);
         AuthnRequest authnRequest = parser.parseSamlString(decodedEidasAuthnRequest, AuthnRequest.class);
-        AuthnRequest hubAuthnRequest = authnRequestTranslator.translate(authnRequest);
-        return buildSamlFormView(hubAuthnRequest);
+        return new EidasAuthnRequest(authnRequest);
     }
 
     private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest) {
