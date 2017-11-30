@@ -4,10 +4,10 @@ import org.junit.Test;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.EidasAuthnRequestMapper;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
+import uk.gov.ida.notification.HubAuthnRequestGenerator;
 import uk.gov.ida.notification.SamlFormViewMapper;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
-import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import java.net.URI;
@@ -30,12 +30,12 @@ public class EidasAuthnRequestResourceTest {
     private EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
     private final AuthnRequest hubAuthnRequest = mock(AuthnRequest.class);
     private final EidasAuthnRequest eidasAuthnRequest = mock(EidasAuthnRequest.class);
-    private EidasAuthnRequestTranslator eidasAuthnRequestTranslator = mock(EidasAuthnRequestTranslator.class);
     private SamlFormViewMapper samlFormViewMapper = mock(SamlFormViewMapper.class);
     private EidasAuthnRequestMapper eidasMapper = mock(EidasAuthnRequestMapper.class);
+    private HubAuthnRequestGenerator hubAuthnRequestGenerator = mock(HubAuthnRequestGenerator.class);
     private EidasAuthnRequestResource eidasAuthnRequestResource = new EidasAuthnRequestResource(
             configuration,
-            eidasAuthnRequestTranslator,
+            hubAuthnRequestGenerator,
             samlFormViewMapper,
             eidasMapper);
 
@@ -60,7 +60,7 @@ public class EidasAuthnRequestResourceTest {
     private void setupResourceDependenciesForSuccess() {
         when(configuration.getHubUrl()).thenReturn(URI.create(hubUrl));
         when(eidasMapper.map(encodedEidasAuthnRequest)).thenReturn(eidasAuthnRequest);
-        when(eidasAuthnRequestTranslator.translate(eidasAuthnRequest)).thenReturn(hubAuthnRequest);
+        when(hubAuthnRequestGenerator.generate(eidasAuthnRequest)).thenReturn(hubAuthnRequest);
         when(samlFormViewMapper.map(hubUrl, samlRequest, hubAuthnRequest, expectedSubmitText)).thenReturn(new SamlFormView(hubUrl, samlRequest, expectedEndodedSamlMessage, expectedSubmitText));
     }
 

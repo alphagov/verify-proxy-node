@@ -4,10 +4,10 @@ import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.EidasAuthnRequestMapper;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
+import uk.gov.ida.notification.HubAuthnRequestGenerator;
 import uk.gov.ida.notification.SamlFormViewMapper;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
-import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.ws.rs.Consumes;
@@ -21,16 +21,16 @@ import javax.ws.rs.core.MediaType;
 @Path("/SAML2/SSO")
 public class EidasAuthnRequestResource {
     private EidasProxyNodeConfiguration configuration;
-    private final EidasAuthnRequestTranslator authnRequestTranslator;
+    private final HubAuthnRequestGenerator hubAuthnRequestGenerator;
     private SamlFormViewMapper samlFormViewMapper;
     private EidasAuthnRequestMapper eidasAuthnRequestMapper;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
-                                     EidasAuthnRequestTranslator authnRequestTranslator,
+                                     HubAuthnRequestGenerator authnRequestTranslator,
                                      SamlFormViewMapper samlFormViewMapper,
                                      EidasAuthnRequestMapper eidasAuthnRequestMapper) {
         this.configuration = configuration;
-        this.authnRequestTranslator = authnRequestTranslator;
+        this.hubAuthnRequestGenerator = authnRequestTranslator;
         this.samlFormViewMapper = samlFormViewMapper;
         this.eidasAuthnRequestMapper = eidasAuthnRequestMapper;
     }
@@ -50,7 +50,7 @@ public class EidasAuthnRequestResource {
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest) {
         EidasAuthnRequest eidasAuthnRequest = eidasAuthnRequestMapper.map(encodedEidasAuthnRequest);
-        AuthnRequest hubAuthnRequest = authnRequestTranslator.translate(eidasAuthnRequest);
+        AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
         return buildSamlFormView(hubAuthnRequest);
     }
 
