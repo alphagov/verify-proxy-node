@@ -3,7 +3,6 @@ package uk.gov.ida.notification.saml;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
-import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
 import org.opensaml.saml.saml2.core.impl.ResponseImpl;
@@ -28,7 +27,7 @@ public class SamlParserTest {
     public void shouldParseAuthnRequest() throws Exception {
         String testXML = FileHelpers.readFileAsString("eidas_authn_request.xml");
 
-        AuthnRequestImpl authnRequest = parser.parseSamlString(testXML, AuthnRequestImpl.class);
+        AuthnRequestImpl authnRequest = parser.parseSamlString(testXML);
 
         assertEquals(AuthnRequestImpl.class, authnRequest.getClass());
     }
@@ -37,7 +36,7 @@ public class SamlParserTest {
     public void shouldParseAuthnResponse() throws Exception {
         String testXML = FileHelpers.readFileAsString("verify_idp_response.xml");
 
-        Response authnResponse = parser.parseSamlString(testXML, ResponseImpl.class);
+        Response authnResponse = parser.parseSamlString(testXML);
 
         assertEquals(ResponseImpl.class, authnResponse.getClass());
     }
@@ -65,7 +64,7 @@ public class SamlParserTest {
                 "<lolz>&lol9;</lolz>";
 
         try {
-            parser.parseSamlString(xmlString, XMLObject.class);
+            parser.parseSamlString(xmlString);
 
             fail("expected exception not thrown");
         } catch(RuntimeException e) {
@@ -85,7 +84,7 @@ public class SamlParserTest {
                 "  <!ELEMENT foo ANY >" +
                 "  <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]><foo>&xxe;</foo>";
         try {
-            parser.parseSamlString(xmlString, XMLObject.class);
+            parser.parseSamlString(xmlString);
 
             fail("expected exception not thrown");
         } catch(RuntimeException e) {

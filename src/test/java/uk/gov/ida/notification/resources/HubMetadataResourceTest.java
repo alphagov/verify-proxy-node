@@ -30,7 +30,7 @@ public class HubMetadataResourceTest {
         HubMetadataResource hubMetadataResource = new HubMetadataResource();
         Response hubMetadaResponse = hubMetadataResource.getHubMetadata();
         String samlObject = hubMetadaResponse.getEntity().toString();
-        hubMetadata = (EntitiesDescriptor) new SamlParser().parseSamlString(samlObject);
+        hubMetadata = new SamlParser().parseSamlString(samlObject);
     }
 
     @Test

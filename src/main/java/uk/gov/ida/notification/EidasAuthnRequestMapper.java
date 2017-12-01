@@ -19,7 +19,7 @@ public class EidasAuthnRequestMapper {
 
     public EidasAuthnRequest map(String inputRequest) {
         String requestAsString = Base64.decodeAsString(inputRequest);
-        AuthnRequest authnRequest = parser.parseSamlString(requestAsString, AuthnRequest.class);
+        AuthnRequest authnRequest = parser.parseSamlString(requestAsString);
         EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest(authnRequest);
         logAuthnRequestInformation(eidasAuthnRequest);
         return eidasAuthnRequest;

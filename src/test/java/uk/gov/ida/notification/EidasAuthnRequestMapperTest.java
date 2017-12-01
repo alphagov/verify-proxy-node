@@ -28,7 +28,7 @@ public class EidasAuthnRequestMapperTest {
         SamlParser parser = mock(SamlParser.class);
         String loa = EidasConstants.EIDAS_LOA_SUBSTANTIAL;
         AuthnRequest authnRequest = buildAuthnRequest(requestId, loa);
-        when(parser.parseSamlString(request, AuthnRequest.class)).thenReturn(authnRequest);
+        when(parser.parseSamlString(request)).thenReturn(authnRequest);
         EidasAuthnRequestMapper mapper = new EidasAuthnRequestMapper(parser);
 
         EidasAuthnRequest eidasAuthnRequest = mapper.map(inputRequest);

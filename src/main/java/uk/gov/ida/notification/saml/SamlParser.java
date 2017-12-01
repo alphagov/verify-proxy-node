@@ -37,7 +37,7 @@ public class SamlParser {
         unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
     }
 
-    public <T extends XMLObject> T parseSamlString(String xmlString, Class<T> clazz) {
+    public <T extends XMLObject> T parseSamlString(String xmlString) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(xmlString.getBytes());
 
         try {

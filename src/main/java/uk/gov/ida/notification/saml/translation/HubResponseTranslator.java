@@ -50,7 +50,7 @@ public class HubResponseTranslator {
     }
 
     public String translate(String decodedHubResponse) {
-        HubResponse hubResponse = new HubResponse(samlParser.parseSamlString(decodedHubResponse, Response.class));
+        HubResponse hubResponse = new HubResponse(samlParser.parseSamlString(decodedHubResponse));
 
         LOG.info("[Hub Response] ID: " + hubResponse.getResponseId());
         LOG.info("[Hub Response] In response to: " + hubResponse.getInResponseTo());
