@@ -1,5 +1,6 @@
 logs/
 out/
+.DS_Store
 
 # IntelliJ
 *.iml
