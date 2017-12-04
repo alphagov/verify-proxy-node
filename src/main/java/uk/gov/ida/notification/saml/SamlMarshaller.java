@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.saml;
 
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallerFactory;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.SAMLObject;
 import org.w3c.dom.Element;
@@ -17,7 +19,9 @@ public class SamlMarshaller {
         Element element;
 
         try {
-            element = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(samlObject).marshall(samlObject);
+            MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+            Marshaller marshaller = marshallerFactory.getMarshaller(samlObject);
+            element = marshaller.marshall(samlObject);
         } catch (MarshallingException e) {
             throw new RuntimeException(e);
         }
