@@ -66,8 +66,8 @@ sourceSets {
 task acceptanceTest(type: Test) {
     description = 'Runs the acceptance tests'
     group = 'verification'
-    testClassesDir = sourceSets.acceptanceTest.output.classesDir
     classpath = sourceSets.acceptanceTest.runtimeClasspath
-    reports.junitXml.destination = "$buildDir/acceptance-test-results"
-    reports.html.destination = "$buildDir/reports/acceptance-test"
+    setTestClassesDirs sourceSets.acceptanceTest.output.classesDirs
+    reports.junitXml.setDestination new File("$buildDir/acceptance-test-results")
+    reports.html.setDestination new File("$buildDir/reports/acceptance-test")
 }
