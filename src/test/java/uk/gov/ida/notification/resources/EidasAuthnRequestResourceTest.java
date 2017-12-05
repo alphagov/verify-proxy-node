@@ -40,7 +40,7 @@ public class EidasAuthnRequestResourceTest {
             eidasMapper);
 
     @Test
-    public void shouldGetViewWithHubRequestFromPost() {
+    public void shouldGetViewWithHubRequestFromPost() throws Throwable {
         setupResourceDependenciesForSuccess();
 
         SamlFormView view = (SamlFormView) eidasAuthnRequestResource.handlePostBinding(encodedEidasAuthnRequest);
@@ -49,7 +49,7 @@ public class EidasAuthnRequestResourceTest {
     }
 
     @Test
-    public void shouldGetViewWithHubRequestFromRedirect() {
+    public void shouldGetViewWithHubRequestFromRedirect() throws Throwable {
         setupResourceDependenciesForSuccess();
 
         SamlFormView view = (SamlFormView) eidasAuthnRequestResource.handleRedirectBinding(encodedEidasAuthnRequest);
@@ -57,7 +57,7 @@ public class EidasAuthnRequestResourceTest {
         viewShouldHaveHubAuthnRequest(view);
     }
 
-    private void setupResourceDependenciesForSuccess() {
+    private void setupResourceDependenciesForSuccess() throws Throwable {
         when(configuration.getHubUrl()).thenReturn(URI.create(hubUrl));
         when(eidasMapper.map(encodedEidasAuthnRequest)).thenReturn(eidasAuthnRequest);
         when(hubAuthnRequestGenerator.generate(eidasAuthnRequest)).thenReturn(hubAuthnRequest);

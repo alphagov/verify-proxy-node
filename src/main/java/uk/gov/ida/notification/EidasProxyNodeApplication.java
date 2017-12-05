@@ -70,6 +70,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
+        CredentialRepository credentialRepository = new CredentialRepository();
         SamlParser samlParser = new SamlParser();
         SamlMarshaller samlMarshaller = new SamlMarshaller();
         EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);
@@ -83,7 +84,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 samlMarshaller
         );
         ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner();
-        HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, proxyNodeSigner);
+        HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, proxyNodeSigner, credentialRepository);
         SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(samlMarshaller);
 
         environment.jersey().register(new EidasAuthnRequestResource(

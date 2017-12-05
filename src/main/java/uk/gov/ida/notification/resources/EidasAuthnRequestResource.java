@@ -37,18 +37,18 @@ public class EidasAuthnRequestResource {
 
     @GET
     @Path("/Redirect")
-    public View handleRedirectBinding(@QueryParam(SamlMessageType.SAML_REQUEST) String encodedEidasAuthnRequest) {
+    public View handleRedirectBinding(@QueryParam(SamlMessageType.SAML_REQUEST) String encodedEidasAuthnRequest) throws Throwable {
         return handleAuthnRequest(encodedEidasAuthnRequest);
     }
 
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public View handlePostBinding(@FormParam(SamlMessageType.SAML_REQUEST) String encodedEidasAuthnRequest) {
+    public View handlePostBinding(@FormParam(SamlMessageType.SAML_REQUEST) String encodedEidasAuthnRequest) throws Throwable {
         return handleAuthnRequest(encodedEidasAuthnRequest);
     }
 
-    private View handleAuthnRequest(String encodedEidasAuthnRequest) {
+    private View handleAuthnRequest(String encodedEidasAuthnRequest) throws Throwable {
         EidasAuthnRequest eidasAuthnRequest = eidasAuthnRequestMapper.map(encodedEidasAuthnRequest);
         AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
         return buildSamlFormView(hubAuthnRequest);
