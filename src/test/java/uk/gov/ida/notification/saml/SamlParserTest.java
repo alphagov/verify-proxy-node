@@ -34,7 +34,7 @@ public class SamlParserTest {
 
     @Test
     public void shouldParseAuthnResponse() throws Exception {
-        String testXML = FileHelpers.readFileAsString("verify_idp_response.xml");
+        String testXML = FileHelpers.readFileAsString("idp_response_unencrypted.xml");
 
         Response authnResponse = parser.parseSamlString(testXML);
 

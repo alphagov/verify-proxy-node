@@ -29,7 +29,7 @@ public class HubResponseTranslatorTest {
         SamlMarshaller samlMarshaller = new SamlMarshaller();
         HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, samlMarshaller);
 
-        String hubResponseXml = FileHelpers.readFileAsString("idp_response.xml");
+        String hubResponseXml = FileHelpers.readFileAsString("idp_response_unencrypted.xml");
 
         Response expectedEidasResponse = getResponse("eidas_response.xml");
 
