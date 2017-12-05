@@ -1,11 +1,16 @@
 package uk.gov.ida.notification;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.x509.BasicX509Credential;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -19,8 +24,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 public class CredentialRepository {
 
-    private final String publicKey = "src/main/resources/pki/hub_signing.crt";
-    private final String privateKey = "src/main/resources/pki/hub_signing.pk8";
+    private final String publicKey = "pki/hub_signing.crt";
+    private final String privateKey = "pki/hub_signing.pk8";
     private final String privateKeyAlgortihm = "RSA";
 
     public Credential getHubCredential() throws Throwable {
@@ -33,16 +38,18 @@ public class CredentialRepository {
     }
 
     private PrivateKey buildPrivateKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] privateKeyAsBytes = Files.readAllBytes(Paths.get(privateKey));
+        URL privateKeyURL = Resources.getResource(privateKey);
+        byte[] privateKeyAsBytes = Resources.toByteArray(privateKeyURL);
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKeyAsBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(privateKeyAlgortihm);
         return keyFactory.generatePrivate(pkcs8EncodedKeySpec);
     }
 
     private X509Certificate buildPublicKey() throws CertificateException, IOException {
-        InputStream publicKeyInputStream = new FileInputStream(publicKey);
+        URL publicKeyURL = Resources.getResource(publicKey);
+        InputStream publicKeyInputStream = new ByteArrayInputStream(Resources.toByteArray(publicKeyURL));
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate publicKeyCert = (X509Certificate)certificateFactory.generateCertificate(publicKeyInputStream);
+        X509Certificate publicKeyCert = (X509Certificate) certificateFactory.generateCertificate(publicKeyInputStream);
         publicKeyInputStream.close();
         return publicKeyCert;
     }
