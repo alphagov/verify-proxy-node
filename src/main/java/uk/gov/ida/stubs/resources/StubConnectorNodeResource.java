@@ -3,6 +3,7 @@ package uk.gov.ida.stubs.resources;
 import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
@@ -15,6 +16,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.xml.transform.TransformerException;
 import java.net.URISyntaxException;
 
 @Path("/connector-node")
@@ -31,7 +33,7 @@ public class StubConnectorNodeResource {
 
     @GET
     @Path("/eidas-authn-request")
-    public SamlFormView eidasAuthnRequest() throws URISyntaxException {
+    public SamlFormView eidasAuthnRequest() throws Throwable {
         String proxyNodeAuthnUrl = "/SAML2/SSO/POST";
         String samlRequest = SamlMessageType.SAML_REQUEST;
         String encodedAuthnRequest = buildEncodedAuthnRequest();
@@ -39,7 +41,7 @@ public class StubConnectorNodeResource {
         return new SamlFormView(proxyNodeAuthnUrl, samlRequest, encodedAuthnRequest, submitText);
     }
 
-    private String buildEncodedAuthnRequest() {
+    private String buildEncodedAuthnRequest() throws Throwable {
         AuthnRequest authnRequest = eidasAuthnRequestFactory.createEidasAuthnRequest(
                 "any issuer entity id",
                 "any destination",

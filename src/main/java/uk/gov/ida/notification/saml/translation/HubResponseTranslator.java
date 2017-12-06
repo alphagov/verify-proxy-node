@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.saml.translation;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
@@ -26,6 +27,7 @@ import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
+import javax.xml.transform.TransformerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -49,7 +51,7 @@ public class HubResponseTranslator {
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
 
-    public String translate(String decodedHubResponse) {
+    public String translate(String decodedHubResponse) throws Throwable {
         HubResponse hubResponse = new HubResponse(samlParser.parseSamlString(decodedHubResponse));
 
         LOG.info("[Hub Response] ID: " + hubResponse.getResponseId());

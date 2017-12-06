@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.EidasAuthnRequestMapper;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
@@ -17,6 +18,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.xml.transform.TransformerException;
 
 @Path("/SAML2/SSO")
 public class EidasAuthnRequestResource {
@@ -54,7 +56,7 @@ public class EidasAuthnRequestResource {
         return buildSamlFormView(hubAuthnRequest);
     }
 
-    private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest) {
+    private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest) throws Throwable{
         String hubUrl = configuration.getHubUrl().toString();
         String submitText = "Post Verify Authn Request to Hub";
         String samlRequest = SamlMessageType.SAML_REQUEST;

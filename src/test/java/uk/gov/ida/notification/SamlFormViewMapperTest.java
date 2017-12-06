@@ -1,6 +1,7 @@
 package uk.gov.ida.notification;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Test;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.saml.SamlMarshaller;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -12,7 +13,7 @@ import static org.mockito.Mockito.when;
 public class SamlFormViewMapperTest {
 
     @Test
-    public void shouldMapAuthnRequestToSamlFormView(){
+    public void shouldMapAuthnRequestToSamlFormView() throws Throwable {
         String submitTest = "submit text";
         String url = "url";
         String samlMessageType = "saml message type";

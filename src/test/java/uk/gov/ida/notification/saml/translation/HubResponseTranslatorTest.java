@@ -24,7 +24,7 @@ public class HubResponseTranslatorTest {
     }
 
     @Test
-    public void shouldTranslateHubResponseToEidasResponse() throws Exception {
+    public void shouldTranslateHubResponseToEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();
         SamlMarshaller samlMarshaller = new SamlMarshaller();
         HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, samlMarshaller);

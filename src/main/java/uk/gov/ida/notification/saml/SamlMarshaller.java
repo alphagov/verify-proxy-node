@@ -15,28 +15,21 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
 public class SamlMarshaller {
-    public String samlObjectToString(SAMLObject samlObject) {
-        Element element;
+    public String samlObjectToString(SAMLObject samlObject) throws Throwable{
+        Element element = mashall(samlObject);
+        return marshallToString(element);
+    }
 
-        try {
-            MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
-            Marshaller marshaller = marshallerFactory.getMarshaller(samlObject);
-            element = marshaller.marshall(samlObject);
-        } catch (MarshallingException e) {
-            throw new RuntimeException(e);
-        }
-
-        String xmlString;
+    private String marshallToString(Element element) throws Throwable {
         StringWriter output = new StringWriter();
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.transform(new DOMSource(element), new StreamResult(output));
+        return output.toString();
+    }
 
-        try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.transform(new DOMSource(element), new StreamResult(output));
-        } catch (TransformerException e) {
-            throw new RuntimeException(e);
-        }
-
-        xmlString = output.toString();
-        return xmlString;
+    private Element mashall(SAMLObject samlObject) throws Throwable {
+        MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+        Marshaller marshaller = marshallerFactory.getMarshaller(samlObject);
+        return marshaller.marshall(samlObject);
     }
 }
