@@ -13,8 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+
+import static junit.framework.TestCase.assertEquals;
 
 public class HubResponseTranslatorTest {
 
@@ -80,6 +81,7 @@ public class HubResponseTranslatorTest {
 
     private Response getResponse(String resourceFilename) throws Exception {
         SamlParser parser = new SamlParser();
+        FileHelpers.readFileAsString(resourceFilename);
         String xmlString = FileHelpers.readFileAsString(resourceFilename);
         return parser.parseSamlString(xmlString);
     }

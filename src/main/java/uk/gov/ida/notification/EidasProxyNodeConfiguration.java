@@ -24,6 +24,16 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @NotNull
     private String proxyNodeEntityId;
 
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String hubSigningPrivateKeyPath;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String hubSigningCertificatePath;
+
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -34,5 +44,13 @@ public class EidasProxyNodeConfiguration extends Configuration {
 
     public String getProxyNodeEntityId() {
         return proxyNodeEntityId;
+    }
+
+    public String getHubSigningPrivateKeyPath() {
+        return hubSigningPrivateKeyPath;
+    }
+
+    public String getHubSigningCertificatePath() {
+        return hubSigningCertificatePath;
     }
 }
