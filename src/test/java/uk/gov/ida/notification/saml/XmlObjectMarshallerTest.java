@@ -3,13 +3,9 @@ package uk.gov.ida.notification.saml;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
-import org.opensaml.core.xml.XMLObject;
-import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameIDType;
-import uk.gov.ida.notification.helpers.FileHelpers;
-import uk.gov.ida.notification.saml.SamlMarshaller;
 
 import javax.xml.namespace.QName;
 
@@ -17,7 +13,7 @@ import java.text.MessageFormat;
 
 import static org.junit.Assert.assertEquals;
 
-public class SamlMarshallerTest {
+public class XmlObjectMarshallerTest {
 
     private final String xmlObjectFormat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><saml2:Issuer xmlns:saml2=\"{0}\" Format=\"{1}\">{2}</saml2:Issuer>";
 
@@ -32,9 +28,9 @@ public class SamlMarshallerTest {
         String entity = NameIDType.ENTITY;
         String aValue = "an-issuer";
         Issuer issuer = buildXMLObject(defaultElementName, entity, aValue);
-        SamlMarshaller marshaller = new SamlMarshaller();
+        XmlObjectMarshaller marshaller = new XmlObjectMarshaller();
 
-        String issuerXML = marshaller.samlObjectToString(issuer);
+        String issuerXML = marshaller.marshallToString(issuer);
 
         String expectedIssuerXML = buildExpectedXmlObjectFormat(defaultElementName, entity, aValue);
         assertEquals(expectedIssuerXML, issuerXML);

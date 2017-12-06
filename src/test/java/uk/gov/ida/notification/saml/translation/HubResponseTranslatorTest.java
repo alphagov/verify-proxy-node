@@ -6,7 +6,7 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import uk.gov.ida.notification.helpers.FileHelpers;
-import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import java.util.List;
@@ -26,8 +26,8 @@ public class HubResponseTranslatorTest {
     @Test
     public void shouldTranslateHubResponseToEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();
-        SamlMarshaller samlMarshaller = new SamlMarshaller();
-        HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, samlMarshaller);
+        XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
+        HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, xmlObjectMarshaller);
 
         String hubResponseXml = FileHelpers.readFileAsString("idp_response_unencrypted.xml");
 

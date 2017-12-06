@@ -1,9 +1,8 @@
 package uk.gov.ida.notification;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Test;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import static junit.framework.TestCase.assertEquals;
@@ -19,9 +18,9 @@ public class SamlFormViewMapperTest {
         String samlMessageType = "saml message type";
         String authnRequestAsString = "authnRequest as string";
         AuthnRequest authnRequest = mock(AuthnRequest.class);
-        SamlMarshaller marshaller = mock(SamlMarshaller.class);
+        XmlObjectMarshaller marshaller = mock(XmlObjectMarshaller.class);
         SamlFormViewMapper viewMapper = new SamlFormViewMapper(marshaller);
-        when(marshaller.samlObjectToString(authnRequest)).thenReturn(authnRequestAsString);
+        when(marshaller.marshallToString(authnRequest)).thenReturn(authnRequestAsString);
 
         SamlFormView view = viewMapper.map(url, samlMessageType, authnRequest, submitTest);
 

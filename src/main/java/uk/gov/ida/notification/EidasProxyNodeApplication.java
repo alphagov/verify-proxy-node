@@ -11,7 +11,7 @@ import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
-import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
@@ -72,7 +72,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                     final Environment environment) throws ParserConfigurationException {
         CredentialRepository credentialRepository = new CredentialRepository();
         SamlParser samlParser = new SamlParser();
-        SamlMarshaller samlMarshaller = new SamlMarshaller();
+        XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
         EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
@@ -81,11 +81,11 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 configuration.getProxyNodeEntityId(),
                 configuration.getConnectorNodeUrl().toString(),
                 samlParser,
-                samlMarshaller
+                xmlObjectMarshaller
         );
         ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner();
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, proxyNodeSigner, credentialRepository);
-        SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(samlMarshaller);
+        SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(xmlObjectMarshaller);
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,

@@ -3,9 +3,8 @@ package uk.gov.ida.stubs.resources;
 import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.stubs.EidasAuthnRequestFactory;
@@ -16,14 +15,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.xml.transform.TransformerException;
-import java.net.URISyntaxException;
 
 @Path("/connector-node")
 @Produces(MediaType.TEXT_HTML)
 public class StubConnectorNodeResource {
     private EidasAuthnRequestFactory eidasAuthnRequestFactory = new EidasAuthnRequestFactory();
-    private SamlMarshaller samlMarshaller = new SamlMarshaller();
+    private XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
 
     @POST
     @Path("/eidas-authn-response")
@@ -47,7 +44,7 @@ public class StubConnectorNodeResource {
                 "any destination",
                 new DateTime(DateTimeZone.UTC)
         );
-        String authnRequestString = samlMarshaller.samlObjectToString(authnRequest);
+        String authnRequestString = xmlObjectMarshaller.marshallToString(authnRequest);
         return Base64.encodeAsString(authnRequestString);
     }
 }

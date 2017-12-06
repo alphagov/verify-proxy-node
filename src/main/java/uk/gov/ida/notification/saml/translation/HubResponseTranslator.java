@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.saml.translation;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
@@ -22,12 +21,11 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.SamlMarshaller;
+import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
-import javax.xml.transform.TransformerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -39,14 +37,14 @@ public class HubResponseTranslator {
     private final String proxyNodeEntityId;
     private final String connectorNodeUrl;
     private final SamlParser samlParser;
-    private final SamlMarshaller samlMarshaller;
+    private final XmlObjectMarshaller xmlObjectMarshaller;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy;
 
-    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl, SamlParser samlParser, SamlMarshaller samlMarshaller) {
+    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl, SamlParser samlParser, XmlObjectMarshaller xmlObjectMarshaller) {
         this.proxyNodeEntityId = proxyNodeEntityId;
         this.connectorNodeUrl = connectorNodeUrl;
         this.samlParser = samlParser;
-        this.samlMarshaller = samlMarshaller;
+        this.xmlObjectMarshaller = xmlObjectMarshaller;
 
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
@@ -98,7 +96,7 @@ public class HubResponseTranslator {
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
 
-        return samlMarshaller.samlObjectToString(eidasResponse);
+        return xmlObjectMarshaller.marshallToString(eidasResponse);
     }
 
     private String mapLoa(String hubLoa) {
