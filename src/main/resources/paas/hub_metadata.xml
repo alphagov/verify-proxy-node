@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntitiesDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_entities" Name="VERIFY-FEDERATION" validUntil="2017-12-19T16:15:52+00:00"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>1OWJ5vaYG8sUUyvQ117XtxmdiKMzoJPL5TIiY/oHa5Q=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+mHJDt4PySZNppH2wm/kznRftiarG62pOycgb1BIX7cZNlWtEswM3DRqNql84i2sqY2sbJTQhHhF3
+5lGW6fDmbVkDReOrLZj4Um4OLHS/y8gDj1UaCqjhdijUccu7e1/L1A32KZrjd3+q96QRmwxVu9Sh
+wEk09QPYiLfyOEoynwUOAOZt6NKPufxSqCn3xlGaBXU1/EqQJtdolDExiOA5QXXtGkyvwR5J+ur9
+MTIr2V/ewYDiui2a59DF9yvvTU3W6kEfPH/oy1evJBTvOS7qT6Sz49nkZmPsweAPR70s/JzzHdF1
+MlVPwjDx5+JXnCjvtASSrH06EH0c0IGCO+s9cg==
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>
+vsnzOn1fcDixICaoHJp4ZP+WduYZhuoWcZGN4iSfQMf6/yTgSGKDNZkV0nU8nZ1oTyx4Km1dywZQ
+UfmuyuS7qJyyPJ5Xw1RF67Uws4bpbAo/+ALwTc0YkQlJOBXrXxflPeRc40GcjpCc7rvga39whmGw
+Z49YhasT6KPq7h+Ra6MwZYgylzzUYETw1NAkJMbznxa+uzNvakquSrC1jDVYEzSocWiDn15+pJkN
+9Fe7Nl9Wt8OfjRt6dRO4tMXvJQPsqK41/FD+sk1DWzYFeowyUsPSi0eFVdCYgqrTizTUmstFk+Se
+JcanYbj1T11vTfJ+yc7Yj7bBfk/7ao6p5CHY8Q==
+</ds:Modulus>
+<ds:Exponent>AQAB</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIEDTCCAvWgAwIBAgIUP7MNwYSmQoMFqWgYAMOs+rNby+owDQYJKoZIhvcNAQELBQAwcDELMAkG
+A1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9uZG9uMRcwFQYDVQQKEw5DYWJp
+bmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRgwFgYDVQQDEw9EZXYgTWV0YWRhdGEgQ0EwIBcNMTcx
+MjA1MTYxMTAwWhgPMjExNzExMTExNjExMDBaMHcxCzAJBgNVBAYTAkdCMQ8wDQYDVQQIEwZMb25k
+b24xDzANBgNVBAcTBkxvbmRvbjEXMBUGA1UEChMOQ2FiaW5ldCBPZmZpY2UxDDAKBgNVBAsTA0dE
+UzEfMB0GA1UEAxMWRGV2IE1ldGFkYXRhIFNpZ25pbmcgQTCCASIwDQYJKoZIhvcNAQEBBQADggEP
+ADCCAQoCggEBAL7J8zp9X3A4sSAmqByaeGT/lnbmGYbqFnGRjeIkn0DH+v8k4EhigzWZFdJ1PJ2d
+aE8seCptXcsGUFH5rsrku6icsjyeV8NUReu1MLOG6WwKP/gC8E3NGJEJSTgV618X5T3kXONBnI6Q
+nO674Gt/cIZhsGePWIWrE+ij6u4fkWujMGWIMpc81GBE8NTQJCTG858Wvrszb2pKrkqwtYw1WBM0
+qHFog59efqSZDfRXuzZfVrfDn40benUTuLTF7yUD7KiuNfxQ/rJNQ1s2BXqMMlLD0otHhVXQmIKq
+04s01JrLRZPkniXGp2G49U9db03yfsnO2I+2wX5P+2qOqeQh2PECAwEAAaOBlTCBkjAOBgNVHQ8B
+Af8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUHdtAyWEOf4LsMSLceNBEjH+3eJswHwYD
+VR0jBBgwFoAU0gVb9nKy1lExNlxmRCerqs8wIL8wMgYIKwYBBQUHAQEEJjAkMCIGCCsGAQUFBzAB
+hhZodHRwOi8vbG9jYWxob3N0OjU4ODg5MA0GCSqGSIb3DQEBCwUAA4IBAQDUZ9PzpBg+a6UCGUCj
+SdVVDT61/Na53qPuqf5inI3QsVYDYni6twG2fCihdyMmkBexvrLRhqvcaghiXXLY5EmTbDDOH7jv
+w8I7gC1zD92bLdfwzbkFCzV7rA6rTT20F35KHRk+WIJswpwfhYTOExtixI7haAIsJLRcQiqpHkdJ
+3mp9mQ66CFJLGPRFoUVjr7xnypNVYOADajQKlpTzkBPeZAlbakBxoU0rQFr7i5KZXRNkh2nFeDuG
+9YTdegLUw1QSmFYOzMHzhmMyWmxPx227dW6az2YYXJ+U1+6bOm+GFLcIFSwvjN3oocj5bsPo1lkd
+l5TPwaTT578NsWH1Q/ea
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature>
+  <md:EntityDescriptor ID="VERIFY-HUB" entityID="https://dev-hub.local" xsi:type="md:EntityDescriptorType">
+  <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" xsi:type="md:SPSSODescriptorType">
+    <md:KeyDescriptor use="encryption" xsi:type="md:KeyDescriptorType">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
+        <ds:KeyName xmlns:xs="http://www.w3.org/2001/XMLSchema">encryption</ds:KeyName>
+        <ds:X509Data xsi:type="ds:X509DataType">
+          <ds:X509Certificate>MIIEBDCCAuygAwIBAgIUTZgG9Fitkh219Jp2NIA9CQRJ70EwDQYJKoZIhvcNAQEL
+BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u
+ZG9uMRcwFQYDVQQKEw5DYWJpbmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRMwEQYD
+VQQDEwpEZXYgSHViIENBMCAXDTE3MTIwNTE2MTEwMFoYDzIxMTcxMTExMTYxMTAw
+WjBzMQswCQYDVQQGEwJHQjEPMA0GA1UECBMGTG9uZG9uMQ8wDQYDVQQHEwZMb25k
+b24xFzAVBgNVBAoTDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLEwNHRFMxGzAZBgNV
+BAMTEkRldiBIdWIgRW5jcnlwdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+AQoCggEBAMt7e8SJFGRM7KXeS7RjTIB/uWmRyvYfNSLts5CiYhCDdGIuQPALlWhH
+QZ8d4jtRfE+nvQ0cNF8X8thi3qLa+IW8UrlU558OcRKHelBeZnPU4k/lXYdwGU4a
+yCxAAFxwd3j3gD30PXKxcmZRBYH1Rv1bpQYN/T53Cxxwj9mWYoudC3rm1C6WbyXD
+XiIFf66FhV0gz+x9XKbiyRU78+bnA+ZXhf6y4IIIIzcyYGR7n5PMvjclhp+uzBl1
+1kldojNR8Rj0Cq8CHYdE4xesEYV3VrRCaxN6RQolUXHIM5dihamt4CwFaHtBN95I
+XfvOyEsdrSt8wOrES+rErMetFIVJ8F8CAwEAAaOBlTCBkjAOBgNVHQ8BAf8EBAMC
+BSAwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUD0+ki0B6XZ5TFg40RwYW526Z2JAw
+HwYDVR0jBBgwFoAUmJFg6kgkDlgk4lEzusC1TtK9QWwwMgYIKwYBBQUHAQEEJjAk
+MCIGCCsGAQUFBzABhhZodHRwOi8vbG9jYWxob3N0OjU4ODg5MA0GCSqGSIb3DQEB
+CwUAA4IBAQC2jEQ19kz+yvuNrSyarxhwa5rgSfj3gVePCP+3f/ShLmb1Bmofk/gb
+m443suoioBOdFEnZ/ggIO10Y+dceQEuTh+dsFRYRwVDJ+Pve4Cq++sYVdIx/2Srh
+cLJDPSUQz1/QLSTlQCAM78qQ1ECFka5W0gt6Exu9rvprJWy9vRmIrdKi+WKVTHBu
+rcbw3MzR6eBud4M/Lau+Y67th71Yic3gcWcVRJtXPwqzPEIk5rmkVCngmZGd9hSK
+yp6evC3y7r21e5Xq8JLYI+JRJiH7SgDcP2ADLSUybQ28pbL9XoVgjmpFdH5vuecg
+OAHGG3uPpoq/x2kOmlQSdITx6O12I1+z</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="signing" xsi:type="md:KeyDescriptorType">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
+        <ds:KeyName xmlns:xs="http://www.w3.org/2001/XMLSchema">signing_primary</ds:KeyName>
+        <ds:X509Data xsi:type="ds:X509DataType">
+          <ds:X509Certificate>MIIEATCCAumgAwIBAgIUUSfuJ5pPtKKep0O6IAzlEk2+oX8wDQYJKoZIhvcNAQEL
+BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u
+ZG9uMRcwFQYDVQQKEw5DYWJpbmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRMwEQYD
+VQQDEwpEZXYgSHViIENBMCAXDTE3MTIwNTE2MTEwMFoYDzIxMTcxMTExMTYxMTAw
+WjBwMQswCQYDVQQGEwJHQjEPMA0GA1UECBMGTG9uZG9uMQ8wDQYDVQQHEwZMb25k
+b24xFzAVBgNVBAoTDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLEwNHRFMxGDAWBgNV
+BAMTD0RldiBIdWIgU2lnbmluZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+ggEBAMY8WoSbpTt8W12OWL4IMSnWcnuX/eqz82IYZyzEZ6CKWROuYPU5ynGk1Mlo
+bk1XIAPx3S4Re9j7ZY987AAWdzI4Ha7BbjnA8Wq0SHQN6IdewK9q5QzsT3l2qd9t
+Scgh5rKWEJZNWsO4mteqM8efPm1p0mGVh2LGycxpFuhbnBLDjlqPaDa+/yOoy4dw
+BvOcnanDqbcIXdNAW9iLNF2KXMliksdx7Bv8ipbylATSXIjo4e3EMQI5yl1cikVp
+NvomkJOgrqODvWKMVo7SKrKZjf/EFT6/eAygeE9Zq1gW3tbIAcaKV+x7/dyg7P3L
+d2RWFq+bXAfpweBEf4zq7afwzpECAwEAAaOBlTCBkjAOBgNVHQ8BAf8EBAMCB4Aw
+DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUd6UYdxvlAyHufAEQqDhzV8eHiLkwHwYD
+VR0jBBgwFoAUmJFg6kgkDlgk4lEzusC1TtK9QWwwMgYIKwYBBQUHAQEEJjAkMCIG
+CCsGAQUFBzABhhZodHRwOi8vbG9jYWxob3N0OjU4ODg5MA0GCSqGSIb3DQEBCwUA
+A4IBAQBNXnpvCz/Gm0DmvLZ3CZ2ms0rOkBFNoRPwr5Flktrq2kx3U8Fwo9MtwFb+
+BO1JJFmSEamWIIWbg39gM5EEn1qFl9M2xqOjb58927I+IOR4lQ8elr9vQT2SeZd+
+QuTZV/fUb5eWHxdAZRCRqFPRYfuSl7UIWlRbyMTCTatXQrubtILVBbZKjLkNaDLr
+vsmIf9DehRkWXR19b01G878sWcaSLhIRiPlVF4aLQgNchW3Yy7L78qQsy4uTd8tq
+zlNJOSJ+wQGpOz1lwb4+NXc2NV993vZrhWGU+BIfDVJ7JK8t+gI5FD+l6VeqT6So
+d8QE60lOSqvDcQYyNovbNeSzbgjq</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/Response/POST" index="1" isDefault="true" xsi:type="md:IndexedEndpointType"/>
+  </md:SPSSODescriptor>
+  <md:Organization xsi:type="md:OrganizationType">
+    <md:OrganizationName xml:lang="en-GB" xsi:type="md:localizedNameType">Hub</md:OrganizationName>
+    <md:OrganizationDisplayName xml:lang="en-GB" xsi:type="md:localizedNameType">Hub</md:OrganizationDisplayName>
+    <md:OrganizationURL xml:lang="en-GB" xsi:type="md:localizedURIType">http://localhost</md:OrganizationURL>
+  </md:Organization>
+</md:EntityDescriptor>
+  <md:EntityDescriptor ID="stub-idp-one" entityID="http://stub-idp-one.local/SSO/POST" xsi:type="md:EntityDescriptorType">
+  <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" xsi:type="md:IDPSSODescriptorType">
+    <md:KeyDescriptor use="signing" xsi:type="md:KeyDescriptorType">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
+        <ds:KeyName xmlns:xs="http://www.w3.org/2001/XMLSchema">signing_1</ds:KeyName>
+        <ds:X509Data xsi:type="ds:X509DataType">
+          <ds:X509Certificate>MIIEBjCCAu6gAwIBAgIUEoYSf42MoHpy+5bgPFayBODlBpowDQYJKoZIhvcNAQELBQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9uZG9uMRcwFQYDVQQKEw5DYWJpbmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRMwEQYDVQQDEwpEZXYgSURQIENBMCAXDTE3MTIwNTE2MTEwMFoYDzIxMTcxMTExMTYxMTAwWjB1MQswCQYDVQQGEwJHQjEPMA0GA1UECBMGTG9uZG9uMQ8wDQYDVQQHEwZMb25kb24xFzAVBgNVBAoTDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLEwNHRFMxHTAbBgNVBAMTFERldiBTdHViIElEUCBTaWduaW5nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTR/KLvGhxPQ/S8Y+EwQolDbvqwvhgx+Vd5PUffBhwc2GuIO8OZH/TVE/1dOwucnQGN+mLpxSXpA8rrMnJlL8WXOvyH33E5FHfAF3ymE4hlJryzKkezxRQxdUd5n2fyIN2c+UaTXOtZjKrQqkKwT3Kb5ZxcjDsFr6QL0KxuJK0Y01qF/IFZxDzzGc2wtQRhtchVYwb0dG/sMvM7FcyfCV2uzl2puop+PrfGP0zjIhsHWPnn469G8GEizMacYBw3j86xZ5otO6fYNBydilRskefAfX1or8GL99nr71Oi44ddZJPcpTkjECDTYoKlsBRlUuTHI/TyWSOOgKq8p8DgmnQIDAQABo4GVMIGSMA4GA1UdDwEB/wQEAwIHgDAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBSAbzTpVe0oLwg31O++oRKfjqcH8zAfBgNVHSMEGDAWgBRpmtyzaVIFQkVzi1nzqHgKFSfcuzAyBggrBgEFBQcBAQQmMCQwIgYIKwYBBQUHMAGGFmh0dHA6Ly9sb2NhbGhvc3Q6NTg4ODkwDQYJKoZIhvcNAQELBQADggEBAF+LEJ85WZG+sgEwyoZ1y+h90tGxe8djcWOfAyyRSvKiEsbJQoTv9zTK5cTdTYNtjnApFdxiLrH0WkZrwYxhUBw2UkTTMjQ5eg0nIqeUIOgwObTmh2B6kRXMBI2HEvbssX7DfpIG6V4knOpn9uTCFXv1pmQbX5QtiVxKWAPPzYMEdFViGaCZFuHlYt0kB8FNwJ/8jfDoMWmnP+LNEp22jDzSCsi8fq1CNJyiIkLEdHaE4fjMKudsLl/6rf22oaj6K90+rJ1SkWKWpE7CoUp+oNXRE4pSUsKWCRQ182zs4d4IwMcqpSqWYeBKA4aAex801kC36I0lTezbXhV4jtr8U7s=</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://verify-notification-stub-idp.cloudapps.digital/stub-idp-one/SAML2/SSO"/>
+  </md:IDPSSODescriptor>
+  <md:Organization xsi:type="md:OrganizationType">
+    <md:OrganizationName xml:lang="en-GB" xsi:type="md:localizedNameType">stub-idp-one</md:OrganizationName>
+    <md:OrganizationDisplayName xml:lang="en-GB" xsi:type="md:localizedNameType">Stub IDP One</md:OrganizationDisplayName>
+    <md:OrganizationURL xml:lang="en-GB" xsi:type="md:localizedURIType">http://stub-idp-one.local</md:OrganizationURL>
+  </md:Organization>
+</md:EntityDescriptor>
+</md:EntitiesDescriptor>

@@ -16,7 +16,7 @@ import static org.junit.Assert.assertThat;
 public class EidasProxyNodeAcceptanceTests {
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
-    public static final String HUB_METADATA_ENDPOINT = "/hub-metadata";
+    public static final String HUB_METADATA_ENDPOINT = "/hub-metadata/local";
 
     @ClassRule
     public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();

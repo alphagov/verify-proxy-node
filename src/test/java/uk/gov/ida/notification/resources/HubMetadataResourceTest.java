@@ -7,13 +7,16 @@ import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.metadata.EntitiesDescriptor;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.xmlsec.signature.X509Certificate;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -21,24 +24,23 @@ import java.security.cert.CertificateFactory;
 import static org.junit.Assert.assertEquals;
 
 public class HubMetadataResourceTest {
-
+    private final HubMetadataResource hubMetadataResource = new HubMetadataResource();
     private EntitiesDescriptor hubMetadata;
 
     @Before
     public void setUp() throws Exception {
         InitializationService.initialize();
-        HubMetadataResource hubMetadataResource = new HubMetadataResource();
-        Response hubMetadaResponse = hubMetadataResource.getHubMetadata();
-        String samlObject = hubMetadaResponse.getEntity().toString();
+        Response hubMetadataResponse = hubMetadataResource.getHubMetadata("local");
+        String samlObject = hubMetadataResponse.getEntity().toString();
         hubMetadata = new SamlParser().parseSamlString(samlObject);
     }
 
     @Test
     public void shouldReturnSigningCertInMetadata() throws Exception {
-        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("pki/hub_signing.crt")));
+        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("local/hub_signing_primary.crt")));
 
         SPSSODescriptor spssoDescriptor = hubMetadata.getEntityDescriptors().get(0).getSPSSODescriptor(SAMLConstants.SAML20P_NS);
-        X509Certificate hubSigningCert = getCertFromSPSSODescriptor(spssoDescriptor, UsageType.SIGNING);
+        X509Certificate hubSigningCert = getCertFromSSODescriptor(spssoDescriptor, UsageType.SIGNING);
 
         Certificate actualCertificate = parseMetadataCert(hubSigningCert.getValue());
 
@@ -47,17 +49,35 @@ public class HubMetadataResourceTest {
 
     @Test
     public void shouldReturnEncryptionCertInMetadata() throws Exception {
-        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("pki/hub_encryption.crt")));
+        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("local/hub_encryption_primary.crt")));
 
-        SPSSODescriptor spssoDescriptor = hubMetadata.getEntityDescriptors().get(0).getSPSSODescriptor(SAMLConstants.SAML20P_NS);
-        X509Certificate hubEncryptionCert = getCertFromSPSSODescriptor(spssoDescriptor, UsageType.ENCRYPTION);
+        SPSSODescriptor spSsoDescriptor = hubMetadata.getEntityDescriptors().get(0).getSPSSODescriptor(SAMLConstants.SAML20P_NS);
+        X509Certificate hubEncryptionCert = getCertFromSSODescriptor(spSsoDescriptor, UsageType.ENCRYPTION);
 
         Certificate actualCertificate = parseMetadataCert(hubEncryptionCert.getValue());
 
         assertEquals(expectedCertificate, actualCertificate);
     }
 
-    private X509Certificate getCertFromSPSSODescriptor(SPSSODescriptor spssoDescriptor, UsageType usageType) throws Exception {
+    @Test
+    public void shouldReturnStubIDPSigningCertInMetadata() throws Exception {
+        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("local/stub_idp_signing_primary.crt")));
+
+        IDPSSODescriptor idpSsoDescriptor = hubMetadata.getEntityDescriptors().get(1).getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
+        X509Certificate idpSigningCert = getCertFromSSODescriptor(idpSsoDescriptor, UsageType.SIGNING);
+
+        Certificate actualCertificate = parseMetadataCert(idpSigningCert.getValue());
+
+        assertEquals(expectedCertificate, actualCertificate);
+    }
+
+    @Test
+    public void should404WhenInvalidEnvironmentProvided() {
+        Response response = hubMetadataResource.getHubMetadata("missing");
+        assertEquals(response.getStatusInfo(), Status.NOT_FOUND);
+    }
+
+    private X509Certificate getCertFromSSODescriptor(SSODescriptor spssoDescriptor, UsageType usageType) throws Exception {
         KeyDescriptor signingKeyDescriptor = spssoDescriptor.getKeyDescriptors()
                 .stream()
                 .filter((x) -> x.getUse().equals(usageType))
