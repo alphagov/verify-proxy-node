@@ -1,11 +1,16 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'com.github.ben-manes.versions'
 
 mainClassName = 'uk.gov.ida.notification.EidasProxyNodeApplication'
 
 buildscript {
     repositories {
         maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+    }
+
+    dependencies {
+      classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
     }
 }
 
