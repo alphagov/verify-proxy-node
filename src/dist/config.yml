@@ -19,4 +19,7 @@ logging:
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID:-http://proxy-node.uk}
 hubUrl: ${HUB_URL:-/stub-idp/request}
 connectorNodeUrl: ${CONNECTOR_NODE_URL:-/connector-node/eidas-authn-response}
+hubSigningPrivateKeyPath: ${HUB_SIGNING_PRIVATE_KEY:-pki/hub_signing.pk8}
+hubSigningCertificatePath: ${HUB_SIGNING_CERT:-pki/hub_signing.crt}
+
 

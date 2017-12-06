@@ -18,18 +18,32 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CredentialRepositoryTest {
+    private EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
+    private static CredentialRepository credentialRepository;
+    private final String privateKey = "pki/hub_signing.pk8";
+    private final String publicKey = "pki/hub_signing.crt";
+
     @Test
     public void shouldReturnHubCredentials() throws Throwable {
-        CredentialRepository credentialRepository = new CredentialRepository();
+        setupResourceDependenciesForSuccess();
+
+        credentialRepository = new CredentialRepository(privateKey, publicKey);
 
         Credential credential = credentialRepository.getHubCredential();
 
         Credential expectedCredential = buildCredential();
-        assertEquals(credential.getPrivateKey(), expectedCredential.getPrivateKey());
-        assertEquals(credential.getPublicKey(), expectedCredential.getPublicKey());
-        assertEquals(credential.getEntityId(), expectedCredential.getEntityId());
+        assertEquals(expectedCredential.getPrivateKey(), credential.getPrivateKey());
+        assertEquals(expectedCredential.getPublicKey(), credential.getPublicKey());
+        assertEquals(expectedCredential.getEntityId(), credential.getEntityId());
+    }
+
+    private void setupResourceDependenciesForSuccess() throws Throwable {
+        when(configuration.getHubSigningPrivateKeyPath()).thenReturn((privateKey));
+        when(configuration.getHubSigningCertificatePath()).thenReturn((publicKey));
     }
 
     private Credential buildCredential() throws Throwable {
@@ -43,7 +57,7 @@ public class CredentialRepositoryTest {
     private X509Certificate buildPublicKey(String publicKey) throws CertificateException, IOException {
         InputStream publicKeyInputStream = new FileInputStream(publicKey);
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate publicKeyCert = (X509Certificate)certificateFactory.generateCertificate(publicKeyInputStream);
+        X509Certificate publicKeyCert = (X509Certificate) certificateFactory.generateCertificate(publicKeyInputStream);
         publicKeyInputStream.close();
         return publicKeyCert;
     }

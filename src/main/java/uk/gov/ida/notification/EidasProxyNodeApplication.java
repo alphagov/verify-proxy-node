@@ -70,7 +70,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
-        CredentialRepository credentialRepository = new CredentialRepository();
+        CredentialRepository credentialRepository = new CredentialRepository(
+                configuration.getHubSigningPrivateKeyPath(),
+                configuration.getHubSigningCertificatePath());
         SamlParser samlParser = new SamlParser();
         SamlMarshaller samlMarshaller = new SamlMarshaller();
         EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);

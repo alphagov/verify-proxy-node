@@ -1,18 +1,13 @@
 package uk.gov.ida.notification;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.x509.BasicX509Credential;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -24,9 +19,14 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 public class CredentialRepository {
 
-    private final String publicKey = "pki/hub_signing.crt";
-    private final String privateKey = "pki/hub_signing.pk8";
+    private String privateKey;
+    private String publicKey;
     private final String privateKeyAlgortihm = "RSA";
+
+    public CredentialRepository(String hubSigningPrivateKeyPath, String hubSigningCertificatePath) {
+        privateKey = hubSigningPrivateKeyPath;
+        publicKey = hubSigningCertificatePath;
+    }
 
     public Credential getHubCredential() throws Throwable {
         return buildCredential();
