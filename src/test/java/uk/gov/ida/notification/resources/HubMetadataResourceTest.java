@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.resources;
 
-import com.google.common.io.Resources;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,11 +16,11 @@ import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.ida.notification.helpers.PKIHelpers.parseCert;
+import static uk.gov.ida.notification.helpers.PKIHelpers.getCertificateFromFile;
 
 public class HubMetadataResourceTest {
     private final HubMetadataResource hubMetadataResource = new HubMetadataResource();
@@ -37,7 +36,8 @@ public class HubMetadataResourceTest {
 
     @Test
     public void shouldReturnSigningCertInMetadata() throws Exception {
-        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("local/hub_signing_primary.crt")));
+        String hubSigningCertFile = "local/hub_signing_primary.crt";
+        Certificate expectedCertificate = getCertificateFromFile(hubSigningCertFile);
 
         SPSSODescriptor spssoDescriptor = hubMetadata.getEntityDescriptors().get(0).getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         X509Certificate hubSigningCert = getCertFromSSODescriptor(spssoDescriptor, UsageType.SIGNING);
@@ -49,7 +49,8 @@ public class HubMetadataResourceTest {
 
     @Test
     public void shouldReturnEncryptionCertInMetadata() throws Exception {
-        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("local/hub_encryption_primary.crt")));
+        String hubEncryptionCertFile = "local/hub_encryption_primary.crt";
+        Certificate expectedCertificate = getCertificateFromFile(hubEncryptionCertFile);
 
         SPSSODescriptor spSsoDescriptor = hubMetadata.getEntityDescriptors().get(0).getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         X509Certificate hubEncryptionCert = getCertFromSSODescriptor(spSsoDescriptor, UsageType.ENCRYPTION);
@@ -61,7 +62,8 @@ public class HubMetadataResourceTest {
 
     @Test
     public void shouldReturnStubIDPSigningCertInMetadata() throws Exception {
-        Certificate expectedCertificate = parseCert(Resources.toByteArray(Resources.getResource("local/stub_idp_signing_primary.crt")));
+        String idpSigningCertFile = "local/stub_idp_signing_primary.crt";
+        Certificate expectedCertificate = getCertificateFromFile(idpSigningCertFile);
 
         IDPSSODescriptor idpSsoDescriptor = hubMetadata.getEntityDescriptors().get(1).getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
         X509Certificate idpSigningCert = getCertFromSSODescriptor(idpSsoDescriptor, UsageType.SIGNING);
@@ -84,12 +86,6 @@ public class HubMetadataResourceTest {
                 .findFirst()
                 .orElseThrow(Exception::new);
         return signingKeyDescriptor.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0);
-    }
-
-    private Certificate parseCert(byte[] certificateBytes) throws Exception {
-        ByteArrayInputStream certificateStream = new ByteArrayInputStream(certificateBytes);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        return certificateFactory.generateCertificate(certificateStream);
     }
 
     private Certificate parseMetadataCert(String certString) throws Exception {

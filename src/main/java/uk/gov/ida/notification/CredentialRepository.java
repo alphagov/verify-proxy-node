@@ -24,8 +24,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 public class CredentialRepository {
 
-    private final String publicKey = "pki/hub_signing.crt";
-    private final String privateKey = "pki/hub_signing.pk8";
+    private final String publicKey = "local/hub_signing_primary.crt";
+    private final String privateKey = "local/hub_signing_primary.pk8";
     private final String privateKeyAlgortihm = "RSA";
 
     public Credential getHubCredential() throws Throwable {
