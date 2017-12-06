@@ -14,21 +14,21 @@ import java.io.StringWriter;
 
 public class XmlObjectMarshaller {
 
-    public String marshallToString(SAMLObject samlObject) throws Throwable{
-        Element element = mashall(samlObject);
-        return marshallToString(element);
+    public String transformToString(SAMLObject samlObject) throws Throwable{
+        marshall(samlObject);
+        return transformToString(samlObject.getDOM());
     }
 
-    private String marshallToString(Element element) throws Throwable {
+    public Element marshall(SAMLObject samlObject) throws Throwable {
+        MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+        Marshaller marshaller = marshallerFactory.getMarshaller(samlObject);
+        return marshaller.marshall(samlObject);
+    }
+
+    private String transformToString(Element element) throws Throwable {
         StringWriter output = new StringWriter();
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.transform(new DOMSource(element), new StreamResult(output));
         return output.toString();
-    }
-
-    private Element mashall(SAMLObject samlObject) throws Throwable {
-        MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
-        Marshaller marshaller = marshallerFactory.getMarshaller(samlObject);
-        return marshaller.marshall(samlObject);
     }
 }

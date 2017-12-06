@@ -96,7 +96,7 @@ public class HubResponseTranslator {
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
 
-        return xmlObjectMarshaller.marshallToString(eidasResponse);
+        return xmlObjectMarshaller.transformToString(eidasResponse);
     }
 
     private String mapLoa(String hubLoa) {

@@ -13,7 +13,7 @@ public class SamlFormViewMapper {
     }
 
     public SamlFormView map(String url, String samlMessageType, AuthnRequest authnRequest, String submitTest) throws Throwable{
-        String samlMessage = marshaller.marshallToString(authnRequest);
+        String samlMessage = marshaller.transformToString(authnRequest);
         String encodedSamlMessage = Base64.encodeAsString(samlMessage);
         return new SamlFormView(url, samlMessageType, encodedSamlMessage, submitTest);
     }

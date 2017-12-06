@@ -83,7 +83,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 samlParser,
                 xmlObjectMarshaller
         );
-        ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner();
+        ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner(xmlObjectMarshaller);
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, proxyNodeSigner, credentialRepository);
         SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(xmlObjectMarshaller);
 

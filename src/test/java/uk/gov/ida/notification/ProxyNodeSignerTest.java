@@ -2,21 +2,27 @@ package uk.gov.ida.notification;
 
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestBuilder;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
+import org.w3c.dom.Element;
+import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.ida.notification.helpers.PKIHelpers.buildCredential;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProxyNodeSignerTest {
 
     @Test
-    public void shouldBuildProxyNodeSignature () throws Exception {
+    public void shouldBuildProxyNodeSignature () throws Throwable {
         InitializationService.initialize();
         String requestId = "requestId";
         AuthnRequestBuilder authnRequestBuilder = new AuthnRequestBuilder();
@@ -26,7 +32,9 @@ public class ProxyNodeSignerTest {
                 "local/hub_signing_primary.crt",
                 "local/hub_signing_primary.pk8");
 
-        ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner();
+        XmlObjectMarshaller marshaller = mock(XmlObjectMarshaller.class);
+        when(marshaller.marshall(authRequest)).thenAnswer(invocation -> mashall(authRequest));
+        ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner(marshaller);
 
         AuthnRequest signedAuthnRequest = proxyNodeSigner.sign(authRequest, credential);
 
@@ -40,4 +48,9 @@ public class ProxyNodeSignerTest {
         SignatureValidator.validate(signature, credential);
     }
 
+    private Element mashall(SAMLObject samlObject) throws Throwable {
+        return XMLObjectProviderRegistrySupport.getMarshallerFactory()
+                .getMarshaller(samlObject)
+                .marshall(samlObject);
+    }
 }

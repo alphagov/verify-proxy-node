@@ -44,7 +44,7 @@ public class StubConnectorNodeResource {
                 "any destination",
                 new DateTime(DateTimeZone.UTC)
         );
-        String authnRequestString = xmlObjectMarshaller.marshallToString(authnRequest);
+        String authnRequestString = xmlObjectMarshaller.transformToString(authnRequest);
         return Base64.encodeAsString(authnRequestString);
     }
 }

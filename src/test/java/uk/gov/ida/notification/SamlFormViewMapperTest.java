@@ -20,7 +20,7 @@ public class SamlFormViewMapperTest {
         AuthnRequest authnRequest = mock(AuthnRequest.class);
         XmlObjectMarshaller marshaller = mock(XmlObjectMarshaller.class);
         SamlFormViewMapper viewMapper = new SamlFormViewMapper(marshaller);
-        when(marshaller.marshallToString(authnRequest)).thenReturn(authnRequestAsString);
+        when(marshaller.transformToString(authnRequest)).thenReturn(authnRequestAsString);
 
         SamlFormView view = viewMapper.map(url, samlMessageType, authnRequest, submitTest);
 
