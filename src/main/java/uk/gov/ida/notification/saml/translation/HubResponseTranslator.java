@@ -49,9 +49,7 @@ public class HubResponseTranslator {
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
 
-    public String translate(String decodedHubResponse) throws Throwable {
-        HubResponse hubResponse = new HubResponse(samlParser.parseSamlString(decodedHubResponse));
-
+    public String translate(HubResponse hubResponse) throws Throwable {
         LOG.info("[Hub Response] ID: " + hubResponse.getResponseId());
         LOG.info("[Hub Response] In response to: " + hubResponse.getInResponseTo());
         LOG.info("[Hub Response] Provided level of assurance: " + hubResponse.getProvidedLoa());

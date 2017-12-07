@@ -5,6 +5,8 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.core.xml.io.MarshallingException;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.saml.translation.HubResponse;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -30,7 +32,8 @@ public class HubResponseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedHubResponse) throws Throwable {
         String hubResponseSamlString = Base64.decodeAsString(encodedHubResponse);
-        String eidasSamlString = hubResponseTranslator.translate(hubResponseSamlString);
+        HubResponse hubResponse = new HubResponse(new SamlParser().parseSamlString(hubResponseSamlString));
+        String eidasSamlString = hubResponseTranslator.translate(hubResponse);
         String encodedEidasResponse = Base64.encodeAsString(eidasSamlString);
         return new SamlFormView(connectorNodeUrl, SamlMessageType.SAML_RESPONSE, encodedEidasResponse, SUBMIT_TEXT);
     }

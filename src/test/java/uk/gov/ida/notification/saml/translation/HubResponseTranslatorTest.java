@@ -30,11 +30,10 @@ public class HubResponseTranslatorTest {
         XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
         HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, xmlObjectMarshaller);
 
-        String hubResponseXml = FileHelpers.readFileAsString("idp_response_unencrypted.xml");
-
+        HubResponse hubResponse = new HubResponse(getResponse("idp_response_unencrypted.xml"));
         Response expectedEidasResponse = getResponse("eidas_response.xml");
 
-        String actualEidasResponseXml = translator.translate(hubResponseXml);
+        String actualEidasResponseXml = translator.translate(hubResponse);
         Response actualEidasResponse = samlParser.parseSamlString(actualEidasResponseXml);
 
 
