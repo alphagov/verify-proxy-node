@@ -5,6 +5,7 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.Response;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -19,13 +20,14 @@ public class HubResponse {
     private final Map<String, String> mdsAttributes;
 
     public HubResponse(Response response) {
-        authnAssertion = response.getAssertions()
+        List<Assertion> assertions = response.getAssertions();
+        authnAssertion = assertions
                 .stream()
                 .filter(a -> !a.getAuthnStatements().isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new HubResponseException("Hub Response has no authn assertion"));
 
-        mdsAssertion = response.getAssertions()
+        mdsAssertion = assertions
                 .stream()
                 .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
                 .findFirst()

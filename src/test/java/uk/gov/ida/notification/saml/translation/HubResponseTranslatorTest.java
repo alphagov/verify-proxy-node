@@ -27,30 +27,22 @@ public class HubResponseTranslatorTest {
     @Test
     public void shouldTranslateHubResponseToEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();
-        XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
-        HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser, xmlObjectMarshaller);
-
+        HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser);
         HubResponse hubResponse = new HubResponse(getResponse("idp_response_unencrypted.xml"));
         Response expectedEidasResponse = getResponse("eidas_response.xml");
 
-        String actualEidasResponseXml = translator.translate(hubResponse);
-        Response actualEidasResponse = samlParser.parseSamlString(actualEidasResponseXml);
-
+        Response actualEidasResponse = translator.translate(hubResponse);
 
         String expectedStatusCode = getStatusCode(expectedEidasResponse);
         String actualStatusCode = getStatusCode(actualEidasResponse);
         assertEquals(expectedStatusCode, actualStatusCode);
-
         String expectedLoa = getLoa(expectedEidasResponse);
         String actualLoa = getLoa(actualEidasResponse);
         assertEquals(expectedLoa, actualLoa);
-
         String expectedPid = getPid(expectedEidasResponse);
         String actualPid = getPid(actualEidasResponse);
         assertEquals(expectedPid, actualPid);
-
         assertEquals(expectedEidasResponse.getInResponseTo(), actualEidasResponse.getInResponseTo());
-
         List<String> expectedAttributes = getAttributes(expectedEidasResponse);
         List<String> actualAttributes = getAttributes(actualEidasResponse);
         assertThat(actualAttributes, containsInAnyOrder(expectedAttributes.toArray()));

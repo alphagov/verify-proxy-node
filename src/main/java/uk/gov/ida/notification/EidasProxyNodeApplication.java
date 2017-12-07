@@ -70,10 +70,11 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
+        SamlParser samlParser = new SamlParser();
+        HubResponseMapper hubResponseMapper = new HubResponseMapper(samlParser);
         CredentialRepository credentialRepository = new CredentialRepository(
                 configuration.getHubSigningPrivateKeyPath(),
                 configuration.getHubSigningCertificatePath());
-        SamlParser samlParser = new SamlParser();
         XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
         EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
@@ -82,19 +83,20 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getConnectorNodeUrl().toString(),
-                samlParser,
-                xmlObjectMarshaller
+                samlParser
         );
         ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner(xmlObjectMarshaller);
-        HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, proxyNodeSigner, credentialRepository);
+        HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(
+                eidasAuthnRequestTranslator,
+                proxyNodeSigner,
+                credentialRepository);
         SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(xmlObjectMarshaller);
-
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
                 samlFormViewMapper,
                 eidasAuthnRequestMapper));
-        environment.jersey().register(new HubResponseResource(configuration, hubResponseTranslator));
+        environment.jersey().register(new HubResponseResource(configuration, hubResponseTranslator, samlFormViewMapper, hubResponseMapper));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());

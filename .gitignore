@@ -30,4 +30,4 @@ buildNumber.properties
 !gradle-wrapper.jar
 
 /classes/*
-
+/**/*.orig
