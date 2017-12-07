@@ -23,6 +23,4 @@ public class EidasResponseGeneratorTest {
 
         assertEquals(translatedEidasResponse, eidasResponse);
     }
-
-
 }

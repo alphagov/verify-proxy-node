@@ -16,13 +16,13 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 public class PKIHelpers {
-    public static X509Certificate parseCert(byte[] certificateBytes) throws CertificateException {
+    public static X509Certificate parseCert(byte[] certificateBytes) throws Throwable {
         ByteArrayInputStream certificateStream = new ByteArrayInputStream(certificateBytes);
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
         return (X509Certificate) certificateFactory.generateCertificate(certificateStream);
     }
 
-    public static X509Certificate getCertificateFromFile(String certFile) throws CertificateException, IOException {
+    public static X509Certificate getCertificateFromFile(String certFile) throws Throwable {
         return parseCert(Resources.toByteArray(Resources.getResource(certFile)));
     }
 
@@ -33,9 +33,21 @@ public class PKIHelpers {
         return keyFactory.generatePrivate(pkcs8EncodedKeySpec);
     }
 
-    public static Credential buildCredential(String publicKeyFile, String privateKeyFile) throws Exception {
+    public static Credential buildCredential(String publicKeyFile, String privateKeyFile) throws Throwable {
         X509Certificate publicKeyCert = PKIHelpers.getCertificateFromFile(publicKeyFile);
         PrivateKey privateKeyCert = PKIHelpers.getPrivateKeyFromFile(privateKeyFile);
         return new BasicX509Credential(publicKeyCert, privateKeyCert);
+    }
+
+    public static Credential buildAnyCredential() throws Throwable {
+        return buildCredential(
+                "local/hub_signing_primary.crt",
+                "local/hub_signing_primary.pk8");
+    }
+
+    public static Credential buildHubEncryptionCredential() throws Throwable {
+        return buildCredential(
+                "local/hub_encryption_primary.crt",
+                "local/hub_encryption_primary.pk8");
     }
 }
