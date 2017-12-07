@@ -1,0 +1,15 @@
+---
+applications:
+  - name: verify-eidas-notification-stub-idp
+    memory: 1G
+    buildpack: java_buildpack
+    path: ../../ida-stub-idp/build/distributions/ida-stub-idp.zip
+    env:
+      CONFIG_FILE: /app/ida-stub-idp/resources/configuration.yml
+      HUB_ENTITY_ID: https://dev-hub.local
+      IDP_SIGNING_PRIVATE_KEY: /app/ida-stub-idp/resources/stub_idp_signing.pk8
+      IDP_SIGNING_CERT: /app/ida-stub-idp/resources/stub_idp_signing.crt
+      STUB_IDPS_FILE_PATH: /app/ida-stub-idp/resources/stub-idps.yml
+      METADATA_URL: https://verify-eidas-notification.cloudapps.digital/hub-metadata/paas
+      METADATA_TRUST_STORE: /app/ida-stub-idp/resources/metadata.ts
+      METADATA_TRUST_STORE_PASSWORD: marshmallow
