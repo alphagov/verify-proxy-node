@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-./jenkins/login_to_paas.sh
+set -eu
+
+. ./jenkins/login_to_paas.sh
 
 VERIFY_EIDAS_NOTIFICATION_REPO=$(pwd)
 MANIFEST_FILE=$VERIFY_EIDAS_NOTIFICATION_REPO/stub-idp/manifest.yml

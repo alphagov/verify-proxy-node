@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -eu
-
 CF_API="api.cloud.service.gov.uk"
 CF_ORG="govuk-verify"
 CF_SPACE="notification"
