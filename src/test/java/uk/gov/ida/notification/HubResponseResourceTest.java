@@ -5,7 +5,6 @@ import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.saml.translation.HubResponse;
-import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import java.net.URI;
@@ -21,15 +20,15 @@ public class HubResponseResourceTest {
         SamlFormView expectedSamlFormView = buildExpectedView();
         String hubResponseAsString = "hub response encrypted form content";
         EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
-        HubResponseTranslator translator = mock(HubResponseTranslator.class);
+        EidasResponseGenerator eidasResponseGenerator = mock(EidasResponseGenerator.class);
         SamlFormViewMapper viewMapper = mock(SamlFormViewMapper.class);
         HubResponseMapper hubResponseMapper = mock(HubResponseMapper.class);
         HubResponse hubResponse = mock(HubResponse.class);
         when(hubResponseMapper.map(hubResponseAsString)).thenReturn(hubResponse);
         when(configuration.getConnectorNodeUrl()).thenReturn(URI.create(expectedSamlFormView.getPostUrl()));
-        HubResponseResource hubResponseResource = new HubResponseResource(configuration, translator, viewMapper, hubResponseMapper);
+        HubResponseResource hubResponseResource = new HubResponseResource(configuration, eidasResponseGenerator, viewMapper, hubResponseMapper);
         Response eidasResponse = mock(Response.class);
-        when(translator.translate(hubResponse)).thenReturn(eidasResponse);
+        when(eidasResponseGenerator.generate(hubResponse)).thenReturn(eidasResponse);
         when(viewMapper.map(expectedSamlFormView.getPostUrl(), expectedSamlFormView.getSamlMessageType(), eidasResponse, expectedSamlFormView.getSubmitText())).thenReturn(expectedSamlFormView);
 
         SamlFormView view = (SamlFormView) hubResponseResource.hubResponse(hubResponseAsString);
