@@ -22,11 +22,11 @@ public class HubResponseResourceTest {
         EidasProxyNodeConfiguration configuration = mock(EidasProxyNodeConfiguration.class);
         EidasResponseGenerator eidasResponseGenerator = mock(EidasResponseGenerator.class);
         SamlFormViewMapper viewMapper = mock(SamlFormViewMapper.class);
-        HubResponseMapper hubResponseMapper = mock(HubResponseMapper.class);
+        HubResponseGenerator hubResponseGenerator = mock(HubResponseGenerator.class);
         HubResponse hubResponse = mock(HubResponse.class);
-        when(hubResponseMapper.map(hubResponseAsString)).thenReturn(hubResponse);
+        when(hubResponseGenerator.generate(hubResponseAsString)).thenReturn(hubResponse);
         when(configuration.getConnectorNodeUrl()).thenReturn(URI.create(expectedSamlFormView.getPostUrl()));
-        HubResponseResource hubResponseResource = new HubResponseResource(configuration, eidasResponseGenerator, viewMapper, hubResponseMapper);
+        HubResponseResource hubResponseResource = new HubResponseResource(configuration, eidasResponseGenerator, viewMapper, hubResponseGenerator);
         Response eidasResponse = mock(Response.class);
         when(eidasResponseGenerator.generate(hubResponse)).thenReturn(eidasResponse);
         when(viewMapper.map(expectedSamlFormView.getPostUrl(), expectedSamlFormView.getSamlMessageType(), eidasResponse, expectedSamlFormView.getSubmitText())).thenReturn(expectedSamlFormView);

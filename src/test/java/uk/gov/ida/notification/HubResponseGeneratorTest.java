@@ -6,6 +6,7 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.AuthnStatement;
 import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.security.credential.Credential;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.HubResponse;
 
@@ -16,25 +17,31 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class HubResponseMapperTest {
+public class HubResponseGeneratorTest {
 
     @Test
-    public void shouldMapeWebStringToHubResponse() throws Throwable {
+    public void shouldGenerateHubResponseFromWebString() throws Throwable {
         String responseInputStringContent = "response";
         String encodedInput = Base64.encodeAsString(responseInputStringContent);
         Response response = buildParsedResponse();
         SamlParser parser = mock(SamlParser.class);
+        CredentialRepository credentialRepository = mock(CredentialRepository.class);
+        ProxyNodeSignatureValidator signatureValidator = mock(ProxyNodeSignatureValidator.class);
         when(parser.parseSamlString(responseInputStringContent)).thenReturn(response);
-        HubResponseMapper hubResponseMapper = new HubResponseMapper(parser);
+        Credential credential = mock(Credential.class);
+        when(credentialRepository.getHubCredential()).thenReturn(credential);
+        HubResponseGenerator hubResponseGenerator = new HubResponseGenerator(parser, signatureValidator, credentialRepository);
 
-        HubResponse hubResponse = hubResponseMapper.map(encodedInput);
+        HubResponse hubResponse = hubResponseGenerator.generate(encodedInput);
 
         assertNotEquals(null, hubResponse);
         assertEquals(hubResponse.getResponseId(), response.getID());
         assertEquals(hubResponse.getAuthnAssertion(), response.getAssertions().get(0));
         assertEquals(hubResponse.getMdsAssertion(), response.getAssertions().get(1));
+        verify(signatureValidator).validate(response, credential);
     }
 
     private Response buildParsedResponse() {

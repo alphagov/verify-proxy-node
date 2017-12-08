@@ -19,6 +19,6 @@ public class HubAuthnRequestGenerator {
     public AuthnRequest generate(EidasAuthnRequest eidasAuthnRequest) throws Throwable {
         AuthnRequest authnRequest = translator.translate(eidasAuthnRequest);
         Credential hubCredential = credentialRepository.getHubCredential();
-        return signer.sign(authnRequest, hubCredential);
+        return (AuthnRequest) signer.sign(authnRequest, hubCredential);
     }
 }

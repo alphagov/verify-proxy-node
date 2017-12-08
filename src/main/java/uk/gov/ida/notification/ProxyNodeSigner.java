@@ -1,6 +1,8 @@
 package uk.gov.ida.notification;
 
+import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.impl.SignatureBuilder;
@@ -17,14 +19,13 @@ public class ProxyNodeSigner {
         this.marshaller = marshaller;
     }
 
-    public AuthnRequest sign(AuthnRequest authRequest, Credential credential) throws Throwable{
+    public <T extends SignableSAMLObject>  T sign(T signableSAMLObject, Credential credential) throws Throwable{
         Signature signature = buildSignature(credential);
-        authRequest.setSignature(signature);
-        marshaller.marshall(authRequest);
+        signableSAMLObject.setSignature(signature);
+        marshaller.marshall(signableSAMLObject);
         Signer.signObject(signature);
-        return authRequest;
+        return signableSAMLObject;
     }
-
 
     private Signature buildSignature(Credential credential) {
         String signatureAlgorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
