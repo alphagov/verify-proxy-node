@@ -21,7 +21,6 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
@@ -37,19 +36,16 @@ public class HubResponseTranslator {
     private final String proxyNodeEntityId;
     private final String connectorNodeUrl;
     private final SamlParser samlParser;
-    private final XmlObjectMarshaller xmlObjectMarshaller;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy;
 
-    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl, SamlParser samlParser, XmlObjectMarshaller xmlObjectMarshaller) {
+    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl, SamlParser samlParser) {
         this.proxyNodeEntityId = proxyNodeEntityId;
         this.connectorNodeUrl = connectorNodeUrl;
         this.samlParser = samlParser;
-        this.xmlObjectMarshaller = xmlObjectMarshaller;
-
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
 
-    public String translate(HubResponse hubResponse) throws Throwable {
+    public Response translate(HubResponse hubResponse) throws Throwable {
         LOG.info("[Hub Response] ID: " + hubResponse.getResponseId());
         LOG.info("[Hub Response] In response to: " + hubResponse.getInResponseTo());
         LOG.info("[Hub Response] Provided level of assurance: " + hubResponse.getProvidedLoa());
@@ -93,8 +89,7 @@ public class HubResponseTranslator {
 
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
-
-        return xmlObjectMarshaller.transformToString(eidasResponse);
+        return eidasResponse;
     }
 
     private String mapLoa(String hubLoa) {

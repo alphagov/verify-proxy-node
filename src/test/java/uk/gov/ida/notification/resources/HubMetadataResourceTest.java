@@ -35,7 +35,7 @@ public class HubMetadataResourceTest {
     }
 
     @Test
-    public void shouldReturnSigningCertInMetadata() throws Exception {
+    public void shouldReturnSigningCertInMetadata() throws Throwable {
         String hubSigningCertFile = "local/hub_signing_primary.crt";
         Certificate expectedCertificate = getCertificateFromFile(hubSigningCertFile);
 
@@ -48,7 +48,7 @@ public class HubMetadataResourceTest {
     }
 
     @Test
-    public void shouldReturnEncryptionCertInMetadata() throws Exception {
+    public void shouldReturnEncryptionCertInMetadata() throws Throwable {
         String hubEncryptionCertFile = "local/hub_encryption_primary.crt";
         Certificate expectedCertificate = getCertificateFromFile(hubEncryptionCertFile);
 
@@ -61,7 +61,7 @@ public class HubMetadataResourceTest {
     }
 
     @Test
-    public void shouldReturnStubIDPSigningCertInMetadata() throws Exception {
+    public void shouldReturnStubIDPSigningCertInMetadata() throws Throwable {
         String idpSigningCertFile = "local/stub_idp_signing_primary.crt";
         Certificate expectedCertificate = getCertificateFromFile(idpSigningCertFile);
 
@@ -88,7 +88,7 @@ public class HubMetadataResourceTest {
         return signingKeyDescriptor.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0);
     }
 
-    private Certificate parseMetadataCert(String certString) throws Exception {
+    private Certificate parseMetadataCert(String certString) throws Throwable {
         String trimmedCertString = certString.replaceAll("\\n", "").replaceAll("\\s", "");
         byte[] decoded = Base64.decode(trimmedCertString);
         return parseCert(decoded);

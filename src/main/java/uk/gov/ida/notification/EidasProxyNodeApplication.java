@@ -70,31 +70,35 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
+        ProxyNodeSignatureValidator proxyNodeSignatureValidator = new ProxyNodeSignatureValidator();
+        SamlParser samlParser = new SamlParser();
         CredentialRepository credentialRepository = new CredentialRepository(
                 configuration.getHubSigningPrivateKeyPath(),
                 configuration.getHubSigningCertificatePath());
-        SamlParser samlParser = new SamlParser();
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
+                configuration.getProxyNodeEntityId(),
+                configuration.getConnectorNodeUrl().toString(),
+                samlParser
+        );
+        EidasResponseGenerator eidasResponseGenerator = new EidasResponseGenerator(hubResponseTranslator);
+        HubResponseGenerator hubResponseGenerator = new HubResponseGenerator(samlParser, proxyNodeSignatureValidator, credentialRepository);
         XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
         EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
-                configuration.getProxyNodeEntityId(),
-                configuration.getConnectorNodeUrl().toString(),
-                samlParser,
-                xmlObjectMarshaller
-        );
         ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner(xmlObjectMarshaller);
-        HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, proxyNodeSigner, credentialRepository);
+        HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(
+                eidasAuthnRequestTranslator,
+                proxyNodeSigner,
+                credentialRepository);
         SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(xmlObjectMarshaller);
-
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
                 samlFormViewMapper,
                 eidasAuthnRequestMapper));
-        environment.jersey().register(new HubResponseResource(configuration, hubResponseTranslator));
+        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewMapper, hubResponseGenerator));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());

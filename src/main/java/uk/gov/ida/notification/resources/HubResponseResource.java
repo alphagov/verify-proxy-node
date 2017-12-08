@@ -1,14 +1,13 @@
 package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
-import org.glassfish.jersey.internal.util.Base64;
-import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
+import uk.gov.ida.notification.EidasResponseGenerator;
+import uk.gov.ida.notification.HubResponseGenerator;
+import uk.gov.ida.notification.SamlFormViewMapper;
 import uk.gov.ida.notification.saml.SamlMessageType;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.HubResponse;
-import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
-import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -20,21 +19,26 @@ import javax.ws.rs.core.MediaType;
 public class HubResponseResource {
     private final String connectorNodeUrl;
     private final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
-    private HubResponseTranslator hubResponseTranslator;
+    private EidasResponseGenerator eidasResponseGenerator;
+    private SamlFormViewMapper viewMapper;
+    private HubResponseGenerator hubResponseGenerator;
 
-    public HubResponseResource(EidasProxyNodeConfiguration configuration, HubResponseTranslator hubResponseTranslator) {
+    public HubResponseResource(EidasProxyNodeConfiguration configuration,
+                               EidasResponseGenerator eidasResponseGenerator,
+                               SamlFormViewMapper viewMapper,
+                               HubResponseGenerator hubResponseGenerator) {
         this.connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
-        this.hubResponseTranslator = hubResponseTranslator;
+        this.eidasResponseGenerator = eidasResponseGenerator;
+        this.viewMapper = viewMapper;
+        this.hubResponseGenerator = hubResponseGenerator;
     }
 
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedHubResponse) throws Throwable {
-        String hubResponseSamlString = Base64.decodeAsString(encodedHubResponse);
-        HubResponse hubResponse = new HubResponse(new SamlParser().parseSamlString(hubResponseSamlString));
-        String eidasSamlString = hubResponseTranslator.translate(hubResponse);
-        String encodedEidasResponse = Base64.encodeAsString(eidasSamlString);
-        return new SamlFormView(connectorNodeUrl, SamlMessageType.SAML_RESPONSE, encodedEidasResponse, SUBMIT_TEXT);
+        HubResponse hubResponse = hubResponseGenerator.generate(encodedHubResponse);
+        Response eidasResponse = eidasResponseGenerator.generate(hubResponse);
+        return viewMapper.map(connectorNodeUrl, SamlMessageType.SAML_RESPONSE, eidasResponse, SUBMIT_TEXT);
     }
 }

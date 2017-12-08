@@ -1,6 +1,7 @@
 package uk.gov.ida.notification;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Test;
+import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -12,17 +13,17 @@ import static org.mockito.Mockito.when;
 public class SamlFormViewMapperTest {
 
     @Test
-    public void shouldMapAuthnRequestToSamlFormView() throws Throwable {
+    public void shouldMapSamlObjectToSamlFormView() throws Throwable {
         String submitTest = "submit text";
         String url = "url";
         String samlMessageType = "saml message type";
         String authnRequestAsString = "authnRequest as string";
-        AuthnRequest authnRequest = mock(AuthnRequest.class);
+        SAMLObject samlObject = mock(SAMLObject.class);
         XmlObjectMarshaller marshaller = mock(XmlObjectMarshaller.class);
         SamlFormViewMapper viewMapper = new SamlFormViewMapper(marshaller);
-        when(marshaller.transformToString(authnRequest)).thenReturn(authnRequestAsString);
+        when(marshaller.transformToString(samlObject)).thenReturn(authnRequestAsString);
 
-        SamlFormView view = viewMapper.map(url, samlMessageType, authnRequest, submitTest);
+        SamlFormView view = viewMapper.map(url, samlMessageType, samlObject, submitTest);
 
         assertEquals(view.getSubmitText(), submitTest);
         assertEquals(view.getPostUrl(), url);
