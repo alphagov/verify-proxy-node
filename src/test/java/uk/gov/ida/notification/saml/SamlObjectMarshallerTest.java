@@ -14,10 +14,10 @@ import java.text.MessageFormat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class XmlObjectMarshallerTest {
+public class SamlObjectMarshallerTest {
 
     private final String xmlObjectFormat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><saml2:Issuer xmlns:saml2=\"{0}\" Format=\"{1}\">{2}</saml2:Issuer>";
-    private XmlObjectMarshaller marshaller = new XmlObjectMarshaller();
+    private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
 
     private final QName defaultElementName = Issuer.DEFAULT_ELEMENT_NAME;
     private final String entity = NameIDType.ENTITY;
@@ -29,8 +29,8 @@ public class XmlObjectMarshallerTest {
     }
 
     @Test
-    public void shouldMarshalSamlObjectToString() throws Throwable {
-        Issuer issuer = buildXMLObject(defaultElementName, entity, aValue);
+    public void shouldMarshallSamlObjectToString() {
+        Issuer issuer = buildXmlObject(defaultElementName, entity, aValue);
 
         String issuerXML = marshaller.transformToString(issuer);
 
@@ -39,11 +39,11 @@ public class XmlObjectMarshallerTest {
     }
 
     @Test
-    public void shouldMarshalSamlObject() throws Throwable {
-        Issuer issuer = buildXMLObject(defaultElementName, entity, aValue);
+    public void shouldMarshallSamlObject() throws Throwable {
+        Issuer issuer = buildXmlObject(defaultElementName, entity, aValue);
         assertEquals(issuer.getDOM(), null);
 
-        Element element = marshaller.marshall(issuer);
+        Element element = marshaller.marshallToElement(issuer);
 
         assertEquals(element.getNamespaceURI(), defaultElementName.getNamespaceURI() );
         assertEquals(element.getLocalName(), "Issuer");
@@ -52,7 +52,7 @@ public class XmlObjectMarshallerTest {
         assertEquals(element, issuer.getDOM());
     }
 
-    private Issuer buildXMLObject(QName defaultElementName, String entity, String aValue) {
+    private Issuer buildXmlObject(QName defaultElementName, String entity, String aValue) {
         Issuer issuer = (Issuer) XMLObjectSupport.buildXMLObject(defaultElementName);
         issuer.setFormat(entity);
         issuer.setValue(aValue);

@@ -21,11 +21,20 @@ public class EidasAuthnRequest {
     private final String requestedLoa;
     private final List<RequestedAttribute> requestedAttributes;
 
-    public EidasAuthnRequest(AuthnRequest request)  {
-        requestId = request.getID();
-        issuer = request.getIssuer().getValue();
-        destination = request.getDestination();
-        requestedLoa = request.getRequestedAuthnContext().getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
+    public EidasAuthnRequest(String requestId, String issuer, String destination, SPTypeEnumeration spType, String requestedLoa, List<RequestedAttribute> requestedAttributes) {
+        this.requestId = requestId;
+        this.issuer = issuer;
+        this.destination = destination;
+        this.spType = spType;
+        this.requestedLoa = requestedLoa;
+        this.requestedAttributes = requestedAttributes;
+    }
+
+    public static EidasAuthnRequest buildFromAuthnRequest(AuthnRequest request)  {
+        String requestId = request.getID();
+        String issuer = request.getIssuer().getValue();
+        String destination = request.getDestination();
+        String requestedLoa = request.getRequestedAuthnContext().getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
 
         XMLObject spTypeObj = request.getExtensions().getOrderedChildren()
                 .stream()
@@ -33,16 +42,18 @@ public class EidasAuthnRequest {
                 .findFirst()
                 .orElseThrow(() -> new EidasAuthnRequestException("eIDAS AuthnRequest has no SPType"));
 
-        spType = ((SPType) spTypeObj).getType();
+        SPTypeEnumeration spType = ((SPType) spTypeObj).getType();
 
         Optional<XMLObject> requestedAttributesObj = request.getExtensions().getOrderedChildren()
                 .stream()
                 .filter(obj -> obj.getClass() == RequestedAttributesImpl.class)
                 .findFirst();
 
-        requestedAttributes = requestedAttributesObj
+        List<RequestedAttribute> requestedAttributes = requestedAttributesObj
                 .map(obj -> ((RequestedAttributes) obj).getRequestedAttributes())
                 .orElse(Collections.emptyList());
+
+        return new EidasAuthnRequest(requestId, issuer, destination, spType, requestedLoa, requestedAttributes);
     }
 
     public String getRequestId() {

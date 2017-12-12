@@ -2,13 +2,13 @@ package uk.gov.ida.notification;
 
 import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.common.SAMLObject;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.views.SamlFormView;
 
 public class SamlFormViewMapper {
-    private XmlObjectMarshaller marshaller;
+    private SamlObjectMarshaller marshaller;
 
-    public SamlFormViewMapper(XmlObjectMarshaller marshaller) {
+    public SamlFormViewMapper(SamlObjectMarshaller marshaller) {
         this.marshaller = marshaller;
     }
 

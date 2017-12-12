@@ -6,7 +6,6 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import uk.gov.ida.notification.helpers.FileHelpers;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import java.util.List;

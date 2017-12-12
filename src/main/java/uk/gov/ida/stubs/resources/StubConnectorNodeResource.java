@@ -4,7 +4,7 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.stubs.EidasAuthnRequestFactory;
@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.TEXT_HTML)
 public class StubConnectorNodeResource {
     private EidasAuthnRequestFactory eidasAuthnRequestFactory = new EidasAuthnRequestFactory();
-    private XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
+    private SamlObjectMarshaller samlObjectMarshaller = new SamlObjectMarshaller();
 
     @POST
     @Path("/eidas-authn-response")
@@ -44,7 +44,7 @@ public class StubConnectorNodeResource {
                 "any destination",
                 new DateTime(DateTimeZone.UTC)
         );
-        String authnRequestString = xmlObjectMarshaller.transformToString(authnRequest);
+        String authnRequestString = samlObjectMarshaller.transformToString(authnRequest);
         return Base64.encodeAsString(authnRequestString);
     }
 }

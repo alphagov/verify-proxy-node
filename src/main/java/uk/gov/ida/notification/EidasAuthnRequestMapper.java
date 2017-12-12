@@ -8,10 +8,8 @@ import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 import java.util.logging.Logger;
 
 public class EidasAuthnRequestMapper {
-
     private SamlParser parser;
     private static final Logger LOG = Logger.getLogger(EidasAuthnRequestMapper.class.getName());
-
 
     public EidasAuthnRequestMapper(SamlParser parser) {
         this.parser = parser;
@@ -20,7 +18,7 @@ public class EidasAuthnRequestMapper {
     public EidasAuthnRequest map(String inputRequest) {
         String requestAsString = Base64.decodeAsString(inputRequest);
         AuthnRequest authnRequest = parser.parseSamlString(requestAsString);
-        EidasAuthnRequest eidasAuthnRequest = new EidasAuthnRequest(authnRequest);
+        EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
         logAuthnRequestInformation(eidasAuthnRequest);
         return eidasAuthnRequest;
     }
