@@ -23,9 +23,9 @@ connectorNodeUrl: ${CONNECTOR_NODE_URL:-/connector-node/eidas-authn-response}
 hubFacingSigningKeyPair:
   publicKey:
     type: file
-    certFile: build/resources/main/local/hub_signing_primary.crt
+    certFile: ${HUB_FACING_SIGNING_CERT_FILE:-build/resources/main/local/hub_signing_primary.crt}
     name: hub_signing
   privateKey:
-    keyFile: build/resources/main/local/hub_signing_primary.pk8
+    keyFile: ${HUB_FACING_SIGNING_KEY_FILE:-build/resources/main/local/hub_signing_primary.pk8}
 
 
