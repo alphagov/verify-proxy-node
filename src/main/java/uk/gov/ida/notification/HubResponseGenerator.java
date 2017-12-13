@@ -16,6 +16,6 @@ public class HubResponseGenerator {
     public HubResponse generate(String responseAsString) {
         String decodeStringResponse = Base64.decodeAsString(responseAsString);
         Response response = parser.parseSamlString(decodeStringResponse);
-        return new HubResponse(response);
+        return HubResponse.fromResponse(response);
     }
 }

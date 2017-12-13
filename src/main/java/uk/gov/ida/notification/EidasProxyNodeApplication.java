@@ -92,13 +92,13 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(
                 eidasAuthnRequestTranslator,
                 hubAuthnRequestSigner);
-        SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(samlObjectMarshaller);
+        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
-                samlFormViewMapper,
+                samlFormViewBuilder,
                 eidasAuthnRequestMapper));
-        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewMapper, hubResponseGenerator));
+        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewBuilder, hubResponseGenerator));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());

@@ -5,7 +5,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
-import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.stubs.EidasAuthnRequestFactory;
 
@@ -24,21 +24,21 @@ public class StubConnectorNodeResource {
 
     @POST
     @Path("/eidas-authn-response")
-    public String eidasAuthnResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedEidasResponse) {
+    public String eidasAuthnResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) String encodedEidasResponse) {
         return Base64.decodeAsString(encodedEidasResponse);
     }
 
     @GET
     @Path("/eidas-authn-request")
-    public SamlFormView eidasAuthnRequest() throws Throwable {
+    public SamlFormView eidasAuthnRequest() {
         String proxyNodeAuthnUrl = "/SAML2/SSO/POST";
-        String samlRequest = SamlMessageType.SAML_REQUEST;
+        String samlRequest = SamlFormMessageType.SAML_REQUEST;
         String encodedAuthnRequest = buildEncodedAuthnRequest();
         String submitText = "POST eIDAS AuthnRequest to Proxy Node";
         return new SamlFormView(proxyNodeAuthnUrl, samlRequest, encodedAuthnRequest, submitText);
     }
 
-    private String buildEncodedAuthnRequest() throws Throwable {
+    private String buildEncodedAuthnRequest() {
         AuthnRequest authnRequest = eidasAuthnRequestFactory.createEidasAuthnRequest(
                 "any issuer entity id",
                 "any destination",

@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HubResponse {
-    private final Assertion mdsAssertion;
-    private final Assertion authnAssertion;
     private final String pid;
     private final String statusCode;
     private final String providedLoa;
@@ -19,45 +17,46 @@ public class HubResponse {
     private final String inResponseTo;
     private final Map<String, String> mdsAttributes;
 
-    public HubResponse(Response response) {
+    public HubResponse(String pid, String statusCode, String providedLoa, String responseId, String inResponseTo, Map<String, String> mdsAttributes) {
+        this.pid = pid;
+        this.statusCode = statusCode;
+        this.providedLoa = providedLoa;
+        this.responseId = responseId;
+        this.inResponseTo = inResponseTo;
+        this.mdsAttributes = mdsAttributes;
+    }
+
+    public static HubResponse fromResponse(Response response) {
         List<Assertion> assertions = response.getAssertions();
-        authnAssertion = assertions
+        Assertion authnAssertion = assertions
                 .stream()
                 .filter(a -> !a.getAuthnStatements().isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new HubResponseException("Hub Response has no authn assertion"));
 
-        mdsAssertion = assertions
+        Assertion mdsAssertion = assertions
                 .stream()
                 .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new HubResponseException("Hub Response has no MDS assertion"));
 
-        pid = authnAssertion.getSubject().getNameID().getValue();
+        String pid = authnAssertion.getSubject().getNameID().getValue();
 
-        providedLoa = authnAssertion.getAuthnStatements().get(0).getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
+        String providedLoa = authnAssertion.getAuthnStatements().get(0).getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
 
-        mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes()
-                .stream()
+        Map<String, String> mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes().stream()
                 .filter(a -> ((XSAnyImpl) a.getAttributeValues().get(0)).getTextContent() != null)
                 .collect(Collectors.toMap(
                         Attribute::getName,
-                        a -> ((XSAnyImpl) a.getAttributeValues().get(0)).getTextContent())
-                );
+                        a -> ((XSAnyImpl) a.getAttributeValues().get(0)).getTextContent()));
 
-        statusCode = response.getStatus().getStatusCode().getValue();
+        String statusCode = response.getStatus().getStatusCode().getValue();
 
-        responseId = response.getID();
+        String responseId = response.getID();
 
-        inResponseTo = response.getInResponseTo();
-    }
+        String inResponseTo = response.getInResponseTo();
 
-    public Assertion getMdsAssertion() {
-        return mdsAssertion;
-    }
-
-    public Assertion getAuthnAssertion() {
-        return authnAssertion;
+        return new HubResponse(pid, statusCode, providedLoa, responseId, inResponseTo, mdsAttributes);
     }
 
     public String getPid() {

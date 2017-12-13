@@ -5,8 +5,8 @@ import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.HubResponseGenerator;
-import uk.gov.ida.notification.SamlFormViewMapper;
-import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.translation.HubResponse;
 
 import javax.ws.rs.Consumes;
@@ -20,25 +20,25 @@ public class HubResponseResource {
     private final String connectorNodeUrl;
     private final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
     private EidasResponseGenerator eidasResponseGenerator;
-    private SamlFormViewMapper viewMapper;
+    private SamlFormViewBuilder samlFormViewBuilder;
     private HubResponseGenerator hubResponseGenerator;
 
     public HubResponseResource(EidasProxyNodeConfiguration configuration,
                                EidasResponseGenerator eidasResponseGenerator,
-                               SamlFormViewMapper viewMapper,
+                               SamlFormViewBuilder samlFormViewBuilder,
                                HubResponseGenerator hubResponseGenerator) {
         this.connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         this.eidasResponseGenerator = eidasResponseGenerator;
-        this.viewMapper = viewMapper;
+        this.samlFormViewBuilder = samlFormViewBuilder;
         this.hubResponseGenerator = hubResponseGenerator;
     }
 
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public View hubResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedHubResponse) throws Throwable {
+    public View hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) String encodedHubResponse) throws Throwable {
         HubResponse hubResponse = hubResponseGenerator.generate(encodedHubResponse);
         Response eidasResponse = eidasResponseGenerator.generate(hubResponse);
-        return viewMapper.map(connectorNodeUrl, SamlMessageType.SAML_RESPONSE, eidasResponse, SUBMIT_TEXT);
+        return samlFormViewBuilder.buildResponse(connectorNodeUrl, eidasResponse, SUBMIT_TEXT);
     }
 }

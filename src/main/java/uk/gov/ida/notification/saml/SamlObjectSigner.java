@@ -32,7 +32,7 @@ public class SamlObjectSigner {
 
     private Signature buildSignature(SigningCredential credential) {
         String signatureAlgorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
-        Signature signature = new SignatureBuilder().buildObject();
+        Signature signature = SamlBuilder.build(Signature.DEFAULT_ELEMENT_NAME);
         signature.setSignatureAlgorithm(signatureAlgorithm);
         signature.setSigningCredential(credential);
         signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);

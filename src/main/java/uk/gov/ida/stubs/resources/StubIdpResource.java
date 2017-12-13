@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.saml2.core.Response;
-import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -25,7 +25,7 @@ public class StubIdpResource {
     @Path("/request")
     public SamlFormView hubAuthnRequest() throws Throwable {
         String proxyNodeHubResponseUrl = "/SAML2/Response/POST";
-        String samlResponse = SamlMessageType.SAML_RESPONSE;
+        String samlResponse = SamlFormMessageType.SAML_RESPONSE;
         String encodedHubResponse = buildEncodedHubResponse();
         String submitText = "POST HUB SAML to PROXY NODE";
         return new SamlFormView(proxyNodeHubResponseUrl, samlResponse, encodedHubResponse, submitText);

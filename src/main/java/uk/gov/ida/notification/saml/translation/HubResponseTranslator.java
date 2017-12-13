@@ -26,7 +26,9 @@ import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -54,7 +56,7 @@ public class HubResponseTranslator {
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                resp -> String.join(" ", resp.getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME), resp.getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME))
+                resp -> combineFirstAndMiddleNames(resp)
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
@@ -90,6 +92,13 @@ public class HubResponseTranslator {
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
         return eidasResponse;
+    }
+
+    public String combineFirstAndMiddleNames(HubResponse response) {
+        List<String> names = Arrays.asList(
+                response.getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME),
+                response.getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME));
+        return names.stream().filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
     }
 
     private String mapLoa(String hubLoa) {

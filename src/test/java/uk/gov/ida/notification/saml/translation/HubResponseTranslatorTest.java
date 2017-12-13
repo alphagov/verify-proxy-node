@@ -27,7 +27,7 @@ public class HubResponseTranslatorTest {
     public void shouldTranslateHubResponseToEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();
         HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser);
-        HubResponse hubResponse = new HubResponse(getResponse("idp_response_unencrypted.xml"));
+        HubResponse hubResponse = HubResponse.fromResponse(getResponse("idp_response_unencrypted.xml"));
         Response expectedEidasResponse = getResponse("eidas_response.xml");
 
         Response actualEidasResponse = translator.translate(hubResponse);

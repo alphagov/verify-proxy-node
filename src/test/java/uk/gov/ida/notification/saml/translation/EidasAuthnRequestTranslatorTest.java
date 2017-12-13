@@ -5,11 +5,12 @@ import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasConstants;
+import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
+import java.util.Collections;
+
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class EidasAuthnRequestTranslatorTest {
 
@@ -19,16 +20,22 @@ public class EidasAuthnRequestTranslatorTest {
     }
 
     @Test
-    public void shouldBuildHubAuthnRequestWithSameId() throws Exception {
-        String requestId = "any id";
-        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("any", "other");
-        EidasAuthnRequest eidasAuthnRequest = mock(EidasAuthnRequest.class);
-        when(eidasAuthnRequest.getRequestedLoa()).thenReturn(EidasConstants.EIDAS_LOA_SUBSTANTIAL);
-        when(eidasAuthnRequest.getRequestId()).thenReturn(requestId);
+    public void shouldBuildHubAuthnRequestWithSameId() {
+        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://hub.uk");
+        EidasAuthnRequest eidasRequest = new EidasAuthnRequest(
+                "request-id",
+                "http://connector.eu",
+                "http://proxy-node.uk",
+                SPTypeEnumeration.PUBLIC,
+                EidasConstants.EIDAS_LOA_SUBSTANTIAL,
+                Collections.emptyList()
+        );
 
-        AuthnRequest hubAuthnRequest = translator.translate(eidasAuthnRequest);
+        AuthnRequest hubAuthnRequest = translator.translate(eidasRequest);
 
-        assertEquals(requestId, hubAuthnRequest.getID());
+        assertEquals("request-id", hubAuthnRequest.getID());
+        assertEquals("http://proxy-node.uk", hubAuthnRequest.getIssuer().getValue());
+        assertEquals("http://hub.uk", hubAuthnRequest.getDestination());
         assertEquals(IdaAuthnContext.LEVEL_2_AUTHN_CTX, getLoa(hubAuthnRequest));
     }
 

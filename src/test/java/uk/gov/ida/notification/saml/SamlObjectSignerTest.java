@@ -4,8 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.saml.saml2.core.impl.AuthnRequestBuilder;
-import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
@@ -30,8 +28,7 @@ public class SamlObjectSignerTest {
     public void shouldSignAuthRequest() throws Throwable {
         SigningCredential credential = new SigningCredential(testKeyPair.getPublicKey(), testKeyPair.getPrivateKey());
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credential);
-        AuthnRequestBuilder authnRequestBuilder = new AuthnRequestBuilder();
-        AuthnRequest authnRequest = authnRequestBuilder.buildObject();
+        AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest signedAuthnRequest = samlObjectSigner.sign(authnRequest);
         Signature signature = signedAuthnRequest.getSignature();
 
