@@ -8,10 +8,13 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+import uk.gov.ida.notification.pki.KeyPairConfigurationCredentialBuilder;
+import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
@@ -70,35 +73,32 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
-        ProxyNodeSignatureValidator proxyNodeSignatureValidator = new ProxyNodeSignatureValidator();
         SamlParser samlParser = new SamlParser();
-        CredentialRepository credentialRepository = new CredentialRepository(
-                configuration.getHubSigningPrivateKeyPath(),
-                configuration.getHubSigningCertificatePath());
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getConnectorNodeUrl().toString(),
                 samlParser
         );
         EidasResponseGenerator eidasResponseGenerator = new EidasResponseGenerator(hubResponseTranslator);
-        HubResponseGenerator hubResponseGenerator = new HubResponseGenerator(samlParser, proxyNodeSignatureValidator, credentialRepository);
-        XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
+        HubResponseGenerator hubResponseGenerator = new HubResponseGenerator(samlParser);
+        SamlObjectMarshaller samlObjectMarshaller = new SamlObjectMarshaller();
         EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
-        ProxyNodeSigner proxyNodeSigner = new ProxyNodeSigner(xmlObjectMarshaller);
+        KeyPairConfigurationCredentialBuilder credentialBuilder = new KeyPairConfigurationCredentialBuilder();
+        SigningCredential hubFacingSigningCredential = credentialBuilder.buildSigningCredential(configuration.getHubFacingSigningKeyPair());
+        SamlObjectSigner hubAuthnRequestSigner = new SamlObjectSigner(hubFacingSigningCredential);
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(
                 eidasAuthnRequestTranslator,
-                proxyNodeSigner,
-                credentialRepository);
-        SamlFormViewMapper samlFormViewMapper = new SamlFormViewMapper(xmlObjectMarshaller);
+                hubAuthnRequestSigner);
+        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
-                samlFormViewMapper,
+                samlFormViewBuilder,
                 eidasAuthnRequestMapper));
-        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewMapper, hubResponseGenerator));
+        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewBuilder, hubResponseGenerator));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());

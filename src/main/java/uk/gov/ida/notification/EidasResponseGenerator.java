@@ -9,7 +9,6 @@ public class EidasResponseGenerator {
     private HubResponseTranslator hubResponseTranslator;
 
     public EidasResponseGenerator(HubResponseTranslator hubResponseTranslator) {
-
         this.hubResponseTranslator = hubResponseTranslator;
     }
 

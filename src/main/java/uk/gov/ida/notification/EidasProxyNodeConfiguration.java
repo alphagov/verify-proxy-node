@@ -2,6 +2,7 @@ package uk.gov.ida.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import uk.gov.ida.notification.pki.KeyPairConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -27,13 +28,8 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private String hubSigningPrivateKeyPath;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private String hubSigningCertificatePath;
-
+    private KeyPairConfiguration hubFacingSigningKeyPair;
+    
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -46,11 +42,7 @@ public class EidasProxyNodeConfiguration extends Configuration {
         return proxyNodeEntityId;
     }
 
-    public String getHubSigningPrivateKeyPath() {
-        return hubSigningPrivateKeyPath;
-    }
-
-    public String getHubSigningCertificatePath() {
-        return hubSigningCertificatePath;
+    public KeyPairConfiguration getHubFacingSigningKeyPair() {
+        return hubFacingSigningKeyPair;
     }
 }

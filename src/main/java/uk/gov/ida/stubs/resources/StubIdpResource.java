@@ -4,12 +4,9 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.security.credential.Credential;
-import uk.gov.ida.notification.CredentialRepository;
-import uk.gov.ida.notification.ProxyNodeSigner;
-import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlFormMessageType;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.ws.rs.POST;
@@ -22,27 +19,20 @@ import java.io.IOException;
 @Path("/stub-idp")
 @Produces(MediaType.TEXT_HTML)
 public class StubIdpResource {
+    private final SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
+
     @POST
     @Path("/request")
     public SamlFormView hubAuthnRequest() throws Throwable {
         String proxyNodeHubResponseUrl = "/SAML2/Response/POST";
-        String samlResponse = SamlMessageType.SAML_RESPONSE;
+        String samlResponse = SamlFormMessageType.SAML_RESPONSE;
         String encodedHubResponse = buildEncodedHubResponse();
         String submitText = "POST HUB SAML to PROXY NODE";
         return new SamlFormView(proxyNodeHubResponseUrl, samlResponse, encodedHubResponse, submitText);
     }
 
     private String buildEncodedHubResponse() throws Throwable {
-        Response response = getResponseFromFile();
-        Response signedResponse = signResponseWithHubCredentials(response);
-        String signedResponseAsText = new XmlObjectMarshaller().transformToString(signedResponse);
-        return Base64.encodeAsString(signedResponseAsText);
-    }
-
-    private Response signResponseWithHubCredentials(Response response) throws Throwable {
-        CredentialRepository credentialRepository = new CredentialRepository("local/hub_signing_primary.pk8", "local/hub_signing_primary.crt");
-        Credential hubCredential = credentialRepository.getHubCredential();
-        return new ProxyNodeSigner(new XmlObjectMarshaller()).sign(response, hubCredential);
+        return Base64.encodeAsString(marshaller.transformToString(getResponseFromFile()));
     }
 
     private Response getResponseFromFile() throws IOException, ParserConfigurationException {

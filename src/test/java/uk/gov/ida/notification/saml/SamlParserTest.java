@@ -46,7 +46,7 @@ public class SamlParserTest {
      * @see https://en.wikipedia.org/wiki/Billion_laughs
      */
     @Test
-    public void convertToElement_shouldDealWithEntityExpansionAttacks() throws Exception {
+    public void convertToElement_shouldDealWithEntityExpansionAttacks() {
         String xmlString = "<?xml version=\"1.0\"?>\n" +
                 "<!DOCTYPE lolz [\n" +
                 " <!ENTITY lol \"lol\">\n" +
@@ -78,7 +78,7 @@ public class SamlParserTest {
      * @see https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
      */
     @Test
-    public void convertToElement_shouldThrowExceptionIfProvidedWithDoctypeDeclaration() throws Exception {
+    public void convertToElement_shouldThrowExceptionIfProvidedWithDoctypeDeclaration() {
         String xmlString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
                 "<!DOCTYPE foo [" +
                 "  <!ELEMENT foo ANY >" +

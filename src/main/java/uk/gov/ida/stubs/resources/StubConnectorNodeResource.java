@@ -4,8 +4,8 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.saml.XmlObjectMarshaller;
-import uk.gov.ida.notification.saml.SamlMessageType;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.stubs.EidasAuthnRequestFactory;
 
@@ -20,31 +20,31 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.TEXT_HTML)
 public class StubConnectorNodeResource {
     private EidasAuthnRequestFactory eidasAuthnRequestFactory = new EidasAuthnRequestFactory();
-    private XmlObjectMarshaller xmlObjectMarshaller = new XmlObjectMarshaller();
+    private SamlObjectMarshaller samlObjectMarshaller = new SamlObjectMarshaller();
 
     @POST
     @Path("/eidas-authn-response")
-    public String eidasAuthnResponse(@FormParam(SamlMessageType.SAML_RESPONSE) String encodedEidasResponse) {
+    public String eidasAuthnResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) String encodedEidasResponse) {
         return Base64.decodeAsString(encodedEidasResponse);
     }
 
     @GET
     @Path("/eidas-authn-request")
-    public SamlFormView eidasAuthnRequest() throws Throwable {
+    public SamlFormView eidasAuthnRequest() {
         String proxyNodeAuthnUrl = "/SAML2/SSO/POST";
-        String samlRequest = SamlMessageType.SAML_REQUEST;
+        String samlRequest = SamlFormMessageType.SAML_REQUEST;
         String encodedAuthnRequest = buildEncodedAuthnRequest();
         String submitText = "POST eIDAS AuthnRequest to Proxy Node";
         return new SamlFormView(proxyNodeAuthnUrl, samlRequest, encodedAuthnRequest, submitText);
     }
 
-    private String buildEncodedAuthnRequest() throws Throwable {
+    private String buildEncodedAuthnRequest() {
         AuthnRequest authnRequest = eidasAuthnRequestFactory.createEidasAuthnRequest(
                 "any issuer entity id",
                 "any destination",
                 new DateTime(DateTimeZone.UTC)
         );
-        String authnRequestString = xmlObjectMarshaller.transformToString(authnRequest);
+        String authnRequestString = samlObjectMarshaller.transformToString(authnRequest);
         return Base64.encodeAsString(authnRequestString);
     }
 }
