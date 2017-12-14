@@ -1,24 +1,17 @@
 package uk.gov.ida.notification.saml.translation;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
+import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public class EidasAuthnRequestTranslatorTest {
-
-    @BeforeClass
-    public static void setup() throws Exception {
-        InitializationService.initialize();
-    }
-
+public class EidasAuthnRequestTranslatorTest extends SamlInitializedTest {
     @Test
     public void shouldBuildHubAuthnRequestWithSameId() {
         EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://hub.uk");

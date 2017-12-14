@@ -1,28 +1,20 @@
 package uk.gov.ida.notification.saml.translation;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
+import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.FileHelpers;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
-import static junit.framework.TestCase.assertEquals;
-
-public class HubResponseTranslatorTest {
-
-    @BeforeClass
-    public static void setup() throws Exception {
-        InitializationService.initialize();
-    }
-
+public class HubResponseTranslatorTest extends SamlInitializedTest {
     @Test
     public void shouldTranslateHubResponseToEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();

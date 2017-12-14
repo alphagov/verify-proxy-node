@@ -1,10 +1,7 @@
 package uk.gov.ida.notification;
 
 import org.glassfish.jersey.internal.util.Base64;
-import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.core.config.InitializationService;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.helpers.FileHelpers;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -12,12 +9,7 @@ import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 
 import static org.junit.Assert.assertEquals;
 
-public class EidasAuthnRequestMapperTest {
-    @Before
-    public void before() throws InitializationException {
-        InitializationService.initialize();
-    }
-
+public class EidasAuthnRequestMapperTest extends SamlInitializedTest {
     @Test
     public void shouldMapEidasRequestFromString() throws Throwable {
         String request = FileHelpers.readFileAsString("eidas_authn_request.xml");

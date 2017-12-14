@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml;
+package uk.gov.ida.notification.exceptions;
 
 public class SamlSigningException extends RuntimeException {
     public SamlSigningException(Throwable cause) {

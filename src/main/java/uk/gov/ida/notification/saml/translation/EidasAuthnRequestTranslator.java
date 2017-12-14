@@ -10,6 +10,7 @@ import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import se.litsec.eidas.opensaml.common.EidasConstants;
+import uk.gov.ida.notification.exceptions.EidasAuthnRequestException;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 

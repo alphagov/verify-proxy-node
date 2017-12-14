@@ -4,7 +4,6 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
-import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.net.URI;
@@ -17,9 +16,6 @@ public class EidasProxyNodeAcceptanceTests {
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
     public static final String HUB_METADATA_ENDPOINT = "/hub-metadata/local";
-
-    @ClassRule
-    public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();
 
     @Test
     public void shouldHubFetchMetadata() throws Exception {
@@ -56,16 +52,15 @@ public class EidasProxyNodeAcceptanceTests {
     }
 
     private String connectorNodeUrl() throws URISyntaxException {
-        return getEnvVariableOrDefault("CONNECTOR_NODE_URL", proxyNodeBase("/connector-node/eidas-authn-request"));
+        return getEnv("CONNECTOR_NODE_URL", proxyNodeBase("/connector-node/eidas-authn-request"));
     }
 
     private String proxyNodeBase(String path) throws URISyntaxException {
-        String proxyNodeUrlDefaultValue = "http://localhost:" + proxyNodeAppRule.getLocalPort();
-        String proxyNodeUrl = getEnvVariableOrDefault("PROXY_NODE_URL", proxyNodeUrlDefaultValue);
+        String proxyNodeUrl = getEnv("PROXY_NODE_URL", "http://localhost:6600");
         return new URI(proxyNodeUrl).resolve(path).toString();
     }
 
-    private String getEnvVariableOrDefault(String envVariableName, String defaultValue) {
+    private String getEnv(String envVariableName, String defaultValue) {
         return System.getenv().getOrDefault(envVariableName, defaultValue);
     }
 }

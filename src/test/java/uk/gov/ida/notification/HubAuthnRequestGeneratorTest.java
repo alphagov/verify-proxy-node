@@ -17,12 +17,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public class HubAuthnRequestGeneratorTest {
-    @Before
-    public void before() throws InitializationException {
-        InitializationService.initialize();
-    }
-
+public class HubAuthnRequestGeneratorTest extends SamlInitializedTest {
     @Test
     public void shouldGenerateHubAuthnRequestGivenEidas () throws Throwable {
         EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://hub.uk");

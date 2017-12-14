@@ -7,19 +7,19 @@ import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
 import org.opensaml.saml.saml2.core.impl.ResponseImpl;
 import org.xml.sax.SAXParseException;
+import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-public class SamlParserTest {
+public class SamlParserTest extends SamlInitializedTest {
 
     private static SamlParser parser;
 
     @BeforeClass
     public static void setup() throws Exception {
-        InitializationService.initialize();
         parser = new SamlParser();
     }
 

@@ -4,6 +4,7 @@ import org.opensaml.core.xml.schema.impl.XSAnyImpl;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.Response;
+import uk.gov.ida.notification.exceptions.HubResponseException;
 
 import java.util.List;
 import java.util.Map;

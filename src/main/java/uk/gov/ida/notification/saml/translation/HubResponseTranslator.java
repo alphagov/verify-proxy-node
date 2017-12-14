@@ -20,6 +20,7 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
+import uk.gov.ida.notification.exceptions.HubResponseException;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.IdaConstants;

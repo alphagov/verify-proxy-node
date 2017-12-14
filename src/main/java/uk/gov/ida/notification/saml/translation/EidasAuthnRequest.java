@@ -8,6 +8,7 @@ import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.impl.RequestedAttributesImpl;
 import se.litsec.eidas.opensaml.ext.impl.SPTypeImpl;
+import uk.gov.ida.notification.exceptions.EidasAuthnRequestException;
 
 import java.util.Collections;
 import java.util.List;
