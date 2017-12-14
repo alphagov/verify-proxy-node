@@ -6,6 +6,7 @@ import org.opensaml.core.xml.io.MarshallerFactory;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.SAMLObject;
 import org.w3c.dom.Element;
+import uk.gov.ida.notification.exceptions.SamlMarshallingException;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;

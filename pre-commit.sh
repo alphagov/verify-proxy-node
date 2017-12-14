@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-./jenkins/build.sh
+set -e
+
+./gradlew clean build
+

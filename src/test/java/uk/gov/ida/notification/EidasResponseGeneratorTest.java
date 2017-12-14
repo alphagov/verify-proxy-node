@@ -23,12 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
-public class EidasResponseGeneratorTest {
-    @Before
-    public void before() throws InitializationException {
-        InitializationService.initialize();
-    }
-
+public class EidasResponseGeneratorTest extends SamlInitializedTest {
     @Test
     public void shouldGenerateEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();

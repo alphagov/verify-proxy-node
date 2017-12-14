@@ -1,10 +1,7 @@
 package uk.gov.ida.notification;
 
 import org.glassfish.jersey.internal.util.Base64;
-import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.helpers.FileHelpers;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -12,12 +9,7 @@ import uk.gov.ida.notification.saml.translation.HubResponse;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class HubResponseGeneratorTest {
-    @Before
-    public void before() throws InitializationException {
-        InitializationService.initialize();
-    }
-
+public class HubResponseGeneratorTest extends SamlInitializedTest {
     @Test
     public void shouldGenerateHubResponseFromWebString() throws Throwable {
         // Replace with marshalled built response

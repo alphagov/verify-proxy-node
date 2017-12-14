@@ -1,12 +1,11 @@
 package uk.gov.ida.notification.saml;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.w3c.dom.Element;
+import uk.gov.ida.notification.SamlInitializedTest;
 
 import javax.xml.namespace.QName;
 import java.text.MessageFormat;
@@ -14,7 +13,7 @@ import java.text.MessageFormat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class SamlObjectMarshallerTest {
+public class SamlObjectMarshallerTest extends SamlInitializedTest {
 
     private final String xmlObjectFormat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><saml2:Issuer xmlns:saml2=\"{0}\" Format=\"{1}\">{2}</saml2:Issuer>";
     private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
@@ -22,11 +21,6 @@ public class SamlObjectMarshallerTest {
     private final QName defaultElementName = Issuer.DEFAULT_ELEMENT_NAME;
     private final String entity = NameIDType.ENTITY;
     private final String aValue = "an-issuer";
-
-    @Before
-    public void setup() throws Exception {
-        InitializationService.initialize();
-    }
 
     @Test
     public void shouldMarshallSamlObjectToString() {

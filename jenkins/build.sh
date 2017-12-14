@@ -2,4 +2,5 @@
 
 set -e
 
-./gradlew clean build acceptanceTest
+./pre-commit.sh
+
