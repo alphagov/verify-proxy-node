@@ -13,9 +13,10 @@ import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
-import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
+import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
@@ -80,9 +81,6 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 samlParser
         );
         EidasResponseGenerator eidasResponseGenerator = new EidasResponseGenerator(hubResponseTranslator);
-        HubResponseGenerator hubResponseGenerator = new HubResponseGenerator(samlParser);
-        SamlObjectMarshaller samlObjectMarshaller = new SamlObjectMarshaller();
-        EidasAuthnRequestMapper eidasAuthnRequestMapper = new EidasAuthnRequestMapper(samlParser);
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
@@ -93,12 +91,15 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 eidasAuthnRequestTranslator,
                 hubAuthnRequestSigner);
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+
+        environment.jersey().register(AuthnRequestParameterProvider.class);
+        environment.jersey().register(ResponseParameterProvider.class);
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
-                samlFormViewBuilder,
-                eidasAuthnRequestMapper));
-        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewBuilder, hubResponseGenerator));
+                samlFormViewBuilder
+        ));
+        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewBuilder));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());
