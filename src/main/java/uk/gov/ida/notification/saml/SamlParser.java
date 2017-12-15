@@ -8,12 +8,14 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import uk.gov.ida.notification.exceptions.SamlParsingException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 import static javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING;
 
@@ -22,8 +24,8 @@ import static javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING;
  * {@link javax.xml.parsers.DocumentBuilderFactory} should *only* be used via
  * the utility methods in this class.  For more information on the vulnerabilities
  * identified, see the tests.
- * @see uk.gov.ida.notification.saml.SamlParserTest
  */
+@SuppressWarnings("unchecked")
 public class SamlParser {
     private final DocumentBuilder documentBuilder;
     private final UnmarshallerFactory unmarshallerFactory;
@@ -44,9 +46,11 @@ public class SamlParser {
             Document document = documentBuilder.parse(inputStream);
             Element element = document.getDocumentElement();
             Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(element);
-            return (T) unmarshaller.unmarshall(element);
-        } catch (SAXException | IOException | UnmarshallingException e) {
-            throw new RuntimeException(e);
+            return (T) Objects.requireNonNull(
+                unmarshaller, String.format("No unmarshaller for element <%s>", element.getTagName())
+            ).unmarshall(element);
+        } catch (NullPointerException | SAXException | IOException | UnmarshallingException e) {
+            throw new SamlParsingException(e);
         }
     }
 }

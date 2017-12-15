@@ -1,13 +1,14 @@
 package uk.gov.ida.notification.saml;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
 import org.opensaml.saml.saml2.core.impl.ResponseImpl;
 import org.xml.sax.SAXParseException;
 import uk.gov.ida.notification.SamlInitializedTest;
+import uk.gov.ida.notification.exceptions.SamlParsingException;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
 import static junit.framework.TestCase.fail;
@@ -18,8 +19,8 @@ public class SamlParserTest extends SamlInitializedTest {
 
     private static SamlParser parser;
 
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
         parser = new SamlParser();
     }
 
@@ -41,12 +42,26 @@ public class SamlParserTest extends SamlInitializedTest {
         assertEquals(ResponseImpl.class, authnResponse.getClass());
     }
 
+    @Test
+    public void shouldFailToParseUnknownElement() {
+        String xmlString = "<?xml version=\"1.0\"?>\n" +
+            "<lolz>hey</lolz>";
+
+        try {
+            parser.parseSamlString(xmlString);
+            fail("expected exception not thrown");
+        } catch(SamlParsingException e) {
+            assertThat(e.getCause()).isInstanceOf(NullPointerException.class);
+            assertThat(e.getCause().getMessage()).isEqualTo("No unmarshaller for element <lolz>");
+        }
+    }
+
     /**
      * Test for protection against the Billion Laughs attack.
      * @see https://en.wikipedia.org/wiki/Billion_laughs
      */
     @Test
-    public void convertToElement_shouldDealWithEntityExpansionAttacks() {
+    public void shouldDealWithEntityExpansionAttacks() {
         String xmlString = "<?xml version=\"1.0\"?>\n" +
                 "<!DOCTYPE lolz [\n" +
                 " <!ENTITY lol \"lol\">\n" +
@@ -65,9 +80,8 @@ public class SamlParserTest extends SamlInitializedTest {
 
         try {
             parser.parseSamlString(xmlString);
-
             fail("expected exception not thrown");
-        } catch(RuntimeException e) {
+        } catch(SamlParsingException e) {
             assertThat(e.getCause()).isInstanceOf(SAXParseException.class);
         }
     }
@@ -78,18 +92,17 @@ public class SamlParserTest extends SamlInitializedTest {
      * @see https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
      */
     @Test
-    public void convertToElement_shouldThrowExceptionIfProvidedWithDoctypeDeclaration() {
+    public void shouldThrowExceptionIfProvidedWithDoctypeDeclaration() {
         String xmlString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
                 "<!DOCTYPE foo [" +
                 "  <!ELEMENT foo ANY >" +
                 "  <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]><foo>&xxe;</foo>";
         try {
             parser.parseSamlString(xmlString);
-
             fail("expected exception not thrown");
-        } catch(RuntimeException e) {
+        } catch(SamlParsingException e) {
             assertThat(e.getCause()).isInstanceOf(SAXParseException.class);
-            assertThat(e.getMessage()).contains("DOCTYPE is disallowed");
+            assertThat(e.getCause().getMessage()).contains("DOCTYPE is disallowed");
         }
     }
 }
