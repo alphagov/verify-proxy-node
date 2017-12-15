@@ -22,7 +22,6 @@ import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
 import uk.gov.ida.notification.exceptions.HubResponseException;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
@@ -30,29 +29,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
-    private static final Logger LOG = Logger.getLogger(HubResponseTranslator.class.getName());
-
     private final String proxyNodeEntityId;
     private final String connectorNodeUrl;
-    private final SamlParser samlParser;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy;
 
-    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl, SamlParser samlParser) {
+    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl) {
         this.proxyNodeEntityId = proxyNodeEntityId;
         this.connectorNodeUrl = connectorNodeUrl;
-        this.samlParser = samlParser;
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
 
-    public Response translate(HubResponse hubResponse) throws Throwable {
-        LOG.info("[Hub Response] ID: " + hubResponse.getResponseId());
-        LOG.info("[Hub Response] In response to: " + hubResponse.getInResponseTo());
-        LOG.info("[Hub Response] Provided level of assurance: " + hubResponse.getProvidedLoa());
-
+    public Response translate(HubResponse hubResponse) {
         List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
@@ -90,8 +80,6 @@ public class HubResponseTranslator {
                 hubResponse.getInResponseTo()
         );
 
-        LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
-        LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
         return eidasResponse;
     }
 

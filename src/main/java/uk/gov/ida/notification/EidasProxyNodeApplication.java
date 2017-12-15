@@ -74,13 +74,12 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws ParserConfigurationException {
+        String connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         SamlParser samlParser = new SamlParser();
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 configuration.getProxyNodeEntityId(),
-                configuration.getConnectorNodeUrl().toString(),
-                samlParser
+                connectorNodeUrl
         );
-        EidasResponseGenerator eidasResponseGenerator = new EidasResponseGenerator(hubResponseTranslator);
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
@@ -99,7 +98,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder
         ));
-        environment.jersey().register(new HubResponseResource(configuration, eidasResponseGenerator, samlFormViewBuilder));
+        environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, connectorNodeUrl));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());

@@ -1,70 +1,59 @@
 package uk.gov.ida.notification.saml.translation;
 
+import org.joda.time.LocalDate;
+import org.junit.Assert;
 import org.junit.Test;
+import org.opensaml.core.xml.AbstractXMLObject;
+import org.opensaml.core.xml.schema.impl.XSStringImpl;
+import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.Response;
-import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
+import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
+import se.litsec.eidas.opensaml.ext.attributes.impl.DateOfBirthTypeImpl;
 import uk.gov.ida.notification.SamlInitializedTest;
-import uk.gov.ida.notification.helpers.FileHelpers;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.saml.core.IdaConstants;
+import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 public class HubResponseTranslatorTest extends SamlInitializedTest {
     @Test
-    public void shouldTranslateHubResponseToEidasResponse() throws Throwable {
+    public void shouldGenerateEidasResponse() throws Throwable {
         SamlParser samlParser = new SamlParser();
-        HubResponseTranslator translator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu", samlParser);
-        HubResponse hubResponse = HubResponse.fromResponse(getResponse("idp_response_unencrypted.xml"));
-        Response expectedEidasResponse = getResponse("eidas_response.xml");
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu");
+        HubResponse hubResponse = new HubResponse(
+            "pid",
+            "success",
+            IdaAuthnContext.LEVEL_2_AUTHN_CTX,
+            "response id",
+            "id of request",
+            buildHubAttributes("Jane", "Smith", "1984-02-29")
+        );
 
-        Response actualEidasResponse = translator.translate(hubResponse);
+        Response eidasResponse = hubResponseTranslator.translate(hubResponse);
+        Map<String, AbstractXMLObject> eidasResponseAttributes = getEidasResponseAttributes(eidasResponse);
 
-        String expectedStatusCode = getStatusCode(expectedEidasResponse);
-        String actualStatusCode = getStatusCode(actualEidasResponse);
-        assertEquals(expectedStatusCode, actualStatusCode);
-        String expectedLoa = getLoa(expectedEidasResponse);
-        String actualLoa = getLoa(actualEidasResponse);
-        assertEquals(expectedLoa, actualLoa);
-        String expectedPid = getPid(expectedEidasResponse);
-        String actualPid = getPid(actualEidasResponse);
-        assertEquals(expectedPid, actualPid);
-        assertEquals(expectedEidasResponse.getInResponseTo(), actualEidasResponse.getInResponseTo());
-        List<String> expectedAttributes = getAttributes(expectedEidasResponse);
-        List<String> actualAttributes = getAttributes(actualEidasResponse);
-        assertThat(actualAttributes, containsInAnyOrder(expectedAttributes.toArray()));
+        Assert.assertEquals("id of request", eidasResponse.getInResponseTo());
+        Assert.assertEquals("Jane", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME)).getValue());
+        Assert.assertEquals("Smith", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME)).getValue());
+        Assert.assertEquals(new LocalDate(1984, 2, 29), ((DateOfBirthTypeImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME)).getDate());
     }
 
-    private String getPid(Response expectedEidasResponse) {
-        return expectedEidasResponse.getAssertions().get(0).getSubject().getNameID().getValue();
+    private Map<String, AbstractXMLObject> getEidasResponseAttributes(Response eidasResponse) {
+        return eidasResponse.getAssertions().get(0).getAttributeStatements().get(0).getAttributes()
+            .stream()
+            .collect(Collectors.toMap(
+                Attribute::getName,
+                a -> (AbstractXMLObject) a.getAttributeValues().get(0)));
     }
 
-    private String getLoa(Response expectedEidasResponse) {
-        return expectedEidasResponse.getAssertions().get(0).getAuthnStatements().get(0).getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
-    }
-
-    private String getStatusCode(Response expectedEidasResponse) {
-        return expectedEidasResponse
-                .getStatus()
-                .getStatusCode()
-                .getValue();
-    }
-
-    private List<String> getAttributes(Response response) {
-        return response.getAssertions().get(0).getAttributeStatements().get(0).getAttributes()
-                .stream()
-                .map(a ->  ((EidasAttributeValueType) a.getAttributeValues().get(0)).toStringValue())
-                .collect(Collectors.toList());
-    }
-
-    private Response getResponse(String resourceFilename) throws Exception {
-        SamlParser parser = new SamlParser();
-        FileHelpers.readFileAsString(resourceFilename);
-        String xmlString = FileHelpers.readFileAsString(resourceFilename);
-        return parser.parseSamlString(xmlString);
+    private Map<String, String> buildHubAttributes(String firstName, String surName, String dob) {
+        Map<String, String> hubResponseAttributes = new HashMap<>();
+        hubResponseAttributes.put(IdaConstants.Attributes_1_1.Firstname.NAME, firstName);
+        hubResponseAttributes.put(IdaConstants.Attributes_1_1.Surname.NAME, surName);
+        hubResponseAttributes.put(IdaConstants.Attributes_1_1.DateOfBirth.NAME, dob);
+        return hubResponseAttributes;
     }
 }
