@@ -11,6 +11,7 @@ import uk.gov.ida.notification.helpers.HubSamlResponseBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
@@ -32,7 +33,7 @@ public class HubResponseAppRuleTests extends SamlInitializedTest {
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Throwable {
         HubSamlResponseBuilder builder = new HubSamlResponseBuilder();
-        Response hubResponse = builder.build();
+        Response hubResponse = ResponseBuilder.aValidIdpResponse().build();
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 

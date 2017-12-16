@@ -23,7 +23,9 @@ import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
 import uk.gov.ida.notification.exceptions.HubResponseException;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.saml.core.IdaConstants;
+import uk.gov.ida.saml.core.extensions.Date;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
+import uk.gov.ida.saml.core.extensions.PersonName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,17 +49,17 @@ public class HubResponseTranslator {
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                resp -> combineFirstAndMiddleNames(resp)
+                this::combineFirstAndMiddleNames
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
-                resp -> resp.getMdsAttribute(IdaConstants.Attributes_1_1.Surname.NAME)
+                resp -> resp.getMdsAttribute(IdaConstants.Attributes_1_1.Surname.NAME, PersonName.class).getValue()
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                resp -> resp.getMdsAttribute(IdaConstants.Attributes_1_1.DateOfBirth.NAME)
+                resp -> resp.getMdsAttribute(IdaConstants.Attributes_1_1.DateOfBirth.NAME, Date.class).getValue()
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
@@ -84,10 +86,14 @@ public class HubResponseTranslator {
     }
 
     public String combineFirstAndMiddleNames(HubResponse response) {
-        List<String> names = Arrays.asList(
-                response.getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME),
-                response.getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME));
-        return names.stream().filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
+        List<PersonName> names = Arrays.asList(
+                response.getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME, PersonName.class),
+                response.getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME, PersonName.class));
+        return names.stream()
+                .filter(Objects::nonNull)
+                .map(PersonName::getValue)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(" "));
     }
 
     private String mapLoa(String hubLoa) {

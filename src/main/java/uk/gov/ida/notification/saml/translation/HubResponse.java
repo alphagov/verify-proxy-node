@@ -1,8 +1,8 @@
 package uk.gov.ida.notification.saml.translation;
 
-import org.opensaml.core.xml.schema.impl.XSAnyImpl;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.exceptions.HubResponseException;
 
@@ -16,9 +16,9 @@ public class HubResponse {
     private final String providedLoa;
     private final String responseId;
     private final String inResponseTo;
-    private final Map<String, String> mdsAttributes;
+    private final Map<String, AttributeValue> mdsAttributes;
 
-    public HubResponse(String pid, String statusCode, String providedLoa, String responseId, String inResponseTo, Map<String, String> mdsAttributes) {
+    public HubResponse(String pid, String statusCode, String providedLoa, String responseId, String inResponseTo, Map<String, AttributeValue> mdsAttributes) {
         this.pid = pid;
         this.statusCode = statusCode;
         this.providedLoa = providedLoa;
@@ -45,11 +45,10 @@ public class HubResponse {
 
         String providedLoa = authnAssertion.getAuthnStatements().get(0).getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
 
-        Map<String, String> mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes().stream()
-                .filter(a -> ((XSAnyImpl) a.getAttributeValues().get(0)).getTextContent() != null)
+        Map<String, AttributeValue> mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes().stream()
                 .collect(Collectors.toMap(
                         Attribute::getName,
-                        a -> ((XSAnyImpl) a.getAttributeValues().get(0)).getTextContent()));
+                        a -> (AttributeValue) a.getAttributeValues().get(0)));
 
         String statusCode = response.getStatus().getStatusCode().getValue();
 
@@ -64,8 +63,8 @@ public class HubResponse {
         return pid;
     }
 
-    public String getMdsAttribute(String key) {
-        return mdsAttributes.get(key);
+    public <T extends AttributeValue> T getMdsAttribute(String key, Class<T> castClazz) {
+        return castClazz.cast(mdsAttributes.get(key));
     }
 
     public String getStatusCode() {

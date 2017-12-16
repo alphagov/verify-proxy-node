@@ -8,5 +8,6 @@ public class SamlInitializedTest {
     @Before
     public void initializeSaml() throws InitializationException {
         InitializationService.initialize();
+        VerifySamlInitializer.init();
     }
 }

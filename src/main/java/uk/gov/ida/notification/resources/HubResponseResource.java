@@ -3,6 +3,7 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.translation.HubResponse;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
@@ -18,11 +19,13 @@ import java.util.logging.Logger;
 public class HubResponseResource {
     private static final Logger LOG = Logger.getLogger(HubResponseResource.class.getName());
 
-    private final String connectorNodeUrl;
     private final HubResponseTranslator hubResponseTranslator;
     private final SamlFormViewBuilder samlFormViewBuilder;
+    private final ResponseAssertionDecrypter assertionDecrypter;
+    private final String connectorNodeUrl;
 
-    public HubResponseResource(HubResponseTranslator hubResponseTranslator, SamlFormViewBuilder samlFormViewBuilder, String connectorNodeUrl) {
+    public HubResponseResource(HubResponseTranslator hubResponseTranslator, SamlFormViewBuilder samlFormViewBuilder, ResponseAssertionDecrypter assertionDecrypter, String connectorNodeUrl) {
+        this.assertionDecrypter = assertionDecrypter;
         this.connectorNodeUrl = connectorNodeUrl;
         this.hubResponseTranslator = hubResponseTranslator;
         this.samlFormViewBuilder = samlFormViewBuilder;
@@ -31,8 +34,9 @@ public class HubResponseResource {
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public View hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) Response encodedHubResponse) {
-        HubResponse hubResponse = HubResponse.fromResponse(encodedHubResponse);
+    public View hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse) {
+//        Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
+        HubResponse hubResponse = HubResponse.fromResponse(encryptedHubResponse);
         logHubResponse(hubResponse);
         Response eidasResponse = hubResponseTranslator.translate(hubResponse);
         logEidasResponse(eidasResponse);

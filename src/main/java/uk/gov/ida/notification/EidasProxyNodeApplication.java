@@ -67,6 +67,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
             throw new RuntimeException(e);
         }
 
+        // Verify SAML
+        VerifySamlInitializer.init();
+
         // Views
         bootstrap.addBundle(new ViewBundle<>());
     }
@@ -98,7 +101,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder
         ));
-        environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, connectorNodeUrl));
+        environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, null, connectorNodeUrl));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());
