@@ -29,7 +29,12 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @Valid
     @NotNull
     private KeyPairConfiguration hubFacingSigningKeyPair;
-    
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private KeyPairConfiguration hubFacingEncryptionKeyPair;
+
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -44,5 +49,9 @@ public class EidasProxyNodeConfiguration extends Configuration {
 
     public KeyPairConfiguration getHubFacingSigningKeyPair() {
         return hubFacingSigningKeyPair;
+    }
+
+    public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
+        return hubFacingEncryptionKeyPair;
     }
 }

@@ -12,4 +12,6 @@ applications:
       PROXY_NODE_AUTHN_REQUEST_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST
       HUB_FACING_SIGNING_CERT_FILE: /app/verify-eidas-notification/pki/hub_signing_primary.crt
       HUB_FACING_SIGNING_KEY_FILE: /app/verify-eidas-notification/pki/hub_signing_primary.pk8
+      HUB_FACING_ENCRYPTION_CERT_FILE: /app/verify-eidas-notification/pki/hub_encryption_primary.crt
+      HUB_FACING_ENCRYPTION_KEY_FILE: /app/verify-eidas-notification/pki/hub_encryption_primary.pk8
 

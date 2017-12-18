@@ -28,4 +28,12 @@ hubFacingSigningKeyPair:
   privateKey:
     keyFile: ${HUB_FACING_SIGNING_KEY_FILE:-build/resources/main/local/hub_signing_primary.pk8}
 
+hubFacingEncryptionKeyPair:
+  publicKey:
+    type: file
+    certFile: ${HUB_FACING_ENCRYPTION_CERT_FILE:-build/resources/main/local/hub_encryption_primary.crt}
+    name: hub_signing
+  privateKey:
+    keyFile: ${HUB_FACING_ENCRYPTION_KEY_FILE:-build/resources/main/local/hub_encryption_primary.pk8}
+
 

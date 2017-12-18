@@ -35,8 +35,8 @@ public class HubResponseResource {
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse) {
-//        Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
-        HubResponse hubResponse = HubResponse.fromResponse(encryptedHubResponse);
+        Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
+        HubResponse hubResponse = HubResponse.fromResponse(decryptedHubResponse);
         logHubResponse(hubResponse);
         Response eidasResponse = hubResponseTranslator.translate(hubResponse);
         logEidasResponse(eidasResponse);

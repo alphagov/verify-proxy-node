@@ -8,21 +8,20 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
-import uk.gov.ida.notification.pki.KeyPairConfigurationCredentialBuilder;
+import uk.gov.ida.notification.pki.CredentialBuilder;
+import uk.gov.ida.notification.pki.DecryptingCredential;
 import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
+import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
 import uk.gov.ida.stubs.resources.StubIdpResource;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
@@ -76,9 +75,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
-                    final Environment environment) throws ParserConfigurationException {
+                    final Environment environment) {
         String connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
-        SamlParser samlParser = new SamlParser();
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 configuration.getProxyNodeEntityId(),
                 connectorNodeUrl
@@ -86,13 +84,18 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
-        KeyPairConfigurationCredentialBuilder credentialBuilder = new KeyPairConfigurationCredentialBuilder();
-        SigningCredential hubFacingSigningCredential = credentialBuilder.buildSigningCredential(configuration.getHubFacingSigningKeyPair());
+        SigningCredential hubFacingSigningCredential = CredentialBuilder
+                .withKeyPairConfiguration(configuration.getHubFacingSigningKeyPair())
+                .buildSigningCredential();
         SamlObjectSigner hubAuthnRequestSigner = new SamlObjectSigner(hubFacingSigningCredential);
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(
                 eidasAuthnRequestTranslator,
                 hubAuthnRequestSigner);
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+        DecryptingCredential hubFacingDecryptingCredential = CredentialBuilder
+                .withKeyPairConfiguration(configuration.getHubFacingEncryptionKeyPair())
+                .buildDecryptingCredential();
+        ResponseAssertionDecrypter assertionDecrypter = new ResponseAssertionDecrypter(hubFacingDecryptingCredential);
 
         environment.jersey().register(AuthnRequestParameterProvider.class);
         environment.jersey().register(ResponseParameterProvider.class);
@@ -101,7 +104,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder
         ));
-        environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, null, connectorNodeUrl));
+        environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, assertionDecrypter, connectorNodeUrl));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
         environment.jersey().register(new StubIdpResource());
