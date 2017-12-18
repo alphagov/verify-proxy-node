@@ -6,17 +6,18 @@ import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
-import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
-import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
 import uk.gov.ida.notification.exceptions.ResponseAssertionDecryptionException;
+import uk.gov.ida.saml.security.DecrypterFactory;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class ResponseAssertionDecrypter {
     private final Decrypter decrypter;
 
     public ResponseAssertionDecrypter(Credential credential) {
-        decrypter = new Decrypter(null, new StaticKeyInfoCredentialResolver(credential), new InlineEncryptedKeyResolver());
+        DecrypterFactory decrypterFactory = new DecrypterFactory();
+        decrypter = decrypterFactory.createDecrypter(Collections.singletonList(credential));
         decrypter.setRootInNewDocument(true);
     }
 

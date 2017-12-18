@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
-import uk.gov.ida.notification.helpers.HubSamlResponseBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -32,7 +31,6 @@ public class HubResponseAppRuleTests extends SamlInitializedTest {
 
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Throwable {
-        HubSamlResponseBuilder builder = new HubSamlResponseBuilder();
         Response hubResponse = ResponseBuilder.aValidIdpResponse().build();
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
