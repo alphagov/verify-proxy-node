@@ -18,12 +18,13 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         String encodedAuthnRequest = Base64.encodeAsString(marshaller.transformToString(authnRequest));
 
-        SamlFormView view = builder.buildRequest("url", authnRequest, "submit");
+        SamlFormView view = builder.buildRequest("url", authnRequest, "submit", "relay");
 
         assertEquals("url", view.getPostUrl());
         assertEquals(SamlFormMessageType.SAML_REQUEST, view.getSamlMessageType());
         assertEquals(encodedAuthnRequest, view.getEncodedSamlMessage());
         assertEquals("submit", view.getSubmitText());
+        assertEquals("relay", view.getRelayState());
     }
 
     @Test
@@ -33,11 +34,12 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
         Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
         String encodedAuthnRequest = Base64.encodeAsString(marshaller.transformToString(response));
 
-        SamlFormView view = builder.buildResponse("url", response, "submit");
+        SamlFormView view = builder.buildResponse("url", response, "submit", "relay");
 
         assertEquals("url", view.getPostUrl());
         assertEquals(SamlFormMessageType.SAML_RESPONSE, view.getSamlMessageType());
         assertEquals(encodedAuthnRequest, view.getEncodedSamlMessage());
         assertEquals("submit", view.getSubmitText());
+        assertEquals("relay", view.getRelayState());
     }
 }

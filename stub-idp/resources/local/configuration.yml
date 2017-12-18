@@ -1,7 +1,7 @@
 server:
   applicationConnectors:
     - type: http
-      port: ${STUB_IDP_PORT:-$PORT}
+      port: ${PORT:-50140}
   adminConnectors:
     - type: http
       port: 50141
@@ -11,8 +11,13 @@ server:
 
 logging:
   level: INFO
+  loggers:
+    uk.gov.ida: DEBUG
   appenders:
     - type: console
+    - type: file
+      currentLogFilename: logs/stub-idp.log
+      archive: false
 
 assertionLifetime: 60m
 

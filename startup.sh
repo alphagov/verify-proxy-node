@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
 
-# Start proxy-node locally
+# Kill old services
+./kill-service.sh 2>/dev/null
 
-RUN_DIR=$(pwd -P)
-DIST_DIR="$RUN_DIR/build/distributions"
-ZIP_DIR="$DIST_DIR/verify-eidas-notification"
+# Setup environment for local running
+# Proxy Node
+export PROXY_NODE_ENTITY_ID="https://dev-hub.local"
+export HUB_URL="http://localhost:50140/stub-idp-demo/SAML2/SSO"
 
-./gradlew clean distZip
+# Stub IDP
+stub_idp_local="$(pwd -P)/stub-idp/resources/local"
+export HUB_ENTITY_ID="$PROXY_NODE_ENTITY_ID"
+export IDP_SIGNING_PRIVATE_KEY="$stub_idp_local/stub_idp_signing.pk8"
+export IDP_SIGNING_CERT="$stub_idp_local/stub_idp_signing.crt"
+export STUB_IDPS_FILE_PATH="$stub_idp_local/stub-idps.yml"
+export METADATA_URL="http://localhost:6600/hub-metadata/local"
+export METADATA_TRUST_STORE="$stub_idp_local/metadata.ts"
+export METADATA_TRUST_STORE_PASSWORD="marshmallow"
 
-pushd "$DIST_DIR" >/dev/null
-  echo "Extracting distribution zip"
-  unzip -q verify-eidas-notification.zip
-popd >/dev/null
-
-echo "Running Proxy Node"
-(CONFIG_FILE="$ZIP_DIR/config.yml" "$ZIP_DIR/bin/verify-eidas-notification" &) >/dev/null
+# Start applications
+source start-proxy-node.sh
+source start-stub-idp.sh

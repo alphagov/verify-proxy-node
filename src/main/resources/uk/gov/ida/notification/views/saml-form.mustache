@@ -17,6 +17,7 @@
 
 <form action={{postUrl}} method=post name=saml-form>
     <input type=hidden name={{samlMessageType}} value={{encodedSamlMessage}}>
+    <input type=hidden name=RelayState value={{relayState}}>
     <label>
         {{submitText}}:
         <input type=submit name=submit value=Submit>

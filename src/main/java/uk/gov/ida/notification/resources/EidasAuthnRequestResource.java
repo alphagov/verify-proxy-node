@@ -36,28 +36,32 @@ public class EidasAuthnRequestResource {
 
     @GET
     @Path("/Redirect")
-    public View handleRedirectBinding(@QueryParam(SamlFormMessageType.SAML_REQUEST) AuthnRequest encodedEidasAuthnRequest) {
-        return handleAuthnRequest(encodedEidasAuthnRequest);
+    public View handleRedirectBinding(
+            @QueryParam(SamlFormMessageType.SAML_REQUEST) AuthnRequest encodedEidasAuthnRequest,
+            @QueryParam("RelayState") String relayState) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState);
     }
 
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public View handlePostBinding(@FormParam(SamlFormMessageType.SAML_REQUEST) AuthnRequest encodedEidasAuthnRequest) {
-        return handleAuthnRequest(encodedEidasAuthnRequest);
+    public View handlePostBinding(
+            @FormParam(SamlFormMessageType.SAML_REQUEST) AuthnRequest encodedEidasAuthnRequest,
+            @FormParam("RelayState") String relayState) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState);
     }
 
-    private View handleAuthnRequest(AuthnRequest authnRequest) {
+    private View handleAuthnRequest(AuthnRequest authnRequest, String relayState) {
         EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
         logAuthnRequestInformation(eidasAuthnRequest);
         AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
-        return buildSamlFormView(hubAuthnRequest);
+        return buildSamlFormView(hubAuthnRequest, relayState);
     }
 
-    private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest) {
+    private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest, String relayState) {
         String hubUrl = configuration.getHubUrl().toString();
         String submitText = "Post Verify Authn Request to Hub";
-        return samlFormViewBuilder.buildRequest(hubUrl, hubAuthnRequest, submitText);
+        return samlFormViewBuilder.buildRequest(hubUrl, hubAuthnRequest, submitText, relayState);
     }
 
 

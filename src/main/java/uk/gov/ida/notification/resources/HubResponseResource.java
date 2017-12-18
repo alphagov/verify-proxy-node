@@ -15,7 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import java.util.logging.Logger;
 
-@Path("/SAML2/Response")
+@Path("/SAML2/SSO/Response")
 public class HubResponseResource {
     private static final Logger LOG = Logger.getLogger(HubResponseResource.class.getName());
 
@@ -34,13 +34,15 @@ public class HubResponseResource {
     @POST
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public View hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse) {
+    public View hubResponse(
+            @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
+            @FormParam("RelayState") String relayState) {
         Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
         HubResponse hubResponse = HubResponse.fromResponse(decryptedHubResponse);
         logHubResponse(hubResponse);
         Response eidasResponse = hubResponseTranslator.translate(hubResponse);
         logEidasResponse(eidasResponse);
-        return samlFormViewBuilder.buildResponse(connectorNodeUrl, eidasResponse, "Post eIDAS Response SAML to Connector Node");
+        return samlFormViewBuilder.buildResponse(connectorNodeUrl, eidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
     }
 
     private void logHubResponse(HubResponse hubResponse) {
