@@ -5,6 +5,7 @@ import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.Conditions;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.NameIDType;
@@ -44,6 +45,10 @@ public class EidasAuthnRequestTranslator {
                 AuthnContextComparisonTypeEnumeration.EXACT,
                 loa
         );
+
+        Conditions conditions = SamlBuilder.build(Conditions.DEFAULT_ELEMENT_NAME);
+        conditions.setNotOnOrAfter(issueInstant.plusHours(1));
+
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(requestId);
         authnRequest.setDestination(hubUrl);
@@ -51,6 +56,7 @@ public class EidasAuthnRequestTranslator {
         authnRequest.setIssuer(createIssuer(proxyNodeEntityId));
         authnRequest.setNameIDPolicy(createNameIDPolicy());
         authnRequest.setRequestedAuthnContext(requestedAuthnContext);
+        authnRequest.setConditions(conditions);
         return authnRequest;
     }
 

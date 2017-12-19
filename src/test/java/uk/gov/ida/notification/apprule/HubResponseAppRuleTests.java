@@ -62,7 +62,7 @@ public class HubResponseAppRuleTests extends SamlInitializedTest {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 
-        String html = proxyNodeAppRule.target("/SAML2/Response/POST").request()
+        String html = proxyNodeAppRule.target("/SAML2/SSO/Response/POST").request()
                 .post(Entity.form(postForm))
                 .readEntity(String.class);
 

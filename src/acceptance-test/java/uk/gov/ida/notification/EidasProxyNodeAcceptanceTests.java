@@ -6,6 +6,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -29,16 +30,27 @@ public class EidasProxyNodeAcceptanceTests {
     @Test
     public void shouldHandleEidasAuthnRequest() throws Exception {
         try (final WebClient webClient = new WebClient()) {
+            // Disable JS
+            webClient.getOptions().setJavaScriptEnabled(false);
+
+            // Service Start Page
             HtmlPage testSamlPage = webClient.getPage(connectorNodeUrl());
 
+            // Submit eIDAS AuthnRequest to Proxy Node
             HtmlPage verifyAuthnRequestPage = submitSamlForm(testSamlPage);
-            HtmlPage idpSamlResponsePage = submitSamlForm(verifyAuthnRequestPage);
-            HtmlPage eidasSamlResponsePage = submitSamlForm(idpSamlResponsePage);
-            HtmlPage successPage = submitSamlForm(eidasSamlResponsePage);
+
+            // Submit Verify AuthnRequest to Hub
+            HtmlPage idpLoginPage = submitSamlForm(verifyAuthnRequestPage);
+
+            // Login at Hub (IDP)
+            HtmlPage idpConsentPage = loginAtIDP(idpLoginPage);
+            HtmlPage idpSamlResponsePage = consentAtIDP(idpConsentPage);
+
+            // Submit eIDAS Response to Connector Node
+            HtmlPage successPage = submitSamlForm(idpSamlResponsePage);
 
             String content = successPage.getBody().getTextContent();
 
-            assertThat(content, containsString("ES/AT/02635542Y"));
             assertThat(content, containsString("http://eidas.europa.eu/LoA/substantial"));
             assertThat(content, containsString("Jack Cornelius"));
             assertThat(content, containsString("Bauer"));
@@ -46,7 +58,20 @@ public class EidasProxyNodeAcceptanceTests {
         }
     }
 
-    private HtmlPage submitSamlForm(HtmlPage testSamlPage) throws java.io.IOException {
+    private HtmlPage loginAtIDP(HtmlPage idpLogin) throws IOException {
+        HtmlForm loginForm = idpLogin.getForms().get(0);
+        loginForm.getInputByName("username").setValueAttribute("stub-idp-demo");
+        loginForm.getInputByName("password").setValueAttribute("bar");
+        return loginForm.getInputByValue("SignIn").click();
+    }
+
+    private HtmlPage consentAtIDP(HtmlPage idpConsent) throws IOException {
+        HtmlForm consentForm = idpConsent.getForms().get(0);
+        HtmlPage continuePage = consentForm.getInputByValue("I Agree").click();
+        return continuePage.getForms().get(0).getElementsByTagName("button").get(0).click();
+    }
+
+    private HtmlPage submitSamlForm(HtmlPage testSamlPage) throws IOException {
         HtmlForm authnRequestForm = testSamlPage.getFormByName(SAML_FORM);
         return authnRequestForm.getInputByName(SUBMIT_BUTTON).click();
     }
