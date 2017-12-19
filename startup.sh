@@ -21,3 +21,13 @@ export METADATA_TRUST_STORE_PASSWORD="marshmallow"
 # Start applications
 source start-proxy-node.sh
 source start-stub-idp.sh
+
+until $(curl --output /dev/null --silent --head --fail http://localhost:6601/); do
+  echo "Waiting for Proxy Node"
+  sleep 1
+done
+
+until $(curl --output /dev/null --silent --head --fail http://localhost:50141/); do
+  echo "Waiting for Stub IDP"
+  sleep 1
+done
