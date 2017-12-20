@@ -22,11 +22,7 @@ public class EidasProxyNodeAppRule extends DropwizardAppRule<EidasProxyNodeConfi
                 EidasProxyNodeApplication.class,
                 resourceFilePath("config.yml"),
                 ConfigOverride.config("server.applicationConnectors[0].port", "0"),
-                ConfigOverride.config("server.adminConnectors[0].port", "0"),
-                ConfigOverride.config("hubFacingSigningKeyPair.publicKey.certFile", "out/production/resources/local/hub_signing_primary.crt"),
-                ConfigOverride.config("hubFacingSigningKeyPair.privateKey.keyFile", "out/production/resources/local/hub_signing_primary.pk8"),
-                ConfigOverride.config("hubFacingEncryptionKeyPair.publicKey.certFile", "out/production/resources/local/hub_encryption_primary.crt"),
-                ConfigOverride.config("hubFacingEncryptionKeyPair.privateKey.keyFile", "out/production/resources/local/hub_encryption_primary.pk8")
+                ConfigOverride.config("server.adminConnectors[0].port", "0")
         );
     }
 
