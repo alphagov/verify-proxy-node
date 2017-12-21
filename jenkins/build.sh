@@ -2,5 +2,4 @@
 
 set -e
 
-./pre-commit.sh
-
+./gradlew clean build
