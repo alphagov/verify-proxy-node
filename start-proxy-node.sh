@@ -17,4 +17,10 @@ pushd "$DIST_DIR" >/dev/null
 popd >/dev/null
 
 echo "Running Proxy Node"
+
+if [ "$DEBUG" = "true" ]; then
+  echo "Running in Debug mode..."
+  export JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006"
+fi
+
 (CONFIG_FILE="$ZIP_DIR/config.yml" "$ZIP_DIR/bin/$APP_NAME" &) >/dev/null
