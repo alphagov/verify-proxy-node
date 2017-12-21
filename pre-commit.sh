@@ -2,5 +2,5 @@
 
 set -e
 
-./gradlew clean build
+./jenkins/build.sh
 ./local-acceptance.sh
