@@ -25,7 +25,7 @@ public class ResponseAssertionDecrypter {
         encryptedResponse.getAssertions().clear();
         encryptedResponse.getAssertions().addAll(encryptedResponse.getEncryptedAssertions()
             .stream()
-            .map(a -> decryptAssertion(a))
+            .map(this::decryptAssertion)
             .collect(Collectors.toList())
         );
         encryptedResponse.getEncryptedAssertions().clear();
