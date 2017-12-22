@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor
+    xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+    xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport"
+    xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+    xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute"
+    ID="_entities"
+    entityID="_verify_proxy_node"
+validUntil="2115-05-24T19:30:26.624Z">
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+    <ds:SignedInfo>
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+      <ds:Reference URI="#_9ebc8854ec7f701da9749e87a801e5f2">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+          <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>t2DvNbFynxqsLoF4BfJPIvauBrSeVDjBCPBHulKYh4g=</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue>G34==</ds:SignatureValue>
+    <ds:KeyInfo>
+      <ds:X509Data>
+        <ds:X509Certificate>MIIDPWA==</ds:X509Certificate>
+      </ds:X509Data>
+    </ds:KeyInfo>
+  </ds:Signature>
+  <md:Extensions>
+    <mdattr:EntityAttributes>
+      <saml2:Attribute
+          Name="http://eidas.europa.eu/LoA"
+          NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri">
+        <saml2:AttributeValue>
+          http://eidas.europa.eu/LoA/substantial
+        </saml2:AttributeValue>
+      </saml2:Attribute>
+    </mdattr:EntityAttributes>
+    <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+    <alg:SigningMethod MinKeySize="256" Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsasha256"/>
+    <alg:SigningMethod MinKeySize="3072" MaxKeySize="4096"
+                       Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+  </md:Extensions>
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="true"
+                       protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>
+            MIIEATCCAumgAwIBAgIUWl5SWoGZP5zYHo+Z+WQFN7xT9EMwDQYJKoZIhvcNAQEL
+            BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u
+            ZG9uMRcwFQYDVQQKEw5DYWJpbmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRMwEQYD
+            VQQDEwpEZXYgSHViIENBMCAXDTE3MTIyMTExMDcwMFoYDzIxMTcxMTI3MTEwNzAw
+            WjBwMQswCQYDVQQGEwJHQjEPMA0GA1UECBMGTG9uZG9uMQ8wDQYDVQQHEwZMb25k
+            b24xFzAVBgNVBAoTDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLEwNHRFMxGDAWBgNV
+            BAMTD0RldiBIdWIgU2lnbmluZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+            ggEBANCOhPs4PwaI91hf1FeVI3NqVVN9QoE1JCuqliCu1WnUFa6QHVTNWmchc+or
+            Je8jCOTeomxiuOsvV7f0lRuacN3hHtp5lLqeCimcla230/2WSy/7h0XSjBpAqNcC
+            ZmOC+E2Hoa+JlzhMLGVeIahSRNd3o6f6jYi2DpZ980PZquS8IpifeQJgmRWPnt2d
+            nfRr6AQRZwR6hYi65snDICHpP2enfSX6Pg6rvc92M17o9qzi76+uze8K28r5sjS2
+            h92kHT24TfurST1tImWmI3aNOC2aUgFE6Tym/lczOpjVhRjH2gBANo0Mgx9T2OVs
+            uLLZUZYzCqvEbffIBTjvHzSvjrsCAwEAAaOBlTCBkjAOBgNVHQ8BAf8EBAMCB4Aw
+            DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUUamEdmFuEP0WQo/ThI6VSxHSwdwwHwYD
+            VR0jBBgwFoAU1528ED1R/g2HUT8en0Mqr2FQwzYwMgYIKwYBBQUHAQEEJjAkMCIG
+            CCsGAQUFBzABhhZodHRwOi8vbG9jYWxob3N0OjU4ODg5MA0GCSqGSIb3DQEBCwUA
+            A4IBAQCHIGzJkHIwtKHm74cYUwGWABKv+ULbV7NSWOs4XDVjO8fQd6yuKomiYpbp
+            kPhE5/GceQGP0JOrgUb/+027PFW/AP7ffwYxQUA1w1YJvpYLDQ9XiY+BhjBSHvWk
+            G+zlYUKaRM1ZjqKaIRZpPL9Q4sbmnKo9imBy2eZJv7RbKH6i6+nk7Y6AzZlWmYuM
+            6Va1FV/oBarqS5PjcGG7LzRKViSIuq/Ud5FUtLql6KPk5UhSSb1NoqXPVMiqWrG+
+            Yg7EapvmkmJ9J6R+pMl+2cY451WxkTvcGtfHcUbBKElQmlwE/NEQJaNomx+4CgS5
+            +M+y1ighLDc2M6l94dHhp48nAt6i
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="encryption">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>
+            MIIEBDCCAuygAwIBAgIUIvyUrLSaN1aVfbl0XASId4MsKlkwDQYJKoZIhvcNAQEL
+            BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u
+            ZG9uMRcwFQYDVQQKEw5DYWJpbmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRMwEQYD
+            VQQDEwpEZXYgSHViIENBMCAXDTE3MTIyMTExMDcwMFoYDzIxMTcxMTI3MTEwNzAw
+            WjBzMQswCQYDVQQGEwJHQjEPMA0GA1UECBMGTG9uZG9uMQ8wDQYDVQQHEwZMb25k
+            b24xFzAVBgNVBAoTDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLEwNHRFMxGzAZBgNV
+            BAMTEkRldiBIdWIgRW5jcnlwdGlvbjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+            AQoCggEBAL5ob0c4FR+NAFKS3BLKFcyK58LZqcbpTixfM5bnviz89LZERXQvwxsK
+            H3HdPQAAZC3fg+K1ixwI6/zfqgeq3Hyo1L97luq2wKLi6Ayy8NEnX4dFxxSpl2IH
+            dVDZGam4o14Y88b+c313ixCHeWBXNn+8gsdHXcGI6rqxotOLIbhYBURwI4BOxcn4
+            cygEVOng+3S0mjdtAUhXA0pvtWi0znxsgWstD/vUIL8sO6xahtCNhGWSU/Uy7cZm
+            Ag6RLvrqOJQ4YLRtBlbUbjOk2Gy5OWWlRdnEAwyc9LBagFbVwFlS4bFfkj3VvSIn
+            ISLU9OhrRzSvGKN+FfinfbqR97a/mx0CAwEAAaOBlTCBkjAOBgNVHQ8BAf8EBAMC
+            BSAwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUJVTMfuvp6amc44qtnYsgzgYkE7cw
+            HwYDVR0jBBgwFoAU1528ED1R/g2HUT8en0Mqr2FQwzYwMgYIKwYBBQUHAQEEJjAk
+            MCIGCCsGAQUFBzABhhZodHRwOi8vbG9jYWxob3N0OjU4ODg5MA0GCSqGSIb3DQEB
+            CwUAA4IBAQAAlSdVClGyYmm2Q3IqWz++47+EwFA2JZ67qBr5M7UTnBiitz0jbD0d
+            1WSHZVM0FzqRMYEH2NKipXXNQ2tubRhXZcMA/Wg7ee6RwabTRyykkWK5UrdKdJYh
+            EkqvalF5TCAHs2nMk90DCPXm82Y6vg167mMzYVR+prhrD/alpoyVZC83nZIPs1Xq
+            +MOTVfQo+Ir/Wv9yeTE7oAFnsN+OfokKuZ2Gm8B8Xt3+DyBUl3PHQD58Gy2tgiEr
+            tqK8FGZ1yHlEFlu+SQ5oUf1iV14mxhYl4i5a0g7bRFqJcmbB1JXp67+O/bzDE7Vs
+            fZpDNo/LaH8qx55Vf9u5p7wRsgjpZ5ew
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+      <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+    </md:KeyDescriptor>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                            Location="https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                            Location="https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/Redirect"/>
+    <saml2:Attribute
+        FriendlyName="PersonIdentifier"
+        Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+    </saml2:Attribute>
+    <saml2:Attribute
+        FriendlyName="FamilyName"
+        Name="http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+    </saml2:Attribute>
+    <saml2:Attribute
+        FriendlyName="FirstName"
+        Name="http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+    </saml2:Attribute>
+    <saml2:Attribute
+        FriendlyName="DateOfBirth"
+        Name="http://eidas.europa.eu/attributes/naturalperson/DateOfBirth"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+    </saml2:Attribute>
+    <saml2:Attribute
+        FriendlyName="LegalName"
+        Name="http://eidas.europa.eu/attributes/legalperson/LegalName"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+    </saml2:Attribute>
+    <saml2:Attribute
+        FriendlyName="LegalPersonIdentifier"
+        Name="http://eidas.europa.eu/attributes/legalperson/LegalPersonIdentifier"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+    </saml2:Attribute>
+  </md:IDPSSODescriptor>
+  <md:Organization>
+    <md:OrganizationName xml:lang="en">eIDAS Service</md:OrganizationName>
+    <md:OrganizationDisplayName xml:lang="en">eIDAS Service</md:OrganizationDisplayName>
+    <md:OrganizationURL xml:lang="en">https://eidas-service.eu</md:OrganizationURL>
+  </md:Organization>
+  <md:ContactPerson contactType="technical">
+    <md:Company>eIDAS Service Operator</md:Company>
+    <md:GivenName>John</md:GivenName>
+    <md:SurName>Doe</md:SurName>
+    <md:EmailAddress>john.doe@eidas-service.eu</md:EmailAddress>
+    <md:TelephoneNumber>+43 123456</md:TelephoneNumber>
+  </md:ContactPerson>
+</md:EntityDescriptor>
