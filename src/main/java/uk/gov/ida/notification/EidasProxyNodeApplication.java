@@ -21,7 +21,6 @@ import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
-import uk.gov.ida.stubs.resources.StubIdpResource;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
@@ -107,6 +106,5 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, assertionDecrypter, connectorNodeUrl));
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
-        environment.jersey().register(new StubIdpResource());
     }
 }
