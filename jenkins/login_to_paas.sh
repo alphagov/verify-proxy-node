@@ -5,7 +5,6 @@ CF_ORG="govuk-verify"
 CF_SPACE="notification"
 
 if [ -z "${CF_USER:-}" ]; then
-  # For running locally
   echo "CF_USER env var is unset so assume we're running locally" >&2
 else
   # CloudFoundry will cache credentials in ~/.cf/config.json by default.
