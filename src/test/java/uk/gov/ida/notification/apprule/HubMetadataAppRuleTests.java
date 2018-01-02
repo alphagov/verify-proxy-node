@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class MetadataAppRuleTests {
+public class HubMetadataAppRuleTests {
     @ClassRule
     public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();
     private SamlParser parser;

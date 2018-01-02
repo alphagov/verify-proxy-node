@@ -11,6 +11,7 @@ import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.pki.CredentialBuilder;
 import uk.gov.ida.notification.pki.DecryptingCredential;
 import uk.gov.ida.notification.pki.SigningCredential;
+import uk.gov.ida.notification.resources.ConnectorNodeMetadataResource;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
@@ -105,6 +106,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         ));
         environment.jersey().register(new HubResponseResource(hubResponseTranslator, samlFormViewBuilder, assertionDecrypter, connectorNodeUrl));
         environment.jersey().register(new HubMetadataResource());
+        environment.jersey().register(new ConnectorNodeMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
     }
 }
