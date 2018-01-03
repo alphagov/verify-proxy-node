@@ -21,7 +21,7 @@ public class ConnectorNodeMetadataResource {
     public Response getHubMetadata(@PathParam("environment") String environment) {
         try {
             String connectorNodeMetadata = Resources.toString(
-                    Resources.getResource(environment + "/connector_node_metadata.xml"),
+                    Resources.getResource(environment + "/metadata_for_connector_node.xml"),
                     Charsets.UTF_8);
             return Response.ok().entity(connectorNodeMetadata).build();
         } catch (IOException | IllegalArgumentException e) {

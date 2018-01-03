@@ -21,7 +21,7 @@ public class HubMetadataResource {
     public Response getHubMetadata(@PathParam("environment") String environment) {
         try {
             String hubMetadata = Resources.toString(
-                    Resources.getResource(environment + "/hub_metadata.xml"),
+                    Resources.getResource(environment + "/metadata_for_hub.xml"),
                     Charsets.UTF_8);
             return Response.ok().entity(hubMetadata).build();
         } catch (IOException | IllegalArgumentException e) {

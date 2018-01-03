@@ -77,6 +77,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) {
         String connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
+
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 configuration.getProxyNodeEntityId(),
                 connectorNodeUrl
