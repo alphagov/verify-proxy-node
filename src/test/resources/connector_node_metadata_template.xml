@@ -82,71 +82,14 @@
     <md:KeyDescriptor use="signing">
       <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
         <ds:X509Data>
-          <ds:X509Certificate>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
-            1SlFMQ==
-          </ds:X509Certificate>
+          <ds:X509Certificate>{ Signing cert }</ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
     <md:KeyDescriptor use="encryption">
       <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
         <ds:X509Data>
-          <ds:X509Certificate>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
-          </ds:X509Certificate>
+          <ds:X509Certificate>{ Encryption cert }</ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
       <md:EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes192-gcm"/>

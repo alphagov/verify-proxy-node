@@ -1,72 +1,78 @@
 package uk.gov.ida.notification.saml.metadata;
 
-import io.dropwizard.testing.ResourceHelpers;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import org.junit.Rule;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationService;
-import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
-import org.w3c.dom.Document;
-import uk.gov.ida.notification.helpers.FileHelpers;
+import org.junit.rules.ExpectedException;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import uk.gov.ida.notification.exceptions.MissingMetadataException;
+import uk.gov.ida.notification.helpers.TestCertificates;
+import uk.gov.ida.notification.helpers.TestMetadataResolverBuilder;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ConnectorNodeMetadataTest {
 
-    private static final String TEST_CONNECTOR_NODE_METADATA_FILE = "connector_node_metadata.xml";
+    private static final String TEST_CONNECTOR_NODE_METADATA_FILE = "connector_node_metadata_template.xml";
+    private static final String CONNECTOR_NODE_METADATA_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
 
     @Test
-    public void shouldReturnConnectorNodeEncryptionCertificateFromRemoteMetadata() throws Exception {
-        String connectorNodeMetadataEntityId = "http://connector-node:8080/ConnectorResponderMetadata";
-        PublicKey expectedPublicKey = readEncryptionPublicKeyFrom(TEST_CONNECTOR_NODE_METADATA_FILE);
+    public void shouldReturnConnectorNodeEncryptionPublicKeyFromMetadata() throws Exception {
+        X509Certificate encryptionCert = TestCertificates.aX509Certificate();
+        PublicKey expectedPublicKey = encryptionCert.getPublicKey();
 
-        InitializationService.initialize();
-        String testConnectorNodeMetadataFilepath = ResourceHelpers.resourceFilePath(TEST_CONNECTOR_NODE_METADATA_FILE);
-        FilesystemMetadataResolver metadataResolver = initializeMetadataResolver(testConnectorNodeMetadataFilepath);
+        MetadataResolver metadataResolver = new TestMetadataResolverBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
+                .withEncryptionCert(encryptionCert)
+                .build("someId");
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
-        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataResolver, connectorNodeMetadataEntityId);
-        PublicKey connectorNodeEncryptionCert = connectorNodeMetadata.getEncryptionCertificate();
+        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
+        PublicKey connectorNodeEncryptionPublicKey = connectorNodeMetadata.getEncryptionPublicKey();
 
-        assertEquals(expectedPublicKey, connectorNodeEncryptionCert);
+        assertEquals(expectedPublicKey, connectorNodeEncryptionPublicKey);
     }
 
-    private FilesystemMetadataResolver initializeMetadataResolver(String testConnectorNodeMetadataFilepath) throws ResolverException, ComponentInitializationException {
-        FilesystemMetadataResolver metadataResolver = new FilesystemMetadataResolver(new File(testConnectorNodeMetadataFilepath));
-        BasicParserPool parserPool = new BasicParserPool();
-        parserPool.initialize();
-        metadataResolver.setParserPool(parserPool);
-        metadataResolver.setRequireValidMetadata(true);
-        metadataResolver.setId("someId");
-        metadataResolver.initialize();
-        return metadataResolver;
+    @Test(expected = MissingMetadataException.class)
+    public void shouldErrorIfEncryptionPublicKeyElementIsEmpty() throws Exception {
+        MetadataResolver metadataResolver = new TestMetadataResolverBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
+                .withEncryptionCert("")
+                .build("someId");
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
+
+        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
+        connectorNodeMetadata.getEncryptionPublicKey();
     }
 
-    private PublicKey readEncryptionPublicKeyFrom(String file) throws Exception {
-        String metadataString = FileHelpers.readFileAsString(file);
+    @Test(expected = MissingMetadataException.class)
+    public void shouldErrorIfNoEncryptionPublicKeyElement() throws Exception {
+        MetadataResolver metadataResolver = new TestMetadataResolverBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
+                .withNoEncryptionCert()
+                .build("someId");
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
-        InputStream metadataXml = new ByteArrayInputStream(metadataString.getBytes());
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document doc = builder.parse(metadataXml);
+        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
+        connectorNodeMetadata.getEncryptionPublicKey();
+    }
 
-        XPath xpath = XPathFactory.newInstance().newXPath();
-        String x509CertificateString = xpath.evaluate("//KeyDescriptor[@use='encryption']//X509Certificate/text()", doc).replaceAll("\n\\s*", "");
-        String pemString = "-----BEGIN CERTIFICATE-----\n" + x509CertificateString + "\n-----END CERTIFICATE-----";
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
-        InputStream certificateInputStream = new ByteArrayInputStream(pemString.getBytes());
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        Certificate certificate = certFactory.generateCertificate(certificateInputStream);
-        return certificate.getPublicKey();
+    @Test
+    public void shouldErrorIfUnableToResolveMetadata() throws Exception {
+        expectedEx.expect(ResolverException.class);
+        expectedEx.expectMessage("Unable to resolve metadata credentials");
+
+        MetadataCredentialResolver metadataResolver = mock(MetadataCredentialResolver.class);
+        when(metadataResolver.resolveSingle(any())).thenThrow(ResolverException.class);
+
+        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
+        connectorNodeMetadata.getEncryptionPublicKey();
     }
 }
