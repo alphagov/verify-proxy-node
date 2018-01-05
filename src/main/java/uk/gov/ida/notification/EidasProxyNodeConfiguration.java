@@ -2,6 +2,7 @@ package uk.gov.ida.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.dropwizard.client.JerseyClientConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 
 import javax.validation.Valid;
@@ -23,6 +24,16 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
+    private URI connectorNodeMetadataUrl;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String connectorNodeEntityId;
+
+    @JsonProperty
+    @Valid
+    @NotNull
     private String proxyNodeEntityId;
 
     @JsonProperty
@@ -34,6 +45,10 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @Valid
     @NotNull
     private KeyPairConfiguration hubFacingEncryptionKeyPair;
+    @JsonProperty
+    @Valid
+    @NotNull
+    private JerseyClientConfiguration httpClient;
 
     public URI getHubUrl() {
         return hubUrl;
@@ -53,5 +68,17 @@ public class EidasProxyNodeConfiguration extends Configuration {
 
     public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
         return hubFacingEncryptionKeyPair;
+    }
+
+    public JerseyClientConfiguration getHttpClientConfiguration() {
+        return httpClient;
+    }
+
+    public URI getConnectorNodeMetadataUrl() {
+        return connectorNodeMetadataUrl;
+    }
+
+    public String getConnectorNodeEntityId() {
+        return connectorNodeEntityId;
     }
 }

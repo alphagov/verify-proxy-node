@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Kill old services
 ./kill-service.sh 2>/dev/null
 
