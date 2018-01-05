@@ -37,13 +37,20 @@ public class EidasAuthnRequest {
         String destination = request.getDestination();
         String requestedLoa = request.getRequestedAuthnContext().getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
 
+        SPTypeEnumeration spType;
+
         XMLObject spTypeObj = request.getExtensions().getOrderedChildren()
                 .stream()
                 .filter(obj -> obj  instanceof  SPTypeImpl)
                 .findFirst()
-                .orElseThrow(() -> new EidasAuthnRequestException("eIDAS AuthnRequest has no SPType"));
+                .orElse(null);
 
-        SPTypeEnumeration spType = ((SPType) spTypeObj).getType();
+        if (spTypeObj == null) {
+            spType = new SPTypeEnumeration("public");
+        }
+        else {
+            spType = ((SPType) spTypeObj).getType();
+        }
 
         Optional<XMLObject> requestedAttributesObj = request.getExtensions().getOrderedChildren()
                 .stream()
