@@ -30,7 +30,7 @@ dependencies {
         "io.dropwizard:dropwizard-views-mustache:${dropwizardVersion}",
         "org.opensaml:opensaml-core:${openSamlVersion}",
         "org.opensaml:opensaml-saml-impl:${openSamlVersion}",
-        "uk.gov.ida:ida-saml-extensions:${openSamlVersion}-1.2a-36",
+        "uk.gov.ida:ida-saml-extensions:${openSamlVersion}-1.2a-41",
         "uk.gov.ida:saml-security:${openSamlVersion}-51",
         "uk.gov.ida:security-utils:2.0.0-323",
         "se.litsec.eidas:eidas-opensaml3:1.0.5"
