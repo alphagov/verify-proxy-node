@@ -23,6 +23,6 @@ public class ResponseParameterProvider implements ParamConverterProvider {
         if (!org.opensaml.saml.saml2.core.Response.class.equals(rawType)) {
             return null;
         }
-        return new EidasSamlParamConverter<>(samlParser);
+        return new SamlMessageParamConverter<>(samlParser);
     }
 }

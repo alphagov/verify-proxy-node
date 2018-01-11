@@ -8,10 +8,10 @@ import uk.gov.ida.notification.saml.SamlParser;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ParamConverter;
 
-class EidasSamlParamConverter<T> implements ParamConverter<T> {
+class SamlMessageParamConverter<T> implements ParamConverter<T> {
     private SamlParser samlParser;
 
-    EidasSamlParamConverter(SamlParser samlParser) {
+    SamlMessageParamConverter(SamlParser samlParser) {
         this.samlParser = samlParser;
     }
 
