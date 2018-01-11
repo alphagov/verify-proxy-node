@@ -8,10 +8,10 @@ import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.impl.RequestedAttributesImpl;
 import se.litsec.eidas.opensaml.ext.impl.SPTypeImpl;
-import uk.gov.ida.notification.exceptions.EidasAuthnRequestException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class EidasAuthnRequest {
@@ -37,20 +37,12 @@ public class EidasAuthnRequest {
         String destination = request.getDestination();
         String requestedLoa = request.getRequestedAuthnContext().getAuthnContextClassRefs().get(0).getAuthnContextClassRef();
 
-        SPTypeEnumeration spType;
-
-        XMLObject spTypeObj = request.getExtensions().getOrderedChildren()
+        SPTypeEnumeration spType = Objects.requireNonNull(request.getExtensions().getOrderedChildren())
                 .stream()
                 .filter(obj -> obj  instanceof  SPTypeImpl)
                 .findFirst()
-                .orElse(null);
-
-        if (spTypeObj == null) {
-            spType = new SPTypeEnumeration("public");
-        }
-        else {
-            spType = ((SPType) spTypeObj).getType();
-        }
+                .map(o -> ((SPType) o).getType())
+                .orElse(new SPTypeEnumeration("public"));
 
         Optional<XMLObject> requestedAttributesObj = request.getExtensions().getOrderedChildren()
                 .stream()
