@@ -24,6 +24,6 @@ public class AuthnRequestParameterProvider implements ParamConverterProvider {
         if (!AuthnRequest.class.equals(rawType)) {
             return null;
         }
-        return new EidasSamlParamConverter<>(samlParser);
+        return new SamlMessageParamConverter<>(samlParser);
     }
 }

@@ -31,3 +31,5 @@ buildNumber.properties
 
 /classes/*
 /**/*.orig
+
+ida-stub-idp
