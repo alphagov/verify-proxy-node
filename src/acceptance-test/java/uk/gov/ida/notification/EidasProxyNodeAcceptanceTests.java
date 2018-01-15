@@ -19,7 +19,7 @@ public class EidasProxyNodeAcceptanceTests {
     private static final String HUB_METADATA_ENDPOINT = "/hub-metadata/local";
 
     @Test
-    public void shouldHubFetchMetadata() throws Exception {
+    public void shouldFetchHubMetadata() throws Exception {
         try (final WebClient webClient = new WebClient()) {
             XmlPage hubMetadataPage = webClient.getPage(proxyNodeBase(HUB_METADATA_ENDPOINT));
             String content = hubMetadataPage.asXml();

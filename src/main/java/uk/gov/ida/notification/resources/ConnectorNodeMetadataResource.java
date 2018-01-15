@@ -18,7 +18,7 @@ public class ConnectorNodeMetadataResource {
 
     @GET
     @Produces(MEDIA_TYPE_SAMLMETADATA_XML)
-    public Response getHubMetadata(@PathParam("environment") String environment) {
+    public Response getConnectorNodeMetadata(@PathParam("environment") String environment) {
         try {
             String connectorNodeMetadata = Resources.toString(
                     Resources.getResource(environment + "/metadata_for_connector_node.xml"),
