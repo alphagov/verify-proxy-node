@@ -3,12 +3,15 @@ package uk.gov.ida.notification.apprule;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AttributeValue;
+import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.security.credential.Credential;
+import org.opensaml.saml.saml2.encryption.Decrypter;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.helpers.TestCertificates;
+import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -26,9 +29,11 @@ import uk.gov.ida.saml.core.test.builders.IPAddressAttributeBuilder;
 import uk.gov.ida.saml.core.test.builders.PersonNameAttributeBuilder_1_1;
 import uk.gov.ida.saml.core.test.builders.PersonNameAttributeValueBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
+import uk.gov.ida.saml.security.DecrypterFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder.anAttributeStatement;
@@ -45,13 +50,17 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        Credential credential = new BasicCredential(
+        DecryptionCredential hubAssertionsEncryptionCredential = new DecryptionCredential(
                 hubFacingEncryptionKeyPair.getPublicKey().getPublicKey(),
                 hubFacingEncryptionKeyPair.getPrivateKey().getPrivateKey()
         );
+        DecryptionCredential eidasAssertionsDecryptionCredential = new DecryptionCredential(
+                TestCertificates.aX509Certificate().getPublicKey(), TestCertificates.aPrivateKey()
+        );
+
         Response hubResponse = ResponseBuilder.aResponse()
-                .addEncryptedAssertion(anAuthnStatementAssertion().buildWithEncrypterCredential(credential))
-                .addEncryptedAssertion(aMatchingDatasetAssertion().buildWithEncrypterCredential(credential))
+                .addEncryptedAssertion(anAuthnStatementAssertion().buildWithEncrypterCredential(hubAssertionsEncryptionCredential))
+                .addEncryptedAssertion(aMatchingDatasetAssertion().buildWithEncrypterCredential(hubAssertionsEncryptionCredential))
                 .build();
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
@@ -62,8 +71,12 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
         String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
         Response eidasResponse = parser.parseSamlString(decodedEidasResponse);
+        Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
+        assertEquals(1, eidasResponse.getEncryptedAssertions().size());
+        assert(eidasResponse.getAssertions().isEmpty());
+        assertEquals(aMatchingDatasetAssertion().buildUnencrypted().getAttributeStatements().size(), eidasAssertion.getAttributeStatements().size());
     }
 
     private static AssertionBuilder anAuthnStatementAssertion() {
@@ -91,5 +104,11 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
         return AssertionBuilder.anAssertion()
                 .addAttributeStatement(attributeStatementBuilder.build());
+    }
+
+    private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, DecryptionCredential credential) throws Exception {
+        DecrypterFactory decrypterFactory = new DecrypterFactory();
+        Decrypter decrypter = decrypterFactory.createDecrypter(Collections.singletonList(credential));
+        return decrypter.decrypt(encryptedAssertion);
     }
 }

@@ -8,13 +8,12 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import uk.gov.ida.notification.pki.CredentialBuilder;
-import uk.gov.ida.notification.pki.DecryptingCredential;
+import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.resources.ConnectorNodeMetadataResource;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
@@ -156,9 +155,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     }
 
     private ResponseAssertionDecrypter createDecrypter() {
-        DecryptingCredential hubFacingDecryptingCredential = CredentialBuilder
+        DecryptionCredential hubFacingDecryptingCredential = CredentialBuilder
                 .withKeyPairConfiguration(configuration.getHubFacingEncryptionKeyPair())
-                .buildDecryptingCredential();
+                .buildDecryptionCredential();
+        
         return new ResponseAssertionDecrypter(hubFacingDecryptingCredential);
     }
 

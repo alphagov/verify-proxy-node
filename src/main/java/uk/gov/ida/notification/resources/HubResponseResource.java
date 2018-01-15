@@ -4,7 +4,10 @@ import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.pki.CredentialBuilder;
+import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
+import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.metadata.ConnectorNodeMetadata;
 import uk.gov.ida.notification.saml.translation.HubResponse;
@@ -25,9 +28,9 @@ public class HubResponseResource {
 
     private final HubResponseTranslator hubResponseTranslator;
     private final SamlFormViewBuilder samlFormViewBuilder;
-    private ConnectorNodeMetadata connectorNodeMetadata;
     private final ResponseAssertionDecrypter assertionDecrypter;
     private final String connectorNodeUrl;
+    private ConnectorNodeMetadata connectorNodeMetadata;
 
     public HubResponseResource(HubResponseTranslator hubResponseTranslator, SamlFormViewBuilder samlFormViewBuilder, ResponseAssertionDecrypter assertionDecrypter, String connectorNodeUrl, ConnectorNodeMetadata connectorNodeMetadata) {
         this.assertionDecrypter = assertionDecrypter;
@@ -48,8 +51,19 @@ public class HubResponseResource {
         logHubResponse(hubResponseContainer);
         Response eidasResponse = hubResponseTranslator.translate(hubResponseContainer);
         PublicKey encryptionPublicKey = connectorNodeMetadata.getEncryptionPublicKey(); //TODO: Needs this to play the next encryption story. This is here to prove it's been provided.
+
         logEidasResponse(eidasResponse);
-        return samlFormViewBuilder.buildResponse(connectorNodeUrl, eidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
+
+        ResponseAssertionEncrypter assertionEncrypter = createAssertionEncrypter();
+        Response eidasResponseWithAssertionsEncrypted = assertionEncrypter.encrypt(eidasResponse);
+        return samlFormViewBuilder.buildResponse(connectorNodeUrl, eidasResponseWithAssertionsEncrypted, "Post eIDAS Response SAML to Connector Node", relayState);
+    }
+
+    private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException {
+        EncryptionCredential connectorNodeEncryptingCredential = CredentialBuilder
+                .withPublicKey(connectorNodeMetadata.getEncryptionPublicKey())
+                .buildEncryptionCredential();
+        return new ResponseAssertionEncrypter(connectorNodeEncryptingCredential);
     }
 
     private void logHubResponse(HubResponseContainer hubResponseContainer) {

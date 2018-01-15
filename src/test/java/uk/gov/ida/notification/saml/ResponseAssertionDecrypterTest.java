@@ -5,7 +5,7 @@ import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.pki.DecryptingCredential;
+import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.saml.core.test.builders.AssertionBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
@@ -15,7 +15,7 @@ public class ResponseAssertionDecrypterTest extends SamlInitializedTest {
     @Test
     public void shouldDecryptAssertionsInResponse() throws Throwable {
         TestKeyPair testKeyPair = new TestKeyPair();
-        DecryptingCredential credential = new DecryptingCredential(testKeyPair.getPublicKey(), testKeyPair.getPrivateKey());
+        DecryptionCredential credential = new DecryptionCredential(testKeyPair.getPublicKey(), testKeyPair.getPrivateKey());
 
         EncryptedAssertion assertion = AssertionBuilder.anAssertion().withId("hi").buildWithEncrypterCredential(credential);
         Response encryptedResponse = ResponseBuilder.aResponse().addEncryptedAssertion(assertion).build();
