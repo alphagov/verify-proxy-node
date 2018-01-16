@@ -1,10 +1,10 @@
 package uk.gov.ida.notification.apprule;
 
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.opensaml.saml.saml2.metadata.EntitiesDescriptor;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
@@ -17,9 +17,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class HubMetadataAppRuleTests {
-    @ClassRule
-    public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();
+public class HubMetadataAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlParser parser;
 
     @Before

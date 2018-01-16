@@ -2,17 +2,14 @@ package uk.gov.ida.notification.apprule;
 
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
-import uk.gov.ida.notification.SamlInitializedTest;
+import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -36,12 +33,9 @@ import javax.ws.rs.core.Form;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder.anAttributeStatement;
 
-public class HubResponseAppRuleTests extends SamlInitializedTest {
+public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
     private SamlParser parser;
-
-    @ClassRule
-    public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();
 
     @Before
     public void setup() throws Throwable {
@@ -72,13 +66,13 @@ public class HubResponseAppRuleTests extends SamlInitializedTest {
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
     }
 
-    public static AssertionBuilder anAuthnStatementAssertion() {
+    private static AssertionBuilder anAuthnStatementAssertion() {
         return AssertionBuilder.anAssertion()
                 .addAuthnStatement(AuthnStatementBuilder.anAuthnStatement().build())
                 .addAttributeStatement(anAttributeStatement().addAttribute(IPAddressAttributeBuilder.anIPAddress().build()).build());
     }
 
-    public static AssertionBuilder aMatchingDatasetAssertion() {
+    private static AssertionBuilder aMatchingDatasetAssertion() {
         AttributeValue firstnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Jazzy").build();
         AttributeValue middlenameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Harold").build();
         AttributeValue surnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Jefferson").build();
@@ -97,11 +91,5 @@ public class HubResponseAppRuleTests extends SamlInitializedTest {
 
         return AssertionBuilder.anAssertion()
                 .addAttributeStatement(attributeStatementBuilder.build());
-    }
-
-    public static Attribute anAttribute(String name) {
-        Attribute attribute = SamlBuilder.build(Attribute.DEFAULT_ELEMENT_NAME);
-        attribute.setName(name);
-        return attribute;
     }
 }

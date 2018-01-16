@@ -1,23 +1,20 @@
 package uk.gov.ida.notification.apprule;
 
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.opensaml.saml.saml2.metadata.Endpoint;
-import org.opensaml.saml.saml2.metadata.EntitiesDescriptor;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.security.credential.UsageType;
+import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.function.Predicate.isEqual;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -25,9 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-public class ConnectorNodeMetadataAppRuleTests {
-    @ClassRule
-    public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();
+public class ConnectorNodeMetadataAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlParser parser;
 
     @Before

@@ -8,7 +8,7 @@ import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import uk.gov.ida.notification.exceptions.MissingMetadataException;
 import uk.gov.ida.notification.helpers.TestCertificates;
-import uk.gov.ida.notification.helpers.TestMetadataResolverBuilder;
+import uk.gov.ida.notification.helpers.TestMetadataBuilder;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -28,9 +28,9 @@ public class ConnectorNodeMetadataTest {
         X509Certificate encryptionCert = TestCertificates.aX509Certificate();
         PublicKey expectedPublicKey = encryptionCert.getPublicKey();
 
-        MetadataResolver metadataResolver = new TestMetadataResolverBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
+        MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert(encryptionCert)
-                .build("someId");
+                .buildResolver("someId");
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
@@ -41,9 +41,9 @@ public class ConnectorNodeMetadataTest {
 
     @Test(expected = MissingMetadataException.class)
     public void shouldErrorIfEncryptionPublicKeyElementIsEmpty() throws Exception {
-        MetadataResolver metadataResolver = new TestMetadataResolverBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
+        MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert("")
-                .build("someId");
+                .buildResolver("someId");
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
@@ -52,9 +52,9 @@ public class ConnectorNodeMetadataTest {
 
     @Test(expected = MissingMetadataException.class)
     public void shouldErrorIfNoEncryptionPublicKeyElement() throws Exception {
-        MetadataResolver metadataResolver = new TestMetadataResolverBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
+        MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withNoEncryptionCert()
-                .build("someId");
+                .buildResolver("someId");
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);

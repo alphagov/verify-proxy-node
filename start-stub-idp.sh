@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Start stub-idp locally
 
 REMOTE="git@github.com:alphagov/ida-stub-idp"

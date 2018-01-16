@@ -8,6 +8,7 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.metadata.resolver.impl.DOMMetadataResolver;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
@@ -24,7 +25,7 @@ import java.text.MessageFormat;
 import java.util.Base64;
 import java.util.HashMap;
 
-public class TestMetadataResolverBuilder {
+public class TestMetadataBuilder {
 
     private final Document metadataDocument;
     private final String SIGNING = "signing";
@@ -32,7 +33,7 @@ public class TestMetadataResolverBuilder {
     private final String md = "urn:oasis:names:tc:SAML:2.0:metadata";
     private final String ds = "http://www.w3.org/2000/09/xmldsig#";
 
-    public TestMetadataResolverBuilder(String metadataTemplateFileName) throws Exception {
+    public TestMetadataBuilder(String metadataTemplateFileName) throws Exception {
         String metadataString = FileHelpers.readFileAsString(metadataTemplateFileName);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -40,39 +41,43 @@ public class TestMetadataResolverBuilder {
         metadataDocument = builder.parse(new InputSource(new StringReader(metadataString)));
     }
 
-    public TestMetadataResolverBuilder withEncryptionCert(String certificateString) throws XPathExpressionException, CertificateEncodingException {
+    public TestMetadataBuilder withEncryptionCert(String certificateString) throws XPathExpressionException, CertificateEncodingException {
         setCertificate(certificateString, ENCRYPTION);
         return this;
     }
 
-    public TestMetadataResolverBuilder withEncryptionCert(X509Certificate certificate) throws XPathExpressionException, CertificateEncodingException {
+    public TestMetadataBuilder withEncryptionCert(X509Certificate certificate) throws XPathExpressionException, CertificateEncodingException {
         String encodedCertificate = encodeCertificate(certificate);
         return withEncryptionCert(encodedCertificate);
     }
 
-    public TestMetadataResolverBuilder withNoEncryptionCert() throws XPathExpressionException {
+    public TestMetadataBuilder withNoEncryptionCert() throws XPathExpressionException {
         Node encryptionNode = findMetadataCertificateNode(ENCRYPTION);
         encryptionNode.getParentNode().removeChild(encryptionNode);
         return this;
     }
 
-    public TestMetadataResolverBuilder withSigningCert(String certificateString) throws XPathExpressionException, CertificateEncodingException {
+    public TestMetadataBuilder withSigningCert(String certificateString) throws XPathExpressionException, CertificateEncodingException {
         setCertificate(certificateString, SIGNING);
         return this;
     }
 
-    public TestMetadataResolverBuilder withSigningCert(X509Certificate certificate) throws XPathExpressionException, CertificateEncodingException {
+    public TestMetadataBuilder withSigningCert(X509Certificate certificate) throws XPathExpressionException, CertificateEncodingException {
         String encodedCertificate = encodeCertificate(certificate);
         return withSigningCert(encodedCertificate);
     }
 
-    public TestMetadataResolverBuilder withNoSigningCert() throws XPathExpressionException {
+    public TestMetadataBuilder withNoSigningCert() throws XPathExpressionException {
         Node signingNode = findMetadataCertificateNode(SIGNING);
         signingNode.getParentNode().removeChild(signingNode);
         return this;
     }
 
-    public MetadataResolver build(String metadataResolverId) throws ComponentInitializationException, InitializationException {
+    public Element buildElement() {
+        return metadataDocument.getDocumentElement();
+    }
+
+    public MetadataResolver buildResolver(String metadataResolverId) throws ComponentInitializationException, InitializationException {
         InitializationService.initialize();
         DOMMetadataResolver metadataResolver = new DOMMetadataResolver(metadataDocument.getDocumentElement());
         BasicParserPool parserPool = new BasicParserPool();

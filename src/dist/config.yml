@@ -6,6 +6,13 @@ server:
     - type: http
       port: ${ADMIN_PORT:-6601}
 
+httpClient:
+  timeout: 15s
+  timeToLive: 10m
+  cookiesEnabled: false
+  connectionTimeout: 15s
+  minThreads: 8
+
 logging:
   level: INFO
   loggers:
@@ -18,7 +25,10 @@ logging:
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID:-http://proxy-node.uk}
 hubUrl: ${HUB_URL:-/stub-idp/request}
+
 connectorNodeUrl: ${CONNECTOR_NODE_URL:-/connector-node/eidas-authn-response}
+connectorNodeMetadataUrl: ${CONNECTOR_NODE_METADATA_URL:-https://eidas-reference-14-connector.cloudapps.digital/ConnectorResponderMetadata}
+connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID:-https://eidas-reference-14-connector.cloudapps.digital/ConnectorResponderMetadata}
 
 hubFacingSigningKeyPair:
   publicKey:
@@ -35,5 +45,3 @@ hubFacingEncryptionKeyPair:
     name: proxy_node_encryption
   privateKey:
     keyFile: ${HUB_FACING_ENCRYPTION_KEY_FILE:-build/resources/main/local/proxy_node_encryption.pk8}
-
-

@@ -2,9 +2,9 @@ package uk.gov.ida.notification.apprule;
 
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -16,12 +16,9 @@ import javax.ws.rs.core.Form;
 
 import static org.junit.Assert.assertEquals;
 
-public class EidasAuthnRequestAppRuleTests {
+public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller;
     private SamlParser parser;
-
-    @ClassRule
-    public static EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule();
 
     @Before
     public void setup() throws Throwable {

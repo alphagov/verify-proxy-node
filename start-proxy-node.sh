@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Start proxy-node locally
 
 APP_NAME="verify-eidas-notification"
