@@ -1,9 +1,6 @@
 version: '3.1'
 services:
   notification-proxy-node:
-    build:
-      context: ../
-      dockerfile: ./local_cef_reference/Dockerfile.proxy-node
     image: notification-proxy-node
     ports:
       - "56016:6600"
@@ -13,9 +10,6 @@ services:
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
       HUB_URL: http://localhost:56017/stub-idp-demo/SAML2/SSO
   notification-stub-idp:
-    build:
-      context: ../../ida-stub-idp
-      dockerfile: ./Dockerfile.stub-idp
     image: notification-stub-idp
     ports:
       - "56017:50140"
@@ -26,9 +20,10 @@ services:
       IDP_SIGNING_PRIVATE_KEY: ./notification_resources/stub_idp_signing.pk8
       IDP_SIGNING_CERT: ./notification_resources/stub_idp_signing.crt
       STUB_IDPS_FILE_PATH: ./notification_resources/stub-idps.yml
-      METADATA_URL: http://notification-proxy-node:6600/hub-metadata/local
       METADATA_TRUST_STORE: notification_resources/metadata.ts
       METADATA_TRUST_STORE_PASSWORD: marshmallow
+      METADATA_URL: http://proxy-node-metadata:55000/local/metadata_for_hub.xml
+      HUB_METADATA_URL: http://proxy-node-metadata:55000/local/metadata_for_hub.xml
   stub-sp:
     image: govukverify/verify-eidas-reference
     ports:
@@ -92,7 +87,22 @@ services:
     image: nginx
     network_mode: "service:connector-node"
     volumes:
-      - ../../verify-eidas-reference-1.4/metadata-proxy/nginx-reverse-proxy.conf:/etc/nginx/nginx.conf:ro
+      - ../verify-eidas-reference/metadata-proxy/nginx-reverse-proxy.conf:/etc/nginx/nginx.conf:ro
+
+  proxy-node-metadata:
+    image: nginx
+    networks:
+          - global
+    volumes:
+      - ./metadata/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../src/main/resources:/usr/share/nginx/html:ro
+
+hub-metadata-copy-server:
+    image: nginx
+    network_mode: "service:proxy-node-1"
+    volumes:
+      - ../verify-eidas-reference/metadata-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../verify-eidas-reference/metadata-proxy/metadata.xml:/usr/share/nginx/html/local-connector/metadata.xml:ro
 
   proxy-node-1:
     image: govukverify/verify-eidas-reference
@@ -130,8 +140,8 @@ services:
     image: nginx
     network_mode: "service:proxy-node-1"
     volumes:
-      - ../../verify-eidas-reference-1.4/metadata-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ../../verify-eidas-reference-1.4/metadata-proxy/metadata.xml:/usr/share/nginx/html/local-connector/metadata.xml:ro
+      - ../verify-eidas-reference/metadata-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../verify-eidas-reference/metadata-proxy/metadata.xml:/usr/share/nginx/html/local-connector/metadata.xml:ro
 
   proxy-node-2:
     image: govukverify/verify-eidas-reference

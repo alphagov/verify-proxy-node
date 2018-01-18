@@ -1,8 +1,0 @@
-FROM verifybuild/java8:latest
-ENV LC_ALL     en_GB.UTF-8
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-ADD . /app
-WORKDIR /app
-RUN apt-get update && apt-get install unzip
-CMD "local_cef_reference/scripts/start-proxy-node.sh"
-

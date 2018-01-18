@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 follow=false
 
 ref_rebuild=false
@@ -29,13 +30,13 @@ reference_scripts_dir="../../verify-eidas-reference-1.4/scripts"
 
 if [ "$ref_recompile" = true ]
 then
-  rebuild=true
+  ref_rebuild=true
   "$reference_scripts_dir"/compile.sh
 fi
 
 if [ "$ref_rebuild" = true ]
 then
-  "$refernece_scripts_dir"/build_docker_image.sh
+  "$reference_scripts_dir"/build_docker_image.sh
 fi
 
 
