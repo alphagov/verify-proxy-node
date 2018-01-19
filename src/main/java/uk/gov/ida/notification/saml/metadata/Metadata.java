@@ -9,6 +9,7 @@ import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
+import uk.gov.ida.notification.exceptions.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.MissingMetadataException;
 
 import java.security.PublicKey;
@@ -31,7 +32,7 @@ public class Metadata {
             if (encryptionCredential == null) throw new MissingMetadataException("Missing Encryption certificate");
             return encryptionCredential.getPublicKey();
         } catch(ResolverException ex) {
-            throw new ResolverException("Unable to resolve metadata credentials", ex);
+            throw new InvalidMetadataException("Unable to resolve metadata credentials", ex);
         }
     }
 
@@ -48,9 +49,5 @@ public class Metadata {
         } catch(ResolverException ex) {
             throw new ResolverException("Unable to resolve metadata credentials", ex);
         }
-    }
-
-    public MetadataCredentialResolver getMetadataCredentialResolver() {
-        return metadataCredentialResolver;
     }
 }

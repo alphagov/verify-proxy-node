@@ -2,15 +2,16 @@ package uk.gov.ida.notification;
 
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import net.shibboleth.utilities.java.support.xml.BasicParserPool;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import uk.gov.ida.notification.pki.CredentialBuilder;
 import uk.gov.ida.notification.pki.DecryptionCredential;
@@ -21,16 +22,14 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
-import uk.gov.ida.notification.saml.metadata.JerseyClientMetadataResolver;
+import uk.gov.ida.notification.saml.metadata.JerseyClientMetadataResolverInitializer;
 import uk.gov.ida.notification.saml.metadata.Metadata;
-import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverBuilder;
+import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
-import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
-import java.util.Timer;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
@@ -99,8 +98,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         this.environment = environment;
 
         connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
-        connectorMetadata = createConnectorNodeMetadata();
-        hubMetadata = createHubMetadata();
+        JerseyClientConfiguration clientConfiguration = configuration.getHttpClientConfiguration();
+        Client client = new JerseyClientBuilder(environment).using(clientConfiguration).build(this.getName());
+        connectorMetadata = createConnectorNodeMetadata(client);
+        hubMetadata = createHubMetadata(client);
 
         registerProviders();
         registerResources();
@@ -154,8 +155,6 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 configuration.getConnectorNodeEntityId(),
                 connectorMetadata,
                 hubMetadata));
-
-        environment.jersey().register(new StubConnectorNodeResource());
     }
 
     private ResponseAssertionDecrypter createDecrypter() {
@@ -166,36 +165,20 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         return new ResponseAssertionDecrypter(hubFacingDecryptingCredential);
     }
 
-    private Metadata createConnectorNodeMetadata() throws ComponentInitializationException, InitializationException {
-        URI connectorNodeMetadataUrl = configuration.getConnectorNodeMetadataUrl();
-
-        JerseyClientMetadataResolver metadataResolver = initialiseJerseyClientMetadataResolver(CONNECTOR_NODE_METADATA_RESOLVER_ID, connectorNodeMetadataUrl);
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
-
-        return new Metadata(metadataCredentialResolver);
-    }
-
-    private Metadata createHubMetadata() throws ComponentInitializationException, InitializationException {
+    private Metadata createHubMetadata(Client client) throws ComponentInitializationException, InitializationException {
         URI hubMetadataUrl = configuration.getHubMetadataUrl();
 
-        JerseyClientMetadataResolver metadataResolver = initialiseJerseyClientMetadataResolver(HUB_METADATA_RESOLVER_ID, hubMetadataUrl);
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
+        MetadataResolver metadataResolver = new JerseyClientMetadataResolverInitializer(HUB_METADATA_RESOLVER_ID, client, hubMetadataUrl).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
 
         return new Metadata(metadataCredentialResolver);
     }
 
-    private JerseyClientMetadataResolver initialiseJerseyClientMetadataResolver(String resolverId, URI connectorNodeMetadataUrl) throws InitializationException, ComponentInitializationException {
+    private Metadata createConnectorNodeMetadata(Client client) throws ComponentInitializationException {
+        URI connectorNodeMetadataUrl = configuration.getConnectorNodeMetadataUrl();
 
-        Client client = new JerseyClientBuilder(environment).using(configuration.getHttpClientConfiguration()).build(resolverId + "-client");
-
-        JerseyClientMetadataResolver metadataResolver = new JerseyClientMetadataResolver(new Timer(), client, connectorNodeMetadataUrl);
-        BasicParserPool parserPool = new BasicParserPool();
-        parserPool.initialize();
-        metadataResolver.setParserPool(parserPool);
-        metadataResolver.setRequireValidMetadata(true);
-        metadataResolver.setId(resolverId);
-        metadataResolver.initialize();
-
-        return metadataResolver;
+        MetadataResolver metadataResolver = new JerseyClientMetadataResolverInitializer(CONNECTOR_NODE_METADATA_RESOLVER_ID, client, connectorNodeMetadataUrl).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        return new Metadata(metadataCredentialResolver);
     }
 }
