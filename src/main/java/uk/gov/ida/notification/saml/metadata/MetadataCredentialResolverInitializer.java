@@ -6,17 +6,17 @@ import org.opensaml.saml.metadata.resolver.impl.PredicateRoleDescriptorResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 
-public class MetadataCredentialResolverBuilder {
-    private MetadataResolver metadataResolver;
+public class MetadataCredentialResolverInitializer {
+    private MetadataCredentialResolver metadataCredentialResolver;
+    private PredicateRoleDescriptorResolver predicateRoleDescriptorResolver;
 
-    public MetadataCredentialResolverBuilder(MetadataResolver metadataResolver) {
-        this.metadataResolver = metadataResolver;
+    public MetadataCredentialResolverInitializer(MetadataResolver metadataResolver) {
+        metadataCredentialResolver = new MetadataCredentialResolver();
+        predicateRoleDescriptorResolver = new PredicateRoleDescriptorResolver(metadataResolver);
     }
 
-    public MetadataCredentialResolver build() throws ComponentInitializationException {
-        PredicateRoleDescriptorResolver predicateRoleDescriptorResolver = new PredicateRoleDescriptorResolver(metadataResolver);
+    public MetadataCredentialResolver initialize() throws ComponentInitializationException {
         predicateRoleDescriptorResolver.initialize();
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolver();
         metadataCredentialResolver.setRoleDescriptorResolver(predicateRoleDescriptorResolver);
         metadataCredentialResolver.setKeyInfoCredentialResolver(DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver());
         metadataCredentialResolver.initialize();
