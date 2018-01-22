@@ -34,26 +34,26 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
-    private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
-    private EncryptionCredential hubAssertionsEncryptionCredential;
+    private SamlObjectMarshaller marshaller;
+    private Response hubResponse;
 
     @Before
     public void setup() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        hubAssertionsEncryptionCredential = new EncryptionCredential(
+        EncryptionCredential hubAssertionsEncryptionCredential = new EncryptionCredential(
                 hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
         );
+        marshaller = new SamlObjectMarshaller();
+        hubResponse = new HubResponseBuilder()
+                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
+                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
+                .build();
     }
 
     @Test
     public void shouldReturnASignedEidasResponse() throws Exception {
         KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
-
-        Response hubResponse = new HubResponseBuilder()
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
 
         Response eidasResponse = readResponseFromHub(hubResponse);
 
@@ -66,13 +66,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
-        Response hubResponse = new HubResponseBuilder()
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
-
         Response eidasResponse = readResponseFromHub(hubResponse);
-
         assertEquals(1, eidasResponse.getEncryptedAssertions().size());
         assert(eidasResponse.getAssertions().isEmpty());
     }
@@ -84,15 +78,10 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
                 keyPair.publicKey, keyPair.privateKey
         );
 
-        Response hubResponse = new HubResponseBuilder()
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
-
         Response eidasResponse = readResponseFromHub(hubResponse);
 
         Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
-        Element attributeStatement = new SamlObjectMarshaller().marshallToElement(eidasAssertion.getAttributeStatements().get(0));
+        Element attributeStatement = marshaller.marshallToElement(eidasAssertion.getAttributeStatements().get(0));
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
         assertEquals(1, eidasAssertion.getAttributeStatements().size());
