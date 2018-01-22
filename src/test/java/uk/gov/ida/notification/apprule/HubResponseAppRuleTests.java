@@ -8,6 +8,8 @@ import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.TestCertificates;
@@ -29,18 +31,24 @@ import uk.gov.ida.saml.core.test.builders.IPAddressAttributeBuilder;
 import uk.gov.ida.saml.core.test.builders.PersonNameAttributeBuilder_1_1;
 import uk.gov.ida.saml.core.test.builders.PersonNameAttributeValueBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
+import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.DecrypterFactory;
+import uk.gov.ida.saml.security.SignatureValidator;
+import uk.gov.ida.saml.security.SigningCredentialFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
-import java.util.Collections;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder.anAttributeStatement;
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
     private SamlParser parser;
+    private KeyPairConfiguration signingKeyPair;
 
     @Before
     public void setup() throws Throwable {
@@ -50,6 +58,8 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
+        signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
+
         DecryptionCredential hubAssertionsEncryptionCredential = new DecryptionCredential(
                 hubFacingEncryptionKeyPair.getPublicKey().getPublicKey(),
                 hubFacingEncryptionKeyPair.getPrivateKey().getPrivateKey()
@@ -71,6 +81,14 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
         String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
         Response eidasResponse = parser.parseSamlString(decodedEidasResponse);
+
+        SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
+
+        Signature signature = eidasResponse.getSignature();
+        assertNotNull("SAML Response needs to be signed", signature);
+        assertTrue("Invalid signature", signatureValidator.validate(eidasResponse, null, Response.DEFAULT_ELEMENT_NAME));
+        assertEquals(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, signature.getSignatureAlgorithm());
+
         Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
@@ -108,7 +126,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, DecryptionCredential credential) throws Exception {
         DecrypterFactory decrypterFactory = new DecrypterFactory();
-        Decrypter decrypter = decrypterFactory.createDecrypter(Collections.singletonList(credential));
+        Decrypter decrypter = decrypterFactory.createDecrypter(singletonList(credential));
         return decrypter.decrypt(encryptedAssertion);
     }
 }

@@ -35,7 +35,7 @@ public class TestCertificates {
     public static PrivateKey aPrivateKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, Base64DecodingException {
         Path path = Paths.get(ResourceHelpers.resourceFilePath(TEST_PRIVATE_KEY_FILE));
         byte[] bytes = Files.readAllBytes(path);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        KeyFactory keyFactory = KeyFactory.getInstance(RSA);
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
     }
 

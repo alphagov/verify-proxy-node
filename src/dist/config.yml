@@ -30,7 +30,7 @@ connectorNodeUrl: ${CONNECTOR_NODE_URL:-/connector-node/eidas-authn-response}
 connectorNodeMetadataUrl: ${CONNECTOR_NODE_METADATA_URL:-https://eidas-reference-14-connector.cloudapps.digital/ConnectorResponderMetadata}
 connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID:-https://eidas-reference-14-connector.cloudapps.digital/ConnectorResponderMetadata}
 
-hubFacingSigningKeyPair:
+signingKeyPair:
   publicKey:
     type: file
     certFile: ${HUB_FACING_SIGNING_CERT_FILE:-build/resources/main/local/proxy_node_signing.crt}

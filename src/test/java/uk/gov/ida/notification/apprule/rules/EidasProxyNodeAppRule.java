@@ -32,12 +32,14 @@ public class EidasProxyNodeAppRule extends DropwizardAppRule<EidasProxyNodeConfi
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("httpClient.timeout", "25s"));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 
     public WebTarget target(String path) throws URISyntaxException {
         if (client == null) {
-            client = new JerseyClientBuilder(getEnvironment()).build("test client");
+            client = new JerseyClientBuilder(getEnvironment())
+                    .build("test client");
         }
         return client.target(new URI("http://localhost:" + getLocalPort()).resolve(path));
     }

@@ -1,9 +1,6 @@
 package uk.gov.ida.notification;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;

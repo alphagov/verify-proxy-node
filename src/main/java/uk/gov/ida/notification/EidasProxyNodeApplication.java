@@ -40,9 +40,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     private final String CONNECTOR_NODE_METADATA_RESOLVER_ID = "connector-node-metadata";
     private EidasProxyNodeConfiguration configuration;
     private Environment environment;
-    private HubResponseTranslator hubResponseTranslator;
+    private EidasResponseGenerator eidasResponseGenerator;
     private HubAuthnRequestGenerator hubAuthnRequestGenerator;
-    private SamlFormViewBuilder samlFormViewBuilder;
     private ResponseAssertionDecrypter assertionDecrypter;
     private ConnectorNodeMetadata connectorNodeMetadata;
     private String connectorNodeUrl;
@@ -107,16 +106,35 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         connectorNodeMetadata = createConnectorNodeMetadata();
 
-        hubResponseTranslator = new HubResponseTranslator(
-                configuration.getProxyNodeEntityId(),
-                connectorNodeUrl
-        );
-        hubAuthnRequestGenerator = createHubAuthnRequestGenerator();
-        samlFormViewBuilder = new SamlFormViewBuilder();
+        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential());
+        eidasResponseGenerator = createEidasResponseGenerator(signer);
+        hubAuthnRequestGenerator = createHubAuthnRequestGenerator(signer);
+
         assertionDecrypter = createDecrypter();
 
         registerProviders();
         registerResources();
+    }
+
+    private EidasResponseGenerator createEidasResponseGenerator(SamlObjectSigner signer) {
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
+                configuration.getProxyNodeEntityId(),
+                connectorNodeUrl
+        );
+        return new EidasResponseGenerator(hubResponseTranslator, signer);
+    }
+
+    private HubAuthnRequestGenerator createHubAuthnRequestGenerator(SamlObjectSigner signer) {
+        EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
+                configuration.getProxyNodeEntityId(),
+                configuration.getHubUrl().toString());
+        return new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, signer);
+    }
+
+    private SigningCredential createSigningCredential() {
+        return CredentialBuilder
+                .withKeyPairConfiguration(configuration.getSigningKeyPair())
+                .buildSigningCredential();
     }
 
     private void registerProviders() {
@@ -125,33 +143,24 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     }
 
     private void registerResources() {
+        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder
         ));
+
         environment.jersey().register(new HubResponseResource(
-                hubResponseTranslator,
+                eidasResponseGenerator,
                 samlFormViewBuilder,
                 assertionDecrypter,
                 connectorNodeUrl,
                 connectorNodeMetadata));
+
         environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new ConnectorNodeMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
-    }
-
-    private HubAuthnRequestGenerator createHubAuthnRequestGenerator() {
-        EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
-                configuration.getProxyNodeEntityId(),
-                configuration.getHubUrl().toString());
-        SigningCredential hubFacingSigningCredential = CredentialBuilder
-                .withKeyPairConfiguration(configuration.getHubFacingSigningKeyPair())
-                .buildSigningCredential();
-        SamlObjectSigner hubAuthnRequestSigner = new SamlObjectSigner(hubFacingSigningCredential);
-        return new HubAuthnRequestGenerator(
-                eidasAuthnRequestTranslator,
-                hubAuthnRequestSigner);
     }
 
     private ResponseAssertionDecrypter createDecrypter() {
