@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.saml.translation;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
@@ -78,14 +79,20 @@ public class HubResponseTranslator {
                 hubResponse.getPid(),
                 eidasLoa,
                 eidasAttributes,
-                idGeneratorStrategy.generateIdentifier(true),
-                hubResponse.getInResponseTo()
+                hubResponse.getInResponseTo(),
+                hubResponse.getIssueInstant(),
+                hubResponse.getAssertionIssueInstant(),
+                hubResponse.getAuthnStatementAuthnInstant()
         );
 
         return eidasResponse;
     }
 
-    public String combineFirstAndMiddleNames(HubResponse response) {
+    private String generateRandomId(){
+        return idGeneratorStrategy.generateIdentifier(true);
+    }
+
+    private String combineFirstAndMiddleNames(HubResponse response) {
         List<PersonName> names = Arrays.asList(
                 response.getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME, PersonName.class),
                 response.getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME, PersonName.class));
@@ -105,14 +112,20 @@ public class HubResponseTranslator {
         }
     }
 
-    private Response createEidasResponse(String statusCodeValue, String pid, String loa, List<Attribute> attributes, String responseId, String inResponseTo) {
+    private Response createEidasResponse(String statusCodeValue, String pid, String loa, List<Attribute> attributes, String inResponseTo, DateTime issueInstant, DateTime assertionIssueInstant, DateTime authnStatementAuthnInstant) {
+        String responseId = generateRandomId();
+        String assertionId = generateRandomId();
+
         Status status = createStatus(statusCodeValue);
+
         AuthnStatement authnStatement = createAuthnStatement(loa);
+        authnStatement.setAuthnInstant(authnStatementAuthnInstant);
+
         Subject subject = createSubject(pid);
         AttributeStatement attributeStatement = createAttributeStatement(attributes);
         Issuer responseIssuer = createIssuer();
         Issuer assertionIssuer = createIssuer();
-        Assertion assertion = createAssertion(authnStatement, subject, attributeStatement, assertionIssuer);
+        Assertion assertion = createAssertion(authnStatement, subject, attributeStatement, assertionIssuer, assertionId, assertionIssueInstant);
 
         Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
         response.setStatus(status);
@@ -121,16 +134,19 @@ public class HubResponseTranslator {
         response.setID(responseId);
         response.setInResponseTo(inResponseTo);
         response.setDestination(connectorNodeUrl);
+        response.setIssueInstant(issueInstant);
 
         return response;
     }
 
-    private Assertion createAssertion(AuthnStatement authnStatement, Subject subject, AttributeStatement attributeStatement, Issuer assertionIssuer) {
+    private Assertion createAssertion(AuthnStatement authnStatement, Subject subject, AttributeStatement attributeStatement, Issuer assertionIssuer, String assertionId, DateTime assertionIssueInstant) {
         Assertion assertion = SamlBuilder.build(Assertion.DEFAULT_ELEMENT_NAME);
         assertion.getAuthnStatements().add(authnStatement);
         assertion.setSubject(subject);
         assertion.getAttributeStatements().add(attributeStatement);
         assertion.setIssuer(assertionIssuer);
+        assertion.setID(assertionId);
+        assertion.setIssueInstant(assertionIssueInstant);
         return assertion;
     }
 
