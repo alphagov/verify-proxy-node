@@ -28,19 +28,13 @@ public class HubResponseTranslatorTest extends SamlInitializedTest {
     public void shouldGenerateEidasResponse() throws Exception {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu");
         DateTime dummyTime = DateTime.now();
-        HubResponse hubResponse = new HubResponse(
-            "pid",
-            "success",
-            IdaAuthnContext.LEVEL_2_AUTHN_CTX,
-            "response id",
-            "id of request",
-            buildHubAttributes("Jane", "Smith", "1984-02-29"),
-            dummyTime,
-            dummyTime,
-            dummyTime
+        HubResponseContainer hubResponseContainer = new HubResponseContainer(
+                new HubResponse("success", "response id", "id of request", dummyTime),
+                new HubMdsAssertion(buildHubAttributes("Jane", "Smith", "1984-02-29"), dummyTime),
+                new HubAuthnStatement("pid", IdaAuthnContext.LEVEL_2_AUTHN_CTX, dummyTime)
         );
 
-        Response eidasResponse = hubResponseTranslator.translate(hubResponse);
+        Response eidasResponse = hubResponseTranslator.translate(hubResponseContainer);
         Map<String, AbstractXMLObject> eidasResponseAttributes = getEidasResponseAttributes(eidasResponse);
 
         Assertion authnAssertion = eidasResponse.getAssertions()

@@ -45,7 +45,7 @@ public class HubResponseTranslator {
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
 
-    public Response translate(HubResponse hubResponse) {
+    public Response translate(HubResponseContainer hubResponseContainer) {
         List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
@@ -55,34 +55,34 @@ public class HubResponseTranslator {
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
-                resp -> resp.getMdsAttribute(IdaConstants.Attributes_1_1.Surname.NAME, PersonName.class).getValue()
+                resp -> resp.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.Surname.NAME, PersonName.class).getValue()
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                resp -> resp.getMdsAttribute(IdaConstants.Attributes_1_1.DateOfBirth.NAME, Date.class).getValue()
+                resp -> resp.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.DateOfBirth.NAME, Date.class).getValue()
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                HubResponse::getPid
+                resp -> resp.getAuthnStatement().getPid()
         ));
 
         List<Attribute> eidasAttributes = eidasAttributeBuilders
                 .stream()
-                .map(builder -> builder.build(hubResponse))
+                .map(builder -> builder.build(hubResponseContainer))
                 .collect(Collectors.toList());
 
-        String eidasLoa = mapLoa(hubResponse.getProvidedLoa());
+        String eidasLoa = mapLoa(hubResponseContainer.getAuthnStatement().getProvidedLoa());
 
         Response eidasResponse = createEidasResponse(
-                hubResponse.getStatusCode(),
-                hubResponse.getPid(),
+                hubResponseContainer.getHubResponse().getStatusCode(),
+                hubResponseContainer.getAuthnStatement().getPid(),
                 eidasLoa,
                 eidasAttributes,
-                hubResponse.getInResponseTo(),
-                hubResponse.getIssueInstant(),
-                hubResponse.getAssertionIssueInstant(),
-                hubResponse.getAuthnStatementAuthnInstant()
+                hubResponseContainer.getHubResponse().getInResponseTo(),
+                hubResponseContainer.getHubResponse().getIssueInstant(),
+                hubResponseContainer.getMdsAssertion().getIssueInstant(),
+                hubResponseContainer.getAuthnStatement().getAuthnInstant()
         );
 
         return eidasResponse;
@@ -92,10 +92,10 @@ public class HubResponseTranslator {
         return idGeneratorStrategy.generateIdentifier(true);
     }
 
-    private String combineFirstAndMiddleNames(HubResponse response) {
+    private String combineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
         List<PersonName> names = Arrays.asList(
-                response.getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME, PersonName.class),
-                response.getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME, PersonName.class));
+                hubResponseContainer.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.Firstname.NAME, PersonName.class),
+                hubResponseContainer.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.Middlename.NAME, PersonName.class));
         return names.stream()
                 .filter(Objects::nonNull)
                 .map(PersonName::getValue)

@@ -15,21 +15,21 @@ public class EidasAttributeBuilder {
     private final String attributeName;
     private final String attributeFriendlyName;
     private final QName attributeValueTypeName;
-    private final Function<HubResponse, String> attributeMapper;
+    private final Function<HubResponseContainer, String> attributeMapper;
 
-    public EidasAttributeBuilder(String attributeName, String attributeFriendlyName, QName attributeValueTypeName, Function<HubResponse, String> attributeMapper) {
+    public EidasAttributeBuilder(String attributeName, String attributeFriendlyName, QName attributeValueTypeName, Function<HubResponseContainer, String> attributeMapper) {
         this.attributeName = attributeName;
         this.attributeFriendlyName = attributeFriendlyName;
         this.attributeValueTypeName = attributeValueTypeName;
         this.attributeMapper = attributeMapper;
     }
 
-    public Attribute build(HubResponse hubResponse) {
+    public Attribute build(HubResponseContainer hubResponseContainer) {
         XMLObjectBuilder<? extends EidasAttributeValueType> eidasTypeBuilder = (XMLObjectBuilder<? extends EidasAttributeValueType>) XMLObjectSupport.getBuilder(attributeValueTypeName);
         Attribute attribute = SamlBuilder.build(Attribute.DEFAULT_ELEMENT_NAME);
         EidasAttributeValueType attributeValue = eidasTypeBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, attributeValueTypeName);
 
-        attributeValue.parseStringValue(attributeMapper.apply(hubResponse));
+        attributeValue.parseStringValue(attributeMapper.apply(hubResponseContainer));
 
         attribute.setName(attributeName);
         attribute.setFriendlyName(attributeFriendlyName);

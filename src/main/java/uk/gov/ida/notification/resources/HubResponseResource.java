@@ -8,6 +8,7 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.metadata.ConnectorNodeMetadata;
 import uk.gov.ida.notification.saml.translation.HubResponse;
+import uk.gov.ida.notification.saml.translation.HubResponseContainer;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 
 import javax.ws.rs.Consumes;
@@ -43,18 +44,18 @@ public class HubResponseResource {
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
             @FormParam("RelayState") String relayState) throws ResolverException {
         Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
-        HubResponse hubResponse = HubResponse.fromResponse(decryptedHubResponse);
-        logHubResponse(hubResponse);
-        Response eidasResponse = hubResponseTranslator.translate(hubResponse);
+        HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
+        logHubResponse(hubResponseContainer);
+        Response eidasResponse = hubResponseTranslator.translate(hubResponseContainer);
         PublicKey encryptionPublicKey = connectorNodeMetadata.getEncryptionPublicKey(); //TODO: Needs this to play the next encryption story. This is here to prove it's been provided.
         logEidasResponse(eidasResponse);
         return samlFormViewBuilder.buildResponse(connectorNodeUrl, eidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
     }
 
-    private void logHubResponse(HubResponse hubResponse) {
-        LOG.info("[Hub Response] ID: " + hubResponse.getResponseId());
-        LOG.info("[Hub Response] In response to: " + hubResponse.getInResponseTo());
-        LOG.info("[Hub Response] Provided level of assurance: " + hubResponse.getProvidedLoa());
+    private void logHubResponse(HubResponseContainer hubResponseContainer) {
+        LOG.info("[Hub Response] ID: " + hubResponseContainer.getHubResponse().getResponseId());
+        LOG.info("[Hub Response] In response to: " + hubResponseContainer.getHubResponse().getInResponseTo());
+        LOG.info("[Hub Response] Provided level of assurance: " + hubResponseContainer.getAuthnStatement().getProvidedLoa());
     }
 
     private void logEidasResponse(Response eidasResponse) {
