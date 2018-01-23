@@ -4,33 +4,22 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.Assertion;
-import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
+import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.pki.DecryptionCredential;
+import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.saml.core.extensions.Address;
-import uk.gov.ida.saml.core.test.builders.AddressAttributeBuilder_1_1;
-import uk.gov.ida.saml.core.test.builders.AddressAttributeValueBuilder_1_1;
-import uk.gov.ida.saml.core.test.builders.AssertionBuilder;
-import uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder;
-import uk.gov.ida.saml.core.test.builders.AuthnStatementBuilder;
-import uk.gov.ida.saml.core.test.builders.DateAttributeBuilder_1_1;
-import uk.gov.ida.saml.core.test.builders.DateAttributeValueBuilder;
-import uk.gov.ida.saml.core.test.builders.GenderAttributeBuilder_1_1;
-import uk.gov.ida.saml.core.test.builders.IPAddressAttributeBuilder;
-import uk.gov.ida.saml.core.test.builders.PersonNameAttributeBuilder_1_1;
-import uk.gov.ida.saml.core.test.builders.PersonNameAttributeValueBuilder;
-import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.DecrypterFactory;
 import uk.gov.ida.saml.security.SignatureValidator;
@@ -43,36 +32,76 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder.anAttributeStatement;
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
-    private SamlParser parser;
-    private KeyPairConfiguration signingKeyPair;
+    private EncryptionCredential hubAssertionsEncryptionCredential;
 
     @Before
     public void setup() throws Throwable {
-        parser = new SamlParser();
+        KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
+        hubAssertionsEncryptionCredential = new EncryptionCredential(
+                hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
+        );
     }
 
     @Test
-    public void postingHubResponseShouldReturnEidasResponseForm() throws Throwable {
-        KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
-        TestKeyPair keyPair = new TestKeyPair();
+    public void shouldReturnASignedEidasResponse() throws Exception {
+        KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
+        SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
 
-        DecryptionCredential hubAssertionsEncryptionCredential = new DecryptionCredential(
-                hubFacingEncryptionKeyPair.getPublicKey().getPublicKey(),
-                hubFacingEncryptionKeyPair.getPrivateKey().getPrivateKey()
-        );
+        Response hubResponse = new HubResponseBuilder()
+                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
+                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
+                .build();
+
+        Response eidasResponse = readResponseFromHub(hubResponse);
+
+        Signature signature = eidasResponse.getSignature();
+
+        assertNotNull("SAML Response needs to be signed", signature);
+        assertTrue("Invalid signature", signatureValidator.validate(eidasResponse, null, Response.DEFAULT_ELEMENT_NAME));
+        assertEquals(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, signature.getSignatureAlgorithm());
+    }
+
+    @Test
+    public void shouldReturnAnEncryptedEidasResponse() throws Exception {
+        Response hubResponse = new HubResponseBuilder()
+                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
+                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
+                .build();
+
+        Response eidasResponse = readResponseFromHub(hubResponse);
+
+        assertEquals(1, eidasResponse.getEncryptedAssertions().size());
+        assert(eidasResponse.getAssertions().isEmpty());
+    }
+
+    @Test
+    public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
+        TestKeyPair keyPair = new TestKeyPair();
         DecryptionCredential eidasAssertionsDecryptionCredential = new DecryptionCredential(
                 keyPair.publicKey, keyPair.privateKey
         );
 
-        Response hubResponse = ResponseBuilder.aResponse()
-                .addEncryptedAssertion(anAuthnStatementAssertion().buildWithEncrypterCredential(hubAssertionsEncryptionCredential))
-                .addEncryptedAssertion(aMatchingDatasetAssertion().buildWithEncrypterCredential(hubAssertionsEncryptionCredential))
+        Response hubResponse = new HubResponseBuilder()
+                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
+                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
                 .build();
+
+        Response eidasResponse = readResponseFromHub(hubResponse);
+
+        Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
+        Element attributeStatement = new SamlObjectMarshaller().marshallToElement(eidasAssertion.getAttributeStatements().get(0));
+
+        assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
+        assertEquals(1, eidasAssertion.getAttributeStatements().size());
+        assertEquals(1, eidasAssertion.getAuthnStatements().size());
+
+        assertEquals("Jazzy Harold", attributeStatement.getFirstChild().getTextContent());
+    }
+
+    private Response readResponseFromHub(Response hubResponse) throws Exception {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 
@@ -81,48 +110,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
                 .readEntity(String.class);
 
         String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
-        Response eidasResponse = parser.parseSamlString(decodedEidasResponse);
-
-        SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
-
-        Signature signature = eidasResponse.getSignature();
-        assertNotNull("SAML Response needs to be signed", signature);
-        assertTrue("Invalid signature", signatureValidator.validate(eidasResponse, null, Response.DEFAULT_ELEMENT_NAME));
-        assertEquals(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, signature.getSignatureAlgorithm());
-
-        Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
-
-        assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
-        assertEquals(1, eidasResponse.getEncryptedAssertions().size());
-        assert(eidasResponse.getAssertions().isEmpty());
-        assertEquals(aMatchingDatasetAssertion().buildUnencrypted().getAttributeStatements().size(), eidasAssertion.getAttributeStatements().size());
-    }
-
-    private static AssertionBuilder anAuthnStatementAssertion() {
-        return AssertionBuilder.anAssertion()
-                .addAuthnStatement(AuthnStatementBuilder.anAuthnStatement().build())
-                .addAttributeStatement(anAttributeStatement().addAttribute(IPAddressAttributeBuilder.anIPAddress().build()).build());
-    }
-
-    private static AssertionBuilder aMatchingDatasetAssertion() {
-        AttributeValue firstnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Jazzy").build();
-        AttributeValue middlenameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Harold").build();
-        AttributeValue surnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Jefferson").build();
-        AttributeValue dobValue = DateAttributeValueBuilder.aDateValue().withValue("1966-04-23").build();
-        Address currentAddressValue = AddressAttributeValueBuilder_1_1.anAddressAttributeValue().withPostcode("WC2 BNX").build();
-        Address previousAddressValue = AddressAttributeValueBuilder_1_1.anAddressAttributeValue().withPostcode("WC1 ANX").build();
-
-        AttributeStatementBuilder attributeStatementBuilder = anAttributeStatement()
-                .addAttribute(PersonNameAttributeBuilder_1_1.aPersonName_1_1().addValue(firstnameValue).buildAsFirstname())
-                .addAttribute(PersonNameAttributeBuilder_1_1.aPersonName_1_1().addValue(middlenameValue).buildAsMiddlename())
-                .addAttribute(PersonNameAttributeBuilder_1_1.aPersonName_1_1().addValue(surnameValue).buildAsSurname())
-                .addAttribute(GenderAttributeBuilder_1_1.aGender_1_1().withValue("male").build())
-                .addAttribute(DateAttributeBuilder_1_1.aDate_1_1().addValue(dobValue).buildAsDateOfBirth())
-                .addAttribute(AddressAttributeBuilder_1_1.anAddressAttribute().addAddress(currentAddressValue).buildCurrentAddress())
-                .addAttribute(AddressAttributeBuilder_1_1.anAddressAttribute().addAddress(previousAddressValue).buildPreviousAddress());
-
-        return AssertionBuilder.anAssertion()
-                .addAttributeStatement(attributeStatementBuilder.build());
+        return new SamlParser().parseSamlString(decodedEidasResponse);
     }
 
     private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, DecryptionCredential credential) throws Exception {

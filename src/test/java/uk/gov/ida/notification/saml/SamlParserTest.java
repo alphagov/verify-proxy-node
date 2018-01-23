@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.saml;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
