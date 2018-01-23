@@ -25,7 +25,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
 
     @Test
     public void shouldSignAuthRequest() throws Throwable {
-        SigningCredential credential = new SigningCredential(testKeyPair.getPublicKey(), testKeyPair.getPrivateKey());
+        SigningCredential credential = new SigningCredential(testKeyPair.publicKey, testKeyPair.privateKey);
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credential);
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest signedAuthnRequest = samlObjectSigner.sign(authnRequest);

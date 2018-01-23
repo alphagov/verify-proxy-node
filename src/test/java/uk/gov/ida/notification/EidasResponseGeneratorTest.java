@@ -2,14 +2,11 @@ package uk.gov.ida.notification;
 
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.Response;
-import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.translation.HubResponse;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
-
-import java.security.PublicKey;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

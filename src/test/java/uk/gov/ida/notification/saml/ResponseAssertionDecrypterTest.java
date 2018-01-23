@@ -15,7 +15,7 @@ public class ResponseAssertionDecrypterTest extends SamlInitializedTest {
     @Test
     public void shouldDecryptAssertionsInResponse() throws Throwable {
         TestKeyPair testKeyPair = new TestKeyPair();
-        DecryptionCredential credential = new DecryptionCredential(testKeyPair.getPublicKey(), testKeyPair.getPrivateKey());
+        DecryptionCredential credential = new DecryptionCredential(testKeyPair.publicKey, testKeyPair.privateKey);
 
         EncryptedAssertion assertion = AssertionBuilder.anAssertion().withId("hi").buildWithEncrypterCredential(credential);
         Response encryptedResponse = ResponseBuilder.aResponse().addEncryptedAssertion(assertion).build();

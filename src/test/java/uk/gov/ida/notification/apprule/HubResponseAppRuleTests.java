@@ -12,7 +12,7 @@ import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
-import uk.gov.ida.notification.helpers.TestCertificates;
+import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -59,13 +59,14 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     public void postingHubResponseShouldReturnEidasResponseForm() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
         signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
+        TestKeyPair keyPair = new TestKeyPair();
 
         DecryptionCredential hubAssertionsEncryptionCredential = new DecryptionCredential(
                 hubFacingEncryptionKeyPair.getPublicKey().getPublicKey(),
                 hubFacingEncryptionKeyPair.getPrivateKey().getPrivateKey()
         );
         DecryptionCredential eidasAssertionsDecryptionCredential = new DecryptionCredential(
-                TestCertificates.aX509Certificate().getPublicKey(), TestCertificates.aPrivateKey()
+                keyPair.publicKey, keyPair.privateKey
         );
 
         Response hubResponse = ResponseBuilder.aResponse()

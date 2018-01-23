@@ -1,27 +1,57 @@
 package uk.gov.ida.notification.helpers;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import io.dropwizard.testing.ResourceHelpers;
+import org.apache.xml.security.exceptions.Base64DecodingException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public class TestKeyPair {
-    private final PublicKey publicKey;
-    private final PrivateKey privateKey;
 
-    public TestKeyPair() throws Exception {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-        gen.initialize(2048);
-        KeyPair keyPair = gen.generateKeyPair();
-        publicKey = keyPair.getPublic();
-        privateKey = keyPair.getPrivate();
+    private static final String X509 = "X.509";
+    private static final String RSA = "RSA";
+    private static final String TEST_CERTIFICATE_FILE = "test_certificate.crt";
+    private static final String TEST_PRIVATE_KEY_FILE = "test_private_key.pk8";
+
+    public final X509Certificate certificate;
+    public final PublicKey publicKey;
+    public final PrivateKey privateKey;
+
+    public TestKeyPair() throws
+            CertificateException,
+            IOException,
+            Base64DecodingException,
+            NoSuchAlgorithmException,
+            InvalidKeySpecException {
+        certificate = readX509Certificate();
+        publicKey = certificate.getPublicKey();
+        privateKey = readPrivateKey();
     }
 
-    public PrivateKey getPrivateKey() {
-        return privateKey;
+    private X509Certificate readX509Certificate() throws CertificateException, IOException {
+        CertificateFactory certificateFactory = CertificateFactory.getInstance(X509);
+        String certString = FileHelpers.readFileAsString(TEST_CERTIFICATE_FILE);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certString.getBytes(StandardCharsets.UTF_8));
+        return (X509Certificate) certificateFactory.generateCertificate(byteArrayInputStream);
     }
 
-    public PublicKey getPublicKey() {
-        return publicKey;
+    private PrivateKey readPrivateKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, Base64DecodingException {
+        Path path = Paths.get(ResourceHelpers.resourceFilePath(TEST_PRIVATE_KEY_FILE));
+        byte[] bytes = Files.readAllBytes(path);
+        KeyFactory keyFactory = KeyFactory.getInstance(RSA);
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
     }
 }
