@@ -13,7 +13,7 @@ services:
       HUB_URL: http://localhost:56017/stub-idp-demo/SAML2/SSO
   notification-stub-idp:
     image: notification-stub-idp
-    mem_limit: 256M
+    mem_limit: 512M
     ports:
       - "56017:50140"
     networks:
