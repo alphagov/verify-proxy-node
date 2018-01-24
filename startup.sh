@@ -37,7 +37,7 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference
   source "${PN_SCRIPTS_DIR}"/setup-verify-eidas-reference.sh
   source "${PN_SCRIPTS_DIR}"/setup-ida-stub-idp.sh
 
-  reference_scripts_dir=/local_eidas_reference/verify_eidas_reference/scripts
+  reference_scripts_dir="${PN_PROJECT_DIR}"/local_eidas_reference/verify-eidas-reference/scripts
 
   if [ "$stub_idp_rebuild" = true ]
   then
