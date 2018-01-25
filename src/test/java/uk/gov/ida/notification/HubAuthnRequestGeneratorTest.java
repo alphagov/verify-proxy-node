@@ -1,9 +1,6 @@
 package uk.gov.ida.notification;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
@@ -22,7 +19,7 @@ public class HubAuthnRequestGeneratorTest extends SamlInitializedTest {
     public void shouldGenerateHubAuthnRequestGivenEidas () throws Throwable {
         EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://hub.uk");
         TestKeyPair keyPair = new TestKeyPair();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(new SigningCredential(keyPair.getPublicKey(), keyPair.getPrivateKey()));
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(new SigningCredential(keyPair.publicKey, keyPair.privateKey));
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(translator, samlObjectSigner);
         EidasAuthnRequest eidasRequest = new EidasAuthnRequest(
                 "request-id",

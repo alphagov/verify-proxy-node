@@ -7,7 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import uk.gov.ida.notification.exceptions.MissingMetadataException;
-import uk.gov.ida.notification.helpers.TestCertificates;
+import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.helpers.TestMetadataBuilder;
 
 import java.security.PublicKey;
@@ -25,7 +25,7 @@ public class ConnectorNodeMetadataTest {
 
     @Test
     public void shouldReturnConnectorNodeEncryptionPublicKeyFromMetadata() throws Exception {
-        X509Certificate encryptionCert = TestCertificates.aX509Certificate();
+        X509Certificate encryptionCert = new TestKeyPair().certificate;
         PublicKey expectedPublicKey = encryptionCert.getPublicKey();
 
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)

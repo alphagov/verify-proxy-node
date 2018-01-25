@@ -1,11 +1,8 @@
 package uk.gov.ida.notification.apprule.rules;
 
 import io.dropwizard.testing.junit.DropwizardClientRule;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
-import uk.gov.ida.notification.helpers.TestCertificates;
+import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.helpers.TestMetadataBuilder;
 
 import javax.ws.rs.GET;
@@ -26,7 +23,7 @@ public class ConnectorNodeMetadataClientRule extends DropwizardClientRule{
     private static Element getTestMetadata() {
         try {
             return new TestMetadataBuilder("connector_node_metadata_template.xml")
-                    .withEncryptionCert(TestCertificates.aX509Certificate())
+                    .withEncryptionCert(new TestKeyPair().certificate)
                     .buildElement();
         } catch (Exception e) {
             throw new RuntimeException("Unable to create connector node's metadata for testing", e);

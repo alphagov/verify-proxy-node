@@ -7,12 +7,9 @@ public class CredentialBuilder {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
-    public SigningCredential buildSigningCredential() {
-        return new SigningCredential(publicKey, privateKey);
-    }
-
-    public DecryptingCredential buildDecryptingCredential() {
-        return new DecryptingCredential(publicKey, privateKey);
+    private CredentialBuilder(PublicKey publicKey, PrivateKey privateKey) {
+        this.publicKey = publicKey;
+        this.privateKey = privateKey;
     }
 
     public static CredentialBuilder withKeyPairConfiguration(KeyPairConfiguration keyPairConfiguration) {
@@ -22,8 +19,28 @@ public class CredentialBuilder {
         );
     }
 
-    private CredentialBuilder(PublicKey publicKey, PrivateKey privateKey) {
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+    public static CredentialBuilder withPublicKey(PublicKey publicKey) {
+        return new CredentialBuilder(
+                publicKey,
+                null
+        );
+    }
+
+    public SigningCredential buildSigningCredential() {
+        if (privateKey == null) {
+            throw new RuntimeException("Cannot build signing credential: private key is null");
+        }
+        return new SigningCredential(publicKey, privateKey);
+    }
+
+    public DecryptionCredential buildDecryptionCredential() {
+        if (privateKey == null) {
+            throw new RuntimeException("Cannot build decryption credential: private key is null");
+        }
+        return new DecryptionCredential(publicKey, privateKey);
+    }
+
+    public EncryptionCredential buildEncryptionCredential() {
+        return new EncryptionCredential(publicKey);
     }
 }
