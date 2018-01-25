@@ -11,6 +11,7 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.metadata.ConnectorNodeMetadata;
+import uk.gov.ida.notification.saml.metadata.HubMetadata;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
 
 import javax.ws.rs.Consumes;
@@ -28,14 +29,16 @@ public class HubResponseResource {
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final ResponseAssertionDecrypter assertionDecrypter;
     private final String connectorNodeUrl;
+    private final HubMetadata hubMetadata;
     private ConnectorNodeMetadata connectorNodeMetadata;
 
-    public HubResponseResource(EidasResponseGenerator eidasResponseGenerator, SamlFormViewBuilder samlFormViewBuilder, ResponseAssertionDecrypter assertionDecrypter, String connectorNodeUrl, ConnectorNodeMetadata connectorNodeMetadata) {
+    public HubResponseResource(EidasResponseGenerator eidasResponseGenerator, SamlFormViewBuilder samlFormViewBuilder, ResponseAssertionDecrypter assertionDecrypter, String connectorNodeUrl, ConnectorNodeMetadata connectorNodeMetadata, HubMetadata hubMetadata) {
         this.assertionDecrypter = assertionDecrypter;
         this.connectorNodeUrl = connectorNodeUrl;
         this.eidasResponseGenerator = eidasResponseGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.connectorNodeMetadata = connectorNodeMetadata;
+        this.hubMetadata = hubMetadata;
     }
 
     @POST

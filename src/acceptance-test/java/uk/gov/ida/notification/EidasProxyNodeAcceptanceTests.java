@@ -51,10 +51,6 @@ public class EidasProxyNodeAcceptanceTests {
             HtmlPage successPage = submitSamlForm(idpSamlResponsePage);
 
             assertEquals(successPage.getBaseURL().toString(), connectorNodeResponseUrl());
-//            assertThat(content, containsString("http://eidas.europa.eu/LoA/substantial"));
-//            assertThat(content, containsString("Jack Cornelius"));
-//            assertThat(content, containsString("Bauer"));
-//            assertThat(content, containsString("1984-02-29"));
         }
     }
 

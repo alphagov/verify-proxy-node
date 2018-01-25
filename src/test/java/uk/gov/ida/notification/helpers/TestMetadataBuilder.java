@@ -99,6 +99,8 @@ public class TestMetadataBuilder {
     }
 
     private Node findMetadataCertificateNode(String usageType) throws XPathExpressionException {
+        Element x = metadataDocument.getDocumentElement();
+
         XPath xPath = XPathFactory.newInstance().newXPath();
 
         HashMap<String, String> namespaceMap = new HashMap<String, String>() {{
