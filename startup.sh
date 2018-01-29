@@ -24,6 +24,11 @@ do
 		--proxy-node-rebuild)
       proxy_node_rebuild=true
 			;;
+    --build)
+      reference_rebuild=true
+      stub_idp_rebuild=true
+      proxy_node_rebuild=true
+      ;;
 		*)
       echo "Usage $0 [--follow --proxy-node-rebuild --stub-idp-rebuild --reference-rebuild]"
 			exit 1
