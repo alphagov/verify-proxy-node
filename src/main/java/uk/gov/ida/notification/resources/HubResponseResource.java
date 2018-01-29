@@ -10,8 +10,7 @@ import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.saml.metadata.ConnectorNodeMetadata;
-import uk.gov.ida.notification.saml.metadata.HubMetadata;
+import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
 
 import javax.ws.rs.Consumes;
@@ -29,15 +28,17 @@ public class HubResponseResource {
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final ResponseAssertionDecrypter assertionDecrypter;
     private final String connectorNodeUrl;
-    private final HubMetadata hubMetadata;
-    private ConnectorNodeMetadata connectorNodeMetadata;
+    private final String connectorEntityId;
+    private final Metadata connectorMetadata;
+    private final Metadata hubMetadata;
 
-    public HubResponseResource(EidasResponseGenerator eidasResponseGenerator, SamlFormViewBuilder samlFormViewBuilder, ResponseAssertionDecrypter assertionDecrypter, String connectorNodeUrl, ConnectorNodeMetadata connectorNodeMetadata, HubMetadata hubMetadata) {
+    public HubResponseResource(EidasResponseGenerator eidasResponseGenerator, SamlFormViewBuilder samlFormViewBuilder, ResponseAssertionDecrypter assertionDecrypter, String connectorNodeUrl, String connectorEntityId, Metadata connectorMetadata, Metadata hubMetadata) {
         this.assertionDecrypter = assertionDecrypter;
         this.connectorNodeUrl = connectorNodeUrl;
         this.eidasResponseGenerator = eidasResponseGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
-        this.connectorNodeMetadata = connectorNodeMetadata;
+        this.connectorEntityId = connectorEntityId;
+        this.connectorMetadata = connectorMetadata;
         this.hubMetadata = hubMetadata;
     }
 
@@ -47,6 +48,7 @@ public class HubResponseResource {
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
             @FormParam("RelayState") String relayState) throws ResolverException {
+
         Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
 
         HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
@@ -62,7 +64,7 @@ public class HubResponseResource {
 
     private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException {
         EncryptionCredential connectorNodeEncryptingCredential = CredentialBuilder
-                .withPublicKey(connectorNodeMetadata.getEncryptionPublicKey())
+                .withPublicKey(connectorMetadata.getEncryptionPublicKey(connectorEntityId))
                 .buildEncryptionCredential();
         return new ResponseAssertionEncrypter(connectorNodeEncryptingCredential);
     }
@@ -77,4 +79,5 @@ public class HubResponseResource {
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
     }
+
 }

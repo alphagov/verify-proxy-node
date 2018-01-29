@@ -41,7 +41,9 @@ public class HubResponseBuilder {
     }
 
     public Response build() throws MarshallingException, SignatureException {
-        return responseBuilder.build();
+        return responseBuilder
+                .withoutSigning()
+                .build();
     }
 
     private static AssertionBuilder aMatchingDatasetAssertion() {

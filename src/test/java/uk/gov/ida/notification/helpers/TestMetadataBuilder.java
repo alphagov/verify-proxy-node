@@ -57,7 +57,7 @@ public class TestMetadataBuilder {
         return this;
     }
 
-    public TestMetadataBuilder withSigningCert(String certificateString) throws XPathExpressionException, CertificateEncodingException {
+    public TestMetadataBuilder withSigningCert(String certificateString) throws XPathExpressionException {
         setCertificate(certificateString, SIGNING);
         return this;
     }
@@ -99,8 +99,6 @@ public class TestMetadataBuilder {
     }
 
     private Node findMetadataCertificateNode(String usageType) throws XPathExpressionException {
-        Element x = metadataDocument.getDocumentElement();
-
         XPath xPath = XPathFactory.newInstance().newXPath();
 
         HashMap<String, String> namespaceMap = new HashMap<String, String>() {{

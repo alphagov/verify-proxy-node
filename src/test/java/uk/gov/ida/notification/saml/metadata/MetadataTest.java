@@ -18,10 +18,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ConnectorNodeMetadataTest {
+public class MetadataTest {
 
     private static final String TEST_CONNECTOR_NODE_METADATA_FILE = "connector_node_metadata_template.xml";
-    private static final String CONNECTOR_NODE_METADATA_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
+    private static final String TEST_CONNECTOR_NODE_METADATA_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
+    private static final String TEST_HUB_METADATA_FILE = "hub_metadata.xml";
+    private static final String TEST_HUB_METADATA_ENTITY_ID = "http://stub-idp-one.local/SSO/POST";
 
     @Test
     public void shouldReturnConnectorNodeEncryptionPublicKeyFromMetadata() throws Exception {
@@ -33,10 +35,25 @@ public class ConnectorNodeMetadataTest {
                 .buildResolver("someId");
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
-        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
-        PublicKey connectorNodeEncryptionPublicKey = connectorNodeMetadata.getEncryptionPublicKey();
+        Metadata metadata = new Metadata(metadataCredentialResolver);
+        PublicKey connectorNodeEncryptionPublicKey = metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
 
         assertEquals(expectedPublicKey, connectorNodeEncryptionPublicKey);
+    }
+
+    @Test
+    public void shouldReturnHubSigningPublicKeyFromMetadata() throws Exception {
+        X509Certificate signingCert = new TestKeyPair().certificate;
+        PublicKey expectedPublicKey = signingCert.getPublicKey();
+
+        MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_HUB_METADATA_FILE)
+                .buildResolver("someId");
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
+
+        Metadata metadata = new Metadata(metadataCredentialResolver);
+        PublicKey hubSigningPublicKey = metadata.getSigningPublicKey(TEST_HUB_METADATA_ENTITY_ID);
+
+        assertEquals(expectedPublicKey, hubSigningPublicKey);
     }
 
     @Test(expected = MissingMetadataException.class)
@@ -46,8 +63,8 @@ public class ConnectorNodeMetadataTest {
                 .buildResolver("someId");
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
-        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
-        connectorNodeMetadata.getEncryptionPublicKey();
+        Metadata metadata = new Metadata(metadataCredentialResolver);
+        metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
     }
 
     @Test(expected = MissingMetadataException.class)
@@ -57,8 +74,8 @@ public class ConnectorNodeMetadataTest {
                 .buildResolver("someId");
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
-        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataCredentialResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
-        connectorNodeMetadata.getEncryptionPublicKey();
+        Metadata metadata = new Metadata(metadataCredentialResolver);
+        metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
     }
 
     @Rule
@@ -72,7 +89,7 @@ public class ConnectorNodeMetadataTest {
         MetadataCredentialResolver metadataResolver = mock(MetadataCredentialResolver.class);
         when(metadataResolver.resolveSingle(any())).thenThrow(ResolverException.class);
 
-        ConnectorNodeMetadata connectorNodeMetadata = new ConnectorNodeMetadata(metadataResolver, CONNECTOR_NODE_METADATA_ENTITY_ID);
-        connectorNodeMetadata.getEncryptionPublicKey();
+        Metadata metadata = new Metadata(metadataResolver);
+        metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
     }
 }

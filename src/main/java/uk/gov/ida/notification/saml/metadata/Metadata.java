@@ -13,16 +13,14 @@ import uk.gov.ida.notification.exceptions.MissingMetadataException;
 
 import java.security.PublicKey;
 
-public class ConnectorNodeMetadata {
+public class Metadata {
     private final MetadataCredentialResolver metadataCredentialResolver;
-    private final String entityId;
 
-    public ConnectorNodeMetadata(MetadataCredentialResolver metadataCredentialResolver, String entityId) {
+    public Metadata(MetadataCredentialResolver metadataCredentialResolver) {
         this.metadataCredentialResolver = metadataCredentialResolver;
-        this.entityId = entityId;
     }
 
-    public PublicKey getEncryptionPublicKey() throws ResolverException, MissingMetadataException {
+    public PublicKey getEncryptionPublicKey(String entityId) throws ResolverException, MissingMetadataException {
         CriteriaSet criteria = new CriteriaSet();
         criteria.add(new EntityIdCriterion(entityId));
         criteria.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
@@ -35,5 +33,24 @@ public class ConnectorNodeMetadata {
         } catch(ResolverException ex) {
             throw new ResolverException("Unable to resolve metadata credentials", ex);
         }
+    }
+
+    public PublicKey getSigningPublicKey(String entityId) throws ResolverException, MissingMetadataException {
+        CriteriaSet criteria = new CriteriaSet();
+        criteria.add(new EntityIdCriterion(entityId));
+        criteria.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
+        criteria.add(new UsageCriterion(UsageType.SIGNING));
+
+        try {
+            Credential signingCredential = metadataCredentialResolver.resolveSingle(criteria);
+            if (signingCredential == null) throw new MissingMetadataException("Missing Signing key");
+            return signingCredential.getPublicKey();
+        } catch(ResolverException ex) {
+            throw new ResolverException("Unable to resolve metadata credentials", ex);
+        }
+    }
+
+    public MetadataCredentialResolver getMetadataCredentialResolver() {
+        return metadataCredentialResolver;
     }
 }

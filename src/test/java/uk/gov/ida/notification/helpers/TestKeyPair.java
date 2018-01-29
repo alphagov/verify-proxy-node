@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.helpers;
 
 import io.dropwizard.testing.ResourceHelpers;
-import org.apache.xml.security.exceptions.Base64DecodingException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,23 +32,30 @@ public class TestKeyPair {
     public TestKeyPair() throws
             CertificateException,
             IOException,
-            Base64DecodingException,
             NoSuchAlgorithmException,
             InvalidKeySpecException {
-        certificate = readX509Certificate();
-        publicKey = certificate.getPublicKey();
-        privateKey = readPrivateKey();
+        this(TEST_CERTIFICATE_FILE, TEST_PRIVATE_KEY_FILE);
     }
 
-    private X509Certificate readX509Certificate() throws CertificateException, IOException {
+    public TestKeyPair(String certFile, String keyFile) throws
+            CertificateException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeySpecException {
+        certificate = readX509Certificate(certFile);
+        publicKey = certificate.getPublicKey();
+        privateKey = readPrivateKey(keyFile);
+    }
+
+    private X509Certificate readX509Certificate(String certificateFile) throws CertificateException, IOException {
         CertificateFactory certificateFactory = CertificateFactory.getInstance(X509);
-        String certString = FileHelpers.readFileAsString(TEST_CERTIFICATE_FILE);
+        String certString = FileHelpers.readFileAsString(certificateFile);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certString.getBytes(StandardCharsets.UTF_8));
         return (X509Certificate) certificateFactory.generateCertificate(byteArrayInputStream);
     }
 
-    private PrivateKey readPrivateKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, Base64DecodingException {
-        Path path = Paths.get(ResourceHelpers.resourceFilePath(TEST_PRIVATE_KEY_FILE));
+    private PrivateKey readPrivateKey(String privateKeyFile) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        Path path = Paths.get(ResourceHelpers.resourceFilePath(privateKeyFile));
         byte[] bytes = Files.readAllBytes(path);
         KeyFactory keyFactory = KeyFactory.getInstance(RSA);
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
