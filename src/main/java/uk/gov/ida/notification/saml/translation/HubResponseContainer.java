@@ -16,7 +16,6 @@ public class HubResponseContainer {
         this.authnAssertion = authnAssertion;
     }
 
-
     public static HubResponseContainer fromResponse(Response response) {
         HubResponse hubResponse = HubResponse.fromResponse(response);
 
