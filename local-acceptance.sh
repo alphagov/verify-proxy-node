@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+./shutdown.sh
 ./startup.sh
 
 until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" http://localhost:56000/); do

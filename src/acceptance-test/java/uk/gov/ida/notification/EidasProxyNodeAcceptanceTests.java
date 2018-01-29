@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class EidasProxyNodeAcceptanceTests {
     private static final String SAML_FORM = "saml-form";
@@ -25,8 +27,13 @@ public class EidasProxyNodeAcceptanceTests {
             HtmlPage idpConsentPage = loginAtIDP(idpLoginPage);
             HtmlPage proxyNodeToConnectorNodePage = consentAtIDP(idpConsentPage);
             HtmlPage connectorNodePage = submitSamlForm(proxyNodeToConnectorNodePage);
+            HtmlPage serviceProviderResponsePage = submitCefRefSamlForm(connectorNodePage);
 
-            assertEquals(connectorNodePage.getBaseURL().toString(), connectorNodeBase("/ColleagueResponse"));
+            String pageContent = serviceProviderResponsePage.asText();
+            assertEquals(serviceProviderResponsePage.getBaseURL().toString(), serviceProviderBase("/populateReturnPage"));
+            assertThat(pageContent, containsString("Jack Cornelius"));
+            assertThat(pageContent, containsString("Bauer"));
+            assertThat(pageContent, containsString("1984-02-29"));
         }
     }
 
@@ -59,17 +66,8 @@ public class EidasProxyNodeAcceptanceTests {
         return cefRefSamlPage.getElementById("submit_saml").click();
     }
 
-    private String connectorNodeResponseUrl() throws URISyntaxException {
-        return getEnv("CONNECTOR_NODE_URL", proxyNodeBase("/connector-node/eidas-authn-response"));
-    }
-
     private String proxyNodeBase(String path) throws URISyntaxException {
         String proxyNodeUrl = getEnv("PROXY_NODE_URL", "http://localhost:56016");
-        return new URI(proxyNodeUrl).resolve(path).toString();
-    }
-
-    private String connectorNodeBase(String path) throws URISyntaxException {
-        String proxyNodeUrl = getEnv("CONNECTOR_NODE_URL", "http://localhost:56001");
         return new URI(proxyNodeUrl).resolve(path).toString();
     }
 
