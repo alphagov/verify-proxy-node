@@ -7,6 +7,8 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.w3c.dom.Element;
@@ -15,7 +17,6 @@ import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.pki.DecryptionCredential;
-import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -40,7 +41,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     @Before
     public void setup() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        EncryptionCredential hubAssertionsEncryptionCredential = new EncryptionCredential(
+        Credential hubAssertionsEncryptionCredential = new BasicCredential(
                 hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
         );
         marshaller = new SamlObjectMarshaller();

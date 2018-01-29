@@ -3,10 +3,10 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
-import uk.gov.ida.notification.pki.CredentialBuilder;
-import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -47,8 +47,7 @@ public class HubResponseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
-            @FormParam("RelayState") String relayState) throws ResolverException {
-
+            @FormParam("RelayState") String relayState) throws SecurityException, ResolverException {
         Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
 
         HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
@@ -62,11 +61,9 @@ public class HubResponseResource {
         return samlFormViewBuilder.buildResponse(connectorNodeUrl, securedEidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
     }
 
-    private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException {
-        EncryptionCredential connectorNodeEncryptingCredential = CredentialBuilder
-                .withPublicKey(connectorMetadata.getEncryptionPublicKey(connectorEntityId))
-                .buildEncryptionCredential();
-        return new ResponseAssertionEncrypter(connectorNodeEncryptingCredential);
+    private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException, SecurityException {
+        X509Credential encryptionCredential = connectorMetadata.getEncryptionCredential(connectorEntityId);
+        return new ResponseAssertionEncrypter(encryptionCredential);
     }
 
     private void logHubResponse(HubResponseContainer hubResponseContainer) {

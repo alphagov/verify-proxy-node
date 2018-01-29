@@ -39,8 +39,4 @@ public class CredentialBuilder {
         }
         return new DecryptionCredential(publicKey, privateKey);
     }
-
-    public EncryptionCredential buildEncryptionCredential() {
-        return new EncryptionCredential(publicKey);
-    }
 }
