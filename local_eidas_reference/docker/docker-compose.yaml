@@ -90,7 +90,6 @@ services:
     network_mode: "service:connector-node"
     volumes:
       - ../verify-eidas-reference/metadata-proxy/nginx-reverse-proxy.conf:/etc/nginx/nginx.conf:ro
-
   proxy-node-metadata:
     image: nginx
     networks:
@@ -98,6 +97,5 @@ services:
     volumes:
       - ./metadata/nginx.conf:/etc/nginx/nginx.conf:ro
       - ../../src/main/resources:/usr/share/nginx/html:ro
-
 networks:
   global:
