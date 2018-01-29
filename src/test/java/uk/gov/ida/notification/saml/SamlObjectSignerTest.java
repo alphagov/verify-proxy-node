@@ -12,6 +12,8 @@ import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.pki.SigningCredential;
 
+import java.util.Base64;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -25,12 +27,15 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
 
     @Test
     public void shouldSignAuthRequest() throws Throwable {
-        SigningCredential credential = new SigningCredential(testKeyPair.publicKey, testKeyPair.privateKey);
+        SigningCredential credential = new SigningCredential(testKeyPair.publicKey, testKeyPair.privateKey, testKeyPair.getEncodedCertificate());
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credential);
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         AuthnRequest signedAuthnRequest = samlObjectSigner.sign(authnRequest);
         Signature signature = signedAuthnRequest.getSignature();
 
+        String actualCertificate = signature.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0).getValue();
+
+        assertEquals(testKeyPair.getEncodedCertificate(), actualCertificate);
         signatureShouldBeValid(credential, signature);
     }
 
