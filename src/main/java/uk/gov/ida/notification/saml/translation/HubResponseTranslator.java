@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
     private final String proxyNodeEntityId;
+    private final String TEMPORARY_PID_TRANSLATION = "UK/NL/";
     private final String connectorNodeUrl;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy;
 
@@ -64,7 +65,7 @@ public class HubResponseTranslator {
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                resp -> resp.getAuthnStatement().getPid()
+                resp -> TEMPORARY_PID_TRANSLATION + resp.getAuthnAssertion().getPid()
         ));
 
         List<Attribute> eidasAttributes = eidasAttributeBuilders
@@ -72,18 +73,17 @@ public class HubResponseTranslator {
                 .map(builder -> builder.build(hubResponseContainer))
                 .collect(Collectors.toList());
 
-        String eidasLoa = mapLoa(hubResponseContainer.getAuthnStatement().getProvidedLoa());
+        String eidasLoa = mapLoa(hubResponseContainer.getAuthnAssertion().getProvidedLoa());
 
         Response eidasResponse = createEidasResponse(
                 hubResponseContainer.getHubResponse().getStatusCode(),
-                hubResponseContainer.getAuthnStatement().getPid(),
+                hubResponseContainer.getAuthnAssertion().getPid(),
                 eidasLoa,
                 eidasAttributes,
                 hubResponseContainer.getHubResponse().getInResponseTo(),
                 hubResponseContainer.getHubResponse().getIssueInstant(),
                 hubResponseContainer.getMdsAssertion().getIssueInstant(),
-                hubResponseContainer.getAuthnStatement().getAuthnInstant()
-        );
+                hubResponseContainer.getAuthnAssertion().getAuthnInstant());
 
         return eidasResponse;
     }
@@ -125,7 +125,13 @@ public class HubResponseTranslator {
         AttributeStatement attributeStatement = createAttributeStatement(attributes);
         Issuer responseIssuer = createIssuer();
         Issuer assertionIssuer = createIssuer();
-        Assertion assertion = createAssertion(authnStatement, subject, attributeStatement, assertionIssuer, assertionId, assertionIssueInstant);
+        Assertion assertion = createAssertion(
+                authnStatement,
+                subject,
+                attributeStatement,
+                assertionIssuer,
+                assertionId,
+                assertionIssueInstant);
 
         Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
         response.setStatus(status);
@@ -169,7 +175,7 @@ public class HubResponseTranslator {
     private Subject createSubject(String pid) {
         Subject subject = SamlBuilder.build(Subject.DEFAULT_ELEMENT_NAME);
         NameID nameID = SamlBuilder.build(NameID.DEFAULT_ELEMENT_NAME);
-        nameID.setValue(pid);
+        nameID.setValue(TEMPORARY_PID_TRANSLATION + pid);
         nameID.setFormat(NameIDType.PERSISTENT);
         subject.setNameID(nameID);
         return subject;

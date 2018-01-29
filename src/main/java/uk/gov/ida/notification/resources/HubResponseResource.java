@@ -72,7 +72,7 @@ public class HubResponseResource {
     private void logHubResponse(HubResponseContainer hubResponseContainer) {
         LOG.info("[Hub Response] ID: " + hubResponseContainer.getHubResponse().getResponseId());
         LOG.info("[Hub Response] In response to: " + hubResponseContainer.getHubResponse().getInResponseTo());
-        LOG.info("[Hub Response] Provided level of assurance: " + hubResponseContainer.getAuthnStatement().getProvidedLoa());
+        LOG.info("[Hub Response] Provided level of assurance: " + hubResponseContainer.getAuthnAssertion().getProvidedLoa());
     }
 
     private void logEidasResponse(Response eidasResponse) {
