@@ -8,7 +8,7 @@ version = "1.0.0-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
 buildscript {
     repositories {
-        maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+        maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos/' }
     }
 
     dependencies {
@@ -22,7 +22,7 @@ project.ext {
 }
 
 repositories {
-    maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+    maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos/' }
 }
 
 dependencies {
@@ -78,6 +78,10 @@ task acceptanceTest(type: Test) {
     setTestClassesDirs sourceSets.acceptanceTest.output.classesDirs
     reports.junitXml.setDestination new File("$buildDir/acceptance-test-results")
     reports.html.setDestination new File("$buildDir/reports/acceptance-test")
+}
+
+distZip {
+    archiveName baseName+'.zip'
 }
 
 task sourceJar(type: Jar) {
