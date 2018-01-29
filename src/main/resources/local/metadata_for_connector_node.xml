@@ -4,7 +4,7 @@
     xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
     xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute"
     ID="_entities"
-    entityID="_verify_proxy_node"
+    entityID="http://localhost:56016/connector-node-metadata/local"
 validUntil="2115-05-24T19:30:26.624Z">
   <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
     <ds:SignedInfo>

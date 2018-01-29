@@ -24,11 +24,14 @@ logging:
       archive: false
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID:-http://proxy-node.uk}
+proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL:-http://proxy-node-metadata:55000/local/metadata_for_connector_node.xml}
+
 hubUrl: ${HUB_URL:-/stub-idp/request}
 
 connectorNodeUrl: ${CONNECTOR_NODE_URL:-http://localhost:56001/ColleagueResponse}
 connectorNodeMetadataUrl: ${CONNECTOR_NODE_METADATA_URL:-http://connector-node:8080/ConnectorResponderMetadata}
 connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID:-http://connector-node:8080/ConnectorResponderMetadata}
+connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID:-http://connector-node:8080/ConnectorMetadata}
 
 hubMetadataUrl: ${HUB_METADATA_URL:-https://example.com}
 hubEntityId: ${HUB_ENTITY_ID:-https://example.com}
