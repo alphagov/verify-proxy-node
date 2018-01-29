@@ -11,34 +11,36 @@ import uk.gov.ida.notification.views.SamlFormView;
 import static junit.framework.TestCase.assertEquals;
 
 public class SamlFormViewBuilderTest extends SamlInitializedTest {
+
+    private SamlFormViewBuilder builder = new SamlFormViewBuilder();
+    private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
+
     @Test
     public void shouldGenerateSAMLRequestForm() {
-        SamlFormViewBuilder builder = new SamlFormViewBuilder();
-        SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
+
         String encodedAuthnRequest = Base64.encodeAsString(marshaller.transformToString(authnRequest));
 
         SamlFormView view = builder.buildRequest("url", authnRequest, "submit", "relay");
 
-        assertEquals("url", view.getPostUrl());
         assertEquals(SamlFormMessageType.SAML_REQUEST, view.getSamlMessageType());
         assertEquals(encodedAuthnRequest, view.getEncodedSamlMessage());
+        assertEquals("url", view.getPostUrl());
         assertEquals("submit", view.getSubmitText());
         assertEquals("relay", view.getRelayState());
     }
 
     @Test
     public void shouldGenerateSAMLResponseForm() {
-        SamlFormViewBuilder builder = new SamlFormViewBuilder();
-        SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
         Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
-        String encodedAuthnRequest = Base64.encodeAsString(marshaller.transformToString(response));
+
+        String encodedResponse = Base64.encodeAsString(marshaller.transformToString(response));
 
         SamlFormView view = builder.buildResponse("url", response, "submit", "relay");
 
-        assertEquals("url", view.getPostUrl());
         assertEquals(SamlFormMessageType.SAML_RESPONSE, view.getSamlMessageType());
-        assertEquals(encodedAuthnRequest, view.getEncodedSamlMessage());
+        assertEquals(encodedResponse, view.getEncodedSamlMessage());
+        assertEquals("url", view.getPostUrl());
         assertEquals("submit", view.getSubmitText());
         assertEquals("relay", view.getRelayState());
     }
