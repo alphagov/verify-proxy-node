@@ -19,7 +19,7 @@ public class HubAuthnRequestGeneratorTest extends SamlInitializedTest {
     public void shouldGenerateHubAuthnRequestGivenEidas () throws Throwable {
         EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://hub.uk");
         TestKeyPair keyPair = new TestKeyPair();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(new SigningCredential(keyPair.publicKey, keyPair.privateKey));
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(new SigningCredential(keyPair.publicKey, keyPair.privateKey, keyPair.getEncodedCertificate()));
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(translator, samlObjectSigner);
         EidasAuthnRequest eidasRequest = new EidasAuthnRequest(
                 "request-id",

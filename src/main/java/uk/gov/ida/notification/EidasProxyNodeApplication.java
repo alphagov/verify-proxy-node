@@ -15,6 +15,7 @@ import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import uk.gov.ida.notification.pki.CredentialBuilder;
 import uk.gov.ida.notification.pki.DecryptionCredential;
+import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
@@ -32,6 +33,8 @@ import javax.ws.rs.client.Client;
 import java.net.URI;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
+    private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+    private static final String END_CERT = "-----END CERTIFICATE-----";
 
     private static final String CONNECTOR_NODE_METADATA_RESOLVER_ID = "connector-node-metadata";
     private static final String HUB_METADATA_RESOLVER_ID = "hub-metadata";
@@ -124,9 +127,15 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     }
 
     private SigningCredential createSigningCredential() {
+        KeyPairConfiguration signingKeyPair = configuration.getSigningKeyPair();
+        String certString = signingKeyPair
+                .getPublicKey()
+                .getCert()
+                .replaceAll(BEGIN_CERT, "")
+                .replaceAll(END_CERT, "");
         return CredentialBuilder
-                .withKeyPairConfiguration(configuration.getSigningKeyPair())
-                .buildSigningCredential();
+                .withKeyPairConfiguration(signingKeyPair)
+                .buildSigningCredential(certString);
     }
 
     private void registerProviders() {
