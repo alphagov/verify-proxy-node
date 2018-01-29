@@ -1,8 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'com.github.ben-manes.versions'
+apply plugin: 'maven-publish'
 
 mainClassName = 'uk.gov.ida.notification.EidasProxyNodeApplication'
+version = "1.0.0-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
 buildscript {
     repositories {
@@ -76,4 +78,27 @@ task acceptanceTest(type: Test) {
     setTestClassesDirs sourceSets.acceptanceTest.output.classesDirs
     reports.junitXml.setDestination new File("$buildDir/acceptance-test-results")
     reports.html.setDestination new File("$buildDir/reports/acceptance-test")
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = "uk.gov.ida"
+            artifactId = "eidas-notification"
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "/srv/maven"
+        }
+    }
 }
