@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
-import uk.gov.ida.notification.exceptions.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.MissingMetadataException;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.helpers.TestMetadataBuilder;
@@ -34,10 +33,10 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert(encryptionCert)
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        PublicKey connectorNodeEncryptionPublicKey = metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID).getPublicKey();
+        PublicKey connectorNodeEncryptionPublicKey = metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
 
         assertEquals(expectedPublicKey, connectorNodeEncryptionPublicKey);
     }
@@ -49,7 +48,7 @@ public class MetadataTest {
 
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_HUB_METADATA_FILE)
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
         PublicKey hubSigningPublicKey = metadata.getSigningPublicKey(TEST_HUB_METADATA_ENTITY_ID);
@@ -62,10 +61,10 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert("")
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
+        metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
     }
 
     @Test(expected = MissingMetadataException.class)
@@ -73,10 +72,10 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withNoEncryptionCert()
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverBuilder(metadataResolver).build();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
+        metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
     }
 
     @Rule
@@ -84,13 +83,13 @@ public class MetadataTest {
 
     @Test
     public void shouldErrorIfUnableToResolveMetadata() throws Exception {
-        expectedEx.expect(InvalidMetadataException.class);
+        expectedEx.expect(ResolverException.class);
         expectedEx.expectMessage("Unable to resolve metadata credentials");
 
-        MetadataCredentialResolver metadataCredentialResolver = mock(MetadataCredentialResolver.class);
-        when(metadataCredentialResolver.resolveSingle(any())).thenThrow(ResolverException.class);
+        MetadataCredentialResolver metadataResolver = mock(MetadataCredentialResolver.class);
+        when(metadataResolver.resolveSingle(any())).thenThrow(ResolverException.class);
 
-        Metadata metadata = new Metadata(metadataCredentialResolver);
-        metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
+        Metadata metadata = new Metadata(metadataResolver);
+        metadata.getEncryptionPublicKey(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
     }
 }

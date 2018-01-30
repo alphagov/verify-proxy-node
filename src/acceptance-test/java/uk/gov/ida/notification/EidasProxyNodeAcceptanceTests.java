@@ -18,33 +18,27 @@ public class EidasProxyNodeAcceptanceTests {
     @Test
     public void shouldHandleEidasAuthnRequest() throws Exception {
         try (final WebClient webClient = new WebClient()) {
-            HtmlPage countryServicePage = webClient.getPage(serviceProviderBase("/"));
-            HtmlPage eidasAuthnRequestPage = submitCountrySelections(countryServicePage);
-            HtmlPage proxyNodeToHubPage = submitCefRefSamlForm(eidasAuthnRequestPage);
-            HtmlPage idpLoginPage = submitSamlForm(proxyNodeToHubPage);
+            // Disable JS
+            webClient.getOptions().setJavaScriptEnabled(false);
+
+            // Service Start Page
+            HtmlPage testSamlPage = webClient.getPage(connectorNodeUrl());
+
+            // Submit eIDAS AuthnRequest to Proxy Node
+            HtmlPage verifyAuthnRequestPage = submitSamlForm(testSamlPage);
+
+            // Submit Verify AuthnRequest to Hub
+            HtmlPage idpLoginPage = submitSamlForm(verifyAuthnRequestPage);
+
+            // Login at Hub (IDP)
             HtmlPage idpConsentPage = loginAtIDP(idpLoginPage);
-            HtmlPage proxyNodeToConnectorNodePage = consentAtIDP(idpConsentPage);
-            HtmlPage connectorNodePage = submitSamlForm(proxyNodeToConnectorNodePage);
-            HtmlPage serviceProviderResponsePage = submitCefRefSamlForm(connectorNodePage);
+            HtmlPage idpSamlResponsePage = consentAtIDP(idpConsentPage);
 
-            String pageContent = serviceProviderResponsePage.asText();
-            assertEquals(serviceProviderResponsePage.getBaseURL().toString(), serviceProviderBase("/populateReturnPage"));
-            assertThat(pageContent, containsString("Jack Cornelius"));
-            assertThat(pageContent, containsString("Bauer"));
-            assertThat(pageContent, containsString("1984-02-29"));
+            // Submit eIDAS Response to Connector Node
+            HtmlPage successPage = submitSamlForm(idpSamlResponsePage);
+
+            assertEquals(successPage.getBaseURL().toString(), connectorNodeResponseUrl());
         }
-    }
-
-    private HtmlPage submitCountrySelections(HtmlPage countryServicePage) throws IOException, URISyntaxException {
-        HtmlForm cefRefForm = countryServicePage.getForms().get(0);
-        cefRefForm.getInputByName("nodeMetadataUrl").setValueAttribute(connectorNodeMetadataUrl("/ConnectorResponderMetadata"));
-        cefRefForm.getSelectByName("citizenEidas").setSelectedAttribute(citizenCountry(), true);
-        cefRefForm.getSelectByName("eidasloa").setSelectedAttribute("http://eidas.europa.eu/LoA/substantial", true);
-        return countryServicePage.getElementById("submit_tab2").click();
-    }
-
-    private String citizenCountry() {
-        return getEnv("CITIZEN_COUNTRY", "UK2");
     }
 
     private HtmlPage loginAtIDP(HtmlPage idpLogin) throws IOException {
@@ -56,7 +50,8 @@ public class EidasProxyNodeAcceptanceTests {
 
     private HtmlPage consentAtIDP(HtmlPage idpConsent) throws IOException {
         HtmlForm consentForm = idpConsent.getForms().get(0);
-        return consentForm.getInputByValue("I Agree").click();
+        HtmlPage continuePage = consentForm.getInputByValue("I Agree").click();
+        return continuePage.getForms().get(0).getElementsByTagName("button").get(0).click();
     }
 
     private HtmlPage submitSamlForm(HtmlPage testSamlPage) throws IOException {
@@ -64,22 +59,16 @@ public class EidasProxyNodeAcceptanceTests {
         return authnRequestForm.getInputByName(SUBMIT_BUTTON).click();
     }
 
-    private HtmlPage submitCefRefSamlForm(HtmlPage cefRefSamlPage) throws IOException {
-        return cefRefSamlPage.getElementById("submit_saml").click();
+    private String connectorNodeUrl() throws URISyntaxException {
+        return getEnv("CONNECTOR_NODE_URL", proxyNodeBase("/connector-node/eidas-authn-request"));
     }
 
-    private String connectorNodeMetadataUrl(String path) throws URISyntaxException {
-        String connectorNodeUrl = getEnv("CONNECTOR_NODE_URL", "http://connector-node:8080");
-        return new URI(connectorNodeUrl).resolve(path).toString();
+    private String connectorNodeResponseUrl() throws URISyntaxException {
+        return getEnv("CONNECTOR_NODE_URL", proxyNodeBase("/connector-node/eidas-authn-response"));
     }
 
     private String proxyNodeBase(String path) throws URISyntaxException {
-        String proxyNodeUrl = getEnv("PROXY_NODE_URL", "http://localhost:56016");
-        return new URI(proxyNodeUrl).resolve(path).toString();
-    }
-
-    private String serviceProviderBase(String path) throws URISyntaxException {
-        String proxyNodeUrl = getEnv("SERVICE_PROVIDER_URL", "http://localhost:56000");
+        String proxyNodeUrl = getEnv("PROXY_NODE_URL", "http://localhost:6600");
         return new URI(proxyNodeUrl).resolve(path).toString();
     }
 

@@ -2,7 +2,7 @@
   hooks:
     - id: java-tests
       name: Run Java tests
-      entry: ./jenkins/build.sh
+      entry: ./pre-commit.sh
       language: system
       files: \.java$
       pass_filenames: false

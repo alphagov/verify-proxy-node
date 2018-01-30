@@ -26,11 +26,11 @@ public class CredentialBuilder {
         );
     }
 
-    public SigningCredential buildSigningCredential(String certString) {
+    public SigningCredential buildSigningCredential() {
         if (privateKey == null) {
             throw new RuntimeException("Cannot build signing credential: private key is null");
         }
-        return new SigningCredential(publicKey, privateKey, certString);
+        return new SigningCredential(publicKey, privateKey);
     }
 
     public DecryptionCredential buildDecryptionCredential() {
@@ -38,5 +38,9 @@ public class CredentialBuilder {
             throw new RuntimeException("Cannot build decryption credential: private key is null");
         }
         return new DecryptionCredential(publicKey, privateKey);
+    }
+
+    public EncryptionCredential buildEncryptionCredential() {
+        return new EncryptionCredential(publicKey);
     }
 }

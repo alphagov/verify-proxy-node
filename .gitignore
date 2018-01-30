@@ -32,7 +32,6 @@ buildNumber.properties
 /classes/*
 /**/*.orig
 
+ida-stub-idp
+local_eidas_reference
 metadata/*.xml
-local_eidas_reference/ida-stub-idp
-local_eidas_reference/verify-metadata
-local_eidas_reference/verify-eidas-reference
