@@ -2,6 +2,7 @@ package uk.gov.ida.notification.saml.translation;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opensaml.core.xml.AbstractXMLObject;
 import org.opensaml.core.xml.schema.impl.XSStringImpl;
@@ -17,24 +18,20 @@ import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 import uk.gov.ida.saml.core.test.builders.DateAttributeValueBuilder;
 import uk.gov.ida.saml.core.test.builders.PersonNameAttributeValueBuilder;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class HubResponseTranslatorTest extends SamlInitializedTest {
     @Test
     public void shouldGenerateEidasResponse() throws Exception {
-        String proxyNodeMetadataForConnectorNodeUrl = "http://proxy-node.uk/connector-node-metadata";
-        String connectorNodeIssuerId = "connectorNode issuerId";
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator("http://connector.eu", proxyNodeMetadataForConnectorNodeUrl, connectorNodeIssuerId);
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator("http://proxy-node.uk", "http://connector.eu");
         DateTime dummyTime = DateTime.now();
         HubResponseContainer hubResponseContainer = new HubResponseContainer(
                 new HubResponse("success", "response id", "id of request", dummyTime),
                 new HubMdsAssertion(buildHubAttributes("Jane", "Smith", "1984-02-29"), dummyTime),
-                new HubAuthnAssertion("pid", IdaAuthnContext.LEVEL_2_AUTHN_CTX, dummyTime)
+                new HubAuthnStatement("pid", IdaAuthnContext.LEVEL_2_AUTHN_CTX, dummyTime)
         );
 
         Response eidasResponse = hubResponseTranslator.translate(hubResponseContainer);
@@ -46,19 +43,14 @@ public class HubResponseTranslatorTest extends SamlInitializedTest {
                 .findFirst()
                 .orElseThrow(() -> new Exception("Hub Response has no authn assertion"));
 
-        assertEquals("id of request", eidasResponse.getInResponseTo());
-        assertEquals("Jane", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME)).getValue());
-        assertEquals("Smith", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME)).getValue());
-        assertEquals(new LocalDate(1984, 2, 29), ((
+        Assert.assertEquals("id of request", eidasResponse.getInResponseTo());
+        Assert.assertEquals("Jane", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME)).getValue());
+        Assert.assertEquals("Smith", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME)).getValue());
+        Assert.assertEquals(new LocalDate(1984, 2, 29), ((
                 DateOfBirthTypeImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME)).getDate());
-        assertTrue(dummyTime.isEqual(eidasResponse.getIssueInstant()));
-        assertTrue(dummyTime.isEqual(eidasResponse.getAssertions().get(0).getIssueInstant()));
-        assertTrue(dummyTime.isEqual(authnAssertion.getAuthnStatements().get(0).getAuthnInstant()));
-        assertEquals(proxyNodeMetadataForConnectorNodeUrl, eidasResponse.getIssuer().getValue());
-        assertEquals(connectorNodeIssuerId, eidasResponse.getAssertions().get(0).getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).getAudienceURI());
-
-        assertEquals("UK/NL/pid", eidasResponse.getAssertions().get(0).getSubject().getNameID().getValue());
-        assertEquals("UK/NL/pid", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME)).getValue());
+        Assert.assertTrue(dummyTime.isEqual(eidasResponse.getIssueInstant()));
+        Assert.assertTrue(dummyTime.isEqual(eidasResponse.getAssertions().get(0).getIssueInstant()));
+        Assert.assertTrue(dummyTime.isEqual(authnAssertion.getAuthnStatements().get(0).getAuthnInstant()));
     }
 
     private Map<String, AbstractXMLObject> getEidasResponseAttributes(Response eidasResponse) {

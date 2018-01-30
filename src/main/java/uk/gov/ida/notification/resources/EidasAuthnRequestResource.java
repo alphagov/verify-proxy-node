@@ -27,10 +27,10 @@ public class EidasAuthnRequestResource {
     private SamlFormViewBuilder samlFormViewBuilder;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
-                                     HubAuthnRequestGenerator authnRequestGenerator,
+                                     HubAuthnRequestGenerator authnRequestTranslator,
                                      SamlFormViewBuilder samlFormViewBuilder) {
         this.configuration = configuration;
-        this.hubAuthnRequestGenerator = authnRequestGenerator;
+        this.hubAuthnRequestGenerator = authnRequestTranslator;
         this.samlFormViewBuilder = samlFormViewBuilder;
     }
 

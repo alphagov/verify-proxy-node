@@ -8,26 +8,27 @@ import java.util.List;
 public class HubResponseContainer {
     private final HubResponse hubResponse;
     private final HubMdsAssertion mdsAssertion;
-    private final HubAuthnAssertion authnAssertion;
+    private final HubAuthnStatement authnStatement;
 
-    public HubResponseContainer(HubResponse hubResponse, HubMdsAssertion mdsAssertion, HubAuthnAssertion authnAssertion) {
+    public HubResponseContainer(HubResponse hubResponse, HubMdsAssertion mdsAssertion, HubAuthnStatement authnStatement) {
         this.hubResponse = hubResponse;
         this.mdsAssertion = mdsAssertion;
-        this.authnAssertion = authnAssertion;
+        this.authnStatement = authnStatement;
     }
+
 
     public static HubResponseContainer fromResponse(Response response) {
         HubResponse hubResponse = HubResponse.fromResponse(response);
 
         List<Assertion> assertions = response.getAssertions();
         HubMdsAssertion mdsAssertion = HubMdsAssertion.fromAssertions(assertions);
-        HubAuthnAssertion hubAuthnAssertion = HubAuthnAssertion.fromAssertions(assertions);
+        HubAuthnStatement hubAuthnStatement = HubAuthnStatement.fromAssertions(assertions);
 
-        return new HubResponseContainer(hubResponse, mdsAssertion, hubAuthnAssertion);
+        return new HubResponseContainer(hubResponse, mdsAssertion, hubAuthnStatement);
     }
 
-    public HubAuthnAssertion getAuthnAssertion() {
-        return authnAssertion;
+    public HubAuthnStatement getAuthnStatement() {
+        return authnStatement;
     }
 
     public HubResponse getHubResponse() {

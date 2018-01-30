@@ -6,14 +6,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 public class SigningCredential extends BasicCredential {
-    private final String certificateString;
-
-    public SigningCredential(PublicKey publicKey, PrivateKey privateKey, String certificateString) {
+    public SigningCredential(PublicKey publicKey, PrivateKey privateKey) {
         super(publicKey, privateKey);
-        this.certificateString = certificateString;
-    }
-
-    public String getCertificateString() {
-        return certificateString;
     }
 }

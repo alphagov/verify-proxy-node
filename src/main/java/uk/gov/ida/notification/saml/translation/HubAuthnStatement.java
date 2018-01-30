@@ -7,18 +7,19 @@ import uk.gov.ida.notification.exceptions.HubResponseException;
 
 import java.util.List;
 
-public class HubAuthnAssertion {
+public class HubAuthnStatement {
     private final String pid;
     private final String providedLoa;
     private final DateTime authnInstant;
 
-    public HubAuthnAssertion(String pid, String providedLoa, DateTime authnInstant) {
+    public HubAuthnStatement(String pid, String providedLoa, DateTime authnInstant) {
         this.pid = pid;
         this.providedLoa = providedLoa;
         this.authnInstant = authnInstant;
     }
 
-    public static HubAuthnAssertion fromAssertions(List<Assertion> assertions) {
+
+    public static HubAuthnStatement fromAssertions(List<Assertion> assertions) {
         Assertion authnAssertion = assertions
                 .stream()
                 .filter(a -> !a.getAuthnStatements().isEmpty())
@@ -32,7 +33,7 @@ public class HubAuthnAssertion {
 
         DateTime authnInstant = authnStatement.getAuthnInstant();
 
-        return new HubAuthnAssertion(pid, providedLoa, authnInstant);
+        return new HubAuthnStatement(pid, providedLoa, authnInstant);
     }
 
 

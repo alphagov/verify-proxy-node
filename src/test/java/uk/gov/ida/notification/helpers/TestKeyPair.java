@@ -12,13 +12,11 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 
 public class TestKeyPair {
 
@@ -47,10 +45,6 @@ public class TestKeyPair {
         certificate = readX509Certificate(certFile);
         publicKey = certificate.getPublicKey();
         privateKey = readPrivateKey(keyFile);
-    }
-
-    public String getEncodedCertificate() throws CertificateEncodingException {
-        return Base64.getEncoder().encodeToString(certificate.getEncoded());
     }
 
     private X509Certificate readX509Certificate(String certificateFile) throws CertificateException, IOException {

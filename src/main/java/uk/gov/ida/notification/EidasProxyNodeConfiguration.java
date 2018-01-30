@@ -56,16 +56,6 @@ public class EidasProxyNodeConfiguration extends Configuration {
     private JerseyClientConfiguration httpClient;
     private URI hubMetadataUrl;
 
-    @JsonProperty
-    @Valid
-    @NotNull
-    private URI proxyNodeMetadataForConnectorNodeUrl;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private String connectorNodeIssuerId;
-
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -106,11 +96,4 @@ public class EidasProxyNodeConfiguration extends Configuration {
         return hubEntityId;
     }
 
-    public URI getProxyNodeMetadataForConnectorNodeUrl() {
-        return proxyNodeMetadataForConnectorNodeUrl;
-    }
-
-    public String getConnectorNodeIssuerId() {
-        return connectorNodeIssuerId;
-    }
 }

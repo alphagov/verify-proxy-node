@@ -4,8 +4,8 @@ package uk.gov.ida.notification.helpers;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.support.SignatureException;
+import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.saml.core.extensions.Address;
 import uk.gov.ida.saml.core.test.builders.AddressAttributeBuilder_1_1;
 import uk.gov.ida.saml.core.test.builders.AddressAttributeValueBuilder_1_1;
@@ -30,13 +30,13 @@ public class HubResponseBuilder {
         responseBuilder = ResponseBuilder.aResponse();
     }
 
-    public HubResponseBuilder addAuthnStatementAssertionUsing(Credential credential) {
-        responseBuilder.addEncryptedAssertion(anAuthnStatementAssertion().buildWithEncrypterCredential(credential));
+    public HubResponseBuilder addAuthnStatementAssertionUsing(EncryptionCredential encryptionCredential) {
+        responseBuilder.addEncryptedAssertion(anAuthnStatementAssertion().buildWithEncrypterCredential(encryptionCredential));
         return this;
     }
 
-    public HubResponseBuilder addMatchingDatasetAssertionUsing(Credential credential) {
-        responseBuilder.addEncryptedAssertion(aMatchingDatasetAssertion().buildWithEncrypterCredential(credential));
+    public HubResponseBuilder addMatchingDatasetAssertionUsing(EncryptionCredential encryptionCredential) {
+        responseBuilder.addEncryptedAssertion(aMatchingDatasetAssertion().buildWithEncrypterCredential(encryptionCredential));
         return this;
     }
 
