@@ -32,7 +32,7 @@ public class EidasProxyNodeAppRule extends DropwizardAppRule<EidasProxyNodeConfi
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
-        configOverridesList.add(ConfigOverride.config("httpClient.timeout", "25s"));
+        configOverridesList.add(ConfigOverride.config("httpClient.timeout", "40s"));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 
