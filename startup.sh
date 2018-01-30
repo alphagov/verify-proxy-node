@@ -1,42 +1,70 @@
 #!/usr/bin/env bash
 
-set -e
+PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PN_SCRIPTS_DIR="${PN_PROJECT_DIR}"/local_eidas_reference/scripts
 
-# Kill old services
-./kill-service.sh 2>/dev/null
+follow=false
 
-# Setup environment for local running
-# Proxy Node
-export PROXY_NODE_ENTITY_ID="https://dev-hub.local"
-export HUB_URL="http://localhost:50140/stub-idp-demo/SAML2/SSO"
+reference_rebuild=false
+proxy_node_rebuild=false
+stub_idp_rebuild=false
 
-# Stub IDP
-stub_idp_local="$(pwd -P)/stub-idp/resources/local"
-export HUB_ENTITY_ID="$PROXY_NODE_ENTITY_ID"
-export IDP_SIGNING_PRIVATE_KEY="$stub_idp_local/stub_idp_signing.pk8"
-export IDP_SIGNING_CERT="$stub_idp_local/stub_idp_signing.crt"
-export STUB_IDPS_FILE_PATH="$stub_idp_local/stub-idps.yml"
-export METADATA_URL="http://localhost:55000/local/metadata_for_hub.xml"
-export METADATA_TRUST_STORE="$stub_idp_local/metadata.ts"
-export METADATA_TRUST_STORE_PASSWORD="marshmallow"
-export HUB_METADATA_URL="$METADATA_URL"
-
-rm -f logs/*
-
-# Start metadata server
-echo "Starting metadata server"
-( ./local_metadata_server >logs/metadata_server.log 2>&1 ) &
-
-# Start applications
-source start-proxy-node.sh
-source start-stub-idp.sh
-
-until $(curl --output /dev/null --silent --head --fail http://localhost:6601/); do
-  echo "Waiting for Proxy Node"
-  sleep 1
+while [ ! $# -eq 0 ]
+do
+	case "$1" in
+		--follow)
+      follow=true
+			;;
+		--reference-rebuild)
+      reference_rebuild=true
+			;;
+		--stub-idp-rebuild)
+      stub_idp_rebuild=true
+			;;
+		--proxy-node-rebuild)
+      proxy_node_rebuild=true
+			;;
+    --build)
+      reference_rebuild=true
+      stub_idp_rebuild=true
+      proxy_node_rebuild=true
+      ;;
+		*)
+      echo "Usage $0 [--follow --proxy-node-rebuild --stub-idp-rebuild --reference-rebuild]"
+			exit 1
+			;;
+	esac
+	shift
 done
 
-until $(curl --output /dev/null --silent --head --fail http://localhost:50141/); do
-  echo "Waiting for Stub IDP"
-  sleep 1
-done
+pushd "${PN_PROJECT_DIR}"/local_eidas_reference
+  source "${PN_SCRIPTS_DIR}"/setup-verify-metadata.sh
+  source "${PN_SCRIPTS_DIR}"/setup-verify-eidas-reference.sh
+  source "${PN_SCRIPTS_DIR}"/setup-ida-stub-idp.sh
+
+  reference_scripts_dir="${PN_PROJECT_DIR}"/local_eidas_reference/verify-eidas-reference/scripts
+
+  if [ "$stub_idp_rebuild" = true ]
+  then
+    docker build -f docker/Dockerfile.stub-idp "${PN_PROJECT_DIR}" -t notification-stub-idp
+  fi
+
+  if [ "$proxy_node_rebuild" = true ]
+  then
+    docker build -f docker/Dockerfile.proxy-node "${PN_PROJECT_DIR}" -t notification-proxy-node
+  fi
+
+  if [ "$reference_rebuild" = true ]
+  then
+    "$reference_scripts_dir"/build_docker_image.sh
+  fi
+popd
+
+pushd "${PN_PROJECT_DIR}"/local_eidas_reference/docker
+  docker-compose up -d
+  if [ "$follow" = true ]
+  then
+    docker-compose logs -f
+  fi
+popd
+

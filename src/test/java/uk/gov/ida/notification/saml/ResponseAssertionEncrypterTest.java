@@ -5,10 +5,11 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.pki.DecryptionCredential;
-import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.saml.core.test.builders.AssertionBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 import uk.gov.ida.saml.security.DecrypterFactory;
@@ -22,12 +23,12 @@ public class ResponseAssertionEncrypterTest extends SamlInitializedTest {
     public void shouldEncryptAssertionsInResponse() throws Throwable {
         TestKeyPair testKeyPair = new TestKeyPair();
         DecryptionCredential decryptionCredential = new DecryptionCredential(testKeyPair.publicKey, testKeyPair.privateKey);
-        EncryptionCredential encryptionCredential = new EncryptionCredential(testKeyPair.publicKey);
+        X509Credential credential = new BasicX509Credential(testKeyPair.certificate);
 
         Assertion assertion = AssertionBuilder.anAssertion().withId("hi").buildUnencrypted();
         Response response = ResponseBuilder.aResponse().addAssertion(assertion).build();
 
-        ResponseAssertionEncrypter encrypter = new ResponseAssertionEncrypter(encryptionCredential);
+        ResponseAssertionEncrypter encrypter = new ResponseAssertionEncrypter(credential);
         Response encryptedResponse = encrypter.encrypt(response);
 
         EncryptedAssertion encryptedAssertion = encryptedResponse.getEncryptedAssertions().get(0);
