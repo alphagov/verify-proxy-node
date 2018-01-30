@@ -7,6 +7,8 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.w3c.dom.Element;
@@ -15,7 +17,6 @@ import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.pki.DecryptionCredential;
-import uk.gov.ida.notification.pki.EncryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -34,26 +35,26 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
-    private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
-    private EncryptionCredential hubAssertionsEncryptionCredential;
+    private SamlObjectMarshaller marshaller;
+    private Response hubResponse;
 
     @Before
     public void setup() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        hubAssertionsEncryptionCredential = new EncryptionCredential(
+        Credential hubAssertionsEncryptionCredential = new BasicCredential(
                 hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
         );
+        marshaller = new SamlObjectMarshaller();
+        hubResponse = new HubResponseBuilder()
+                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
+                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
+                .build();
     }
 
     @Test
     public void shouldReturnASignedEidasResponse() throws Exception {
         KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
-
-        Response hubResponse = new HubResponseBuilder()
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
 
         Response eidasResponse = readResponseFromHub(hubResponse);
 
@@ -66,13 +67,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
-        Response hubResponse = new HubResponseBuilder()
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
-
         Response eidasResponse = readResponseFromHub(hubResponse);
-
         assertEquals(1, eidasResponse.getEncryptedAssertions().size());
         assert(eidasResponse.getAssertions().isEmpty());
     }
@@ -84,15 +79,10 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
                 keyPair.publicKey, keyPair.privateKey
         );
 
-        Response hubResponse = new HubResponseBuilder()
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
-
         Response eidasResponse = readResponseFromHub(hubResponse);
 
         Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
-        Element attributeStatement = new SamlObjectMarshaller().marshallToElement(eidasAssertion.getAttributeStatements().get(0));
+        Element attributeStatement = marshaller.marshallToElement(eidasAssertion.getAttributeStatements().get(0));
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
         assertEquals(1, eidasAssertion.getAttributeStatements().size());

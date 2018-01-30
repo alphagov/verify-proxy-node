@@ -2,36 +2,31 @@ package uk.gov.ida.notification;
 
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import se.litsec.eidas.opensaml.common.EidasConstants;
-import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
-import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 
-import java.util.Collections;
-
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HubAuthnRequestGeneratorTest extends SamlInitializedTest {
+
     @Test
-    public void shouldGenerateHubAuthnRequestGivenEidas () throws Throwable {
-        EidasAuthnRequestTranslator translator = new EidasAuthnRequestTranslator("http://proxy-node.uk", "http://hub.uk");
-        TestKeyPair keyPair = new TestKeyPair();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(new SigningCredential(keyPair.publicKey, keyPair.privateKey));
+    public void shouldTranslateAndSignEidasAuthnRequests() {
+        EidasAuthnRequestTranslator translator = mock(EidasAuthnRequestTranslator.class);
+        SamlObjectSigner samlObjectSigner = mock(SamlObjectSigner.class);
+
+        EidasAuthnRequest eidasAuthnRequest = mock(EidasAuthnRequest.class);
+        AuthnRequest translatedAuthnRequest = mock(AuthnRequest.class);
+        AuthnRequest expectedHubAuthnRequest = mock(AuthnRequest.class);
+
+        when(translator.translate(eidasAuthnRequest)).thenReturn(translatedAuthnRequest);
+        when(samlObjectSigner.sign(translatedAuthnRequest)).thenReturn(expectedHubAuthnRequest);
+
         HubAuthnRequestGenerator hubAuthnRequestGenerator = new HubAuthnRequestGenerator(translator, samlObjectSigner);
-        EidasAuthnRequest eidasRequest = new EidasAuthnRequest(
-                "request-id",
-                "http://connector.eu",
-                "http://proxy-node.uk",
-                SPTypeEnumeration.PUBLIC,
-                EidasConstants.EIDAS_LOA_SUBSTANTIAL,
-                Collections.emptyList()
-        );
+        AuthnRequest actualHubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
 
-        AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasRequest);
-
-        assertEquals("http://proxy-node.uk", hubAuthnRequest.getIssuer().getValue());
+        assertEquals(expectedHubAuthnRequest, actualHubAuthnRequest);
     }
 }

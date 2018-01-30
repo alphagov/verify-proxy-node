@@ -5,9 +5,12 @@ import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.Audience;
+import org.opensaml.saml.saml2.core.AudienceRestriction;
 import org.opensaml.saml.saml2.core.AuthnContext;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.Conditions;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDType;
@@ -35,13 +38,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
-    private final String proxyNodeEntityId;
+    private final String TEMPORARY_PID_TRANSLATION = "UK/NL/";
     private final String connectorNodeUrl;
+    private final String proxyNodeMetadataForConnectorNodeUrl;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy;
+    private final String connectorNodeIssuerId;
 
-    public HubResponseTranslator(String proxyNodeEntityId, String connectorNodeUrl) {
-        this.proxyNodeEntityId = proxyNodeEntityId;
+    public HubResponseTranslator(String connectorNodeUrl, String proxyNodeMetadataForConnectorNodeUrl, String connectorNodeIssuerId) {
         this.connectorNodeUrl = connectorNodeUrl;
+        this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
+        this.connectorNodeIssuerId = connectorNodeIssuerId;
         idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     }
 
@@ -64,7 +70,7 @@ public class HubResponseTranslator {
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                resp -> resp.getAuthnStatement().getPid()
+                resp -> TEMPORARY_PID_TRANSLATION + resp.getAuthnAssertion().getPid()
         ));
 
         List<Attribute> eidasAttributes = eidasAttributeBuilders
@@ -72,18 +78,17 @@ public class HubResponseTranslator {
                 .map(builder -> builder.build(hubResponseContainer))
                 .collect(Collectors.toList());
 
-        String eidasLoa = mapLoa(hubResponseContainer.getAuthnStatement().getProvidedLoa());
+        String eidasLoa = mapLoa(hubResponseContainer.getAuthnAssertion().getProvidedLoa());
 
         Response eidasResponse = createEidasResponse(
                 hubResponseContainer.getHubResponse().getStatusCode(),
-                hubResponseContainer.getAuthnStatement().getPid(),
+                hubResponseContainer.getAuthnAssertion().getPid(),
                 eidasLoa,
                 eidasAttributes,
                 hubResponseContainer.getHubResponse().getInResponseTo(),
                 hubResponseContainer.getHubResponse().getIssueInstant(),
                 hubResponseContainer.getMdsAssertion().getIssueInstant(),
-                hubResponseContainer.getAuthnStatement().getAuthnInstant()
-        );
+                hubResponseContainer.getAuthnAssertion().getAuthnInstant());
 
         return eidasResponse;
     }
@@ -125,7 +130,13 @@ public class HubResponseTranslator {
         AttributeStatement attributeStatement = createAttributeStatement(attributes);
         Issuer responseIssuer = createIssuer();
         Issuer assertionIssuer = createIssuer();
-        Assertion assertion = createAssertion(authnStatement, subject, attributeStatement, assertionIssuer, assertionId, assertionIssueInstant);
+        Assertion assertion = createAssertion(
+                authnStatement,
+                subject,
+                attributeStatement,
+                assertionIssuer,
+                assertionId,
+                assertionIssueInstant);
 
         Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
         response.setStatus(status);
@@ -147,7 +158,23 @@ public class HubResponseTranslator {
         assertion.setIssuer(assertionIssuer);
         assertion.setID(assertionId);
         assertion.setIssueInstant(assertionIssueInstant);
+        assertion.setConditions(createCondition());
         return assertion;
+    }
+
+    private Conditions createCondition() {
+        Audience audience = SamlBuilder.build(Audience.DEFAULT_ELEMENT_NAME);
+        audience.setAudienceURI(connectorNodeIssuerId);
+
+        AudienceRestriction audienceRestriction = SamlBuilder.build(AudienceRestriction.DEFAULT_ELEMENT_NAME);
+        audienceRestriction.getAudiences().add(audience);
+
+        Conditions conditions = SamlBuilder.build(Conditions.DEFAULT_ELEMENT_NAME);
+        DateTime now = DateTime.now();
+        conditions.setNotBefore(now);
+        conditions.setNotOnOrAfter(now.plusMinutes(5));
+        conditions.getAudienceRestrictions().add(audienceRestriction);
+        return conditions;
     }
 
     private AttributeStatement createAttributeStatement(List<Attribute> attributes) {
@@ -169,7 +196,7 @@ public class HubResponseTranslator {
     private Subject createSubject(String pid) {
         Subject subject = SamlBuilder.build(Subject.DEFAULT_ELEMENT_NAME);
         NameID nameID = SamlBuilder.build(NameID.DEFAULT_ELEMENT_NAME);
-        nameID.setValue(pid);
+        nameID.setValue(TEMPORARY_PID_TRANSLATION + pid);
         nameID.setFormat(NameIDType.PERSISTENT);
         subject.setNameID(nameID);
         return subject;
@@ -186,7 +213,7 @@ public class HubResponseTranslator {
     private Issuer createIssuer() {
         Issuer responseIssuer = SamlBuilder.build(Issuer.DEFAULT_ELEMENT_NAME);
         responseIssuer.setFormat(NameIDType.ENTITY);
-        responseIssuer.setValue(proxyNodeEntityId);
+        responseIssuer.setValue(proxyNodeMetadataForConnectorNodeUrl);
         return responseIssuer;
     }
 }

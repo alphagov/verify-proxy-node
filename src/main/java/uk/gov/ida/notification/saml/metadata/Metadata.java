@@ -9,6 +9,8 @@ import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
+import org.opensaml.security.x509.X509Credential;
+import uk.gov.ida.notification.exceptions.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.MissingMetadataException;
 
 import java.security.PublicKey;
@@ -20,18 +22,18 @@ public class Metadata {
         this.metadataCredentialResolver = metadataCredentialResolver;
     }
 
-    public PublicKey getEncryptionPublicKey(String entityId) throws ResolverException, MissingMetadataException {
+    public X509Credential getEncryptionCredential(String entityId) throws ResolverException, MissingMetadataException {
         CriteriaSet criteria = new CriteriaSet();
         criteria.add(new EntityIdCriterion(entityId));
         criteria.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
         criteria.add(new UsageCriterion(UsageType.ENCRYPTION));
 
         try {
-            Credential encryptionCredential = metadataCredentialResolver.resolveSingle(criteria);
+            X509Credential encryptionCredential = (X509Credential) metadataCredentialResolver.resolveSingle(criteria);
             if (encryptionCredential == null) throw new MissingMetadataException("Missing Encryption certificate");
-            return encryptionCredential.getPublicKey();
+            return encryptionCredential;
         } catch(ResolverException ex) {
-            throw new ResolverException("Unable to resolve metadata credentials", ex);
+            throw new InvalidMetadataException("Unable to resolve metadata credentials", ex);
         }
     }
 
@@ -48,9 +50,5 @@ public class Metadata {
         } catch(ResolverException ex) {
             throw new ResolverException("Unable to resolve metadata credentials", ex);
         }
-    }
-
-    public MetadataCredentialResolver getMetadataCredentialResolver() {
-        return metadataCredentialResolver;
     }
 }
