@@ -35,12 +35,16 @@ public class EidasProxyNodeAcceptanceTests {
         }
     }
 
-    private HtmlPage submitCountrySelections(HtmlPage countryServicePage) throws IOException {
+    private HtmlPage submitCountrySelections(HtmlPage countryServicePage) throws IOException, URISyntaxException {
         HtmlForm cefRefForm = countryServicePage.getForms().get(0);
-        cefRefForm.getInputByName("nodeMetadataUrl").setValueAttribute("http://connector-node:8080/ConnectorResponderMetadata");
-        cefRefForm.getSelectByName("citizenEidas").setSelectedAttribute("UK2", true);
+        cefRefForm.getInputByName("nodeMetadataUrl").setValueAttribute(connectorNodeMetadataUrl("/ConnectorResponderMetadata"));
+        cefRefForm.getSelectByName("citizenEidas").setSelectedAttribute(citizenCountry(), true);
         cefRefForm.getSelectByName("eidasloa").setSelectedAttribute("http://eidas.europa.eu/LoA/substantial", true);
         return countryServicePage.getElementById("submit_tab2").click();
+    }
+
+    private String citizenCountry() {
+        return getEnv("CITIZEN_COUNTRY", "UK2");
     }
 
     private HtmlPage loginAtIDP(HtmlPage idpLogin) throws IOException {
@@ -62,6 +66,11 @@ public class EidasProxyNodeAcceptanceTests {
 
     private HtmlPage submitCefRefSamlForm(HtmlPage cefRefSamlPage) throws IOException {
         return cefRefSamlPage.getElementById("submit_saml").click();
+    }
+
+    private String connectorNodeMetadataUrl(String path) throws URISyntaxException {
+        String connectorNodeUrl = getEnv("CONNECTOR_NODE_URL", "http://connector-node:8080");
+        return new URI(connectorNodeUrl).resolve(path).toString();
     }
 
     private String proxyNodeBase(String path) throws URISyntaxException {
