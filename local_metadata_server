@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require 'webrick'
+require 'webrick/https'
+
+cert_name = [
+  %w[CN localhost],
+]
+
+doc_root = File.expand_path("src/main/resources")
+
+puts doc_root
+
+server = WEBrick::HTTPServer.new(:Port => 55000,
+                                 :DocumentRoot => doc_root)
+
+trap 'INT' do server.shutdown end
+
+server.start

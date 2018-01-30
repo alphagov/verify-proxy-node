@@ -15,9 +15,7 @@ import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import uk.gov.ida.notification.pki.CredentialBuilder;
 import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.SigningCredential;
-import uk.gov.ida.notification.resources.ConnectorNodeMetadataResource;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
-import uk.gov.ida.notification.resources.HubMetadataResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -32,7 +30,6 @@ import uk.gov.ida.stubs.resources.StubConnectorNodeResource;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Timer;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
@@ -41,9 +38,6 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     private static final String HUB_METADATA_RESOLVER_ID = "hub-metadata";
     private EidasProxyNodeConfiguration configuration;
     private Environment environment;
-    private EidasResponseGenerator eidasResponseGenerator;
-    private HubAuthnRequestGenerator hubAuthnRequestGenerator;
-    private ResponseAssertionDecrypter assertionDecrypter;
     private Metadata connectorMetadata;
     private Metadata hubMetadata;
     private String connectorNodeUrl;
@@ -100,20 +94,13 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws
             InitializationException,
-            ComponentInitializationException,
-            URISyntaxException {
+            ComponentInitializationException {
         this.configuration = configuration;
         this.environment = environment;
 
         connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         connectorMetadata = createConnectorNodeMetadata();
         hubMetadata = createHubMetadata();
-
-        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential());
-        eidasResponseGenerator = createEidasResponseGenerator(signer);
-        hubAuthnRequestGenerator = createHubAuthnRequestGenerator(signer);
-
-        assertionDecrypter = createDecrypter();
 
         registerProviders();
         registerResources();
@@ -148,6 +135,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     private void registerResources() {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential());
+        EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(signer);
+        HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(signer);
+        ResponseAssertionDecrypter assertionDecrypter = createDecrypter();
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
@@ -164,8 +155,6 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 connectorMetadata,
                 hubMetadata));
 
-        environment.jersey().register(new ConnectorNodeMetadataResource());
-        environment.jersey().register(new HubMetadataResource());
         environment.jersey().register(new StubConnectorNodeResource());
     }
 

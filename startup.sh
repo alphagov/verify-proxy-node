@@ -16,9 +16,16 @@ export HUB_ENTITY_ID="$PROXY_NODE_ENTITY_ID"
 export IDP_SIGNING_PRIVATE_KEY="$stub_idp_local/stub_idp_signing.pk8"
 export IDP_SIGNING_CERT="$stub_idp_local/stub_idp_signing.crt"
 export STUB_IDPS_FILE_PATH="$stub_idp_local/stub-idps.yml"
-export METADATA_URL="http://localhost:6600/hub-metadata/local"
+export METADATA_URL="http://localhost:55000/local/metadata_for_hub.xml"
 export METADATA_TRUST_STORE="$stub_idp_local/metadata.ts"
 export METADATA_TRUST_STORE_PASSWORD="marshmallow"
+export HUB_METADATA_URL="$METADATA_URL"
+
+rm -f logs/*
+
+# Start metadata server
+echo "Starting metadata server"
+( ./local_metadata_server >logs/metadata_server.log 2>&1 ) &
 
 # Start applications
 source start-proxy-node.sh

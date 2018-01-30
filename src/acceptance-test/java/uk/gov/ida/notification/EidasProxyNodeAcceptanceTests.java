@@ -3,30 +3,17 @@ package uk.gov.ida.notification;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.xml.XmlPage;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class EidasProxyNodeAcceptanceTests {
     private static final String SAML_FORM = "saml-form";
     private static final String SUBMIT_BUTTON = "submit";
-    private static final String HUB_METADATA_ENDPOINT = "/hub-metadata/local";
-
-    @Test
-    public void shouldFetchHubMetadata() throws Exception {
-        try (final WebClient webClient = new WebClient()) {
-            XmlPage hubMetadataPage = webClient.getPage(proxyNodeBase(HUB_METADATA_ENDPOINT));
-            String content = hubMetadataPage.asXml();
-            assertThat(content, containsString("EntityDescriptor"));
-        }
-    }
 
     @Test
     public void shouldHandleEidasAuthnRequest() throws Exception {
