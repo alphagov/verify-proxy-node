@@ -33,3 +33,5 @@ buildNumber.properties
 /**/*.orig
 
 ida-stub-idp
+local_eidas_reference
+metadata/*.xml
