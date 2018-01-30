@@ -7,9 +7,9 @@ applications:
     env:
       CONFIG_FILE: /app/verify-eidas-notification/config.yml
       HUB_URL: https://verify-eidas-notification-stub-idp.cloudapps.digital/stub-idp-demo/SAML2/SSO
-      CONNECTOR_NODE_URL: https://eidas-reference-14-sp.cloudapps.digital/
-      CONNECTOR_NODE_METADATA_URL: https://eidas-reference-14-connector.cloudapps.digital/ConnectorResponderMetadata
-      CONNECTOR_NODE_ENTITY_ID: https://eidas-reference-14-connector.cloudapps.digital/ConnectorResponderMetadata
+      CONNECTOR_NODE_URL: https://eidas-joint-14-connector.cloudapps.digital/
+      CONNECTOR_NODE_METADATA_URL: https://eidas-joint-14-connector.cloudapps.digital/ConnectorResponderMetadata
+      CONNECTOR_NODE_ENTITY_ID: https://eidas-joint-14-connector.cloudapps.digital/ConnectorResponderMetadata
       PROXY_NODE_HUB_RESPONSE_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/Response/POST
       PROXY_NODE_AUTHN_REQUEST_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST
       HUB_FACING_SIGNING_CERT_FILE: /app/verify-eidas-notification/pki/proxy_node_signing.crt
