@@ -10,6 +10,7 @@ applications:
       CONNECTOR_NODE_URL: https://eidas-joint-14-connector.cloudapps.digital/ColleagueResponse
       CONNECTOR_NODE_METADATA_URL: https://eidas-joint-14-connector.cloudapps.digital/ConnectorResponderMetadata
       CONNECTOR_NODE_ENTITY_ID: https://eidas-joint-14-connector.cloudapps.digital/ConnectorResponderMetadata
+      CONNECTOR_NODE_ISSUER_ID: https://eidas-joint-14-connector.cloudapps.digital/ConnectorMetadata
       PROXY_NODE_HUB_RESPONSE_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/Response/POST
       PROXY_NODE_AUTHN_REQUEST_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST
       HUB_FACING_SIGNING_CERT_FILE: /app/verify-eidas-notification/pki/proxy_node_signing.crt
@@ -17,3 +18,4 @@ applications:
       HUB_FACING_ENCRYPTION_CERT_FILE: /app/verify-eidas-notification/pki/proxy_node_encryption.crt
       HUB_FACING_ENCRYPTION_KEY_FILE: /app/verify-eidas-notification/pki/proxy_node_encryption.pk8
       PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: https://verify-eidas-notification-metadata.cloudapps.digital/metadata_for_connector_node.xml
+
