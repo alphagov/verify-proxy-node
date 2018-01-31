@@ -27,6 +27,7 @@ import uk.gov.ida.notification.saml.metadata.JerseyClientMetadataResolverInitial
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
+import uk.gov.ida.notification.saml.translation.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 
 import javax.ws.rs.client.Client;
@@ -113,9 +114,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     private EidasResponseGenerator createEidasResponseGenerator(SamlObjectSigner signer) {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
+                new EidasResponseBuilder(
                 connectorNodeUrl,
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString(),
-                configuration.getConnectorNodeIssuerId());
+                configuration.getConnectorNodeIssuerId()));
         return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 

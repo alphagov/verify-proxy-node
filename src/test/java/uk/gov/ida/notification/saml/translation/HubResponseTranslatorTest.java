@@ -29,7 +29,7 @@ public class HubResponseTranslatorTest extends SamlInitializedTest {
     public void shouldGenerateEidasResponse() throws Exception {
         String proxyNodeMetadataForConnectorNodeUrl = "http://proxy-node.uk/connector-node-metadata";
         String connectorNodeIssuerId = "connectorNode issuerId";
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator("http://connector.eu", proxyNodeMetadataForConnectorNodeUrl, connectorNodeIssuerId);
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(new EidasResponseBuilder("http://connector.eu", proxyNodeMetadataForConnectorNodeUrl, connectorNodeIssuerId));
         DateTime dummyTime = DateTime.now();
         HubResponseContainer hubResponseContainer = new HubResponseContainer(
                 new HubResponse("success", "response id", "id of request", dummyTime),
