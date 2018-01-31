@@ -57,7 +57,7 @@ public class HubResponseTranslator {
 
         String eidasLoa = mapLoa(hubResponseContainer.getAuthnAssertion().getProvidedLoa());
 
-        Response eidasResponse = eidasResponseBuilder.createEidasResponse(
+        return eidasResponseBuilder.createEidasResponse(
                 hubResponseContainer.getHubResponse().getStatusCode(),
                 hubResponseContainer.getAuthnAssertion().getPid(),
                 eidasLoa,
@@ -66,8 +66,6 @@ public class HubResponseTranslator {
                 hubResponseContainer.getHubResponse().getIssueInstant(),
                 hubResponseContainer.getMdsAssertion().getIssueInstant(),
                 hubResponseContainer.getAuthnAssertion().getAuthnInstant());
-
-        return eidasResponse;
     }
 
     private String combineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
