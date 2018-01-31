@@ -56,26 +56,26 @@ public class HubResponseTranslator {
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                this::combineFirstAndMiddleNames
+                combineFirstAndMiddleNames(hubResponseContainer)
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
-                resp -> resp.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.Surname.NAME, PersonName.class).getValue()
+                hubResponseContainer.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.Surname.NAME, PersonName.class).getValue()
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                resp -> resp.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.DateOfBirth.NAME, Date.class).getValue()
+                hubResponseContainer.getMdsAssertion().getMdsAttribute(IdaConstants.Attributes_1_1.DateOfBirth.NAME, Date.class).getValue()
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                resp -> TEMPORARY_PID_TRANSLATION + resp.getAuthnAssertion().getPid()
+                TEMPORARY_PID_TRANSLATION + hubResponseContainer.getAuthnAssertion().getPid()
         ));
 
         List<Attribute> eidasAttributes = eidasAttributeBuilders
                 .stream()
-                .map(builder -> builder.build(hubResponseContainer))
+                .map(EidasAttributeBuilder::build)
                 .collect(Collectors.toList());
 
         String eidasLoa = mapLoa(hubResponseContainer.getAuthnAssertion().getProvidedLoa());

@@ -9,27 +9,26 @@ import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import uk.gov.ida.notification.saml.SamlBuilder;
 
 import javax.xml.namespace.QName;
-import java.util.function.Function;
 
 public class EidasAttributeBuilder {
     private final String attributeName;
     private final String attributeFriendlyName;
     private final QName attributeValueTypeName;
-    private final Function<HubResponseContainer, String> attributeMapper;
+    private final String attributeAsString;
 
-    public EidasAttributeBuilder(String attributeName, String attributeFriendlyName, QName attributeValueTypeName, Function<HubResponseContainer, String> attributeMapper) {
+    public EidasAttributeBuilder(String attributeName, String attributeFriendlyName, QName attributeValueTypeName, String attributeAsString) {
         this.attributeName = attributeName;
         this.attributeFriendlyName = attributeFriendlyName;
         this.attributeValueTypeName = attributeValueTypeName;
-        this.attributeMapper = attributeMapper;
+        this.attributeAsString = attributeAsString;
     }
 
-    public Attribute build(HubResponseContainer hubResponseContainer) {
+    public Attribute build() {
         XMLObjectBuilder<? extends EidasAttributeValueType> eidasTypeBuilder = (XMLObjectBuilder<? extends EidasAttributeValueType>) XMLObjectSupport.getBuilder(attributeValueTypeName);
         Attribute attribute = SamlBuilder.build(Attribute.DEFAULT_ELEMENT_NAME);
         EidasAttributeValueType attributeValue = eidasTypeBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, attributeValueTypeName);
 
-        attributeValue.parseStringValue(attributeMapper.apply(hubResponseContainer));
+        attributeValue.parseStringValue(attributeAsString);
 
         attribute.setName(attributeName);
         attribute.setFriendlyName(attributeFriendlyName);
