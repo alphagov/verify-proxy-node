@@ -115,9 +115,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     private EidasResponseGenerator createEidasResponseGenerator(SamlObjectSigner signer) {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 new EidasResponseBuilder(
-                connectorNodeUrl,
-                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString(),
-                configuration.getConnectorNodeIssuerId()));
+                        configuration.getProxyNodeMetadataForConnectorNodeUrl().toString(),
+                        configuration.getConnectorNodeIssuerId()),
+                connectorNodeUrl);
         return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 

@@ -25,18 +25,16 @@ import java.util.List;
 public class EidasResponseBuilder {
 
     public static final String TEMPORARY_PID_TRANSLATION = "UK/EU/";
-    private final String connectorNodeUrl;
     private final String proxyNodeMetadataForConnectorNodeUrl;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     private final String connectorNodeIssuerId;
 
-    public EidasResponseBuilder(String connectorNodeUrl, String proxyNodeMetadataForConnectorNodeUrl, String connectorNodeIssuerId) {
-        this.connectorNodeUrl = connectorNodeUrl;
+    public EidasResponseBuilder(String proxyNodeMetadataForConnectorNodeUrl, String connectorNodeIssuerId) {
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
         this.connectorNodeIssuerId = connectorNodeIssuerId;
     }
 
-    public Response createEidasResponse(String statusCodeValue, String pid, String loa, List<Attribute> attributes, String inResponseTo, DateTime issueInstant, DateTime assertionIssueInstant, DateTime authnStatementAuthnInstant) {
+    public Response createEidasResponse(String statusCodeValue, String pid, String loa, List<Attribute> attributes, String inResponseTo, DateTime issueInstant, DateTime assertionIssueInstant, DateTime authnStatementAuthnInstant, String destinationUrl) {
         String responseId = generateRandomId();
         String assertionId = generateRandomId();
 
@@ -63,7 +61,7 @@ public class EidasResponseBuilder {
         response.getAssertions().add(assertion);
         response.setID(responseId);
         response.setInResponseTo(inResponseTo);
-        response.setDestination(connectorNodeUrl);
+        response.setDestination(destinationUrl);
         response.setIssueInstant(issueInstant);
 
         return response;

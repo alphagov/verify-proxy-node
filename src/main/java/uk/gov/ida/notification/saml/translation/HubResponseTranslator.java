@@ -23,9 +23,11 @@ import java.util.stream.Collectors;
 public class HubResponseTranslator {
 
     private EidasResponseBuilder eidasResponseBuilder;
+    private String destinationUrl;
 
-    public HubResponseTranslator(EidasResponseBuilder eidasResponseBuilder) {
+    public HubResponseTranslator(EidasResponseBuilder eidasResponseBuilder, String destinationUrl) {
         this.eidasResponseBuilder = eidasResponseBuilder;
+        this.destinationUrl = destinationUrl;
     }
 
     public Response translate(HubResponseContainer hubResponseContainer) {
@@ -65,7 +67,9 @@ public class HubResponseTranslator {
                 hubResponseContainer.getHubResponse().getInResponseTo(),
                 hubResponseContainer.getHubResponse().getIssueInstant(),
                 hubResponseContainer.getMdsAssertion().getIssueInstant(),
-                hubResponseContainer.getAuthnAssertion().getAuthnInstant());
+                hubResponseContainer.getAuthnAssertion().getAuthnInstant(),
+                destinationUrl
+                );
     }
 
     private String combineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {

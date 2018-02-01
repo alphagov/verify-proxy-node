@@ -34,12 +34,12 @@ public class EidasResponseBuilderTest extends SamlInitializedTest {
 
     @Test
     public void shouldGenerateAnEidasResponse() throws Exception {
-        EidasResponseBuilder eidasResponseBuilder = new EidasResponseBuilder(connectorNodeUrl, proxyNodeMetadataForConnectorNodeUrl, connectorNodeIssuerId);
+        EidasResponseBuilder eidasResponseBuilder = new EidasResponseBuilder(proxyNodeMetadataForConnectorNodeUrl, connectorNodeIssuerId);
         DateTime issueInstant = DateTime.now();
         List<Attribute> eidasAttributes = getEidasAttributes();
 
         Response response = eidasResponseBuilder.createEidasResponse("success", "pid", EidasConstants.EIDAS_LOA_SUBSTANTIAL,
-                eidasAttributes,"id-of-request", issueInstant, issueInstant, issueInstant);
+                eidasAttributes,"id-of-request", issueInstant, issueInstant, issueInstant, connectorNodeUrl);
         Map<String, AbstractXMLObject> eidasResponseAttributes = getEidasResponseAttributes(response);
         Assertion authnAssertion = response.getAssertions()
                 .stream()

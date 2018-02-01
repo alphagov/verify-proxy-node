@@ -42,7 +42,7 @@ public class HubResponseTranslatorTest extends SamlInitializedTest {
 
     @Test
     public void shouldTranslateVerifyTermsIntoEidasEquivalentsWhenGeneratingEidasResponse() {
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(eidasResponseBuilder);
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(eidasResponseBuilder, "www.example.com/response/POST");
         DateTime dummyTime = DateTime.now();
         HubResponseContainer hubResponseContainer = new HubResponseContainer(
                 new HubResponse("success", "response id", "id of request", dummyTime),
@@ -56,7 +56,7 @@ public class HubResponseTranslatorTest extends SamlInitializedTest {
                 eq("success"), eq("pid"),
                 eq(EidasConstants.EIDAS_LOA_SUBSTANTIAL), attributeListCaptor.capture(),
                 eq("id of request"), eq(dummyTime),
-                eq(dummyTime), eq(dummyTime));
+                eq(dummyTime), eq(dummyTime), eq("www.example.com/response/POST"));
         assertEquals(4,
                 attributeListCaptor.getValue().size());
         assertEquals("Jane Doe",
