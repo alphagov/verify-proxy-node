@@ -2,6 +2,4 @@
 
 set -e
 
-./gradlew clean build
-./local-acceptance.sh
-./gradlew publish
+./gradlew clean build publish
