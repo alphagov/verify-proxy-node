@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ./shutdown.sh
-./startup.sh
+./startup.sh --build
 
 until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" http://localhost:56000/); do
   echo "Waiting for CEF"
