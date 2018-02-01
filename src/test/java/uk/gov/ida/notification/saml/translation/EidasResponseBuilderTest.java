@@ -52,13 +52,13 @@ public class EidasResponseBuilderTest extends SamlInitializedTest {
         assertEquals("Bob", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME)).getValue());
         assertEquals("Hobbs", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME)).getValue());
         assertEquals(new LocalDate(1985, 1, 30), ((DateOfBirthTypeImpl)eidasResponseAttributes.get(AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME)).getDate());
-        assertEquals("UK/NL/pid", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME)).getValue());
+        assertEquals("UK/EU/pid", ((XSStringImpl) eidasResponseAttributes.get(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME)).getValue());
         assertTrue(issueInstant.isEqual(response.getIssueInstant()));
         assertTrue(issueInstant.isEqual(response.getAssertions().get(0).getIssueInstant()));
         assertTrue(issueInstant.isEqual(authnAssertion.getAuthnStatements().get(0).getAuthnInstant()));
         assertEquals(proxyNodeMetadataForConnectorNodeUrl, response.getIssuer().getValue());
         assertEquals(connectorNodeIssuerId, response.getAssertions().get(0).getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).getAudienceURI());
-        assertEquals("UK/NL/pid", response.getAssertions().get(0).getSubject().getNameID().getValue());
+        assertEquals("UK/EU/pid", response.getAssertions().get(0).getSubject().getNameID().getValue());
     }
 
     private Map<String, AbstractXMLObject> getEidasResponseAttributes(Response eidasResponse) {
@@ -74,7 +74,7 @@ public class EidasResponseBuilderTest extends SamlInitializedTest {
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME ,"Bob"));
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME ,"Hobbs"));
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME ,"1985-01-30"));
-        eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME ,"UK/NL/pid"));
+        eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME ,"UK/EU/pid"));
 
         return eidasAttributeBuilders.stream()
                 .map(builder -> builder.build())

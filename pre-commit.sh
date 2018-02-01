@@ -3,4 +3,3 @@
 set -e
 
 ./gradlew clean build
-./local-acceptance.sh
