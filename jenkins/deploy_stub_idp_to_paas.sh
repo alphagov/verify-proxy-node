@@ -12,4 +12,4 @@ cd ../ida-stub-idp
 ./gradlew -x test \
       pushToPaas \
       -PmanifestFile=$MANIFEST_FILE \
-      -PincludeDirectory=$STUB_IDP_RESOURCES
+      -PincludeDirectories=$STUB_IDP_RESOURCES
