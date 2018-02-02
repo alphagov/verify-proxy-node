@@ -29,6 +29,8 @@ import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializ
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
+import uk.gov.ida.saml.metadata.MetadataHealthCheck;
+import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
@@ -44,6 +46,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     private Metadata connectorMetadata;
     private Metadata hubMetadata;
     private String connectorNodeUrl;
+
+    private MetadataResolverBundle<EidasProxyNodeConfiguration> connectorMetadataResolverBundle;
+
+    private MetadataResolverBundle<EidasProxyNodeConfiguration> hubMetadataResolverBundle;
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
     public EidasProxyNodeApplication() {
@@ -91,21 +97,32 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
         // Views
         bootstrap.addBundle(new ViewBundle<>());
+
+        // Metadata
+        hubMetadataResolverBundle = new MetadataResolverBundle<>(EidasProxyNodeConfiguration::getHubMetadataConfiguration);
+        bootstrap.addBundle(hubMetadataResolverBundle);
     }
 
     @Override
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws
-            InitializationException,
             ComponentInitializationException {
         this.configuration = configuration;
         this.environment = environment;
 
         connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         JerseyClientConfiguration clientConfiguration = configuration.getHttpClientConfiguration();
-        Client client = new JerseyClientBuilder(environment).using(clientConfiguration).build(this.getName());
-        connectorMetadata = createConnectorNodeMetadata(client);
-        hubMetadata = createHubMetadata(client);
+
+        connectorMetadata = createConnectorNodeMetadata(new JerseyClientBuilder(environment).using(clientConfiguration).build(this.getName()));
+
+        hubMetadata = createMetadata(hubMetadataResolverBundle);
+
+        MetadataHealthCheck hubMetadataHealthCheck = new MetadataHealthCheck(
+                hubMetadataResolverBundle.getMetadataResolver(),
+                configuration.getHubMetadataConfiguration().getExpectedEntityId()
+        );
+
+        environment.healthChecks().register(hubMetadataHealthCheck.getName(), hubMetadataHealthCheck);
 
         registerProviders();
         registerResources();
@@ -175,20 +192,16 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         return new ResponseAssertionDecrypter(hubFacingDecryptingCredential);
     }
 
-    private Metadata createHubMetadata(Client client) throws ComponentInitializationException, InitializationException {
-        URI hubMetadataUrl = configuration.getHubMetadataUrl();
-
-        MetadataResolver metadataResolver = new JerseyClientMetadataResolverInitializer(HUB_METADATA_RESOLVER_ID, client, hubMetadataUrl).initialize();
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
-
-        return new Metadata(metadataCredentialResolver);
-    }
-
     private Metadata createConnectorNodeMetadata(Client client) throws ComponentInitializationException {
         URI connectorNodeMetadataUrl = configuration.getConnectorNodeMetadataUrl();
 
         MetadataResolver metadataResolver = new JerseyClientMetadataResolverInitializer(CONNECTOR_NODE_METADATA_RESOLVER_ID, client, connectorNodeMetadataUrl).initialize();
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        return new Metadata(metadataCredentialResolver);
+    }
+
+    private Metadata createMetadata(MetadataResolverBundle bundle) throws ComponentInitializationException {
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(bundle.getMetadataResolver()).initialize();
         return new Metadata(metadataCredentialResolver);
     }
 }

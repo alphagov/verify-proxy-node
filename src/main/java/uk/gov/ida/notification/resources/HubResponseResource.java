@@ -2,8 +2,10 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -12,12 +14,14 @@ import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
+import uk.gov.ida.notification.saml.validation.SamlSignatureValidator;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
+import java.security.PublicKey;
 import java.util.logging.Logger;
 
 @Path("/SAML2/SSO/Response")
@@ -47,8 +51,13 @@ public class HubResponseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
-            @FormParam("RelayState") String relayState) throws SecurityException, ResolverException {
+            @FormParam("RelayState") String relayState) throws SecurityException, ResolverException, MarshallingException {
+        SamlSignatureValidator samlSignatureValidator = new SamlSignatureValidator();
+        PublicKey hubPublicKey = hubMetadata.getSigningPublicKey(encryptedHubResponse.getIssuer().getValue());
+
+        samlSignatureValidator.validateResponse(new BasicCredential(hubPublicKey), encryptedHubResponse);
         Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
+
 
         HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
         logHubResponse(hubResponseContainer);

@@ -33,8 +33,21 @@ connectorNodeMetadataUrl: ${CONNECTOR_NODE_METADATA_URL:-http://connector-node:8
 connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID:-http://connector-node:8080/ConnectorResponderMetadata}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID:-http://connector-node:8080/ConnectorMetadata}
 
-hubMetadataUrl: ${HUB_METADATA_URL:-https://example.com}
-hubEntityId: ${HUB_ENTITY_ID:-https://example.com}
+connectorMetadataConfiguration:
+  url: ${CONNECTOR_NODE_METADATA_URL:-http://connector-node:8080/ConnectorResponderMetadata}
+  expectedEntityId: ${CONNECTOR_NODE_ENTITY_ID:-http://connector-node:8080/ConnectorResponderMetadata}
+  jerseyClientName: connector-metadata-client
+  trustStore:
+    path: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_FILE:-build/resources/main/local/connectorNodeKeystore.jks}
+    password: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD:-Password}
+
+hubMetadataConfiguration:
+  url: ${HUB_METADATA_URL:-https://example.com}
+  expectedEntityId: ${HUB_ENTITY_ID:-https://example.com}
+  jerseyClientName: hub-metadata-client
+  trustStore:
+    path: ${HUB_METADATA_TRUSTSTORE_FILE:-build/resources/main/local/hub_metadata.ts}
+    password: ${HUB_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
 signingKeyPair:
   publicKey:

@@ -1,12 +1,7 @@
 package uk.gov.ida.notification.saml.translation;
 
 import org.joda.time.DateTime;
-import org.opensaml.saml.saml2.core.*;
-import uk.gov.ida.notification.exceptions.HubResponseException;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.opensaml.saml.saml2.core.Response;
 
 public class HubResponse {
     private final String statusCode;

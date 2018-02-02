@@ -16,6 +16,7 @@ public class HubAuthnRequestGenerator {
 
     public AuthnRequest generate(EidasAuthnRequest eidasAuthnRequest) {
         AuthnRequest authnRequest = translator.translate(eidasAuthnRequest);
-        return samlObjectSigner.sign(authnRequest);
+        samlObjectSigner.sign(authnRequest);
+        return authnRequest;
     }
 }

@@ -12,8 +12,6 @@ import org.opensaml.xmlsec.signature.support.Signer;
 import uk.gov.ida.notification.exceptions.SamlSigningException;
 import uk.gov.ida.notification.pki.SigningCredential;
 
-import java.util.Base64;
-
 
 public class SamlObjectSigner {
     private final SigningCredential signingCredential;
@@ -24,7 +22,7 @@ public class SamlObjectSigner {
         this.marshaller = new SamlObjectMarshaller();
     }
 
-    public <T extends SignableSAMLObject> T sign(T signableSAMLObject) {
+    public void sign(SignableSAMLObject signableSAMLObject) {
         Signature signature = buildSignature();
         signableSAMLObject.setSignature(signature);
         try {
@@ -33,7 +31,6 @@ public class SamlObjectSigner {
         } catch (MarshallingException | SignatureException e) {
             throw new SamlSigningException(e);
         }
-        return signableSAMLObject;
     }
 
     private Signature buildSignature() {

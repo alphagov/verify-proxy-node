@@ -21,13 +21,14 @@ import uk.gov.ida.saml.core.test.builders.PersonNameAttributeValueBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import static uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder.anAttributeStatement;
+import static uk.gov.ida.saml.core.test.builders.IssuerBuilder.anIssuer;
 
 public class HubResponseBuilder {
 
     private ResponseBuilder responseBuilder;
 
     public HubResponseBuilder() {
-        responseBuilder = ResponseBuilder.aResponse();
+        responseBuilder = new ResponseBuilder();
     }
 
     public HubResponseBuilder addAuthnStatementAssertionUsing(Credential credential) {
@@ -40,8 +41,14 @@ public class HubResponseBuilder {
         return this;
     }
 
+    public HubResponseBuilder withIssuer(String issuer) {
+        responseBuilder.withIssuer(anIssuer().withIssuerId(issuer).build());
+        return this;
+    }
+
     public Response build() throws MarshallingException, SignatureException {
         return responseBuilder
+                .withoutSignatureElement()
                 .withoutSigning()
                 .build();
     }

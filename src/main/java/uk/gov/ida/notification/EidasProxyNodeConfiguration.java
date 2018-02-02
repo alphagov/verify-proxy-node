@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
+import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -34,11 +35,6 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private String hubEntityId;
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private String proxyNodeEntityId;
 
     @JsonProperty
@@ -50,11 +46,11 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @Valid
     @NotNull
     private KeyPairConfiguration hubFacingEncryptionKeyPair;
+
     @JsonProperty
     @Valid
     @NotNull
     private JerseyClientConfiguration httpClient;
-    private URI hubMetadataUrl;
 
     @JsonProperty
     @Valid
@@ -65,6 +61,16 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @Valid
     @NotNull
     private String connectorNodeIssuerId;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private TrustStoreBackedMetadataConfiguration connectorMetadataConfiguration;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private TrustStoreBackedMetadataConfiguration hubMetadataConfiguration;
 
     public URI getHubUrl() {
         return hubUrl;
@@ -98,19 +104,19 @@ public class EidasProxyNodeConfiguration extends Configuration {
         return connectorNodeEntityId;
     }
 
-    public URI getHubMetadataUrl() {
-        return hubMetadataUrl;
-    }
-
-    public String getHubEntityId() {
-        return hubEntityId;
-    }
-
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
         return proxyNodeMetadataForConnectorNodeUrl;
     }
 
     public String getConnectorNodeIssuerId() {
         return connectorNodeIssuerId;
+    }
+
+    public TrustStoreBackedMetadataConfiguration getConnectorMetadataConfiguration() {
+        return connectorMetadataConfiguration;
+    }
+
+    public TrustStoreBackedMetadataConfiguration getHubMetadataConfiguration() {
+        return hubMetadataConfiguration;
     }
 }

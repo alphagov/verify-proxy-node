@@ -37,8 +37,8 @@ public class SamlSignatureValidatorTest extends SamlInitializedTest{
         Response response = hubResponseBuilder.build();
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential);
 
-        Response signedResponse = samlObjectSigner.sign(response);
-        samlSignatureValidator.validateResponse(signingCredential, signedResponse);
+        samlObjectSigner.sign(response);
+        samlSignatureValidator.validateResponse(signingCredential, response);
     }
 
     @Test
@@ -51,10 +51,10 @@ public class SamlSignatureValidatorTest extends SamlInitializedTest{
         Response response = hubResponseBuilder.build();
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(anotherSigningCredential);
 
-        Response signedResponse = samlObjectSigner.sign(response);
+        samlObjectSigner.sign(response);
 
         try {
-            samlSignatureValidator.validateResponse(signingCredential, signedResponse);
+            samlSignatureValidator.validateResponse(signingCredential, response);
             fail("Should have thrown SamlTransformationErrorException");
         } catch(SamlTransformationErrorException e) {
             assertThat(e.getMessage()).contains("Signature was not valid");

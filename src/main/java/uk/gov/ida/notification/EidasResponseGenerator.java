@@ -18,6 +18,7 @@ public class EidasResponseGenerator {
     public Response generate(HubResponseContainer hubResponseContainer, ResponseAssertionEncrypter assertionEncrypter) {
         Response eidasResponse = translator.translate(hubResponseContainer);
         Response eidasResponseWithEncryptedAssertion = assertionEncrypter.encrypt(eidasResponse);
-        return samlObjectSigner.sign(eidasResponseWithEncryptedAssertion);
+        samlObjectSigner.sign(eidasResponseWithEncryptedAssertion);
+        return eidasResponseWithEncryptedAssertion;
     }
 }

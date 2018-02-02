@@ -4,6 +4,7 @@ import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.helpers.TestMetadataBuilder;
+import uk.gov.ida.saml.metadata.test.factories.metadata.MetadataFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -64,12 +65,14 @@ public class MetadataClientRule extends DropwizardClientRule{
         @GET
         @Path("/hub/metadata")
         public String getMetadata() throws TransformerException {
-            StringWriter output = new StringWriter();
+//            StringWriter output = new StringWriter();
+//
+//            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+//            transformer.transform(new DOMSource(hubMetadata), new StreamResult(output));
+//
+//            return output.toString();
 
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.transform(new DOMSource(hubMetadata), new StreamResult(output));
-
-            return output.toString();
+            return new MetadataFactory().defaultMetadata();
         }
     }
 }
