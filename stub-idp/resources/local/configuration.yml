@@ -56,6 +56,14 @@ metadata:
     path: ${METADATA_TRUST_STORE}
     password: ${METADATA_TRUST_STORE_PASSWORD}
 
-stubCountryMetadataUrl: ${STUB_COUNTRY_METADATA_URL:-http://DefaultNotUsed}
-connectorNodeUrl: https://${SIGNIN_DOMAIN}/SAML2/SSO/EidasResponse/POST
-connectorNodeIssuerId: ${HUB_CONNECTOR_ENTITY_ID:-http://DefaultNotUsed}
+europeanIdentity:
+  enabled: ${EUROPEAN_IDENTITY_ENABLED:-false}
+  hubConnectorEntityId: ${HUB_CONNECTOR_ENTITY_ID:-http://DefaultNotUsed}
+  stubCountryMetadataUrl: ${STUB_COUNTRY_METADATA_URL:-http://DefaultNotUsed}
+  metadata:
+    jerseyClientName: connector-metadata-client
+    uri: ${HUB_CONNECTOR_ENTITY_ID:-http://DefaultNotUsed}
+    trustStore:
+      path: ${METADATA_TRUST_STORE}
+      password: ${METADATA_TRUST_STORE_PASSWORD}
+    expectedEntityId: ${HUB_CONNECTOR_ENTITY_ID:-http://DefaultNotUsed}
