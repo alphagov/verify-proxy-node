@@ -5,11 +5,13 @@ applications:
     buildpack: java_buildpack
     path: ../../ida-stub-idp/build/distributions/ida-stub-idp.zip
     env:
-      CONFIG_FILE: /app/ida-stub-idp/resources/configuration.yml
-      HUB_ENTITY_ID: https://dev-hub.local
-      IDP_SIGNING_PRIVATE_KEY: /app/ida-stub-idp/resources/stub_idp_signing.pk8
-      IDP_SIGNING_CERT: /app/ida-stub-idp/resources/stub_idp_signing.crt
+      CONFIG_FILE: /app/ida-stub-idp/stub-idp.yml
+      LOG_PATH: /app/ida-stub-idp/logs
+      STUB_IDP_BASIC_AUTH: 'true'
+      METADATA_ENTITY_ID: https://dev-hub.local
+      KEYS_DIRECTORY: /app/ida-stub-idp/resources
+      CERTS_DIRECTORY: /app/ida-stub-idp/resources
       STUB_IDPS_FILE_PATH: /app/ida-stub-idp/resources/stub-idps.yml
       METADATA_URL: https://verify-eidas-notification-metadata.cloudapps.digital/metadata_for_hub.xml
-      METADATA_TRUST_STORE: /app/ida-stub-idp/resources/metadata.ts
-      METADATA_TRUST_STORE_PASSWORD: marshmallow
+      TRUSTSTORE_PATH: /app/ida-stub-idp/resources
+      TRUSTSTORE_PASSWORD: marshmallow
