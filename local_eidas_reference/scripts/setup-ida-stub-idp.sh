@@ -8,3 +8,7 @@ RUN_DIR="ida-stub-idp"
 
 test -d "$RUN_DIR" || git clone --quiet --depth 1 "$REMOTE" "$RUN_DIR" 
 
+pushd "$RUN_DIR"
+  git pull --quiet
+popd
+

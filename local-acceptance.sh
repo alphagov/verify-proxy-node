@@ -1,29 +1,23 @@
 #!/usr/bin/env bash
 
+function wait_for {
+  local service="$1"
+  local port="$2"
+
+  echo -n "Waiting for $service "
+  until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" "http://localhost:$port/"); do
+    echo -n "."
+    sleep 1
+  done
+  echo " READY"
+}
+
 ./shutdown.sh
 (./startup.sh --build --follow &) > ./logs/docker.log
 
-echo "Waiting for CEF"
-until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" http://localhost:56000/); do
-  echo -n "."
-  sleep 1
-done
-echo "CEF started"
-
-echo "Waiting for Proxy Node"
-until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" http://localhost:56016/); do
-  echo -n "."
-  sleep 1
-done
-echo "Proxy Node started"
-
-echo "Waiting for Stub IDP"
-until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" http://localhost:56017/); do
-  echo -n "."
-  sleep 1
-done
-echo "Stud IDP started"
+wait_for "CEF" 56000
+wait_for "Proxy Node" 56016
+wait_for "Stub IDP" 56017
 
 ./gradlew acceptanceTest
-
 ./shutdown.sh
