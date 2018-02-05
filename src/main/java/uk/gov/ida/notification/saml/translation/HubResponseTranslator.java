@@ -24,10 +24,12 @@ public class HubResponseTranslator {
 
     private EidasResponseBuilder eidasResponseBuilder;
     private String destinationUrl;
+    private String proxyNodeMetadataForConnectorNodeUrl;
 
-    public HubResponseTranslator(EidasResponseBuilder eidasResponseBuilder, String destinationUrl) {
+    public HubResponseTranslator(EidasResponseBuilder eidasResponseBuilder, String destinationUrl, String proxyNodeMetadataForConnectorNodeUrl) {
         this.eidasResponseBuilder = eidasResponseBuilder;
         this.destinationUrl = destinationUrl;
+        this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
 
     public Response translate(HubResponseContainer hubResponseContainer) {
@@ -60,6 +62,7 @@ public class HubResponseTranslator {
         String eidasLoa = mapLoa(hubResponseContainer.getAuthnAssertion().getProvidedLoa());
 
         return eidasResponseBuilder.createEidasResponse(
+                proxyNodeMetadataForConnectorNodeUrl,
                 hubResponseContainer.getHubResponse().getStatusCode(),
                 hubResponseContainer.getAuthnAssertion().getPid(),
                 eidasLoa,

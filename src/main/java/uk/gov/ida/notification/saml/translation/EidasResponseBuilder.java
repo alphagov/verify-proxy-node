@@ -25,16 +25,14 @@ import java.util.List;
 public class EidasResponseBuilder {
 
     public static final String TEMPORARY_PID_TRANSLATION = "UK/EU/";
-    private final String proxyNodeMetadataForConnectorNodeUrl;
     private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     private final String connectorNodeIssuerId;
 
-    public EidasResponseBuilder(String proxyNodeMetadataForConnectorNodeUrl, String connectorNodeIssuerId) {
-        this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
+    public EidasResponseBuilder(String connectorNodeIssuerId) {
         this.connectorNodeIssuerId = connectorNodeIssuerId;
     }
 
-    public Response createEidasResponse(String statusCodeValue, String pid, String loa, List<Attribute> attributes, String inResponseTo, DateTime issueInstant, DateTime assertionIssueInstant, DateTime authnStatementAuthnInstant, String destinationUrl) {
+    public Response createEidasResponse(String responseIssuerId, String statusCodeValue, String pid, String loa, List<Attribute> attributes, String inResponseTo, DateTime issueInstant, DateTime assertionIssueInstant, DateTime authnStatementAuthnInstant, String destinationUrl) {
         String responseId = generateRandomId();
         String assertionId = generateRandomId();
 
@@ -45,8 +43,8 @@ public class EidasResponseBuilder {
 
         Subject subject = createSubject(pid);
         AttributeStatement attributeStatement = createAttributeStatement(attributes);
-        Issuer responseIssuer = createIssuer();
-        Issuer assertionIssuer = createIssuer();
+        Issuer responseIssuer = createIssuer(responseIssuerId);
+        Issuer assertionIssuer = createIssuer(responseIssuerId);
         Assertion assertion = createAssertion(
                 authnStatement,
                 subject,
@@ -131,10 +129,10 @@ public class EidasResponseBuilder {
         return status;
     }
 
-    private Issuer createIssuer() {
+    private Issuer createIssuer(String responseIssuerId) {
         Issuer responseIssuer = SamlBuilder.build(Issuer.DEFAULT_ELEMENT_NAME);
         responseIssuer.setFormat(NameIDType.ENTITY);
-        responseIssuer.setValue(proxyNodeMetadataForConnectorNodeUrl);
+        responseIssuer.setValue(responseIssuerId);
         return responseIssuer;
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.ida.notification.saml.translation;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.xml.AbstractXMLObject;
 import org.opensaml.core.xml.schema.impl.XSStringImpl;
@@ -28,18 +29,21 @@ import static org.junit.Assert.assertTrue;
 
 public class EidasResponseBuilderTest extends SamlInitializedTest {
 
-    private String connectorNodeUrl = "http://connector.eu";
-    private String proxyNodeMetadataForConnectorNodeUrl = "http://proxy-node.uk/connector-node-metadata";
     private String connectorNodeIssuerId = "connectorNode issuerId";
+    private EidasResponseBuilder eidasResponseBuilder;
+
+    @Before
+    public void setUp() {
+        eidasResponseBuilder = new EidasResponseBuilder(connectorNodeIssuerId);
+    }
 
     @Test
     public void shouldGenerateAnEidasResponse() throws Exception {
-        EidasResponseBuilder eidasResponseBuilder = new EidasResponseBuilder(proxyNodeMetadataForConnectorNodeUrl, connectorNodeIssuerId);
         DateTime issueInstant = DateTime.now();
         List<Attribute> eidasAttributes = getEidasAttributes();
 
-        Response response = eidasResponseBuilder.createEidasResponse("success", "pid", EidasConstants.EIDAS_LOA_SUBSTANTIAL,
-                eidasAttributes,"id-of-request", issueInstant, issueInstant, issueInstant, connectorNodeUrl);
+        Response response = eidasResponseBuilder.createEidasResponse("proxyNodeMetadataForConnectorNodeUrl", "success", "pid",
+                EidasConstants.EIDAS_LOA_SUBSTANTIAL, eidasAttributes,"id-of-request", issueInstant, issueInstant, issueInstant, "http://connector.eu");
         Map<String, AbstractXMLObject> eidasResponseAttributes = getEidasResponseAttributes(response);
         Assertion authnAssertion = response.getAssertions()
                 .stream()
@@ -56,7 +60,7 @@ public class EidasResponseBuilderTest extends SamlInitializedTest {
         assertTrue(issueInstant.isEqual(response.getIssueInstant()));
         assertTrue(issueInstant.isEqual(response.getAssertions().get(0).getIssueInstant()));
         assertTrue(issueInstant.isEqual(authnAssertion.getAuthnStatements().get(0).getAuthnInstant()));
-        assertEquals(proxyNodeMetadataForConnectorNodeUrl, response.getIssuer().getValue());
+        assertEquals("proxyNodeMetadataForConnectorNodeUrl", response.getIssuer().getValue());
         assertEquals(connectorNodeIssuerId, response.getAssertions().get(0).getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).getAudienceURI());
         assertEquals("UK/EU/pid", response.getAssertions().get(0).getSubject().getNameID().getValue());
     }
