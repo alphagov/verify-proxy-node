@@ -2,13 +2,12 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.exceptions.HubResponseException;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -51,26 +50,29 @@ public class HubResponseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
-            @FormParam("RelayState") String relayState) throws SecurityException, ResolverException, MarshallingException {
-        SamlSignatureValidator samlSignatureValidator = new SamlSignatureValidator();
-        PublicKey hubPublicKey = hubMetadata.getSigningPublicKey(encryptedHubResponse.getIssuer().getValue());
+            @FormParam("RelayState") String relayState) {
+        try {
+            SamlSignatureValidator samlSignatureValidator = new SamlSignatureValidator();
+            PublicKey hubPublicKey = hubMetadata.getSigningPublicKey(encryptedHubResponse.getIssuer().getValue());
 
-        samlSignatureValidator.validateResponse(new BasicCredential(hubPublicKey), encryptedHubResponse);
-        Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
+            samlSignatureValidator.validateResponse(new BasicCredential(hubPublicKey), encryptedHubResponse);
+            Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
 
+            HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
+            logHubResponse(hubResponseContainer);
 
-        HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
-        logHubResponse(hubResponseContainer);
+            ResponseAssertionEncrypter assertionEncrypter = createAssertionEncrypter();
 
-        ResponseAssertionEncrypter assertionEncrypter = createAssertionEncrypter();
+            Response securedEidasResponse = eidasResponseGenerator.generate(hubResponseContainer, assertionEncrypter);
+            logEidasResponse(securedEidasResponse);
 
-        Response securedEidasResponse = eidasResponseGenerator.generate(hubResponseContainer, assertionEncrypter);
-        logEidasResponse(securedEidasResponse);
-
-        return samlFormViewBuilder.buildResponse(connectorNodeUrl, securedEidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
+            return samlFormViewBuilder.buildResponse(connectorNodeUrl, securedEidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
+        } catch (Throwable e) {
+            throw new HubResponseException(e, encryptedHubResponse);
+        }
     }
 
-    private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException, SecurityException {
+    private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException {
         X509Credential encryptionCredential = connectorMetadata.getEncryptionCredential(connectorEntityId);
         return new ResponseAssertionEncrypter(encryptionCredential);
     }

@@ -4,7 +4,7 @@ import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeValue;
-import uk.gov.ida.notification.exceptions.HubResponseException;
+import uk.gov.ida.notification.exceptions.HubResponseTranslationException;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class HubMdsAssertion {
                 .stream()
                 .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
                 .findFirst()
-                .orElseThrow(() -> new HubResponseException("Hub Response has no MDS assertion"));
+                .orElseThrow(() -> new HubResponseTranslationException("Hub Response has no MDS assertion"));
 
         Map<String, AttributeValue> mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes().stream()
                 .collect(Collectors.toMap(

@@ -13,6 +13,7 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.CredentialBuilder;
 import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
@@ -125,6 +126,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.healthChecks().register(hubMetadataHealthCheck.getName(), hubMetadataHealthCheck);
 
         registerProviders();
+        registerExceptionMappers();
         registerResources();
     }
 
@@ -159,6 +161,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     private void registerProviders() {
         environment.jersey().register(AuthnRequestParameterProvider.class);
         environment.jersey().register(ResponseParameterProvider.class);
+    }
+
+    private void registerExceptionMappers() {
+        environment.jersey().register(new HubResponseExceptionMapper());
     }
 
     private void registerResources() {

@@ -3,7 +3,7 @@ package uk.gov.ida.notification.saml.translation;
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AuthnStatement;
-import uk.gov.ida.notification.exceptions.HubResponseException;
+import uk.gov.ida.notification.exceptions.HubResponseTranslationException;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class HubAuthnAssertion {
                 .stream()
                 .filter(a -> !a.getAuthnStatements().isEmpty())
                 .findFirst()
-                .orElseThrow(() -> new HubResponseException("Hub Response has no authn assertion"));
+                .orElseThrow(() -> new HubResponseTranslationException("Hub Response has no authn assertion"));
 
         String pid = authnAssertion.getSubject().getNameID().getValue();
 

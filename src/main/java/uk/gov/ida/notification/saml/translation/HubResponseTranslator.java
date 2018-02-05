@@ -8,7 +8,7 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
-import uk.gov.ida.notification.exceptions.HubResponseException;
+import uk.gov.ida.notification.exceptions.HubResponseTranslationException;
 import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.Date;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
@@ -91,7 +91,7 @@ public class HubResponseTranslator {
             case IdaAuthnContext.LEVEL_2_AUTHN_CTX:
                 return EidasConstants.EIDAS_LOA_SUBSTANTIAL;
             default:
-                throw new HubResponseException("Invalid level of assurance: " + hubLoa);
+                throw new HubResponseTranslationException("Invalid level of assurance: " + hubLoa);
         }
     }
 }

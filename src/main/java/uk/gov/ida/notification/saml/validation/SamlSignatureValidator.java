@@ -2,7 +2,6 @@ package uk.gov.ida.notification.saml.validation;
 
 import net.shibboleth.utilities.java.support.resolver.Criterion;
 import org.opensaml.core.criterion.EntityIdCriterion;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
@@ -17,7 +16,6 @@ import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
-import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
 import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
@@ -27,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SamlSignatureValidator {
-    public void validateResponse(Credential credential, Response response) throws MarshallingException {
+    public void validateResponse(Credential credential, Response response) {
         SignatureValidator signatureValidator = new SignatureValidator() {
             @Override
             protected TrustEngine<Signature> getTrustEngine(String entityId) {

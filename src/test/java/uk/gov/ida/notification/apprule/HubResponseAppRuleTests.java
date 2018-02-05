@@ -45,10 +45,12 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
-
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller;
@@ -112,9 +114,12 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     }
 
     @Test
-    public void shouldNotAcceptUnhubResponse() throws Exception {
+    public void shouldNotAcceptUnsignedHubResponse() throws Exception {
         javax.ws.rs.core.Response response = postSamlResponse(buildUnsignedHubResponse());
-        assertEquals(500, response.getStatus());
+        String message = response.readEntity(String.class);
+
+        assertEquals(400, response.getStatus());
+        assertThat(message).contains("Error handling hub response");
     }
 
     private Response readResponseFromHub(Response hubResponse) throws Exception {
