@@ -19,15 +19,17 @@ services:
     networks:
       - global
     environment:
-      GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
-      HUB_ENTITY_ID: https://dev-hub.local
-      IDP_SIGNING_PRIVATE_KEY: ./notification_resources/stub_idp_signing.pk8
-      IDP_SIGNING_CERT: ./notification_resources/stub_idp_signing.crt
+      CONFIG_FILE: ./configuration/stub-idp.yml
+      LOG_PATH: ./logs
+      STUB_IDP_BASIC_AUTH: 'true'
+      METADATA_ENTITY_ID: https://dev-hub.local
+      KEYS_DIRECTORY: ./notification_resources
+      CERTS_DIRECTORY: ./notification_resources
       STUB_IDPS_FILE_PATH: ./notification_resources/stub-idps.yml
-      METADATA_TRUST_STORE: notification_resources/metadata.ts
-      METADATA_TRUST_STORE_PASSWORD: marshmallow
       METADATA_URL: http://proxy-node-metadata:55000/local/metadata_for_hub.xml
-      HUB_METADATA_URL: http://proxy-node-metadata:55000/local/metadata_for_hub.xml
+      TRUSTSTORE_PATH: ./notification_resources
+      TRUSTSTORE_PASSWORD: marshmallow
+      GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
   stub-sp:
     image: govukverify/verify-eidas-reference
     ports:
@@ -89,7 +91,7 @@ services:
     image: nginx
     network_mode: "service:connector-node"
     volumes:
-      - ../verify-eidas-reference/metadata-proxy/nginx-reverse-proxy.conf:/etc/nginx/nginx.conf:ro
+      - ./metadata/nginx-reverse-proxy.conf:/etc/nginx/nginx.conf:ro
   proxy-node-metadata:
     image: nginx
     networks:
