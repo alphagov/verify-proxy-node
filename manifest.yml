@@ -18,5 +18,7 @@ applications:
       HUB_FACING_ENCRYPTION_CERT_FILE: /app/verify-eidas-notification/pki/proxy_node_encryption.crt
       HUB_FACING_ENCRYPTION_KEY_FILE: /app/verify-eidas-notification/pki/proxy_node_encryption.pk8
       PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: https://verify-eidas-notification-metadata.cloudapps.digital/metadata_for_connector_node.xml
+      HUB_METADATA_URL: https://verify-eidas-notification-metadata.cloudapps.digital/metadata_for_hub.xml
+      HUB_ENTITY_ID: https://dev-hub.local
       HUB_METADATA_TRUSTSTORE_FILE: /app/verify-eidas-notification/pki/hub_metadata.ts
 
