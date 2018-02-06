@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.exceptions;
+package uk.gov.ida.notification.exceptions.hubresponse;
 
 public class ResponseAssertionDecryptionException extends RuntimeException {
     public ResponseAssertionDecryptionException(Throwable cause) {

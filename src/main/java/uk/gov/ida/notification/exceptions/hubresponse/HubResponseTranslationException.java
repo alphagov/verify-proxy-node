@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.exceptions;
+package uk.gov.ida.notification.exceptions.hubresponse;
 
 public class HubResponseTranslationException extends RuntimeException {
     public HubResponseTranslationException(String message) {

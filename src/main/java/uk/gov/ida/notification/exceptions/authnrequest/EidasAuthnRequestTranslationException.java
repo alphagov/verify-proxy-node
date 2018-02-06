@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.exceptions;
+package uk.gov.ida.notification.exceptions.authnrequest;
 
 public class EidasAuthnRequestTranslationException extends RuntimeException {
     public EidasAuthnRequestTranslationException(String message) {

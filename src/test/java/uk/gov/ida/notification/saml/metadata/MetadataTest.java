@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
-import uk.gov.ida.notification.exceptions.InvalidMetadataException;
-import uk.gov.ida.notification.exceptions.MissingMetadataException;
+import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
+import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.helpers.TestMetadataBuilder;
 

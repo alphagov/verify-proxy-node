@@ -10,8 +10,8 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
 import org.opensaml.security.x509.X509Credential;
-import uk.gov.ida.notification.exceptions.InvalidMetadataException;
-import uk.gov.ida.notification.exceptions.MissingMetadataException;
+import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
+import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 
 import java.security.PublicKey;
 

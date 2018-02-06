@@ -14,7 +14,7 @@ import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.KeyValue;
-import uk.gov.ida.notification.exceptions.ResponseAssertionEncryptionException;
+import uk.gov.ida.notification.exceptions.hubresponse.ResponseAssertionEncryptionException;
 
 import java.security.interfaces.RSAPublicKey;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.exceptions;
+package uk.gov.ida.notification.exceptions.saml;
 
 public class SamlMarshallingException extends RuntimeException {
     public SamlMarshallingException(Throwable cause) {

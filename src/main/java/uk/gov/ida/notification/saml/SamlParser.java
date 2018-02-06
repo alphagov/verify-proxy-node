@@ -8,7 +8,7 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import uk.gov.ida.notification.exceptions.SamlParsingException;
+import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

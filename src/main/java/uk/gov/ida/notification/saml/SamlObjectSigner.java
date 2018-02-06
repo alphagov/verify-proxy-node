@@ -9,7 +9,7 @@ import org.opensaml.xmlsec.signature.X509Data;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.Signer;
-import uk.gov.ida.notification.exceptions.SamlSigningException;
+import uk.gov.ida.notification.exceptions.saml.SamlSigningException;
 import uk.gov.ida.notification.pki.SigningCredential;
 
 

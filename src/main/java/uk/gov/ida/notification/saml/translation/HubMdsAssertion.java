@@ -4,7 +4,7 @@ import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeValue;
-import uk.gov.ida.notification.exceptions.HubResponseTranslationException;
+import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 
 import java.util.List;
 import java.util.Map;
