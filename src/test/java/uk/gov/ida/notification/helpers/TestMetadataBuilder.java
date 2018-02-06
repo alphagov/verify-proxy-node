@@ -32,13 +32,14 @@ public class TestMetadataBuilder {
     private final String ENCRYPTION = "encryption";
     private final String md = "urn:oasis:names:tc:SAML:2.0:metadata";
     private final String ds = "http://www.w3.org/2000/09/xmldsig#";
+    private HashMap<String, String> namespaceMap;
 
     public TestMetadataBuilder(String metadataTemplateFileName) throws Exception {
-        String metadataString = FileHelpers.readFileAsString(metadataTemplateFileName);
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        metadataDocument = builder.parse(new InputSource(new StringReader(metadataString)));
+        metadataDocument = XmlHelpers.readDocumentFromFile(metadataTemplateFileName);
+        namespaceMap = new HashMap<String, String>() {{
+            put("md", md);
+            put("ds", ds);
+        }};
     }
 
     public TestMetadataBuilder withEncryptionCert(String certificateString) throws XPathExpressionException, CertificateEncodingException {
@@ -99,16 +100,7 @@ public class TestMetadataBuilder {
     }
 
     private Node findMetadataCertificateNode(String usageType) throws XPathExpressionException {
-        XPath xPath = XPathFactory.newInstance().newXPath();
-
-        HashMap<String, String> namespaceMap = new HashMap<String, String>() {{
-            put("md", md);
-            put("ds", ds);
-        }};
-        SimpleNamespaceContext namespaces = new SimpleNamespaceContext(namespaceMap);
-        xPath.setNamespaceContext(namespaces);
-
         String xPathExpression = MessageFormat.format("//md:KeyDescriptor[@use=\"{0}\"]//ds:X509Certificate", usageType);
-        return (Node) xPath.compile(xPathExpression).evaluate(metadataDocument, XPathConstants.NODE);
+        return XmlHelpers.findNodeInDocument(metadataDocument, xPathExpression, namespaceMap);
     }
 }
