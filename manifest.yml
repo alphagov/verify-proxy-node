@@ -1,6 +1,6 @@
 ---
 applications:
-  - name: verify-eidas-notification
+  - name: verify-eidas-notification-proxy-node
     memory: 1G
     buildpack: java_buildpack
     path: ./build/distributions/verify-eidas-notification.zip
@@ -11,8 +11,8 @@ applications:
       CONNECTOR_NODE_METADATA_URL: https://eidas-joint-14-connector.cloudapps.digital/ConnectorResponderMetadata
       CONNECTOR_NODE_ENTITY_ID: https://eidas-joint-14-connector.cloudapps.digital/ConnectorResponderMetadata
       CONNECTOR_NODE_ISSUER_ID: https://eidas-joint-14-connector.cloudapps.digital/ConnectorMetadata
-      PROXY_NODE_HUB_RESPONSE_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/Response/POST
-      PROXY_NODE_AUTHN_REQUEST_URL: https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST
+      PROXY_NODE_HUB_RESPONSE_URL: https://verify-eidas-notification-proxy-node.cloudapps.digital/SAML2/Response/POST
+      PROXY_NODE_AUTHN_REQUEST_URL: https://verify-eidas-notification-proxy-node.cloudapps.digital/SAML2/SSO/POST
       HUB_FACING_SIGNING_CERT_FILE: /app/verify-eidas-notification/pki/proxy_node_signing.crt
       HUB_FACING_SIGNING_KEY_FILE: /app/verify-eidas-notification/pki/proxy_node_signing.pk8
       HUB_FACING_ENCRYPTION_CERT_FILE: /app/verify-eidas-notification/pki/proxy_node_encryption.crt

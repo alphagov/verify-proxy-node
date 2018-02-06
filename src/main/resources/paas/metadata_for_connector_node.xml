@@ -108,9 +108,9 @@ validUntil="2115-05-24T19:30:26.624Z">
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                            Location="https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/POST"/>
+                            Location="https://verify-eidas-notification-proxy-node.cloudapps.digital/SAML2/SSO/POST"/>
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                            Location="https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/Redirect"/>
+                            Location="https://verify-eidas-notification-proxy-node.cloudapps.digital/SAML2/SSO/Redirect"/>
     <saml2:Attribute
         FriendlyName="PersonIdentifier"
         Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"
