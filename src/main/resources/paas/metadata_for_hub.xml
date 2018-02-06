@@ -116,7 +116,7 @@ Yg7EapvmkmJ9J6R+pMl+2cY451WxkTvcGtfHcUbBKElQmlwE/NEQJaNomx+4CgS5
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
-    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://verify-eidas-notification.cloudapps.digital/SAML2/SSO/Response/POST" index="1" isDefault="true" xsi:type="md:IndexedEndpointType"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://verify-eidas-notification-proxy-node.cloudapps.digital/SAML2/SSO/Response/POST" index="1" isDefault="true" xsi:type="md:IndexedEndpointType"/>
   </md:SPSSODescriptor>
   <md:Organization xsi:type="md:OrganizationType">
     <md:OrganizationName xml:lang="en-GB" xsi:type="md:localizedNameType">Hub</md:OrganizationName>
