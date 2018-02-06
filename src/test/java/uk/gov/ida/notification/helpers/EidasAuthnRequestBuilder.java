@@ -8,7 +8,6 @@ import uk.gov.ida.notification.saml.SamlParser;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.HashMap;
 
 public class EidasAuthnRequestBuilder {
@@ -18,6 +17,7 @@ public class EidasAuthnRequestBuilder {
     private final String saml2 = "urn:oasis:names:tc:SAML:2.0:assertion";
     private final String saml2p = "urn:oasis:names:tc:SAML:2.0:protocol";
     private final String ds = "http://www.w3.org/2000/09/xmldsig#";
+    private final String eidas = "http://eidas.europa.eu/saml-extensions";
     private HashMap<String, String> namespaceMap;
 
     public EidasAuthnRequestBuilder() throws Exception {
@@ -27,6 +27,7 @@ public class EidasAuthnRequestBuilder {
             put("saml2", saml2);
             put("saml2p", saml2p);
             put("ds", ds);
+            put("eidas", eidas);
         }};
     }
 
@@ -36,8 +37,17 @@ public class EidasAuthnRequestBuilder {
     }
 
     public EidasAuthnRequestBuilder withNoIssuer() throws XPathExpressionException {
-        Node node = XmlHelpers.findNodeInDocument(authnRequestDocument, "//saml2:Issuer", namespaceMap);
+        Node node = findNode("//saml2:Issuer");
         node.getParentNode().removeChild(node);
         return this;
+    }
+
+    public EidasAuthnRequestBuilder withSpType(String spType) throws XPathExpressionException {
+        findNode("//eidas:SPType").setTextContent(spType);
+        return this;
+    }
+
+    private Node findNode(String xPathExpression) throws XPathExpressionException {
+        return XmlHelpers.findNodeInDocument(authnRequestDocument, xPathExpression, namespaceMap);
     }
 }

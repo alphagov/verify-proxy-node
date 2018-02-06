@@ -46,4 +46,13 @@ public class SamlAuthnRequestValidatorTest {
         AuthnRequest request = eidasAuthnRequestBuilder.withNoIssuer().build();
         samlMessageValidator.validateAuthnRequest(request);
     }
+    
+    @Test
+    public void shouldThrowExceptionIfInvalidSpType() throws Throwable {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Invalid SPType 'invalid'");
+
+        AuthnRequest request = eidasAuthnRequestBuilder.withSpType("invalid").build();
+        samlMessageValidator.validateAuthnRequest(request);
+    }
 }
