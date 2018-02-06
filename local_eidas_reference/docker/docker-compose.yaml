@@ -88,6 +88,8 @@ services:
     env_file:
       - env/countries.env
   proxy-node-metadata:
+    ports:
+      - "55000:55000"
     image: nginx
     networks:
           - global
