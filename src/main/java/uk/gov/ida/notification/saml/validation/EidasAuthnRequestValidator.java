@@ -14,16 +14,19 @@ import java.util.Optional;
 
 public class EidasAuthnRequestValidator {
 
-    private final SpTypeValidator spTypeValidator;
-    private final LoaValidator loaValidator;
-    private final NameIdPolicyValidator nameIdPolicyValidator;
+    private SpTypeValidator spTypeValidator;
+    private LoaValidator loaValidator;
+    private NameIdPolicyValidator nameIdPolicyValidator;
     private RequestIssuerValidator requestIssuerValidator;
 
-    public EidasAuthnRequestValidator() {
-        requestIssuerValidator = new RequestIssuerValidator();
-        spTypeValidator = new SpTypeValidator();
-        loaValidator = new LoaValidator();
-        nameIdPolicyValidator = new NameIdPolicyValidator();
+    public EidasAuthnRequestValidator(RequestIssuerValidator requestIssuerValidator,
+                                      SpTypeValidator spTypeValidator,
+                                      LoaValidator loaValidator,
+                                      NameIdPolicyValidator nameIdPolicyValidator) {
+        this.requestIssuerValidator = requestIssuerValidator;
+        this.spTypeValidator = spTypeValidator;
+        this.loaValidator = loaValidator;
+        this.nameIdPolicyValidator = nameIdPolicyValidator;
     }
 
     public void validate(AuthnRequest request) {
