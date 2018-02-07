@@ -11,6 +11,8 @@ import java.util.Optional;
 public class SpTypeValidator {
     public void validate(Optional<XMLObject> spTypeElement) {
         SPType spType = (SPType) spTypeElement.orElse(null);
+        if(spType == null) return;
+
         SPTypeEnumeration spTypeType = spType.getType();
         if (!SPTypeEnumeration.PUBLIC.equals(spTypeType)) {
             String message = MessageFormat.format("Invalid SPType ''{0}''", spTypeType);

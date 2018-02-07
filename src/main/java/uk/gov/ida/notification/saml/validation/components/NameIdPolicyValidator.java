@@ -5,6 +5,6 @@ import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestExcept
 
 public class NameIdPolicyValidator {
     public void validate(NameIDPolicy nameIDPolicy) {
-        if (nameIDPolicy == null) throw new InvalidAuthnRequestException("Missing NameIdPolicy");
+        if (nameIDPolicy == null ) throw new InvalidAuthnRequestException("Missing NameIdPolicy");
     }
 }

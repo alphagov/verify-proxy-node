@@ -46,6 +46,16 @@ public class EidasAuthnRequestBuilder {
         return this;
     }
 
+    public EidasAuthnRequestBuilder withIssuer(String issuer) throws XPathExpressionException {
+        findNode("//saml2:Issuer").setTextContent(issuer);
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withRequestId(String id) throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("ID").setTextContent(id);
+        return this;
+    }
+
     public EidasAuthnRequestBuilder withoutIssuer() throws XPathExpressionException {
         removeNode("//saml2:Issuer");
         return this;
@@ -53,6 +63,31 @@ public class EidasAuthnRequestBuilder {
 
     public EidasAuthnRequestBuilder withoutNameIdPolicy() throws XPathExpressionException {
         removeNode("//saml2p:NameIDPolicy");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutRequestId() throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().removeNamedItem("ID");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutExtensions() throws XPathExpressionException {
+        removeNode("//saml2p:Extensions");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutSpType() throws XPathExpressionException {
+        removeNode("//eidas:SPType");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutLoa() throws XPathExpressionException {
+        removeNode("//saml2:AuthnContextClassRef");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutRequestedAuthnContext() throws XPathExpressionException {
+        removeNode("//saml2p:RequestedAuthnContext");
         return this;
     }
 

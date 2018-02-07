@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.saml.validation;
 
+import com.google.common.base.Strings;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.ext.impl.SPTypeImpl;
@@ -11,22 +12,28 @@ import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 
 import java.util.Optional;
 
-public class SamlAuthnRequestValidator {
+public class EidasAuthnRequestValidator {
 
     private final SpTypeValidator spTypeValidator;
     private final LoaValidator loaValidator;
     private final NameIdPolicyValidator nameIdPolicyValidator;
     private RequestIssuerValidator requestIssuerValidator;
 
-    public SamlAuthnRequestValidator() {
+    public EidasAuthnRequestValidator() {
         requestIssuerValidator = new RequestIssuerValidator();
         spTypeValidator = new SpTypeValidator();
         loaValidator = new LoaValidator();
         nameIdPolicyValidator = new NameIdPolicyValidator();
     }
 
-    public void validateAuthnRequest(AuthnRequest request) {
-        if (request == null) throw new InvalidAuthnRequestException("Null request");
+    public void validate(AuthnRequest request) {
+        if (request == null)
+            throw new InvalidAuthnRequestException("Null request");
+        if (Strings.isNullOrEmpty(request.getID()))
+            throw new InvalidAuthnRequestException("Missing Request ID");
+        if (request.getExtensions() == null)
+            throw new InvalidAuthnRequestException("Missing Extensions");
+
         requestIssuerValidator.validate(request.getIssuer());
         spTypeValidator.validate(getSpType(request));
         loaValidator.validate(request.getRequestedAuthnContext());
