@@ -36,18 +36,32 @@ public class EidasAuthnRequestBuilder {
         return parser.parseSamlString(authnRequestString);
     }
 
-    public EidasAuthnRequestBuilder withNoIssuer() throws XPathExpressionException {
-        Node node = findNode("//saml2:Issuer");
-        node.getParentNode().removeChild(node);
-        return this;
-    }
-
     public EidasAuthnRequestBuilder withSpType(String spType) throws XPathExpressionException {
         findNode("//eidas:SPType").setTextContent(spType);
         return this;
     }
 
+    public EidasAuthnRequestBuilder withLoa(String loa) throws XPathExpressionException {
+        findNode("//saml2:AuthnContextClassRef").setTextContent(loa);
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutIssuer() throws XPathExpressionException {
+        removeNode("//saml2:Issuer");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutNameIdPolicy() throws XPathExpressionException {
+        removeNode("//saml2p:NameIDPolicy");
+        return this;
+    }
+
     private Node findNode(String xPathExpression) throws XPathExpressionException {
         return XmlHelpers.findNodeInDocument(authnRequestDocument, xPathExpression, namespaceMap);
+    }
+
+    private void removeNode(String xPathExpression) throws XPathExpressionException {
+        Node node = findNode(xPathExpression);
+        node.getParentNode().removeChild(node);
     }
 }

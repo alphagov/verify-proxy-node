@@ -43,7 +43,7 @@ public class SamlAuthnRequestValidatorTest {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Missing Issuer");
 
-        AuthnRequest request = eidasAuthnRequestBuilder.withNoIssuer().build();
+        AuthnRequest request = eidasAuthnRequestBuilder.withoutIssuer().build();
         samlMessageValidator.validateAuthnRequest(request);
     }
     
@@ -53,6 +53,24 @@ public class SamlAuthnRequestValidatorTest {
         expectedException.expectMessage("Bad Authn Request from Connector Node: Invalid SPType 'invalid'");
 
         AuthnRequest request = eidasAuthnRequestBuilder.withSpType("invalid").build();
+        samlMessageValidator.validateAuthnRequest(request);
+    }
+    
+    @Test
+    public void shouldThrowExceptionIfInvalidLoA() throws Throwable {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Invalid LoA 'invalid'");
+
+        AuthnRequest request = eidasAuthnRequestBuilder.withLoa("invalid").build();
+        samlMessageValidator.validateAuthnRequest(request);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfMissingNameIdPolicy() throws Throwable {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing NameIdPolicy");
+
+        AuthnRequest request = eidasAuthnRequestBuilder.withoutNameIdPolicy().build();
         samlMessageValidator.validateAuthnRequest(request);
     }
 }
