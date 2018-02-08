@@ -12,7 +12,6 @@ import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.NameIdPolicyValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 
@@ -32,7 +31,6 @@ public class EidasAuthnRequestValidatorTest {
     private RequestIssuerValidator requestIssuerValidator;
     private SpTypeValidator spTypeValidator;
     private LoaValidator loaValidator;
-    private NameIdPolicyValidator nameIdPolicyValidator;
 
     @BeforeClass
     public static void classSetup() throws Throwable {
@@ -44,12 +42,10 @@ public class EidasAuthnRequestValidatorTest {
         requestIssuerValidator = mock(RequestIssuerValidator.class);
         spTypeValidator = mock(SpTypeValidator.class);
         loaValidator = mock(LoaValidator.class);
-        nameIdPolicyValidator = mock(NameIdPolicyValidator.class);
 
         eidasAuthnRequestValidator = new EidasAuthnRequestValidator(requestIssuerValidator,
                                                                     spTypeValidator,
-                                                                    loaValidator,
-                                                                    nameIdPolicyValidator);
+                                                                    loaValidator);
         eidasAuthnRequestBuilder = new EidasAuthnRequestBuilder();
     }
 
@@ -121,12 +117,5 @@ public class EidasAuthnRequestValidatorTest {
         AuthnRequest request = eidasAuthnRequestBuilder.build();
         eidasAuthnRequestValidator.validate(request);
         verify(loaValidator, times(1)).validate(request.getRequestedAuthnContext());
-    }
-
-    @Test
-    public void shouldValidateNameIdPolicy() throws Throwable  {
-        AuthnRequest request = eidasAuthnRequestBuilder.build();
-        eidasAuthnRequestValidator.validate(request);
-        verify(nameIdPolicyValidator, times(1)).validate(request.getNameIDPolicy());
     }
 }

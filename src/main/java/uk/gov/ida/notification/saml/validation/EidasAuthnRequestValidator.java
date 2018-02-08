@@ -6,7 +6,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.ext.impl.SPTypeImpl;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.NameIdPolicyValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 
@@ -16,17 +15,15 @@ public class EidasAuthnRequestValidator {
 
     private SpTypeValidator spTypeValidator;
     private LoaValidator loaValidator;
-    private NameIdPolicyValidator nameIdPolicyValidator;
     private RequestIssuerValidator requestIssuerValidator;
 
     public EidasAuthnRequestValidator(RequestIssuerValidator requestIssuerValidator,
                                       SpTypeValidator spTypeValidator,
-                                      LoaValidator loaValidator,
-                                      NameIdPolicyValidator nameIdPolicyValidator) {
+                                      LoaValidator loaValidator)
+    {
         this.requestIssuerValidator = requestIssuerValidator;
         this.spTypeValidator = spTypeValidator;
         this.loaValidator = loaValidator;
-        this.nameIdPolicyValidator = nameIdPolicyValidator;
     }
 
     public void validate(AuthnRequest request) {
@@ -40,7 +37,6 @@ public class EidasAuthnRequestValidator {
         requestIssuerValidator.validate(request.getIssuer());
         spTypeValidator.validate(getSpType(request));
         loaValidator.validate(request.getRequestedAuthnContext());
-        nameIdPolicyValidator.validate(request.getNameIDPolicy());
     }
 
     private Optional<XMLObject> getSpType(AuthnRequest request) {

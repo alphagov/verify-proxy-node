@@ -61,11 +61,6 @@ public class EidasAuthnRequestBuilder {
         return this;
     }
 
-    public EidasAuthnRequestBuilder withoutNameIdPolicy() throws XPathExpressionException {
-        removeNode("//saml2p:NameIDPolicy");
-        return this;
-    }
-
     public EidasAuthnRequestBuilder withoutRequestId() throws XPathExpressionException {
         findNode("//saml2p:AuthnRequest").getAttributes().removeNamedItem("ID");
         return this;
