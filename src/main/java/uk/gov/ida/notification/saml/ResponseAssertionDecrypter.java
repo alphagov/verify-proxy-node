@@ -5,7 +5,7 @@ import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
-import uk.gov.ida.notification.exceptions.ResponseAssertionDecryptionException;
+import uk.gov.ida.notification.exceptions.hubresponse.ResponseAssertionDecryptionException;
 import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.saml.security.DecrypterFactory;
 

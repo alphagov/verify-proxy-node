@@ -7,7 +7,7 @@ import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
-import uk.gov.ida.notification.exceptions.HubResponseException;
+import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;

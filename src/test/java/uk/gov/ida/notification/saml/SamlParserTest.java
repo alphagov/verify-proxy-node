@@ -7,7 +7,7 @@ import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
 import org.opensaml.saml.saml2.core.impl.ResponseImpl;
 import org.xml.sax.SAXParseException;
 import uk.gov.ida.notification.SamlInitializedTest;
-import uk.gov.ida.notification.exceptions.SamlParsingException;
+import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
 import static junit.framework.TestCase.fail;

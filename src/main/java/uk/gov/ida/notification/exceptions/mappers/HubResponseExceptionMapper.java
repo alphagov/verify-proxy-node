@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
 import io.dropwizard.jersey.errors.ErrorMessage;
-import uk.gov.ida.notification.exceptions.HubResponseException;
+import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

@@ -1,0 +1,132 @@
+package uk.gov.ida.notification.saml.validation;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
+import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
+import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.notification.saml.validation.components.NameIdPolicyValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
+import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
+
+import java.util.Optional;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+public class EidasAuthnRequestValidatorTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private EidasAuthnRequestValidator eidasAuthnRequestValidator;
+    private EidasAuthnRequestBuilder eidasAuthnRequestBuilder;
+    private RequestIssuerValidator requestIssuerValidator;
+    private SpTypeValidator spTypeValidator;
+    private LoaValidator loaValidator;
+    private NameIdPolicyValidator nameIdPolicyValidator;
+
+    @BeforeClass
+    public static void classSetup() throws Throwable {
+        InitializationService.initialize();
+    }
+
+    @Before
+    public void setUp() throws Throwable {
+        requestIssuerValidator = mock(RequestIssuerValidator.class);
+        spTypeValidator = mock(SpTypeValidator.class);
+        loaValidator = mock(LoaValidator.class);
+        nameIdPolicyValidator = mock(NameIdPolicyValidator.class);
+
+        eidasAuthnRequestValidator = new EidasAuthnRequestValidator(requestIssuerValidator,
+                                                                    spTypeValidator,
+                                                                    loaValidator,
+                                                                    nameIdPolicyValidator);
+        eidasAuthnRequestBuilder = new EidasAuthnRequestBuilder();
+    }
+
+    @Test
+    public void shouldNotThrowExceptionIfValidAuthnRequest() throws Throwable {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        eidasAuthnRequestValidator.validate(request);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfNullAuthnRequest() {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Null request");
+
+        eidasAuthnRequestValidator.validate(null);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAuthnRequestHasNoRequestId() throws Throwable {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing Request ID");
+
+        AuthnRequest request = eidasAuthnRequestBuilder.withoutRequestId().build();
+        eidasAuthnRequestValidator.validate(request);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAuthnRequestHasEmptyRequestId() throws Throwable {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing Request ID");
+
+        AuthnRequest request = eidasAuthnRequestBuilder.withRequestId("").build();
+        eidasAuthnRequestValidator.validate(request);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAuthnRequestHasNoExtensions() throws Throwable {
+        expectedException.expect(InvalidAuthnRequestException.class);
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing Extensions");
+
+        AuthnRequest request = eidasAuthnRequestBuilder.withoutExtensions().build();
+        eidasAuthnRequestValidator.validate(request);
+    }
+
+    @Test
+    public void shouldValidateRequestIssuerValidator() throws Throwable  {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        eidasAuthnRequestValidator.validate(request);
+        verify(requestIssuerValidator, times(1)).validate(request.getIssuer());
+    }
+
+    @Test
+    public void shouldValidateWithoutSpType() throws Throwable  {
+        AuthnRequest request = eidasAuthnRequestBuilder.withoutSpType().build();
+        eidasAuthnRequestValidator.validate(request);
+        verify(spTypeValidator, times(1)).validate(Optional.empty());
+    }
+
+    @Test
+    public void shouldValidateWithSpType() throws Throwable  {
+        AuthnRequest request = eidasAuthnRequestBuilder.withSpType(SPTypeEnumeration.PRIVATE.toString()).build();
+        XMLObject spType = request.getExtensions().getOrderedChildren().get(0);
+        eidasAuthnRequestValidator.validate(request);
+        verify(spTypeValidator, times(1)).validate(Optional.ofNullable(spType));
+    }
+
+    @Test
+    public void shouldValidateLoA() throws Throwable  {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        eidasAuthnRequestValidator.validate(request);
+        verify(loaValidator, times(1)).validate(request.getRequestedAuthnContext());
+    }
+
+    @Test
+    public void shouldValidateNameIdPolicy() throws Throwable  {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        eidasAuthnRequestValidator.validate(request);
+        verify(nameIdPolicyValidator, times(1)).validate(request.getNameIDPolicy());
+    }
+}

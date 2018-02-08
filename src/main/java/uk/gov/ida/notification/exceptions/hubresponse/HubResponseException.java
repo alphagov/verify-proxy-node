@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.exceptions;
+package uk.gov.ida.notification.exceptions.hubresponse;
 
 import org.opensaml.saml.saml2.core.Response;
 
