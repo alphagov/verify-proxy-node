@@ -35,6 +35,12 @@ public class SpTypeValidatorTest {
     }
 
     @Test
+    public void shouldNotThrowExceptionIfValidSpType() throws Throwable {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        spTypeValidator.validate(getSpType(request));
+    }
+
+    @Test
     public void shouldNOTThrowExceptionIfNoSpType() throws Throwable {
         // since SPType can be specified in metadata, requests with no SPType is valid
         AuthnRequest request = eidasAuthnRequestBuilder.withoutSpType().build();

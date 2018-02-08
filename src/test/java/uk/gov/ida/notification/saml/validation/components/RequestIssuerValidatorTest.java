@@ -30,6 +30,12 @@ public class RequestIssuerValidatorTest {
     }
 
     @Test
+    public void shouldNotThrowExceptionIfValidIssuer() throws Throwable {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        requestIssuerValidator.validate(request.getIssuer());
+    }
+
+    @Test
     public void shouldThrowExceptionIfNoIssuer() throws Throwable {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Missing Issuer");

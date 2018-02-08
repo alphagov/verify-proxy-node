@@ -32,6 +32,12 @@ public class LoaValidatorTest {
     }
 
     @Test
+    public void shouldNotThrowExceptionIfValidLoa() throws Throwable {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        loaValidator.validate(request.getRequestedAuthnContext());
+    }
+
+    @Test
     public void shouldThrowExceptionIfNoRequestedAuthnContext() throws Throwable {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Missing RequestedAuthnContext");
