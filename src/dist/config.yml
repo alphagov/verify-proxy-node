@@ -24,7 +24,7 @@ logging:
       archive: false
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID:-http://proxy-node.uk}
-proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL:-http://proxy-node-metadata:55000/local/metadata_for_connector_node.xml}
+proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL:-http://proxy-node-metadata:55000/metadata_for_connector_node.xml}
 
 hubUrl: ${HUB_URL:-/stub-idp/request}
 
@@ -49,7 +49,15 @@ hubMetadataConfiguration:
     path: ${HUB_METADATA_TRUSTSTORE_FILE:-build/resources/main/local/hub_metadata.ts}
     password: ${HUB_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
-signingKeyPair:
+connectorFacingSigningKeyPair:
+  publicKey:
+    type: file
+    certFile: ${SIGNING_CERT_FILE:-build/resources/main/local/proxy_node_signing.crt}
+    name: proxy_node_signing
+  privateKey:
+    keyFile: ${SIGNING_KEY_FILE:-build/resources/main/local/proxy_node_signing.pk8}
+
+hubFacingSigningKeyPair:
   publicKey:
     type: file
     certFile: ${HUB_FACING_SIGNING_CERT_FILE:-build/resources/main/local/proxy_node_signing.crt}

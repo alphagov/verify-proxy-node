@@ -8,9 +8,24 @@ services:
     networks:
       - global
     environment:
+      CONFIG_FILE: ./config.yml
       GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
       HUB_URL: http://localhost:56017/stub-idp-demo/SAML2/SSO
+      HUB_METADATA_URL: http://proxy-node-metadata:55000/metadata_for_hub.xml
+      HUB_ENTITY_ID: https://dev-hub.local
+      HUB_METADATA_TRUSTSTORE_FILE: pki/ida_metadata_truststore.ts
+      SIGNING_CERT_FILE: pki/proxy_node_signing.crt
+      SIGNING_KEY_FILE: pki/proxy_node_signing.pk8
+      HUB_FACING_SIGNING_CERT_FILE: pki/hub_signing.crt
+      HUB_FACING_SIGNING_KEY_FILE: pki/hub_signing.pk8
+      HUB_FACING_ENCRYPTION_CERT_FILE: pki/hub_encryption.crt
+      HUB_FACING_ENCRYPTION_KEY_FILE: pki/hub_encryption.pk8
+      PROXY_NODE_HUB_RESPONSE_URL: http://localhost:56016/SAML2/SSO/Response/POST
+      PROXY_NODE_AUTHN_REQUEST_URL: http://localhost:56016/SAML2/SSO/POST
+      PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata:55000/metadata_for_connector_node.xml
+    volumes:
+      - ./pki:/verify-eidas-proxy-node/pki:ro
   notification-stub-idp:
     image: notification-stub-idp
     mem_limit: 512M
@@ -19,17 +34,19 @@ services:
     networks:
       - global
     environment:
-      CONFIG_FILE: ./configuration/stub-idp.yml
+      CONFIG_FILE: ./stub-idp.yml
       LOG_PATH: ./logs
       STUB_IDP_BASIC_AUTH: 'true'
       METADATA_ENTITY_ID: https://dev-hub.local
-      KEYS_DIRECTORY: ./notification_resources
-      CERTS_DIRECTORY: ./notification_resources
-      STUB_IDPS_FILE_PATH: ./notification_resources/stub-idps.yml
-      METADATA_URL: http://proxy-node-metadata:55000/local/metadata_for_hub.xml
-      TRUSTSTORE_PATH: ./notification_resources
+      STUB_IDP_SIGNING_PRIVATE_KEY: ./pki/stub_idp_signing.pk8
+      STUB_IDP_SIGNING_CERT: ./pki/stub_idp_signing.crt
+      STUB_IDPS_FILE_PATH: ./stub-idps.yml
+      METADATA_URL: http://proxy-node-metadata:55000/metadata_for_hub.xml
+      METADATA_TRUSTSTORE: ./pki/ida_metadata_truststore.ts
       TRUSTSTORE_PASSWORD: marshmallow
       GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
+    volumes:
+      - ./pki:/ida-stub-idp/pki:ro
   stub-sp:
     image: govukverify/verify-eidas-reference
     ports:
@@ -95,6 +112,6 @@ services:
           - global
     volumes:
       - ./metadata/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ../../src/main/resources:/usr/share/nginx/html:ro
+      - ./pki:/usr/share/nginx/html:ro
 networks:
   global:
