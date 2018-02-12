@@ -8,13 +8,17 @@ import org.junit.rules.ExpectedException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import se.litsec.eidas.opensaml.ext.RequestedAttributes;
+import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
@@ -31,6 +35,7 @@ public class EidasAuthnRequestValidatorTest {
     private RequestIssuerValidator requestIssuerValidator;
     private SpTypeValidator spTypeValidator;
     private LoaValidator loaValidator;
+    private RequestedAttributesValidator requestedAttributesValidator;
 
     @BeforeClass
     public static void classSetup() throws Throwable {
@@ -42,10 +47,12 @@ public class EidasAuthnRequestValidatorTest {
         requestIssuerValidator = mock(RequestIssuerValidator.class);
         spTypeValidator = mock(SpTypeValidator.class);
         loaValidator = mock(LoaValidator.class);
+        requestedAttributesValidator = mock(RequestedAttributesValidator.class);
 
         eidasAuthnRequestValidator = new EidasAuthnRequestValidator(requestIssuerValidator,
                                                                     spTypeValidator,
-                                                                    loaValidator);
+                                                                    loaValidator,
+                                                                    requestedAttributesValidator);
         eidasAuthnRequestBuilder = new EidasAuthnRequestBuilder();
     }
 
@@ -101,15 +108,15 @@ public class EidasAuthnRequestValidatorTest {
     public void shouldValidateWithoutSpType() throws Throwable  {
         AuthnRequest request = eidasAuthnRequestBuilder.withoutSpType().build();
         eidasAuthnRequestValidator.validate(request);
-        verify(spTypeValidator, times(1)).validate(Optional.empty());
+        verify(spTypeValidator, times(1)).validate(null);
     }
 
     @Test
     public void shouldValidateWithSpType() throws Throwable  {
         AuthnRequest request = eidasAuthnRequestBuilder.withSpType(SPTypeEnumeration.PRIVATE.toString()).build();
-        XMLObject spType = request.getExtensions().getOrderedChildren().get(0);
+        SPType spType = (SPType) request.getExtensions().getOrderedChildren().get(0);
         eidasAuthnRequestValidator.validate(request);
-        verify(spTypeValidator, times(1)).validate(Optional.ofNullable(spType));
+        verify(spTypeValidator, times(1)).validate(spType);
     }
 
     @Test
@@ -117,5 +124,20 @@ public class EidasAuthnRequestValidatorTest {
         AuthnRequest request = eidasAuthnRequestBuilder.build();
         eidasAuthnRequestValidator.validate(request);
         verify(loaValidator, times(1)).validate(request.getRequestedAuthnContext());
+    }
+
+    @Test
+    public void shouldValidateRequestedAttributes() throws Throwable {
+        AuthnRequest request = eidasAuthnRequestBuilder.build();
+        RequestedAttributes requestedAttributes = (RequestedAttributes) request.getExtensions().getOrderedChildren().get(1);
+        eidasAuthnRequestValidator.validate(request);
+        verify(requestedAttributesValidator, times(1)).validate(requestedAttributes);
+    }
+
+    @Test
+    public void shouldValidateWithoutRequestedAttributes() throws Throwable  {
+        AuthnRequest request = eidasAuthnRequestBuilder.withoutRequestedAttributes().build();
+        eidasAuthnRequestValidator.validate(request);
+        verify(requestedAttributesValidator, times(1)).validate(null);
     }
 }

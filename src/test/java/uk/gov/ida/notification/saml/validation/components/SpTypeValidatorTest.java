@@ -6,14 +6,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opensaml.core.config.InitializationService;
-import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
-import se.litsec.eidas.opensaml.ext.impl.SPTypeImpl;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
-
-import java.util.Optional;
 
 public class SpTypeValidatorTest {
 
@@ -66,11 +63,11 @@ public class SpTypeValidatorTest {
         spTypeValidator.validate(getSpType(request));
     }
 
-    private Optional<XMLObject> getSpType(AuthnRequest request) {
-        return request.getExtensions().getOrderedChildren()
-                .stream()
-                .filter(obj -> obj instanceof SPTypeImpl)
-                .findFirst();
+    private SPType getSpType(AuthnRequest request) {
+        return (SPType) request
+                .getExtensions()
+                .getUnknownXMLObjects(SPType.DEFAULT_ELEMENT_NAME)
+                .stream().findFirst().orElse(null);
     }
 
 }

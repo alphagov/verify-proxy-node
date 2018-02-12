@@ -1,16 +1,13 @@
 package uk.gov.ida.notification.saml.validation.components;
 
-import org.opensaml.core.xml.XMLObject;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 
 import java.text.MessageFormat;
-import java.util.Optional;
 
 public class SpTypeValidator {
-    public void validate(Optional<XMLObject> spTypeElement) {
-        SPType spType = (SPType) spTypeElement.orElse(null);
+    public void validate(SPType spType) {
         if(spType == null) return;
 
         SPTypeEnumeration spTypeType = spType.getType();

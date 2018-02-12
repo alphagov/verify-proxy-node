@@ -3,27 +3,32 @@ package uk.gov.ida.notification.saml.validation;
 import com.google.common.base.Strings;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import se.litsec.eidas.opensaml.ext.impl.SPTypeImpl;
+import se.litsec.eidas.opensaml.ext.RequestedAttributes;
+import se.litsec.eidas.opensaml.ext.SPType;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 
-import java.util.Optional;
+import javax.xml.namespace.QName;
 
 public class EidasAuthnRequestValidator {
 
     private SpTypeValidator spTypeValidator;
     private LoaValidator loaValidator;
+    private RequestedAttributesValidator requestedAttributesValidator;
     private RequestIssuerValidator requestIssuerValidator;
 
     public EidasAuthnRequestValidator(RequestIssuerValidator requestIssuerValidator,
                                       SpTypeValidator spTypeValidator,
-                                      LoaValidator loaValidator)
+                                      LoaValidator loaValidator,
+                                      RequestedAttributesValidator requestedAttributesValidator)
     {
         this.requestIssuerValidator = requestIssuerValidator;
         this.spTypeValidator = spTypeValidator;
         this.loaValidator = loaValidator;
+        this.requestedAttributesValidator = requestedAttributesValidator;
     }
 
     public void validate(AuthnRequest request) {
@@ -34,15 +39,20 @@ public class EidasAuthnRequestValidator {
         if (request.getExtensions() == null)
             throw new InvalidAuthnRequestException("Missing Extensions");
 
+        SPType spTypeElement = (SPType) getExtension(request, SPType.DEFAULT_ELEMENT_NAME);
+        RequestedAttributes requestedAttributesElement = (RequestedAttributes) getExtension(request, RequestedAttributes.DEFAULT_ELEMENT_NAME);
+
         requestIssuerValidator.validate(request.getIssuer());
-        spTypeValidator.validate(getSpType(request));
+        spTypeValidator.validate(spTypeElement);
         loaValidator.validate(request.getRequestedAuthnContext());
+        requestedAttributesValidator.validate(requestedAttributesElement);
     }
 
-    private Optional<XMLObject> getSpType(AuthnRequest request) {
-        return request.getExtensions().getOrderedChildren()
+    private XMLObject getExtension(AuthnRequest request, QName elementName) {
+        return request.getExtensions()
+                .getUnknownXMLObjects(elementName)
                 .stream()
-                .filter(obj -> obj instanceof SPTypeImpl)
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 }

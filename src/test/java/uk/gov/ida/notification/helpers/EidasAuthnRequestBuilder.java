@@ -2,13 +2,16 @@ package uk.gov.ida.notification.helpers;
 
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 public class EidasAuthnRequestBuilder {
     private final String EIDAS_AUTHN_REQUEST_XML = "eidas_authn_request.xml";
@@ -56,6 +59,20 @@ public class EidasAuthnRequestBuilder {
         return this;
     }
 
+    public EidasAuthnRequestBuilder withRequestedAttribute(String attributeName, Map<String, String> xmlAttributes) throws XPathExpressionException {
+        Element requestedAttribute = (Element) findNode(requestedAttributeXPath(attributeName));
+        requestedAttribute = requestedAttribute == null
+                ? (Element) createEidasRequestedAttributeNode(attributeName)
+                : requestedAttribute;
+        xmlAttributes.forEach(requestedAttribute::setAttribute);
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutRequestedAttribute(String attributeName) throws XPathExpressionException {
+        removeNode(requestedAttributeXPath(attributeName));
+        return this;
+    }
+
     public EidasAuthnRequestBuilder withoutIssuer() throws XPathExpressionException {
         removeNode("//saml2:Issuer");
         return this;
@@ -86,6 +103,15 @@ public class EidasAuthnRequestBuilder {
         return this;
     }
 
+    public EidasAuthnRequestBuilder withoutRequestedAttributes() throws XPathExpressionException {
+        removeNode("//eidas:RequestedAttributes");
+        return this;
+    }
+
+    private String requestedAttributeXPath(String attributeName) {
+        return MessageFormat.format("//eidas:RequestedAttributes//eidas:RequestedAttribute[@Name=\"{0}\"]", attributeName);
+    }
+
     private Node findNode(String xPathExpression) throws XPathExpressionException {
         return XmlHelpers.findNodeInDocument(authnRequestDocument, xPathExpression, namespaceMap);
     }
@@ -93,5 +119,12 @@ public class EidasAuthnRequestBuilder {
     private void removeNode(String xPathExpression) throws XPathExpressionException {
         Node node = findNode(xPathExpression);
         node.getParentNode().removeChild(node);
+    }
+
+    private Node createEidasRequestedAttributeNode(String eidasAttribute) throws XPathExpressionException {
+        Node requestedAttributes = findNode("//eidas:RequestedAttributes");
+        Element newRequestedAttribute = authnRequestDocument.createElement("eidas:RequestedAttribute");
+        newRequestedAttribute.setAttribute("Name", eidasAttribute);
+        return requestedAttributes.appendChild(newRequestedAttribute);
     }
 }
