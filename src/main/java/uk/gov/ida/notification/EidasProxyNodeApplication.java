@@ -13,6 +13,7 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.CredentialBuilder;
 import uk.gov.ida.notification.pki.DecryptionCredential;
@@ -30,6 +31,11 @@ import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializ
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.translation.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
+import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
+import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
+import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
@@ -165,6 +171,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     private void registerExceptionMappers() {
         environment.jersey().register(new HubResponseExceptionMapper());
+        environment.jersey().register(new AuthnRequestExceptionMapper());
     }
 
     private void registerResources() {
@@ -173,12 +180,13 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(signer);
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(signer);
         ResponseAssertionDecrypter assertionDecrypter = createDecrypter();
+        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
-                samlFormViewBuilder
-        ));
+                samlFormViewBuilder,
+                eidasAuthnRequestValidator));
 
         environment.jersey().register(new HubResponseResource(
                 eidasResponseGenerator,
@@ -188,6 +196,15 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 configuration.getConnectorNodeEntityId(),
                 connectorMetadata,
                 hubMetadata));
+    }
+
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator() {
+        return new EidasAuthnRequestValidator(
+                    new RequestIssuerValidator(),
+                    new SpTypeValidator(),
+                    new LoaValidator(),
+                    new RequestedAttributesValidator()
+            );
     }
 
     private ResponseAssertionDecrypter createDecrypter() {

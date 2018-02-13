@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.apprule;
 
+import org.apache.http.HttpStatus;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +14,11 @@ import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller;
@@ -42,6 +46,21 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
         AuthnRequest hubAuthnRequest = parser.parseSamlString(decodedHubAuthnRequest);
 
         assertEquals(eidasAuthnRequest.getID(), hubAuthnRequest.getID());
+    }
+
+    @Test
+    public void postBindingValidatesAuthnRequest() throws Throwable {
+        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
+        AuthnRequest eidasAuthnRequest = builder.withoutRequestId().build();
+
+        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
+        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
+
+        Response response = proxyNodeAppRule.target("/SAML2/SSO/POST").request()
+                .post(Entity.form(postForm));
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
     }
 
     @Test

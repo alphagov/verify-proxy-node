@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.apprule;
 
+import org.apache.http.HttpStatus;
 import org.bouncycastle.util.Strings;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
@@ -118,7 +119,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         javax.ws.rs.core.Response response = postSamlResponse(buildUnsignedHubResponse());
         String message = response.readEntity(String.class);
 
-        assertEquals(400, response.getStatus());
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
         assertThat(message).contains("Error handling hub response");
     }
 

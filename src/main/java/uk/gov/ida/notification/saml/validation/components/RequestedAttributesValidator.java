@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.saml.validation.components;
 
 import com.google.common.collect.ImmutableList;
-import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.saml2.core.Attribute;
 import se.litsec.eidas.opensaml.ext.RequestedAttribute;
 import se.litsec.eidas.opensaml.ext.RequestedAttributes;

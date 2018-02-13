@@ -5,8 +5,10 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.HubAuthnRequestGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.exceptions.authnrequest.AuthnRequestException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
+import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.ws.rs.Consumes;
@@ -25,13 +27,16 @@ public class EidasAuthnRequestResource {
     private EidasProxyNodeConfiguration configuration;
     private final HubAuthnRequestGenerator hubAuthnRequestGenerator;
     private SamlFormViewBuilder samlFormViewBuilder;
+    private EidasAuthnRequestValidator eidasAuthnRequestValidator;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
                                      HubAuthnRequestGenerator authnRequestGenerator,
-                                     SamlFormViewBuilder samlFormViewBuilder) {
+                                     SamlFormViewBuilder samlFormViewBuilder,
+                                     EidasAuthnRequestValidator eidasAuthnRequestValidator) {
         this.configuration = configuration;
         this.hubAuthnRequestGenerator = authnRequestGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
+        this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
     }
 
     @GET
@@ -52,10 +57,15 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(AuthnRequest authnRequest, String relayState) {
-        EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
-        logAuthnRequestInformation(eidasAuthnRequest);
-        AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
-        return buildSamlFormView(hubAuthnRequest, relayState);
+        try {
+            eidasAuthnRequestValidator.validate(authnRequest);
+            EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
+            logAuthnRequestInformation(eidasAuthnRequest);
+            AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
+            return buildSamlFormView(hubAuthnRequest, relayState);
+        } catch (Throwable example) {
+            throw new AuthnRequestException(example, authnRequest);
+        }
     }
 
     private SamlFormView buildSamlFormView(AuthnRequest hubAuthnRequest, String relayState) {

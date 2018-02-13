@@ -1,8 +1,10 @@
 package uk.gov.ida.notification;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlRadioButtonInput;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -42,6 +44,14 @@ public class EidasProxyNodeAcceptanceTests {
         cefRefForm.getInputByName("nodeMetadataUrl").setValueAttribute(connectorNodeMetadataUrl("/ConnectorResponderMetadata"));
         cefRefForm.getSelectByName("citizenEidas").setSelectedAttribute(citizenCountry(), true);
         cefRefForm.getSelectByName("eidasloa").setSelectedAttribute("http://eidas.europa.eu/LoA/substantial", true);
+
+        countryServicePage.getElementById("check_all_NoRequestEidas").click();
+        countryServicePage.getElementById("tab2_toggle1").click();
+        countryServicePage.getElementById("Mandatory_FamilyNameEidas").click();
+        countryServicePage.getElementById("Mandatory_FirstNameEidas").click();
+        countryServicePage.getElementById("Mandatory_DateOfBirthEidas").click();
+        countryServicePage.getElementById("Mandatory_PersonIdentifierEidas").click();
+
         return countryServicePage.getElementById("submit_tab2").click();
     }
 
