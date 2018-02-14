@@ -38,7 +38,8 @@ connectorMetadataConfiguration:
   expectedEntityId: ${CONNECTOR_NODE_ENTITY_ID:-http://connector-node:8080/ConnectorResponderMetadata}
   jerseyClientName: connector-metadata-client
   trustStore:
-    path: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_FILE:-build/resources/main/local/connectorNodeKeystore.jks}
+    type: ${TRUSTSTORE_TYPES:-file}
+    store: ${CONNECTOR_NODE_METADATA_TRUSTSTORE:-build/resources/main/local/connectorNodeKeystore.jks}
     password: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD:-Password}
 
 hubMetadataConfiguration:
@@ -46,29 +47,33 @@ hubMetadataConfiguration:
   expectedEntityId: ${HUB_ENTITY_ID:-https://example.com}
   jerseyClientName: hub-metadata-client
   trustStore:
-    path: ${HUB_METADATA_TRUSTSTORE_FILE:-build/resources/main/local/hub_metadata.ts}
+    type: ${TRUSTSTORE_TYPES:-file}
+    store: ${HUB_METADATA_TRUSTSTORE:-build/resources/main/local/hub_metadata.ts}
     password: ${HUB_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
 connectorFacingSigningKeyPair:
   publicKey:
-    type: file
-    certFile: ${SIGNING_CERT_FILE:-build/resources/main/local/proxy_node_signing.crt}
+    type: ${CERT_TYPES:-file}
+    cert: ${SIGNING_CERT:-build/resources/main/local/proxy_node_signing.crt}
     name: proxy_node_signing
   privateKey:
-    keyFile: ${SIGNING_KEY_FILE:-build/resources/main/local/proxy_node_signing.pk8}
+    type: ${KEY_TYPES:-file}
+    key: ${SIGNING_KEY:-build/resources/main/local/proxy_node_signing.pk8}
 
 hubFacingSigningKeyPair:
   publicKey:
-    type: file
-    certFile: ${HUB_FACING_SIGNING_CERT_FILE:-build/resources/main/local/proxy_node_signing.crt}
+    type: ${CERT_TYPES:-file}
+    cert: ${HUB_FACING_SIGNING_CERT:-build/resources/main/local/proxy_node_signing.crt}
     name: proxy_node_signing
   privateKey:
-    keyFile: ${HUB_FACING_SIGNING_KEY_FILE:-build/resources/main/local/proxy_node_signing.pk8}
+    type: ${KEY_TYPES:-file}
+    key: ${HUB_FACING_SIGNING_KEY:-build/resources/main/local/proxy_node_signing.pk8}
 
 hubFacingEncryptionKeyPair:
   publicKey:
-    type: file
-    certFile: ${HUB_FACING_ENCRYPTION_CERT_FILE:-build/resources/main/local/proxy_node_encryption.crt}
+    type: ${CERT_TYPES:-file}
+    cert: ${HUB_FACING_ENCRYPTION_CERT:-build/resources/main/local/proxy_node_encryption.crt}
     name: proxy_node_encryption
   privateKey:
-    keyFile: ${HUB_FACING_ENCRYPTION_KEY_FILE:-build/resources/main/local/proxy_node_encryption.pk8}
+    type: ${KEY_TYPES:-file}
+    key: ${HUB_FACING_ENCRYPTION_KEY:-build/resources/main/local/proxy_node_encryption.pk8}

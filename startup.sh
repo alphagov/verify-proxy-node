@@ -78,9 +78,14 @@ popd
 pushd "${PN_PROJECT_DIR}/pki"
   rm -f "${PKI_OUTPUT_DIR}/*"
   bundle install
-  bundle exec ruby generate.rb \
-    "${PN_PROJECT_DIR}/local_eidas_reference/docker/docker-compose.yaml" \
-    services.notification-proxy-node.environment \
+  bundle exec generate \
+    --hub-entity-id "https://dev-hub.local" \
+    --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
+    --proxy-node-entity-id "_verify_proxy_node" \
+    --hub-response-url "http://localhost:56016/SAML2/SSO/Response/POST" \
+    --idp-sso-url "http://localhost:56017/stub-idp-demo/SAML2/SSO" \
+    --proxy-sso-url "http://localhost:56016/SAML2/SSO/POST" \
+    --files \
     "${PKI_OUTPUT_DIR}"
 popd
 
