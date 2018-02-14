@@ -76,7 +76,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldReturnASignedEidasResponse() throws Exception {
-        KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getSigningKeyPair();
+        KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
 
         Response eidasResponse = readResponseFromHub(hubResponse);

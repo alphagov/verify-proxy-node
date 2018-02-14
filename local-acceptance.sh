@@ -15,7 +15,7 @@ function wait_for {
 }
 
 ./shutdown.sh
-(./startup.sh --build --follow &) > ./logs/docker.log
+(./startup.sh --build --follow &) > ./logs/docker.log 2>&1
 
 wait_for "CEF" 56000
 wait_for "Proxy Node" 56016

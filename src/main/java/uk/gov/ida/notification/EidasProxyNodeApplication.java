@@ -2,7 +2,6 @@ package uk.gov.ida.notification;
 
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -45,16 +44,11 @@ import java.net.URI;
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     private static final String END_CERT = "-----END CERTIFICATE-----";
-
     private static final String CONNECTOR_NODE_METADATA_RESOLVER_ID = "connector-node-metadata";
-    private static final String HUB_METADATA_RESOLVER_ID = "hub-metadata";
-    private EidasProxyNodeConfiguration configuration;
-    private Environment environment;
+
     private Metadata connectorMetadata;
     private Metadata hubMetadata;
     private String connectorNodeUrl;
-
-    private MetadataResolverBundle<EidasProxyNodeConfiguration> connectorMetadataResolverBundle;
 
     private MetadataResolverBundle<EidasProxyNodeConfiguration> hubMetadataResolverBundle;
 
@@ -114,14 +108,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws
             ComponentInitializationException {
-        this.configuration = configuration;
-        this.environment = environment;
-
         connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
-        JerseyClientConfiguration clientConfiguration = configuration.getHttpClientConfiguration();
-
-        connectorMetadata = createConnectorNodeMetadata(new JerseyClientBuilder(environment).using(clientConfiguration).build(this.getName()));
-
+        connectorMetadata = createConnectorNodeMetadata(configuration, environment);
         hubMetadata = createMetadata(hubMetadataResolverBundle);
 
         MetadataHealthCheck hubMetadataHealthCheck = new MetadataHealthCheck(
@@ -131,55 +119,55 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
         environment.healthChecks().register(hubMetadataHealthCheck.getName(), hubMetadataHealthCheck);
 
-        registerProviders();
-        registerExceptionMappers();
-        registerResources();
+        registerProviders(environment);
+        registerExceptionMappers(environment);
+        registerResources(configuration, environment);
     }
 
 
-    private EidasResponseGenerator createEidasResponseGenerator(SamlObjectSigner signer) {
+    private EidasResponseGenerator createEidasResponseGenerator(EidasProxyNodeConfiguration configuration) {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 new EidasResponseBuilder(configuration.getConnectorNodeIssuerId()),
                 connectorNodeUrl,
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString());
+        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential(configuration.getConnectorFacingSigningKeyPair()));
         return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 
-    private HubAuthnRequestGenerator createHubAuthnRequestGenerator(SamlObjectSigner signer) {
+    private HubAuthnRequestGenerator createHubAuthnRequestGenerator(EidasProxyNodeConfiguration configuration) {
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
+        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential(configuration.getHubFacingSigningKeyPair()));
         return new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, signer);
     }
 
-    private SigningCredential createSigningCredential() {
-        KeyPairConfiguration signingKeyPair = configuration.getSigningKeyPair();
-        String certString = signingKeyPair
+    private SigningCredential createSigningCredential(KeyPairConfiguration configuration) {
+        String certString = configuration
                 .getPublicKey()
                 .getCert()
                 .replaceAll(BEGIN_CERT, "")
                 .replaceAll(END_CERT, "");
         return CredentialBuilder
-                .withKeyPairConfiguration(signingKeyPair)
+                .withKeyPairConfiguration(configuration)
                 .buildSigningCredential(certString);
     }
 
-    private void registerProviders() {
+    private void registerProviders(Environment environment) {
         environment.jersey().register(AuthnRequestParameterProvider.class);
         environment.jersey().register(ResponseParameterProvider.class);
     }
 
-    private void registerExceptionMappers() {
+    private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new HubResponseExceptionMapper());
         environment.jersey().register(new AuthnRequestExceptionMapper());
     }
 
-    private void registerResources() {
+    private void registerResources(EidasProxyNodeConfiguration configuration, Environment environment) {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
-        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential());
-        EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(signer);
-        HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(signer);
-        ResponseAssertionDecrypter assertionDecrypter = createDecrypter();
+        EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
+        HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
+        ResponseAssertionDecrypter assertionDecrypter = createDecrypter(configuration.getHubFacingEncryptionKeyPair());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
 
         environment.jersey().register(new EidasAuthnRequestResource(
@@ -207,17 +195,17 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
             );
     }
 
-    private ResponseAssertionDecrypter createDecrypter() {
+    private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
         DecryptionCredential hubFacingDecryptingCredential = CredentialBuilder
-                .withKeyPairConfiguration(configuration.getHubFacingEncryptionKeyPair())
+                .withKeyPairConfiguration(configuration)
                 .buildDecryptionCredential();
         
         return new ResponseAssertionDecrypter(hubFacingDecryptingCredential);
     }
 
-    private Metadata createConnectorNodeMetadata(Client client) throws ComponentInitializationException {
+    private Metadata createConnectorNodeMetadata(EidasProxyNodeConfiguration configuration, Environment environment) throws ComponentInitializationException {
         URI connectorNodeMetadataUrl = configuration.getConnectorNodeMetadataUrl();
-
+        Client client = new JerseyClientBuilder(environment).using(configuration.getHttpClientConfiguration()).build(this.getName());
         MetadataResolver metadataResolver = new JerseyClientMetadataResolverInitializer(CONNECTOR_NODE_METADATA_RESOLVER_ID, client, connectorNodeMetadataUrl).initialize();
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
         return new Metadata(metadataCredentialResolver);

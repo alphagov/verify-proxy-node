@@ -1,7 +1,6 @@
 GIT
   remote: git@github.com:alphagov/verify-metadata-generator
-  revision: a639ad453bfd91fa66c3d434323503218ee5871f
-  branch: bau-generate-for-proxy-node
+  revision: 57d054bc485325a2e696294582c0b4e32d343351
   specs:
     verify-metadata-generator (0.0.2)
       activemodel
@@ -21,7 +20,7 @@ GEM
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
     concurrent-ruby (1.0.5)
-    i18n (0.9.3)
+    i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     json-schema (2.8.0)
       addressable (>= 2.4)
@@ -30,7 +29,7 @@ GEM
     minitest (5.11.3)
     nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
-    public_suffix (3.0.1)
+    public_suffix (3.0.2)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
