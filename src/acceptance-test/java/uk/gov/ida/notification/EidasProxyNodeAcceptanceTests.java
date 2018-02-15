@@ -56,7 +56,7 @@ public class EidasProxyNodeAcceptanceTests {
     }
 
     private String citizenCountry() {
-        return getEnv("CITIZEN_COUNTRY", "UK2");
+        return getEnv("CITIZEN_COUNTRY", "UK_PN");
     }
 
     private HtmlPage loginAtIDP(HtmlPage idpLogin) throws IOException {
