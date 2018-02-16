@@ -9,6 +9,12 @@ PKI_OUTPUT_DIR="$PN_PROJECT_DIR/paas_pki"
 
 # Generate PKI
 pushd pki
+  # Download xmlsectool
+  XMLSECTOOL_URL="http://shibboleth.net/downloads/tools/xmlsectool/latest/xmlsectool-2.0.0-bin.zip"
+  XMLSECTOOL_DIR="xmlsectool-2.0.0"
+  wget "$XMLSECTOOL_URL"
+  unzip "${XMLSECTOOL_DIR}-bin.zip"
+
   bundle install
   bundle exec generate \
     --hub-entity-id "https://dev-hub.local" \
@@ -18,6 +24,7 @@ pushd pki
     --idp-sso-url "https://verify-eidas-notification-stub-idp.cloudapps.digital/stub-idp-demo/SAML2/SSO" \
     --proxy-sso-url "https://verify-eidas-notification-proxy-node.cloudapps.digital/SAML2/SSO/POST" \
     --manifests \
+    --xmlsectool "./${XMLSECTOOL_DIR}/xmlsectool.sh" \
     "${PKI_OUTPUT_DIR}"
 popd
 

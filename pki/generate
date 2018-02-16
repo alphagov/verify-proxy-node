@@ -109,7 +109,7 @@ stub_idp_config = {
   'enabled' => true
 }
 hub_metadata_xml = generate_hub_metadata(hub_config, [stub_idp_config], root_keypair.cert)
-hub_metadata_xml_signed = sign_metadata(hub_metadata_xml, hub_meta_keypair)
+hub_metadata_xml_signed = sign_metadata(hub_metadata_xml, hub_meta_keypair, options.xmlsectool_path)
 
 # Generate Proxy Node Metadata
 proxy_node_config = {
@@ -123,7 +123,7 @@ proxy_node_config = {
   'enabled' => true
 }
 proxy_node_metadata_xml = generate_proxy_node_metadata(proxy_node_config, root_keypair.cert)
-proxy_node_metadata_xml_signed = sign_metadata(proxy_node_metadata_xml, proxy_node_meta_keypair)
+proxy_node_metadata_xml_signed = sign_metadata(proxy_node_metadata_xml, proxy_node_meta_keypair, options.xmlsectool_path)
 
 # Output
 Dir.mkdir(output_dir) unless Dir.exist?(output_dir)

@@ -70,7 +70,7 @@ def generate_proxy_node_metadata(proxy_node_config, ca_cert)
   end
 end
 
-def sign_metadata(metadata_xml, keypair)
+def sign_metadata(metadata_xml, keypair, xmlsectool_path = 'xmlsectool')
   puts("Signing metadata with cert #{keypair.cert.subject}")
   in_tmp_dir('proxy_node_meta') do
     cert_file = create_file('metadata.crt', keypair.cert.to_pem)
@@ -78,7 +78,7 @@ def sign_metadata(metadata_xml, keypair)
     metadata_file = create_file('metadata.xml', metadata_xml)
 
     cmd = <<~EOS
-    xmlsectool \
+    #{xmlsectool_path} \
       --sign \
       --inFile metadata.xml \
       --outFile metadata_signed.xml \
