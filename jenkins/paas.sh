@@ -28,6 +28,8 @@ pushd pki
     "${PKI_OUTPUT_DIR}"
 popd
 
+mkdir -p logs
+
 # Update metadata
 (cp "$PKI_OUTPUT_DIR"/*.xml metadata/
 pushd metadata
