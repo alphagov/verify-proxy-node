@@ -1,0 +1,190 @@
+#!/usr/bin/env ruby
+
+require 'base64'
+require 'open3'
+require 'yaml'
+
+require_relative 'certs'
+require_relative 'metadata'
+require_relative 'truststores'
+require_relative 'utils'
+require_relative 'options'
+
+options = Parser.parse(ARGV)
+output_dir = ARGV.pop || abort(USAGE)
+
+SCRIPT_DIR = File.expand_path(File.dirname(__FILE__))
+PROXY_NODE_MANIFEST = File.join(SCRIPT_DIR, 'proxy_node_manifest.yml')
+STUB_IDP_MANIFEST = File.join(SCRIPT_DIR, 'stub_idp_manifest.yml')
+
+puts <<-EOS
+🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  🇪🇺🇪🇺    🇪🇺🇪🇺 🇪🇺🇪🇺🇪🇺🇪🇺     🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺    🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  
+🇪🇺🇪🇺     🇪🇺🇪🇺 🇪🇺🇪🇺   🇪🇺🇪🇺   🇪🇺🇪🇺     🇪🇺🇪🇺    🇪🇺🇪🇺  🇪🇺🇪🇺     🇪🇺🇪🇺 
+🇪🇺🇪🇺     🇪🇺🇪🇺 🇪🇺🇪🇺  🇪🇺🇪🇺    🇪🇺🇪🇺     🇪🇺🇪🇺        🇪🇺🇪🇺     🇪🇺🇪🇺 
+🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺     🇪🇺🇪🇺     🇪🇺🇪🇺   🇪🇺🇪🇺🇪🇺🇪🇺 🇪🇺🇪🇺     🇪🇺🇪🇺 
+🇪🇺🇪🇺        🇪🇺🇪🇺  🇪🇺🇪🇺    🇪🇺🇪🇺     🇪🇺🇪🇺    🇪🇺🇪🇺  🇪🇺🇪🇺     🇪🇺🇪🇺 
+🇪🇺🇪🇺        🇪🇺🇪🇺   🇪🇺🇪🇺   🇪🇺🇪🇺     🇪🇺🇪🇺    🇪🇺🇪🇺  🇪🇺🇪🇺     🇪🇺🇪🇺 
+🇪🇺🇪🇺        🇪🇺🇪🇺    🇪🇺🇪🇺 🇪🇺🇪🇺🇪🇺🇪🇺     🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺    🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  
+
+
+EOS
+
+def sub(common_name)
+  "/C=UK/O=Verify/OU=Notification/CN=#{common_name}"
+end
+
+def selfsigned_keypair(cn)
+  puts("Generating self-signed CA cert - #{sub(cn)}")
+  ss_key = create_key
+  ss_cert = create_certificate(ss_key, sub(cn)).tap do |cert|
+    ca_certificate(cert)
+    sign_certificate(cert, ss_key)
+  end
+  KeyPair.new(ss_key, ss_cert)
+end
+
+def sub_keypair(issuer_keypair, cn, key_usage)
+  puts("Issuing cert - #{sub(cn)} from #{issuer_keypair.cert.subject}")
+  sub_key = create_key
+  sub_cert = create_certificate(sub_key, sub(cn)).tap do |cert|
+    issue_certificate(cert, issuer_keypair.cert, key_usage)
+    sign_certificate(cert, issuer_keypair.key)
+  end
+  KeyPair.new(sub_key, sub_cert)
+end
+
+def strip_pem(pem)
+  pem.gsub(/-----(BEGIN|END) CERTIFICATE-----/, '').gsub("\n", '')
+end
+
+def der2pk8(der)
+  stdout, status = Open3.capture2('openssl pkcs8 -inform DER -topk8 -outform DER -nocrypt', stdin_data: der)
+  stdout
+end
+
+def b64(s)
+  strip_pem(Base64.encode64(s))
+end
+
+# Root CA
+root_keypair = selfsigned_keypair('Root CA')
+
+# Verify Hub Metadata Signing
+hub_meta_keypair = sub_keypair(root_keypair, 'Hub Metadata Signing', USAGE_SIGNING)
+
+# eIDAS Proxy Metadata Signing
+proxy_node_meta_keypair = sub_keypair(root_keypair, 'Proxy Node Metadata Signing', USAGE_SIGNING)
+
+# Hub Signing
+hub_signing_keypair = sub_keypair(root_keypair, 'Hub Signing', USAGE_SIGNING)
+
+# Hub Encryption
+hub_encryption_keypair = sub_keypair(root_keypair, 'Hub Encryption', USAGE_ENCRYPTION)
+
+# Stub IDP Signing
+idp_signing_keypair = sub_keypair(root_keypair, 'IDP Signing', USAGE_SIGNING)
+
+# Proxy Node Signing
+proxy_signing_keypair = sub_keypair(root_keypair, 'Proxy Node Signing', USAGE_SIGNING)
+
+# Generate Hub Metadata
+hub_config = {
+  'id' => 'VERIFY-HUB',
+  'entity_id' => options.hub_entity_id,
+  'assertion_consumer_service_uri' => options.hub_response_url,
+  'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://localhost' },
+  'signing_certificates' => [
+    { 'name' => 'hub_signing', 'x509' => strip_pem(hub_signing_keypair.cert.to_pem) }
+  ],
+  'encryption_certificate' => { 'name' => 'hub_encryption', 'x509' => strip_pem(hub_encryption_keypair.cert.to_pem) }
+}
+stub_idp_config = {
+  'id' => 'stub-idp-demo',
+  'entity_id' => options.idp_entity_id,
+  'sso_uri' => options.idp_sso_url,
+  'organization' => { 'name' => 'stub-idp-demo', 'display_name' => 'Stub IDP', 'url' => 'http://localhost' },
+  'signing_certificates' => [
+    { 'x509' => strip_pem(idp_signing_keypair.cert.to_pem) }
+  ],
+  'enabled' => true
+}
+hub_metadata_xml = generate_hub_metadata(hub_config, [stub_idp_config], root_keypair.cert)
+hub_metadata_xml_signed = sign_metadata(hub_metadata_xml, hub_meta_keypair)
+
+# Generate Proxy Node Metadata
+proxy_node_config = {
+  'id' => '_entities',
+  'entity_id' => options.proxy_entity_id,
+  'sso_uri' => options.proxy_sso_url,
+  'organization' => { 'name' => 'eIDAS Service', 'display_name' => 'eIDAS Service', 'url' => 'https://eidas-service.eu' },
+  'signing_certificates' => [
+    { 'x509' => strip_pem(proxy_signing_keypair.cert.to_pem) }
+  ],
+  'enabled' => true
+}
+proxy_node_metadata_xml = generate_proxy_node_metadata(proxy_node_config, root_keypair.cert)
+proxy_node_metadata_xml_signed = sign_metadata(proxy_node_metadata_xml, proxy_node_meta_keypair)
+
+# Output
+Dir.mkdir(output_dir) unless Dir.exist?(output_dir)
+Dir.chdir(output_dir) do
+  create_truststore('ida_metadata_truststore.ts', 'marshmallow', {'root_ca' => root_keypair.cert})
+
+  create_file('metadata_for_hub.xml', hub_metadata_xml_signed)
+  create_file('metadata_for_connector_node.xml', proxy_node_metadata_xml_signed)
+
+  if options.do_files
+    puts('Generating PKI files')
+    create_file('root_ca.crt', root_keypair.cert.to_pem)
+    create_file('hub_metadata_signing.crt', hub_meta_keypair.cert.to_pem)
+    create_file('proxy_node_metadata_signing.crt', proxy_node_meta_keypair.cert.to_pem)
+
+    create_file('hub_signing.crt', hub_signing_keypair.cert.to_pem)
+    create_file('hub_signing.der', hub_signing_keypair.key.to_der)
+    create_file('hub_encryption.crt', hub_encryption_keypair.cert.to_pem)
+    create_file('hub_encryption.der', hub_encryption_keypair.key.to_der)
+    create_file('stub_idp_signing.crt', idp_signing_keypair.cert.to_pem)
+    create_file('stub_idp_signing.der', idp_signing_keypair.key.to_der)
+    create_file('proxy_node_signing.crt', proxy_signing_keypair.cert.to_pem)
+    create_file('proxy_node_signing.der', proxy_signing_keypair.key.to_der)
+
+    create_file('hub_signing.pk8', der2pk8(hub_signing_keypair.key.to_der))
+    create_file('hub_encryption.pk8', der2pk8(hub_encryption_keypair.key.to_der))
+    create_file('stub_idp_signing.pk8', der2pk8(idp_signing_keypair.key.to_der))
+    create_file('proxy_node_signing.pk8', der2pk8(proxy_signing_keypair.key.to_der))
+  end
+
+  if options.do_manifests
+    truststore = File.open('ida_metadata_truststore.ts', 'rb').read
+
+    proxy_node_manifest = YAML.load_file(PROXY_NODE_MANIFEST).tap do |cfg|
+      cfg['applications'][0]['env'].update({
+        'HUB_ENTITY_ID' => options.hub_entity_id,
+        'SIGNING_CERT' => b64(proxy_signing_keypair.cert.to_pem),
+        'SIGNING_KEY' => b64(der2pk8(proxy_signing_keypair.key.to_der)),
+        'HUB_FACING_SIGNING_CERT' => b64(hub_signing_keypair.cert.to_pem),
+        'HUB_FACING_SIGNING_KEY' => b64(der2pk8(hub_signing_keypair.key.to_der)),
+        'HUB_FACING_ENCRYPTION_CERT' => b64(hub_encryption_keypair.cert.to_pem),
+        'HUB_FACING_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
+        'HUB_METADATA_TRUSTSTORE' => b64(truststore),
+      })
+    end
+
+    stub_idp_manifest = YAML.load_file(STUB_IDP_MANIFEST).tap do |cfg|
+      cfg['applications'][0]['env'].update({
+        'ENTITY_ID' => options.idp_entity_id,
+        'METADATA_ENTITY_ID' => options.hub_entity_id,
+        'STUB_IDP_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
+        'STUB_IDP_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
+        'STUB_COUNTRY_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
+        'STUB_COUNTRY_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
+        'METADATA_TRUSTSTORE' => b64(truststore),
+      })
+    end
+
+    puts('Generating manifests')
+    create_file('proxy_node.manifest.yml', YAML.dump(proxy_node_manifest))
+    create_file('stub_idp.manifest.yml', YAML.dump(stub_idp_manifest))
+  end
+end
+

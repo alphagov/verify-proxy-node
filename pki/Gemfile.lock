@@ -1,0 +1,46 @@
+GIT
+  remote: git@github.com:alphagov/verify-metadata-generator
+  revision: 57d054bc485325a2e696294582c0b4e32d343351
+  specs:
+    verify-metadata-generator (0.0.2)
+      activemodel
+      json-schema
+      nokogiri
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activemodel (5.1.4)
+      activesupport (= 5.1.4)
+    activesupport (5.1.4)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (~> 0.7)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    addressable (2.5.2)
+      public_suffix (>= 2.0.2, < 4.0)
+    concurrent-ruby (1.0.5)
+    i18n (0.9.5)
+      concurrent-ruby (~> 1.0)
+    json-schema (2.8.0)
+      addressable (>= 2.4)
+    keystores (0.4.0)
+    mini_portile2 (2.3.0)
+    minitest (5.11.3)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
+    public_suffix (3.0.2)
+    thread_safe (0.3.6)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  keystores
+  nokogiri
+  verify-metadata-generator!
+
+BUNDLED WITH
+   1.16.1

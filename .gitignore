@@ -34,5 +34,8 @@ buildNumber.properties
 
 metadata/*.xml
 local_eidas_reference/ida-stub-idp
+local_eidas_reference/ida-stub-idp-repo
+local_eidas_reference/verify-eidas-proxy-node
 local_eidas_reference/verify-metadata
 local_eidas_reference/verify-eidas-reference
+local_eidas_reference/docker/pki

@@ -40,7 +40,12 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private KeyPairConfiguration signingKeyPair;
+    private KeyPairConfiguration connectorFacingSigningKeyPair;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private KeyPairConfiguration hubFacingSigningKeyPair;
 
     @JsonProperty
     @Valid
@@ -84,8 +89,8 @@ public class EidasProxyNodeConfiguration extends Configuration {
         return proxyNodeEntityId;
     }
 
-    public KeyPairConfiguration getSigningKeyPair() {
-        return signingKeyPair;
+    public KeyPairConfiguration getConnectorFacingSigningKeyPair() {
+        return connectorFacingSigningKeyPair;
     }
 
     public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
@@ -118,5 +123,9 @@ public class EidasProxyNodeConfiguration extends Configuration {
 
     public TrustStoreBackedMetadataConfiguration getHubMetadataConfiguration() {
         return hubMetadataConfiguration;
+    }
+
+    public KeyPairConfiguration getHubFacingSigningKeyPair() {
+        return hubFacingSigningKeyPair;
     }
 }

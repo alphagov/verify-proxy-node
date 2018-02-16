@@ -3,15 +3,19 @@ applications:
   - name: verify-eidas-notification-stub-idp
     memory: 1G
     buildpack: java_buildpack
-    path: ../../ida-stub-idp/build/distributions/ida-stub-idp.zip
+    path: ./build/distributions/ida-stub-idp.zip
     env:
       CONFIG_FILE: /app/ida-stub-idp/stub-idp.yml
       LOG_PATH: /app/ida-stub-idp/logs
+      ENTITY_ID: "http://stub_idp.paas.org/%s/SSO/POST"
       STUB_IDP_BASIC_AUTH: 'true'
       METADATA_ENTITY_ID: https://dev-hub.local
-      KEYS_DIRECTORY: /app/ida-stub-idp/resources
-      CERTS_DIRECTORY: /app/ida-stub-idp/resources
       STUB_IDPS_FILE_PATH: /app/ida-stub-idp/resources/stub-idps.yml
       METADATA_URL: https://verify-eidas-notification-metadata.cloudapps.digital/metadata_for_hub.xml
-      TRUSTSTORE_PATH: /app/ida-stub-idp/resources
+      KEY_TYPE: encoded
+      STUB_IDP_SIGNING_PRIVATE_KEY: ~
+      CERT_TYPE: encoded
+      STUB_IDP_SIGNING_CERT: ~
+      TRUSTSTORE_TYPE: encoded
+      METADATA_TRUSTSTORE: ~
       TRUSTSTORE_PASSWORD: marshmallow
