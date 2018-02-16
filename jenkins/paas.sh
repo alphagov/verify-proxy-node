@@ -16,7 +16,7 @@ unzip "${XMLSECTOOL_DIR}-bin.zip"
 # Generate PKI
 pushd pki
   bundle install
-  bundle exec generate \
+  JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/default-java} bundle exec generate \
     --hub-entity-id "https://dev-hub.local" \
     --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
     --proxy-node-entity-id "https://verify-eidas-notification-metadata.cloudapps.digital/metadata_for_connector_node.xml" \
