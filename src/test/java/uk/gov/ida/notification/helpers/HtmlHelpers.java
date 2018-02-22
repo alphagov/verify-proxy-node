@@ -14,6 +14,7 @@ public class HtmlHelpers {
     public static String getValueFromForm(String html, String formName, String inputName) throws IOException {
         StringWebResponse webResponse = new StringWebResponse(html, new URL("http://localhost"));
         try (final WebClient client = new WebClient()) {
+            client.getOptions().setJavaScriptEnabled(false);
             HtmlPage page = HTMLParser.parseHtml(webResponse, client.getCurrentWindow());
             HtmlForm samlForm = page.getFormByName(formName);
             String encodedEidasResponse = samlForm.getInputByName(inputName).getValueAttribute();

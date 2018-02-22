@@ -1,10 +1,8 @@
 package uk.gov.ida.notification;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlRadioButtonInput;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,18 +15,16 @@ import static org.junit.Assert.assertThat;
 
 public class EidasProxyNodeAcceptanceTests {
     private static final String SAML_FORM = "saml-form";
-    private static final String SUBMIT_BUTTON = "submit";
+    private static final String SUBMIT_BUTTON = "submitBtn";
 
     @Test
     public void shouldHandleEidasAuthnRequest() throws Exception {
         try (final WebClient webClient = new WebClient()) {
             HtmlPage countryServicePage = webClient.getPage(serviceProviderBase("/"));
             HtmlPage eidasAuthnRequestPage = submitCountrySelections(countryServicePage);
-            HtmlPage proxyNodeToHubPage = submitCefRefSamlForm(eidasAuthnRequestPage);
-            HtmlPage idpLoginPage = submitSamlForm(proxyNodeToHubPage);
+            HtmlPage idpLoginPage = submitCefRefSamlForm(eidasAuthnRequestPage);
             HtmlPage idpConsentPage = loginAtIDP(idpLoginPage);
-            HtmlPage proxyNodeToConnectorNodePage = consentAtIDP(idpConsentPage);
-            HtmlPage connectorNodePage = submitSamlForm(proxyNodeToConnectorNodePage);
+            HtmlPage connectorNodePage = consentAtIDP(idpConsentPage);
             HtmlPage serviceProviderResponsePage = submitCefRefSamlForm(connectorNodePage);
 
             String pageContent = serviceProviderResponsePage.asText();
