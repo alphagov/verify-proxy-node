@@ -2,7 +2,7 @@ require 'optparse'
 
 USAGE = 'Usage: generate.rb [options] <output directory>'
 
-Options = Struct.new(:hub_entity_id, :idp_entity_id, :proxy_entity_id, :hub_response_url, :idp_sso_url, :proxy_sso_url, :do_files, :do_manifests, :xmlsectool_path)
+Options = Struct.new(:hub_entity_id, :idp_entity_id, :proxy_entity_id, :hub_response_url, :idp_sso_url, :proxy_sso_url, :do_files, :do_manifests, :do_env, :xmlsectool_path)
 
 class Parser
   def self.parse(args)
@@ -12,6 +12,7 @@ class Parser
                           'http://localhost/hub/SAML2/SSO/Response',
                           'http://localhost/idp/SAML2/SSO/POST',
                           'http://localhost/proxy/SAML2/SSO/POST',
+                          false,
                           false,
                           false,
                           'xmlsectool'
@@ -28,6 +29,7 @@ class Parser
       opts.on('--proxy-sso-url SSO_URL', "URL to post eIDAS AuthnRequest to Proxy Node") { |s| options.proxy_sso_url = s }
       opts.on('--files', "Set to output keys, certs and truststores") { |_| options.do_files = true }
       opts.on('--manifests', "Set to output CF manifests with PKI inlined") { |_| options.do_manifests = true }
+      opts.on('--env', "Output environment files for Docker Compose") { |_| options.do_env = true }
       opts.on('--xmlsectool PATH', "Path to xmlsectool") { |s| options.xmlsectool_path = s }
       opts.on('-h', '--help', 'Print help message') { |_| abort(opts.to_s) }
     end

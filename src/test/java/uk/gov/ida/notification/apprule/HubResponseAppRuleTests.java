@@ -19,14 +19,13 @@ import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
-import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.DecrypterFactory;
@@ -52,6 +51,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private SamlObjectMarshaller marshaller;
@@ -97,14 +98,9 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
-        TestKeyPair keyPair = new TestKeyPair();
-        DecryptionCredential eidasAssertionsDecryptionCredential = new DecryptionCredential(
-                keyPair.publicKey, keyPair.privateKey
-        );
-
+        Credential decryptingCredential = new TestCredentialFactory(TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_RP_PRIVATE_ENCRYPTION_KEY).getDecryptingCredential();
         Response eidasResponse = readResponseFromHub(hubResponse);
-
-        Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), eidasAssertionsDecryptionCredential);
+        Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), decryptingCredential);
         Element attributeStatement = marshaller.marshallToElement(eidasAssertion.getAttributeStatements().get(0));
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
@@ -140,7 +136,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
                 .post(Entity.form(postForm));
     }
 
-    private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, DecryptionCredential credential) throws Exception {
+    private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, Credential credential) throws Exception {
         DecrypterFactory decrypterFactory = new DecrypterFactory();
         Decrypter decrypter = decrypterFactory.createDecrypter(singletonList(credential));
         return decrypter.decrypt(encryptedAssertion);

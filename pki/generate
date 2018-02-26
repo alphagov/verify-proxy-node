@@ -133,6 +133,29 @@ Dir.chdir(output_dir) do
   create_file('metadata_for_hub.xml', hub_metadata_xml_signed)
   create_file('metadata_for_connector_node.xml', proxy_node_metadata_xml_signed)
 
+  metadata_truststore = File.open('ida_metadata_truststore.ts', 'rb').read
+
+  proxy_node_vars = {
+    'HUB_ENTITY_ID' => options.hub_entity_id,
+    'SIGNING_CERT' => b64(proxy_signing_keypair.cert.to_pem),
+    'SIGNING_KEY' => b64(der2pk8(proxy_signing_keypair.key.to_der)),
+    'HUB_FACING_SIGNING_CERT' => b64(hub_signing_keypair.cert.to_pem),
+    'HUB_FACING_SIGNING_KEY' => b64(der2pk8(hub_signing_keypair.key.to_der)),
+    'HUB_FACING_ENCRYPTION_CERT' => b64(hub_encryption_keypair.cert.to_pem),
+    'HUB_FACING_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
+    'HUB_METADATA_TRUSTSTORE' => b64(metadata_truststore),
+  }
+
+  stub_idp_vars = {
+    'ENTITY_ID' => options.idp_entity_id,
+    'METADATA_ENTITY_ID' => options.hub_entity_id,
+    'STUB_IDP_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
+    'STUB_IDP_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
+    'STUB_COUNTRY_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
+    'STUB_COUNTRY_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
+    'METADATA_TRUSTSTORE' => b64(metadata_truststore),
+  }
+
   if options.do_files
     puts('Generating PKI files')
     create_file('root_ca.crt', root_keypair.cert.to_pem)
@@ -155,36 +178,23 @@ Dir.chdir(output_dir) do
   end
 
   if options.do_manifests
-    truststore = File.open('ida_metadata_truststore.ts', 'rb').read
-
     proxy_node_manifest = YAML.load_file(PROXY_NODE_MANIFEST).tap do |cfg|
-      cfg['applications'][0]['env'].update({
-        'HUB_ENTITY_ID' => options.hub_entity_id,
-        'SIGNING_CERT' => b64(proxy_signing_keypair.cert.to_pem),
-        'SIGNING_KEY' => b64(der2pk8(proxy_signing_keypair.key.to_der)),
-        'HUB_FACING_SIGNING_CERT' => b64(hub_signing_keypair.cert.to_pem),
-        'HUB_FACING_SIGNING_KEY' => b64(der2pk8(hub_signing_keypair.key.to_der)),
-        'HUB_FACING_ENCRYPTION_CERT' => b64(hub_encryption_keypair.cert.to_pem),
-        'HUB_FACING_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
-        'HUB_METADATA_TRUSTSTORE' => b64(truststore),
-      })
+      cfg['applications'][0]['env'].update(proxy_node_vars)
     end
 
     stub_idp_manifest = YAML.load_file(STUB_IDP_MANIFEST).tap do |cfg|
-      cfg['applications'][0]['env'].update({
-        'ENTITY_ID' => options.idp_entity_id,
-        'METADATA_ENTITY_ID' => options.hub_entity_id,
-        'STUB_IDP_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
-        'STUB_IDP_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
-        'STUB_COUNTRY_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
-        'STUB_COUNTRY_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
-        'METADATA_TRUSTSTORE' => b64(truststore),
-      })
+      cfg['applications'][0]['env'].update(stub_idp_vars)
     end
 
     puts('Generating manifests')
     create_file('proxy_node.manifest.yml', YAML.dump(proxy_node_manifest))
     create_file('stub_idp.manifest.yml', YAML.dump(stub_idp_manifest))
+  end
+
+  if options.do_env
+    puts('Generating environment files')
+    create_file('proxy_node.env', proxy_node_vars.map { |k,v| "#{k}=#{v}\n" }.join)
+    create_file('stub_idp.env', stub_idp_vars.map { |k,v| "#{k}=#{v}\n" }.join)
   end
 end
 

@@ -5,7 +5,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import org.opensaml.security.credential.UsageType;
 import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 import uk.gov.ida.notification.helpers.TestKeyPair;
@@ -37,7 +39,7 @@ public class MetadataTest {
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        PublicKey connectorNodeEncryptionPublicKey = metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID).getPublicKey();
+        PublicKey connectorNodeEncryptionPublicKey = metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
 
         assertEquals(expectedPublicKey, connectorNodeEncryptionPublicKey);
     }
@@ -52,7 +54,7 @@ public class MetadataTest {
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        PublicKey hubSigningPublicKey = metadata.getSigningPublicKey(TEST_HUB_METADATA_ENTITY_ID);
+        PublicKey hubSigningPublicKey = metadata.getCredential(UsageType.SIGNING, TEST_HUB_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
 
         assertEquals(expectedPublicKey, hubSigningPublicKey);
     }
@@ -65,7 +67,7 @@ public class MetadataTest {
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
+        metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
     }
 
     @Test(expected = MissingMetadataException.class)
@@ -76,7 +78,7 @@ public class MetadataTest {
         MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
+        metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
     }
 
     @Rule
@@ -91,6 +93,6 @@ public class MetadataTest {
         when(metadataCredentialResolver.resolveSingle(any())).thenThrow(ResolverException.class);
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
-        metadata.getEncryptionCredential(TEST_CONNECTOR_NODE_METADATA_ENTITY_ID);
+        metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
     }
 }

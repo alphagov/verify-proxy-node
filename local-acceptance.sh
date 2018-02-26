@@ -4,10 +4,11 @@ set -e
 
 function wait_for {
   local service="$1"
-  local port="$2"
+  local url="$2"
+  local expected_code="${3:-200}"
 
   echo -n "Waiting for $service "
-  until $(curl --output /dev/null --silent --head --header "Connection: keep-alive" "http://localhost:$port/"); do
+  until test "$expected_code" = $(curl --output /dev/null --silent --write-out '%{http_code}' "$url"); do
     echo -n "."
     sleep 1
   done
@@ -17,9 +18,11 @@ function wait_for {
 ./shutdown.sh
 (./startup.sh --proxy-node-rebuild --follow &) > ./logs/docker.log 2>&1
 
-wait_for "CEF" 56000
-wait_for "Proxy Node" 56016
-wait_for "Stub IDP" 56017
+wait_for "CEF SP" localhost:56000
+wait_for "CEF Connector" localhost:56001/ServiceProvider 500
+wait_for "Proxy Node" localhost:56026/healthcheck
+wait_for "Stub IDP" localhost:56027/healthcheck
+wait_for "Metadata" localhost:55000 403
 
 ./gradlew acceptanceTest
 ./shutdown.sh

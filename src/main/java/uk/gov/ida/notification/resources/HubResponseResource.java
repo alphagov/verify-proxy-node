@@ -1,9 +1,11 @@
 package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
-import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -53,7 +55,7 @@ public class HubResponseResource {
             @FormParam("RelayState") String relayState) {
         try {
             SamlSignatureValidator samlSignatureValidator = new SamlSignatureValidator();
-            PublicKey hubPublicKey = hubMetadata.getSigningPublicKey(encryptedHubResponse.getIssuer().getValue());
+            PublicKey hubPublicKey = hubMetadata.getCredential(UsageType.SIGNING, encryptedHubResponse.getIssuer().getValue(), IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
 
             samlSignatureValidator.validateResponse(new BasicCredential(hubPublicKey), encryptedHubResponse);
             Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
@@ -72,8 +74,8 @@ public class HubResponseResource {
         }
     }
 
-    private ResponseAssertionEncrypter createAssertionEncrypter() throws ResolverException {
-        X509Credential encryptionCredential = connectorMetadata.getEncryptionCredential(connectorEntityId);
+    private ResponseAssertionEncrypter createAssertionEncrypter() {
+        X509Credential encryptionCredential = (X509Credential) connectorMetadata.getCredential(UsageType.ENCRYPTION, connectorEntityId, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         return new ResponseAssertionEncrypter(encryptionCredential);
     }
 
