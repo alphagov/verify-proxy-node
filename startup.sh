@@ -85,7 +85,7 @@ pushd "${PN_PROJECT_DIR}/pki"
     --hub-response-url "http://localhost:56016/SAML2/SSO/Response/POST" \
     --idp-sso-url "http://localhost:56017/stub-idp-demo/SAML2/SSO" \
     --proxy-sso-url "http://localhost:56016/SAML2/SSO/POST" \
-    --files \
+    --env \
     "${PKI_OUTPUT_DIR}"
 popd
 

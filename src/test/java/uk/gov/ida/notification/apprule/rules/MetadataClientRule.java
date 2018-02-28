@@ -1,50 +1,77 @@
 package uk.gov.ida.notification.apprule.rules;
 
 import io.dropwizard.testing.junit.DropwizardClientRule;
-import org.w3c.dom.Element;
-import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.helpers.TestMetadataBuilder;
-import uk.gov.ida.notification.helpers.XmlHelpers;
+import org.joda.time.DateTime;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.KeyDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.xmlsec.signature.Signature;
+import uk.gov.ida.saml.core.test.TestCredentialFactory;
+import uk.gov.ida.saml.core.test.builders.SignatureBuilder;
+import uk.gov.ida.saml.core.test.builders.metadata.EntityDescriptorBuilder;
+import uk.gov.ida.saml.core.test.builders.metadata.KeyDescriptorBuilder;
+import uk.gov.ida.saml.core.test.builders.metadata.SPSSODescriptorBuilder;
 import uk.gov.ida.saml.metadata.test.factories.metadata.MetadataFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.xml.transform.TransformerException;
 
-public class MetadataClientRule extends DropwizardClientRule{
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
-    public MetadataClientRule(){
-        super(new TestMetadataResource(getTestConnectorMetadata()));
-    }
-
-    private static Element getTestConnectorMetadata() {
-        try {
-            return new TestMetadataBuilder("connector_node_metadata_template.xml")
-                    .withEncryptionCert(new TestKeyPair().certificate)
-                    .buildElement();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to create connector node's metadata for testing", e);
-        }
+public class MetadataClientRule extends DropwizardClientRule {
+    public MetadataClientRule() throws Exception {
+        super(new TestMetadataResource());
     }
 
     @Path("/")
     public static class TestMetadataResource {
-        private Element connectorNodeMetadata;
+        private final String connectorEntityId = "http://connector-node:8080/ConnectorResponderMetadata";
+        private String connectorMetadataXml;
+        private String hubMetadata;
 
-        TestMetadataResource(Element connectorNodeMetadata) {
-            this.connectorNodeMetadata = connectorNodeMetadata;
+        TestMetadataResource() throws Exception {
+            connectorMetadataXml = new MetadataFactory().singleEntityMetadata(buildConnectorEntityDescriptor());
+            hubMetadata = new MetadataFactory().defaultMetadata();
+        }
+
+        private EntityDescriptor buildConnectorEntityDescriptor() throws Exception {
+            KeyDescriptor keyDescriptor = KeyDescriptorBuilder.aKeyDescriptor()
+                    .withX509ForSigning(TEST_RP_PUBLIC_SIGNING_CERT)
+                    .withX509ForEncryption(TEST_RP_PUBLIC_ENCRYPTION_CERT)
+                    .build();
+
+            SPSSODescriptor spssoDescriptor = SPSSODescriptorBuilder.anSpServiceDescriptor()
+                    .addKeyDescriptor(keyDescriptor)
+                    .withoutDefaultSigningKey()
+                    .build();
+
+            Signature signature = SignatureBuilder.aSignature()
+                    .withSigningCredential(new TestCredentialFactory(METADATA_SIGNING_A_PUBLIC_CERT, METADATA_SIGNING_A_PRIVATE_KEY).getSigningCredential())
+                    .withX509Data(METADATA_SIGNING_A_PUBLIC_CERT)
+                    .build();
+
+            return EntityDescriptorBuilder.anEntityDescriptor()
+                    .withEntityId(connectorEntityId)
+                    .addSpServiceDescriptor(spssoDescriptor)
+                    .withValidUntil(DateTime.now().plusWeeks(2))
+                    .withSignature(signature)
+                    .setAddDefaultSpServiceDescriptor(false)
+                    .build();
         }
 
         @GET
         @Path("/connector-node/metadata")
-        public String getConnectorMetadata() throws TransformerException {
-            return XmlHelpers.serializeDomElementToString(connectorNodeMetadata);
+        public String getConnectorMetadata() {
+            return connectorMetadataXml;
         }
 
         @GET
         @Path("/hub/metadata")
-        public String getMetadata() throws TransformerException {
-            return new MetadataFactory().defaultMetadata();
+        public String getHubMetadata() {
+            return hubMetadata;
         }
     }
 }
