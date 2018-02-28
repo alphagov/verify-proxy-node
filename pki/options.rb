@@ -2,7 +2,7 @@ require 'optparse'
 
 USAGE = 'Usage: generate.rb [options] <output directory>'
 
-Options = Struct.new(:hub_entity_id, :idp_entity_id, :proxy_entity_id, :hub_response_url, :idp_sso_url, :proxy_sso_url, :do_files, :do_manifests, :do_env, :xmlsectool_path)
+Options = Struct.new(:hub_entity_id, :idp_entity_id, :proxy_entity_id, :hub_response_url, :idp_sso_url, :proxy_sso_url, :do_files, :do_manifests, :do_env, :xmlsectool_path, :truststore_pass)
 
 class Parser
   def self.parse(args)
@@ -15,7 +15,8 @@ class Parser
                           false,
                           false,
                           false,
-                          'xmlsectool'
+                          'xmlsectool',
+                          'marshmallow',
                          )
 
     parser = OptionParser.new do |opts|
@@ -30,7 +31,8 @@ class Parser
       opts.on('--files', "Set to output keys, certs and truststores") { |_| options.do_files = true }
       opts.on('--manifests', "Set to output CF manifests with PKI inlined") { |_| options.do_manifests = true }
       opts.on('--env', "Output environment files for Docker Compose") { |_| options.do_env = true }
-      opts.on('--xmlsectool PATH', "Path to xmlsectool") { |s| options.xmlsectool_path = s }
+      opts.on('--xmlsectool PATH', "Path to xmlsectool (default: xmlsectool)") { |s| options.xmlsectool_path = s }
+      opts.on('--truststore-pass PASSWORD', "Password for generated truststores (default: marshmallow)") { |s| options.truststore_pass = s }
       opts.on('-h', '--help', 'Print help message') { |_| abort(opts.to_s) }
     end
 

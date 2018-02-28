@@ -128,7 +128,7 @@ proxy_node_metadata_xml_signed = sign_metadata(proxy_node_metadata_xml, proxy_no
 # Output
 Dir.mkdir(output_dir) unless Dir.exist?(output_dir)
 Dir.chdir(output_dir) do
-  create_truststore('ida_metadata_truststore.ts', 'marshmallow', {'root_ca' => root_keypair.cert})
+  create_truststore('ida_metadata_truststore.ts', options.truststore_pass, {'root_ca' => root_keypair.cert})
 
   create_file('metadata_for_hub.xml', hub_metadata_xml_signed)
   create_file('metadata_for_connector_node.xml', proxy_node_metadata_xml_signed)
@@ -144,6 +144,7 @@ Dir.chdir(output_dir) do
     'HUB_FACING_ENCRYPTION_CERT' => b64(hub_encryption_keypair.cert.to_pem),
     'HUB_FACING_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
     'HUB_METADATA_TRUSTSTORE' => b64(metadata_truststore),
+    'HUB_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
   }
 
   stub_idp_vars = {
@@ -154,6 +155,7 @@ Dir.chdir(output_dir) do
     'STUB_COUNTRY_SIGNING_PRIVATE_KEY' => b64(der2pk8(idp_signing_keypair.key.to_der)),
     'STUB_COUNTRY_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
     'METADATA_TRUSTSTORE' => b64(metadata_truststore),
+    'METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
   }
 
   if options.do_files
