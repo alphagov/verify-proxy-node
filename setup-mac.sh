@@ -45,10 +45,20 @@ echo
 
 colour_print $ORANGE "========================="
 colour_print $YELLOW "Installing adr-tools"
-if   brew ls --versions adr-tools >/dev/null; then
+if brew ls --versions adr-tools >/dev/null; then
 	colour_print $GRAY "adr-tools already exists! Doing nothing"
 else
 	brew update && brew install adr-tools
+	colour_print $GREEN "adr-tools installation complete!"
+fi
+echo
+
+colour_print $ORANGE "========================="
+colour_print $YELLOW "Installing xmlsectool"
+if brew ls --versions xmlsectool >/dev/null; then
+	colour_print $GRAY "xmlsectool already exists! Doing nothing"
+else
+	brew update && brew install xmlsectool
 	colour_print $GREEN "adr-tools installation complete!"
 fi
 echo
