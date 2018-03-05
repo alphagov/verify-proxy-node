@@ -15,7 +15,6 @@ function wait_for {
   echo " READY"
 }
 
-./shutdown.sh
 (./startup.sh --proxy-node-rebuild --follow &) > ./logs/docker.log 2>&1
 
 wait_for "CEF SP" localhost:56000

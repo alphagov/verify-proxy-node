@@ -2,6 +2,7 @@ package uk.gov.ida.notification.helpers;
 
 
 import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.Credential;
@@ -31,12 +32,17 @@ public class HubResponseBuilder {
         responseBuilder = new ResponseBuilder();
     }
 
-    public HubResponseBuilder addAuthnStatementAssertionUsing(Credential credential) {
+    public HubResponseBuilder addAssertion(Assertion assertion) {
+        responseBuilder.addAssertion(assertion);
+        return this;
+    }
+
+    public HubResponseBuilder addEncryptedAuthnStatementAssertionUsing(Credential credential) {
         responseBuilder.addEncryptedAssertion(anAuthnStatementAssertion().buildWithEncrypterCredential(credential));
         return this;
     }
 
-    public HubResponseBuilder addMatchingDatasetAssertionUsing(Credential credential) {
+    public HubResponseBuilder addEncryptedMatchingDatasetAssertionUsing(Credential credential) {
         responseBuilder.addEncryptedAssertion(aMatchingDatasetAssertion().buildWithEncrypterCredential(credential));
         return this;
     }
@@ -53,7 +59,7 @@ public class HubResponseBuilder {
                 .build();
     }
 
-    private static AssertionBuilder aMatchingDatasetAssertion() {
+    public static AssertionBuilder aMatchingDatasetAssertion() {
         AttributeValue firstnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Jazzy").build();
         AttributeValue middlenameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Harold").build();
         AttributeValue surnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Jefferson").build();
@@ -74,7 +80,7 @@ public class HubResponseBuilder {
                 .addAttributeStatement(attributeStatementBuilder.build());
     }
 
-    private static AssertionBuilder anAuthnStatementAssertion() {
+    public static AssertionBuilder anAuthnStatementAssertion() {
         return AssertionBuilder.anAssertion()
                 .addAuthnStatement(AuthnStatementBuilder.anAuthnStatement().build())
                 .addAttributeStatement(anAttributeStatement().addAttribute(IPAddressAttributeBuilder.anIPAddress().build()).build());

@@ -37,7 +37,8 @@ dependencies {
         "uk.gov.ida:saml-metadata-bindings:${openSamlVersion}-68",
         "uk.gov.ida:saml-security:${openSamlVersion}-57",
         "uk.gov.ida:security-utils:${utilsVersion}-331",
-        "se.litsec.eidas:eidas-opensaml3:1.0.5"
+        "se.litsec.eidas:eidas-opensaml3:1.0.5",
+        "uk.gov.ida:hub-saml:${openSamlVersion}-112",
     )
     testCompile(
         'junit:junit:4.12',
@@ -47,7 +48,7 @@ dependencies {
         'net.sourceforge.htmlunit:htmlunit:2.28',
         "uk.gov.ida:common-test-utils:${utilsVersion}-38",
         "uk.gov.ida:saml-metadata-bindings-test:${openSamlVersion}-68",
-        "uk.gov.verify:saml-test-utils:${openSamlVersion}-2"
+        "uk.gov.verify:saml-test-utils:${openSamlVersion}-2",
     )
 }
 

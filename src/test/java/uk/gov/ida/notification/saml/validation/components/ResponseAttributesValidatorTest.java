@@ -312,4 +312,12 @@ public class ResponseAttributesValidatorTest {
         AttributeStatement attributeStatement = attributeStatementBuilder.build();
         responseAttributesValidator.validate(attributeStatement);
     }
+
+    @Test
+    public void shouldThrowExceptionIfNullAttributeStatement() {
+        expectedException.expect(InvalidHubResponseException.class);
+        expectedException.expectMessage("Bad IDP Response from Hub: Missing Matching Dataset Attribute Statement");
+
+        responseAttributesValidator.validate(null);
+    }
 }

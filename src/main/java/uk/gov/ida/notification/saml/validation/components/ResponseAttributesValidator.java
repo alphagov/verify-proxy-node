@@ -31,6 +31,9 @@ public class ResponseAttributesValidator {
     ).collect(Collectors.toSet());
 
     public void validate(AttributeStatement attributeStatement) {
+        if (attributeStatement == null)
+            throw new InvalidHubResponseException("Missing Matching Dataset Attribute Statement");
+
         List<String> attributeNames = attributeStatement.getAttributes().stream()
             .filter(attribute -> validatedAttributes.contains(attribute.getName()))
             .map(this::validateAttribute)

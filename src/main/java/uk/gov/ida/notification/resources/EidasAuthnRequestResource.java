@@ -74,7 +74,6 @@ public class EidasAuthnRequestResource {
         return samlFormViewBuilder.buildRequest(hubUrl, hubAuthnRequest, submitText, relayState);
     }
 
-
     private void logAuthnRequestInformation(EidasAuthnRequest eidasAuthnRequest) {
         LOG.info("[eIDAS AuthnRequest] Request ID: " + eidasAuthnRequest.getRequestId());
         LOG.info("[eIDAS AuthnRequest] Issuer: " + eidasAuthnRequest.getIssuer());

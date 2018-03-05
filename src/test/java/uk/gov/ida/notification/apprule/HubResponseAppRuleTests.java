@@ -140,8 +140,8 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         marshaller = new SamlObjectMarshaller();
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
-                .addAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
+                .addEncryptedAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
+                .addEncryptedMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
                 .build();
     }
 }
