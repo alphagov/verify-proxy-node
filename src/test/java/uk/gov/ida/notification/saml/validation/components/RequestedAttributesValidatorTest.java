@@ -95,7 +95,7 @@ public class RequestedAttributesValidatorTest {
     @Test
     public void shouldThrowExceptionIfNoPersonIdentifierAttribute() throws Throwable {
         expectedException.expect(InvalidAuthnRequestException.class);
-        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute");
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute(s): " + EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME);
 
         AuthnRequest request = eidasAuthnRequestBuilder.withoutRequestedAttribute(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME).build();
         requestedAttributesValidator.validate(getRequestedAttributes(request));
@@ -113,7 +113,7 @@ public class RequestedAttributesValidatorTest {
     @Test
     public void shouldThrowExceptionIfNoGivenNameAttribute() throws Throwable {
         expectedException.expect(InvalidAuthnRequestException.class);
-        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute");
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute(s): " + EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME);
 
         AuthnRequest request = eidasAuthnRequestBuilder.withoutRequestedAttribute(EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME).build();
         requestedAttributesValidator.validate(getRequestedAttributes(request));
@@ -131,7 +131,7 @@ public class RequestedAttributesValidatorTest {
     @Test
     public void shouldThrowExceptionIfNoFamilyNameAttribute() throws Throwable {
         expectedException.expect(InvalidAuthnRequestException.class);
-        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute");
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute(s): " + EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME);
 
         AuthnRequest request = eidasAuthnRequestBuilder.withoutRequestedAttribute(EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME).build();
         requestedAttributesValidator.validate(getRequestedAttributes(request));
@@ -149,7 +149,7 @@ public class RequestedAttributesValidatorTest {
     @Test
     public void shouldThrowExceptionIfNoDateOfBirthAttribute() throws Throwable {
         expectedException.expect(InvalidAuthnRequestException.class);
-        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute");
+        expectedException.expectMessage("Bad Authn Request from Connector Node: Missing mandatory RequestedAttribute(s): " + EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME);
 
         AuthnRequest request = eidasAuthnRequestBuilder.withoutRequestedAttribute(EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME).build();
         requestedAttributesValidator.validate(getRequestedAttributes(request));
