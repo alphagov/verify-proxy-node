@@ -11,12 +11,10 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import org.opensaml.security.credential.BasicCredential;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
-import uk.gov.ida.notification.pki.CredentialBuilder;
-import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
@@ -38,8 +36,6 @@ import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
-    private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
-    private static final String END_CERT = "-----END CERTIFICATE-----";
 
     private Metadata connectorMetadata;
     private Metadata hubMetadata;
@@ -134,7 +130,11 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 connectorNodeUrl,
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
-        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential(configuration.getConnectorFacingSigningKeyPair()));
+        SamlObjectSigner signer = new SamlObjectSigner(
+                configuration.getConnectorFacingSigningKeyPair().getPublicKey().getPublicKey(),
+                configuration.getConnectorFacingSigningKeyPair().getPrivateKey().getPrivateKey(),
+                configuration.getConnectorFacingSigningKeyPair().getPublicKey().getCert()
+        );
         return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 
@@ -142,19 +142,12 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
                 configuration.getProxyNodeEntityId(),
                 configuration.getHubUrl().toString());
-        SamlObjectSigner signer = new SamlObjectSigner(createSigningCredential(configuration.getHubFacingSigningKeyPair()));
+        SamlObjectSigner signer = new SamlObjectSigner(
+                configuration.getHubFacingSigningKeyPair().getPublicKey().getPublicKey(),
+                configuration.getHubFacingSigningKeyPair().getPrivateKey().getPrivateKey(),
+                configuration.getHubFacingSigningKeyPair().getPublicKey().getCert()
+        );
         return new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, signer);
-    }
-
-    private SigningCredential createSigningCredential(KeyPairConfiguration configuration) {
-        String certString = configuration
-                .getPublicKey()
-                .getCert()
-                .replaceAll(BEGIN_CERT, "")
-                .replaceAll(END_CERT, "");
-        return CredentialBuilder
-                .withKeyPairConfiguration(configuration)
-                .buildSigningCredential(certString);
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator() {
@@ -167,11 +160,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     }
 
     private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
-        DecryptionCredential hubFacingDecryptingCredential = CredentialBuilder
-                .withKeyPairConfiguration(configuration)
-                .buildDecryptionCredential();
-
-        return new ResponseAssertionDecrypter(hubFacingDecryptingCredential);
+        return new ResponseAssertionDecrypter(new BasicCredential(
+                configuration.getPublicKey().getPublicKey(),
+                configuration.getPrivateKey().getPrivateKey())
+        );
     }
 
     private Metadata createMetadata(MetadataResolverBundle bundle) throws ComponentInitializationException {

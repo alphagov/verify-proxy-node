@@ -44,8 +44,9 @@ public class MetadataClientRule extends DropwizardClientRule {
                     .build();
 
             SPSSODescriptor spssoDescriptor = SPSSODescriptorBuilder.anSpServiceDescriptor()
-                    .addKeyDescriptor(keyDescriptor)
                     .withoutDefaultSigningKey()
+                    .withoutDefaultEncryptionKey()
+                    .addKeyDescriptor(keyDescriptor)
                     .build();
 
             Signature signature = SignatureBuilder.aSignature()
@@ -55,6 +56,8 @@ public class MetadataClientRule extends DropwizardClientRule {
 
             return EntityDescriptorBuilder.anEntityDescriptor()
                     .withEntityId(connectorEntityId)
+                    .withIdpSsoDescriptor(null)
+                    .setAddDefaultSpServiceDescriptor(false)
                     .addSpServiceDescriptor(spssoDescriptor)
                     .withValidUntil(DateTime.now().plusWeeks(2))
                     .withSignature(signature)

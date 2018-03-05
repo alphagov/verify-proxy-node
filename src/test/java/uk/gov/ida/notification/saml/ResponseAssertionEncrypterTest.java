@@ -5,11 +5,12 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.pki.DecryptionCredential;
 import uk.gov.ida.saml.core.test.builders.AssertionBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 import uk.gov.ida.saml.security.DecrypterFactory;
@@ -22,7 +23,7 @@ public class ResponseAssertionEncrypterTest extends SamlInitializedTest {
     @Test
     public void shouldEncryptAssertionsInResponse() throws Throwable {
         TestKeyPair testKeyPair = new TestKeyPair();
-        DecryptionCredential decryptionCredential = new DecryptionCredential(testKeyPair.publicKey, testKeyPair.privateKey);
+        BasicCredential decryptionCredential = new BasicCredential(testKeyPair.publicKey, testKeyPair.privateKey);
         X509Credential credential = new BasicX509Credential(testKeyPair.certificate);
 
         Assertion assertion = AssertionBuilder.anAssertion().withId("hi").buildUnencrypted();
@@ -38,7 +39,7 @@ public class ResponseAssertionEncrypterTest extends SamlInitializedTest {
         assertEquals(0, encryptedResponse.getAssertions().size());
     }
 
-    private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, DecryptionCredential credential) throws Exception {
+    private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, Credential credential) throws Exception {
         DecrypterFactory decrypterFactory = new DecrypterFactory();
         Decrypter decrypter = decrypterFactory.createDecrypter(Collections.singletonList(credential));
         return decrypter.decrypt(encryptedAssertion);

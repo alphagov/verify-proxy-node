@@ -15,7 +15,6 @@ public class HubResponseExceptionMapper implements ExceptionMapper<HubResponseEx
 
     @Override
     public Response toResponse(HubResponseException exception) {
-        String message = exception.getCause().getMessage();
         String logId = String.format("%016x", ThreadLocalRandom.current().nextLong());
 
         log.log(Level.WARNING, String.format("logId=%s, requestId=%s, issuer=%s, issueInstant=%s, cause=%s",
@@ -23,7 +22,7 @@ public class HubResponseExceptionMapper implements ExceptionMapper<HubResponseEx
                 exception.getSamlResponse().getID(),
                 exception.getSamlResponse().getIssuer().getValue(),
                 exception.getSamlResponse().getIssueInstant(),
-                message)
+                exception.getCause())
         );
 
         return Response.status(Response.Status.BAD_REQUEST)
