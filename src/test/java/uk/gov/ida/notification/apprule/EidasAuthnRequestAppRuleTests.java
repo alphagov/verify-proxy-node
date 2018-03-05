@@ -80,4 +80,22 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
 
         assertEquals(eidasAuthnRequest.getID(), hubAuthnRequest.getID());
     }
+
+
+    @Test
+    public void redirectBindingValidatesAuthnRequest() throws Throwable {
+        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
+        AuthnRequest eidasAuthnRequest = builder.withoutRequestId().build();
+
+        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
+
+        Response response = proxyNodeAppRule.target("/SAML2/SSO/Redirect")
+                .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
+                .request()
+                .get();
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
+    }
+
 }
