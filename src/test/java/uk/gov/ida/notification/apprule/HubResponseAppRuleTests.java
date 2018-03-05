@@ -1,15 +1,12 @@
 package uk.gov.ida.notification.apprule;
 
-import org.apache.http.HttpStatus;
 import org.bouncycastle.util.Strings;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
-import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
@@ -20,7 +17,7 @@ import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.pki.SigningCredential;
+import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -28,7 +25,6 @@ import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
-import uk.gov.ida.saml.security.DecrypterFactory;
 import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
@@ -70,8 +66,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         PublicKey publicKey = X509certificate.getPublicKey();
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY))));
 
-        SigningCredential signingCredential = new SigningCredential(publicKey, privateKey, STUB_IDP_PUBLIC_PRIMARY_CERT);
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential);
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(publicKey, privateKey, STUB_IDP_PUBLIC_PRIMARY_CERT);
         samlObjectSigner.sign(hubResponse);
     }
 
@@ -80,7 +75,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
 
-        Response eidasResponse = readResponseFromHub(hubResponse);
+        Response eidasResponse = extractEidasResponse(hubResponse);
 
         Signature signature = eidasResponse.getSignature();
 
@@ -91,7 +86,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
-        Response eidasResponse = readResponseFromHub(hubResponse);
+        Response eidasResponse = extractEidasResponse(hubResponse);
         assertEquals(1, eidasResponse.getEncryptedAssertions().size());
         assert(eidasResponse.getAssertions().isEmpty());
     }
@@ -99,8 +94,9 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
         Credential decryptingCredential = new TestCredentialFactory(TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_RP_PRIVATE_ENCRYPTION_KEY).getDecryptingCredential();
-        Response eidasResponse = readResponseFromHub(hubResponse);
-        Assertion eidasAssertion = decryptAssertion(eidasResponse.getEncryptedAssertions().get(0), decryptingCredential);
+        Response eidasResponse = extractEidasResponse(hubResponse);
+        Response decryptedEidasResponse = decryptResponse(eidasResponse, decryptingCredential);
+        Assertion eidasAssertion = decryptedEidasResponse.getAssertions().get(0);
         Element attributeStatement = marshaller.marshallToElement(eidasAssertion.getAttributeStatements().get(0));
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
@@ -112,34 +108,28 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldNotAcceptUnsignedHubResponse() throws Exception {
-        javax.ws.rs.core.Response response = postSamlResponse(buildUnsignedHubResponse());
-        String message = response.readEntity(String.class);
-
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        String message = postHubResponseToProxyNode(buildUnsignedHubResponse());
         assertThat(message).contains("Error handling hub response");
     }
 
-    private Response readResponseFromHub(Response hubResponse) throws Exception {
-        javax.ws.rs.core.Response response = postSamlResponse(hubResponse);
-
-        String html = response.readEntity(String.class);
-
+    private Response extractEidasResponse(Response hubResponse) throws Exception {
+        String html = postHubResponseToProxyNode(hubResponse);
         String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
         return new SamlParser().parseSamlString(decodedEidasResponse);
     }
 
-    private javax.ws.rs.core.Response postSamlResponse(Response hubResponse) throws URISyntaxException {
+    private String postHubResponseToProxyNode(Response hubResponse) throws URISyntaxException {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 
         return proxyNodeAppRule.target("/SAML2/SSO/Response/POST").request()
-                .post(Entity.form(postForm));
+                .post(Entity.form(postForm))
+                .readEntity(String.class);
     }
 
-    private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, Credential credential) throws Exception {
-        DecrypterFactory decrypterFactory = new DecrypterFactory();
-        Decrypter decrypter = decrypterFactory.createDecrypter(singletonList(credential));
-        return decrypter.decrypt(encryptedAssertion);
+    private static Response decryptResponse(Response response, Credential credential) {
+        ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(credential);
+        return decrypter.decrypt(response);
     }
 
     private Response buildUnsignedHubResponse() throws MarshallingException, SignatureException {

@@ -4,11 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.pki.SigningCredential;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 
@@ -32,10 +32,10 @@ public class SamlSignatureValidatorTest extends SamlInitializedTest{
     public void shouldValidateValidSignature() throws MarshallingException, SignatureException, CertificateEncodingException {
         SamlSignatureValidator samlSignatureValidator = new SamlSignatureValidator();
 
-        SigningCredential signingCredential = new SigningCredential(testKeyPair.publicKey, testKeyPair.privateKey, testKeyPair.getEncodedCertificate());
         HubResponseBuilder hubResponseBuilder = new HubResponseBuilder();
         Response response = hubResponseBuilder.build();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential);
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(testKeyPair.publicKey, testKeyPair.privateKey, testKeyPair.getEncodedCertificate());
+        BasicCredential signingCredential = new BasicCredential(testKeyPair.publicKey, testKeyPair.privateKey);
 
         samlObjectSigner.sign(response);
         samlSignatureValidator.validateResponse(signingCredential, response);
@@ -45,11 +45,10 @@ public class SamlSignatureValidatorTest extends SamlInitializedTest{
     public void shouldRaiseExceptionForInvalidSignature() throws MarshallingException, SignatureException, CertificateEncodingException {
         SamlSignatureValidator samlSignatureValidator = new SamlSignatureValidator();
 
-        SigningCredential signingCredential = new SigningCredential(testKeyPair.publicKey, testKeyPair.privateKey, testKeyPair.getEncodedCertificate());
-        SigningCredential anotherSigningCredential = new SigningCredential(anotherTestKeyPair.publicKey, anotherTestKeyPair.privateKey, testKeyPair.getEncodedCertificate());
+        BasicCredential signingCredential = new BasicCredential(testKeyPair.publicKey, testKeyPair.privateKey);
         HubResponseBuilder hubResponseBuilder = new HubResponseBuilder();
         Response response = hubResponseBuilder.build();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(anotherSigningCredential);
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(anotherTestKeyPair.publicKey, anotherTestKeyPair.privateKey, testKeyPair.getEncodedCertificate());
 
         samlObjectSigner.sign(response);
 

@@ -6,15 +6,14 @@ import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Encrypter;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.x509.X509Credential;
-import org.opensaml.xmlsec.encryption.support.DataEncryptionParameters;
 import org.opensaml.xmlsec.encryption.support.EncryptionConstants;
 import org.opensaml.xmlsec.encryption.support.EncryptionException;
-import org.opensaml.xmlsec.encryption.support.KeyEncryptionParameters;
 import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.KeyValue;
 import uk.gov.ida.notification.exceptions.hubresponse.ResponseAssertionEncryptionException;
+import uk.gov.ida.saml.security.EncrypterFactory;
 
 import java.security.interfaces.RSAPublicKey;
 import java.util.stream.Collectors;
@@ -24,8 +23,11 @@ public class ResponseAssertionEncrypter {
     private X509Credential encryptionCredential;
 
     public ResponseAssertionEncrypter(X509Credential encryptionCredential) {
+        EncrypterFactory encrypterFactory = new EncrypterFactory()
+                .withDataEncryptionAlgorithm(EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128_GCM)
+                .withKeyPlacement(Encrypter.KeyPlacement.INLINE);
         this.encryptionCredential = encryptionCredential;
-        encrypter = createEncrypter();
+        this.encrypter = encrypterFactory.createEncrypter(this.encryptionCredential);
     }
 
     public Response encrypt(Response response) {
@@ -50,20 +52,6 @@ public class ResponseAssertionEncrypter {
         }
     }
 
-    private Encrypter createEncrypter() {
-        DataEncryptionParameters encParams = new DataEncryptionParameters();
-        encParams.setAlgorithm(EncryptionConstants.ALGO_ID_BLOCKCIPHER_AES128_GCM);
-
-        KeyEncryptionParameters kekParams = new KeyEncryptionParameters();
-        kekParams.setEncryptionCredential(encryptionCredential);
-        kekParams.setAlgorithm(EncryptionConstants.ALGO_ID_KEYTRANSPORT_RSAOAEP);
-
-        Encrypter encrypter = new Encrypter(encParams, kekParams);
-        encrypter.setKeyPlacement(Encrypter.KeyPlacement.INLINE);
-
-        return encrypter;
-    }
-
     private KeyInfo buildKeyInfo() throws SecurityException {
         X509KeyInfoGeneratorFactory x509KeyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
         x509KeyInfoGeneratorFactory.setEmitEntityCertificate(true);
@@ -74,6 +62,7 @@ public class ResponseAssertionEncrypter {
         keyValue.setRSAKeyValue(KeyInfoSupport.buildRSAKeyValue(publicKey));
 
         keyInfo.getKeyValues().add(keyValue);
+
         return keyInfo;
     }
 }
