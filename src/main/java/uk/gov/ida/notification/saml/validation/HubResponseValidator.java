@@ -5,6 +5,7 @@ import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
+import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
 
 public class HubResponseValidator {
@@ -18,12 +19,16 @@ public class HubResponseValidator {
     }
 
     public void validate(Response response) {
-        idpResponseValidator.validate(response);
-        Assertion assertion = response.getAssertions().stream()
-            .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
-            .findFirst()
-            .orElseThrow(() -> new InvalidHubResponseException("Missing Matching Dataset Assertions"));
-        AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
-        responseAttributesValidator.validate(attributeStatement);
+        try {
+            idpResponseValidator.validate(response);
+            Assertion assertion = response.getAssertions().stream()
+                .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
+                .findFirst()
+                .orElseThrow(() -> new InvalidHubResponseException("Missing Matching Dataset Assertions"));
+            AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
+            responseAttributesValidator.validate(attributeStatement);
+        } catch (SamlTransformationErrorException exception) {
+            throw new InvalidHubResponseException(exception.getMessage(), exception);
+        }
     }
 }
