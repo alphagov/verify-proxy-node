@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.apprule;
 
+import org.apache.http.HttpStatus;
 import org.bouncycastle.util.Strings;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
@@ -55,9 +56,17 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private Response hubResponse;
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
     private static final String END_CERT = "\n-----END CERTIFICATE-----";
+    private Credential hubAssertionsEncryptionCredential;
+    private SamlObjectSigner samlObjectSigner;
 
     @Before
     public void setup() throws Throwable {
+        KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
+        hubAssertionsEncryptionCredential = new BasicCredential(
+            hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
+        );
+        marshaller = new SamlObjectMarshaller();
+
         hubResponse = buildUnsignedHubResponse();
 
         String publicCert = BEGIN_CERT + STUB_IDP_PUBLIC_PRIMARY_CERT + END_CERT;
@@ -66,7 +75,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         PublicKey publicKey = X509certificate.getPublicKey();
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY))));
 
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(publicKey, privateKey, STUB_IDP_PUBLIC_PRIMARY_CERT);
+        samlObjectSigner = new SamlObjectSigner(publicKey, privateKey, STUB_IDP_PUBLIC_PRIMARY_CERT);
         samlObjectSigner.sign(hubResponse);
     }
 
@@ -108,23 +117,26 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldNotAcceptUnsignedHubResponse() throws Exception {
-        String message = postHubResponseToProxyNode(buildUnsignedHubResponse());
+        javax.ws.rs.core.Response response = postHubResponseToProxyNode(buildUnsignedHubResponse());
+        String message = response.readEntity(String.class);
+        assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
         assertThat(message).contains("Error handling hub response");
     }
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {
-        String html = postHubResponseToProxyNode(hubResponse);
+        String html = postHubResponseToProxyNode(hubResponse).readEntity(String.class);
         String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
         return new SamlParser().parseSamlString(decodedEidasResponse);
     }
 
-    private String postHubResponseToProxyNode(Response hubResponse) throws URISyntaxException {
+    private javax.ws.rs.core.Response postHubResponseToProxyNode(Response hubResponse) throws URISyntaxException {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 
-        return proxyNodeAppRule.target("/SAML2/SSO/Response/POST").request()
-                .post(Entity.form(postForm))
-                .readEntity(String.class);
+        return proxyNodeAppRule
+                .target("/SAML2/SSO/Response/POST")
+                .request()
+                .post(Entity.form(postForm));
     }
 
     private static Response decryptResponse(Response response, Credential credential) {
@@ -133,11 +145,6 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     }
 
     private Response buildUnsignedHubResponse() throws MarshallingException, SignatureException {
-        KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        Credential hubAssertionsEncryptionCredential = new BasicCredential(
-                hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
-        );
-        marshaller = new SamlObjectMarshaller();
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
                 .addEncryptedAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)

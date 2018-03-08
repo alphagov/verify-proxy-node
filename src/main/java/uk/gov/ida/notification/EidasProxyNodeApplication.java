@@ -12,6 +12,9 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
@@ -34,15 +37,18 @@ import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
+import uk.gov.ida.saml.security.MetadataBackedSignatureValidator;
+import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
+import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
     private Metadata connectorMetadata;
-    private Metadata hubMetadata;
     private String connectorNodeUrl;
 
     private MetadataResolverBundle<EidasProxyNodeConfiguration> hubMetadataResolverBundle;
     private MetadataResolverBundle<EidasProxyNodeConfiguration> connectorMetadataResolverBundle;
+    private SamlResponseSignatureValidator hubResponseSignatureValidator;
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
     public EidasProxyNodeApplication() {
@@ -71,9 +77,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     public void initialize(final Bootstrap<EidasProxyNodeConfiguration> bootstrap) {
         // Needed to correctly interpolate environment variables in config file
         bootstrap.setConfigurationSourceProvider(
-                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
-                        new EnvironmentVariableSubstitutor(false)
-                )
+            new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
+                new EnvironmentVariableSubstitutor(false)
+            )
         );
 
         // Needed to initialise OpenSAML libraries
@@ -103,7 +109,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     public void run(final EidasProxyNodeConfiguration configuration,
                     final Environment environment) throws
             ComponentInitializationException {
-        hubMetadata = createMetadata(hubMetadataResolverBundle);
+
+        hubResponseSignatureValidator = createSignatureValidator(hubMetadataResolverBundle);
         connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
 
@@ -122,6 +129,15 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         registerProviders(environment);
         registerExceptionMappers(environment);
         registerResources(configuration, environment);
+    }
+
+    private SamlResponseSignatureValidator createSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
+        MetadataCredentialResolver hubMetadataCredentialResolver = new MetadataCredentialResolverInitializer(hubMetadataResolverBundle.getMetadataResolver()).initialize();
+        KeyInfoCredentialResolver keyInfoCredentialResolver = DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver();
+        ExplicitKeySignatureTrustEngine explicitKeySignatureTrustEngine = new ExplicitKeySignatureTrustEngine(hubMetadataCredentialResolver, keyInfoCredentialResolver);
+        MetadataBackedSignatureValidator metadataBackedSignatureValidator = MetadataBackedSignatureValidator.withoutCertificateChainValidation(explicitKeySignatureTrustEngine);
+        SamlMessageSignatureValidator samlMessageSignatureValidator = new SamlMessageSignatureValidator(metadataBackedSignatureValidator);
+        return new SamlResponseSignatureValidator(samlMessageSignatureValidator);
     }
 
     private EidasResponseGenerator createEidasResponseGenerator(EidasProxyNodeConfiguration configuration) {
@@ -201,7 +217,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 connectorNodeUrl,
                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 connectorMetadata,
-                hubMetadata));
+                hubResponseSignatureValidator));
     }
 
     public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
