@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.saml.translation;
 
 import org.joda.time.DateTime;
-import org.opensaml.saml.saml2.core.Response;
+import uk.gov.ida.saml.security.validators.ValidatedResponse;
 
 public class HubResponse {
     private final String statusCode;
@@ -16,7 +16,7 @@ public class HubResponse {
         this.issueInstant = issueInstant;
     }
 
-    public static HubResponse fromResponse(Response response) {
+    public static HubResponse from(ValidatedResponse response) {
         String statusCode = response.getStatus().getStatusCode().getValue();
 
         String responseId = response.getID();

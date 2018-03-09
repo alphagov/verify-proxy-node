@@ -20,19 +20,13 @@ public class HubMdsAssertion {
     }
 
 
-    public static HubMdsAssertion fromAssertions(List<Assertion> assertions) {
-        DateTime issueInstant = assertions.get(0).getIssueInstant();
+    public static HubMdsAssertion fromAssertion(Assertion assertion) {
+        DateTime issueInstant = assertion.getIssueInstant();
 
-        Assertion mdsAssertion = assertions
-                .stream()
-                .filter(a -> a.getAuthnStatements().isEmpty() && !a.getAttributeStatements().isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new HubResponseTranslationException("Hub Response has no MDS assertion"));
-
-        Map<String, AttributeValue> mdsAttributes = mdsAssertion.getAttributeStatements().get(0).getAttributes().stream()
-                .collect(Collectors.toMap(
-                        Attribute::getName,
-                        a -> (AttributeValue) a.getAttributeValues().get(0)));
+        Map<String, AttributeValue> mdsAttributes = assertion.getAttributeStatements().get(0).getAttributes().stream()
+            .collect(Collectors.toMap(
+                Attribute::getName,
+                a -> (AttributeValue) a.getAttributeValues().get(0)));
 
         return new HubMdsAssertion(mdsAttributes, issueInstant);
     }

@@ -1,9 +1,7 @@
 package uk.gov.ida.notification.saml.translation;
 
-import org.opensaml.saml.saml2.core.Assertion;
-import org.opensaml.saml.saml2.core.Response;
-
-import java.util.List;
+import uk.gov.ida.saml.security.validators.ValidatedAssertions;
+import uk.gov.ida.saml.security.validators.ValidatedResponse;
 
 public class HubResponseContainer {
     private final HubResponse hubResponse;
@@ -16,16 +14,6 @@ public class HubResponseContainer {
         this.authnAssertion = authnAssertion;
     }
 
-    public static HubResponseContainer fromResponse(Response response) {
-        HubResponse hubResponse = HubResponse.fromResponse(response);
-
-        List<Assertion> assertions = response.getAssertions();
-        HubMdsAssertion mdsAssertion = HubMdsAssertion.fromAssertions(assertions);
-        HubAuthnAssertion hubAuthnAssertion = HubAuthnAssertion.fromAssertions(assertions);
-
-        return new HubResponseContainer(hubResponse, mdsAssertion, hubAuthnAssertion);
-    }
-
     public HubAuthnAssertion getAuthnAssertion() {
         return authnAssertion;
     }
@@ -36,5 +24,14 @@ public class HubResponseContainer {
 
     public HubMdsAssertion getMdsAssertion() {
         return mdsAssertion;
+    }
+
+    public static HubResponseContainer from(ValidatedResponse validatedResponse, ValidatedAssertions validatedAssertions) {
+        HubResponse hubResponse = HubResponse.from(validatedResponse);
+
+        HubMdsAssertion mdsAssertion = HubMdsAssertion.fromAssertion(validatedAssertions.getMatchingDatasetAssertion().get());
+        HubAuthnAssertion hubAuthnAssertion = HubAuthnAssertion.fromAssertion(validatedAssertions.getAuthnStatementAssertion().get());
+
+        return new HubResponseContainer(hubResponse, mdsAssertion, hubAuthnAssertion);
     }
 }

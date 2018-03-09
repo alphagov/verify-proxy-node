@@ -2,19 +2,17 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
-import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
-import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
+import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -29,27 +27,24 @@ public class HubResponseResource {
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final SamlFormViewBuilder samlFormViewBuilder;
-    private final ResponseAssertionDecrypter assertionDecrypter;
     private final String connectorNodeUrl;
     private final String connectorEntityId;
     private final Metadata connectorMetadata;
-    private final SamlResponseSignatureValidator hubResponseSignatureValidator;
+    private HubResponseValidator hubResponseValidator;
 
     public HubResponseResource(
         EidasResponseGenerator eidasResponseGenerator,
         SamlFormViewBuilder samlFormViewBuilder,
-        ResponseAssertionDecrypter assertionDecrypter,
         String connectorNodeUrl,
         String connectorEntityId,
         Metadata connectorMetadata,
-        SamlResponseSignatureValidator hubResponseSignatureValidator) {
-        this.assertionDecrypter = assertionDecrypter;
+        HubResponseValidator hubResponseValidator) {
         this.connectorNodeUrl = connectorNodeUrl;
         this.eidasResponseGenerator = eidasResponseGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.connectorEntityId = connectorEntityId;
         this.connectorMetadata = connectorMetadata;
-        this.hubResponseSignatureValidator = hubResponseSignatureValidator;
+        this.hubResponseValidator = hubResponseValidator;
     }
 
     @POST
@@ -59,11 +54,12 @@ public class HubResponseResource {
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
             @FormParam("RelayState") String relayState) {
         try {
-            hubResponseSignatureValidator.validate(encryptedHubResponse, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            hubResponseValidator.validate(encryptedHubResponse);
 
-            Response decryptedHubResponse = assertionDecrypter.decrypt(encryptedHubResponse);
-
-            HubResponseContainer hubResponseContainer = HubResponseContainer.fromResponse(decryptedHubResponse);
+            HubResponseContainer hubResponseContainer = HubResponseContainer.from(
+                hubResponseValidator.getValidatedResponse(),
+                hubResponseValidator.getValidatedAssertions()
+            );
             logHubResponse(hubResponseContainer);
 
             ResponseAssertionEncrypter assertionEncrypter = createAssertionEncrypter();

@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.saml.validation;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -14,14 +15,16 @@ import org.opensaml.saml.saml2.core.Response;
 import org.slf4j.event.Level;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
-import uk.gov.ida.notification.helpers.HubResponseBuilder;
+import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
+import uk.gov.ida.saml.security.validators.ValidatedAssertions;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HubResponseValidatorTest {
@@ -32,8 +35,9 @@ public class HubResponseValidatorTest {
     private IdpResponseValidator idpResponseValidator;
     @Mock
     private ResponseAttributesValidator responseAttributesValidator;
-
+    @Mock
     private Response response;
+
     private Assertion matchingDatasetAssertion;
     private Assertion authnStatementAssertion;
 
@@ -49,27 +53,19 @@ public class HubResponseValidatorTest {
             idpResponseValidator,
             responseAttributesValidator
         );
-        authnStatementAssertion = HubResponseBuilder.anAuthnStatementAssertion().buildUnencrypted();
-        matchingDatasetAssertion = HubResponseBuilder.aMatchingDatasetAssertion().buildUnencrypted();
+        authnStatementAssertion = HubAssertionBuilder.anAuthnStatementAssertion().build();
+        matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion().build();
+        when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(authnStatementAssertion, matchingDatasetAssertion)));
     }
 
     @Test
     public void shouldValidateIdpResponseMessage() throws Exception {
-        response = new HubResponseBuilder()
-            .addAssertion(matchingDatasetAssertion)
-            .build();
-
         hubResponseValidator.validate(response);
         verify(idpResponseValidator, times(1)).validate(response);
     }
 
     @Test
     public void shouldValidateResponseAttributes() throws Exception {
-        response = new HubResponseBuilder()
-            .addAssertion(authnStatementAssertion)
-            .addAssertion(matchingDatasetAssertion)
-            .build();
-
         hubResponseValidator.validate(response);
         verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
     }
@@ -81,12 +77,21 @@ public class HubResponseValidatorTest {
     public void shouldThrowExceptionIfMatchingDatasetAssertionsNotAvailable() throws Exception {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Missing Matching Dataset Assertions");
-
-        response = new HubResponseBuilder()
-            .addAssertion(authnStatementAssertion)
-            .build();
+        when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(authnStatementAssertion)));
 
         hubResponseValidator.validate(response);
+
+        verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfEmptyAssertions() throws Exception {
+        expectedException.expect(InvalidHubResponseException.class);
+        expectedException.expectMessage("Bad IDP Response from Hub: Missing Matching Dataset Assertions");
+        when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of()));
+
+        hubResponseValidator.validate(response);
+
         verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
     }
 
@@ -95,11 +100,8 @@ public class HubResponseValidatorTest {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Idp Response Error");
 
-        response = new HubResponseBuilder()
-            .addAssertion(matchingDatasetAssertion)
-            .build();
-
-        doThrow(new SamlTransformationErrorException("Idp Response Error", Level.ERROR)).when(idpResponseValidator).validate(response);
+        doThrow(new SamlTransformationErrorException("Idp Response Error", Level.ERROR))
+            .when(idpResponseValidator).validate(response);
 
         hubResponseValidator.validate(response);
     }
@@ -109,11 +111,8 @@ public class HubResponseValidatorTest {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Response Attribute Error");
 
-        response = new HubResponseBuilder()
-            .addAssertion(matchingDatasetAssertion)
-            .build();
-
-        doThrow(new InvalidHubResponseException("Response Attribute Error")).when(responseAttributesValidator).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
+        doThrow(new InvalidHubResponseException("Response Attribute Error"))
+            .when(responseAttributesValidator).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
 
         hubResponseValidator.validate(response);
     }

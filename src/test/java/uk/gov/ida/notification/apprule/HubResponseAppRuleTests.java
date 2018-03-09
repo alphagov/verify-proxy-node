@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
@@ -16,12 +17,12 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
@@ -52,22 +53,21 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_E
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
 public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
-    private SamlObjectMarshaller marshaller;
-    private Response hubResponse;
+    private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
     private static final String END_CERT = "\n-----END CERTIFICATE-----";
-    private Credential hubAssertionsEncryptionCredential;
-    private SamlObjectSigner samlObjectSigner;
+    private SamlObjectMarshaller marshaller;
+    private BasicCredential hubSigningCredential;
+    private EncryptedAssertion authnAssertion;
+    private EncryptedAssertion matchingDatasetAssertion;
 
     @Before
     public void setup() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
-        hubAssertionsEncryptionCredential = new BasicCredential(
+        Credential hubAssertionsEncryptionCredential = new BasicCredential(
             hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
         );
         marshaller = new SamlObjectMarshaller();
-
-        hubResponse = buildUnsignedHubResponse();
 
         String publicCert = BEGIN_CERT + STUB_IDP_PUBLIC_PRIMARY_CERT + END_CERT;
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(publicCert.getBytes(StandardCharsets.UTF_8));
@@ -75,8 +75,17 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         PublicKey publicKey = X509certificate.getPublicKey();
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY))));
 
-        samlObjectSigner = new SamlObjectSigner(publicKey, privateKey, STUB_IDP_PUBLIC_PRIMARY_CERT);
-        samlObjectSigner.sign(hubResponse);
+        hubSigningCredential = new BasicCredential(publicKey, privateKey);
+        authnAssertion = HubAssertionBuilder.anAuthnStatementAssertion()
+            .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
+            .withIssuer(TestEntityIds.STUB_IDP_ONE)
+            .withSubject(PROXY_NODE_ENTITY_ID)
+            .buildEncrypted(hubAssertionsEncryptionCredential);
+        matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion()
+            .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
+            .withIssuer(TestEntityIds.STUB_IDP_ONE)
+            .withSubject(PROXY_NODE_ENTITY_ID)
+            .buildEncrypted(hubAssertionsEncryptionCredential);
     }
 
     @Test
@@ -84,7 +93,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
 
-        Response eidasResponse = extractEidasResponse(hubResponse);
+        Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
 
         Signature signature = eidasResponse.getSignature();
 
@@ -95,13 +104,14 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
-        Response eidasResponse = extractEidasResponse(hubResponse);
+        Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
         assertEquals(1, eidasResponse.getEncryptedAssertions().size());
         assert(eidasResponse.getAssertions().isEmpty());
     }
 
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
+        Response hubResponse = buildSignedHubResponse();
         Credential decryptingCredential = new TestCredentialFactory(TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_RP_PRIVATE_ENCRYPTION_KEY).getDecryptingCredential();
         Response eidasResponse = extractEidasResponse(hubResponse);
         Response decryptedEidasResponse = decryptResponse(eidasResponse, decryptingCredential);
@@ -121,6 +131,19 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         String message = response.readEntity(String.class);
         assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
         assertThat(message).contains("Error handling hub response");
+    }
+
+    @Test
+    public void shouldValidateHubResponseMessage() throws Exception {
+        Response invalidResponse = getHubResponseBuilder()
+            .withIssuer(null)
+            .buildSigned(hubSigningCredential);
+
+        javax.ws.rs.core.Response response = postHubResponseToProxyNode(invalidResponse);
+        String message = response.readEntity(String.class);
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(message).contains("SAML 'Issuer' element has no value.");
     }
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {
@@ -144,11 +167,19 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         return decrypter.decrypt(response);
     }
 
+    private Response buildSignedHubResponse() throws MarshallingException, SignatureException {
+        return getHubResponseBuilder().buildSigned(hubSigningCredential);
+    }
+
     private Response buildUnsignedHubResponse() throws MarshallingException, SignatureException {
+        return getHubResponseBuilder().build();
+    }
+
+    private HubResponseBuilder getHubResponseBuilder() {
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
-                .addEncryptedAuthnStatementAssertionUsing(hubAssertionsEncryptionCredential)
-                .addEncryptedMatchingDatasetAssertionUsing(hubAssertionsEncryptionCredential)
-                .build();
+                .withDestination("http://proxy-node/SAML2/SSO/Response")
+                .addEncryptedAssertion(authnAssertion)
+                .addEncryptedAssertion(matchingDatasetAssertion);
     }
 }

@@ -17,6 +17,7 @@ logging:
       archive: false
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
+proxyNodeResponseUrl: ${PROXY_NODE_RESPONSE_ENDPOINT}
 proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
 
 hubUrl: ${HUB_URL}

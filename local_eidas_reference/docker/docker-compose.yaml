@@ -12,10 +12,9 @@ services:
       CONFIG_FILE: ./config.yml
       GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
+      PROXY_NODE_RESPONSE_ENDPOINT: http://localhost:56016/SAML2/SSO/Response/POST
       HUB_URL: http://localhost:56017/stub-idp-demo/SAML2/SSO
       HUB_METADATA_URL: http://proxy-node-metadata:55000/metadata_for_hub.xml
-      PROXY_NODE_HUB_RESPONSE_URL: http://localhost:56016/SAML2/SSO/Response/POST
-      PROXY_NODE_AUTHN_REQUEST_URL: http://localhost:56016/SAML2/SSO/POST
       PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata:55000/metadata_for_connector_node.xml
       CONNECTOR_NODE_URL: http://localhost:56001/ColleagueResponse
       CONNECTOR_NODE_ISSUER_ID: http://connector-node:8080/ConnectorMetadata

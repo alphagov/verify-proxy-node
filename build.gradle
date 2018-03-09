@@ -35,10 +35,10 @@ dependencies {
         "org.opensaml:opensaml-saml-impl:${openSamlVersion}",
         "uk.gov.ida:ida-saml-extensions:${openSamlVersion}-1.2a-41",
         "uk.gov.ida:saml-metadata-bindings:${openSamlVersion}-68",
-        "uk.gov.ida:saml-security:${openSamlVersion}-57",
+        "uk.gov.ida:saml-security:${openSamlVersion}-58",
         "uk.gov.ida:security-utils:${utilsVersion}-331",
         "se.litsec.eidas:eidas-opensaml3:1.0.5",
-        "uk.gov.ida:hub-saml:${openSamlVersion}-112",
+        "uk.gov.ida:hub-saml:${openSamlVersion}-115",
     )
     testCompile(
         'junit:junit:4.12',

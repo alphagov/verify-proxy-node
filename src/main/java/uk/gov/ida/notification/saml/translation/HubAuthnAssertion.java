@@ -18,16 +18,10 @@ public class HubAuthnAssertion {
         this.authnInstant = authnInstant;
     }
 
-    public static HubAuthnAssertion fromAssertions(List<Assertion> assertions) {
-        Assertion authnAssertion = assertions
-                .stream()
-                .filter(a -> !a.getAuthnStatements().isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new HubResponseTranslationException("Hub Response has no authn assertion"));
+    public static HubAuthnAssertion fromAssertion(Assertion assertion) {
+        String pid = assertion.getSubject().getNameID().getValue();
 
-        String pid = authnAssertion.getSubject().getNameID().getValue();
-
-        AuthnStatement authnStatement = authnAssertion.getAuthnStatements().get(0);
+        AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
         String providedLoa = authnStatement.getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
 
         DateTime authnInstant = authnStatement.getAuthnInstant();
