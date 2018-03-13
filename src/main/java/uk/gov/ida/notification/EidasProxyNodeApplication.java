@@ -70,7 +70,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
 
     private Metadata connectorMetadata;
-    private String connectorNodeUrl;
 
     private MetadataResolverBundle<EidasProxyNodeConfiguration> hubMetadataResolverBundle;
     private MetadataResolverBundle<EidasProxyNodeConfiguration> connectorMetadataResolverBundle;
@@ -135,7 +134,6 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                     final Environment environment) throws
             ComponentInitializationException {
 
-        connectorNodeUrl = configuration.getConnectorNodeUrl().toString();
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
 
         registerMetadataHealthCheck(
@@ -183,7 +181,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.jersey().register(new HubResponseResource(
                 eidasResponseGenerator,
                 samlFormViewBuilder,
-                connectorNodeUrl,
+                configuration.getConnectorNodeUrl().toString(),
                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 connectorMetadata,
                 hubResponseValidator));
@@ -285,8 +283,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     private EidasResponseGenerator createEidasResponseGenerator(EidasProxyNodeConfiguration configuration) {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
-            new EidasResponseBuilder(configuration.getConnectorNodeIssuerId()),
-            connectorNodeUrl,
+            configuration.getConnectorNodeIssuerId(),
+            configuration.getConnectorNodeUrl().toString(),
             configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
         SamlObjectSigner signer = new SamlObjectSigner(

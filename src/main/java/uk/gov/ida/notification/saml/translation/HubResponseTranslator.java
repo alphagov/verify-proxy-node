@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
 
-    private EidasResponseBuilder eidasResponseBuilder;
+    private String connectorNodeIssuerId;
     private String destinationUrl;
     private String proxyNodeMetadataForConnectorNodeUrl;
 
-    public HubResponseTranslator(EidasResponseBuilder eidasResponseBuilder, String destinationUrl, String proxyNodeMetadataForConnectorNodeUrl) {
-        this.eidasResponseBuilder = eidasResponseBuilder;
+    public HubResponseTranslator(String connectorNodeIssuerId, String destinationUrl, String proxyNodeMetadataForConnectorNodeUrl) {
+        this.connectorNodeIssuerId = connectorNodeIssuerId;
         this.destinationUrl = destinationUrl;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
@@ -51,7 +51,7 @@ public class HubResponseTranslator {
         ));
 
         eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                EidasResponseBuilder.TEMPORARY_PID_TRANSLATION + hubResponseContainer.getAuthnAssertion().getPid()
+                EidasAssertionBuilder.TEMPORARY_PID_TRANSLATION + hubResponseContainer.getAuthnAssertion().getPid()
         ));
 
         List<Attribute> eidasAttributes = eidasAttributeBuilders
@@ -61,7 +61,7 @@ public class HubResponseTranslator {
 
         String eidasLoa = mapLoa(hubResponseContainer.getAuthnAssertion().getProvidedLoa());
 
-        return eidasResponseBuilder.createEidasResponse(
+        return EidasResponseBuilder.createEidasResponse(
                 proxyNodeMetadataForConnectorNodeUrl,
                 hubResponseContainer.getHubResponse().getStatusCode(),
                 hubResponseContainer.getAuthnAssertion().getPid(),
@@ -71,8 +71,9 @@ public class HubResponseTranslator {
                 hubResponseContainer.getHubResponse().getIssueInstant(),
                 hubResponseContainer.getMdsAssertion().getIssueInstant(),
                 hubResponseContainer.getAuthnAssertion().getAuthnInstant(),
-                destinationUrl
-                );
+                destinationUrl,
+                connectorNodeIssuerId
+        );
     }
 
     private String combineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {

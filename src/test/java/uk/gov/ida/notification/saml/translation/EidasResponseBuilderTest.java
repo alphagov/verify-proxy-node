@@ -29,21 +29,13 @@ import static org.junit.Assert.assertTrue;
 
 public class EidasResponseBuilderTest extends SamlInitializedTest {
 
-    private String connectorNodeIssuerId = "connectorNode issuerId";
-    private EidasResponseBuilder eidasResponseBuilder;
-
-    @Before
-    public void setUp() {
-        eidasResponseBuilder = new EidasResponseBuilder(connectorNodeIssuerId);
-    }
-
     @Test
     public void shouldGenerateAnEidasResponse() throws Exception {
         DateTime issueInstant = DateTime.now();
         List<Attribute> eidasAttributes = getEidasAttributes();
 
-        Response response = eidasResponseBuilder.createEidasResponse("proxyNodeMetadataForConnectorNodeUrl", "success", "pid",
-                EidasConstants.EIDAS_LOA_SUBSTANTIAL, eidasAttributes,"id-of-request", issueInstant, issueInstant, issueInstant, "http://connector.eu");
+        Response response = EidasResponseBuilder.createEidasResponse("proxyNodeMetadataForConnectorNodeUrl", "success", "pid",
+                EidasConstants.EIDAS_LOA_SUBSTANTIAL, eidasAttributes,"id-of-request", issueInstant, issueInstant, issueInstant, "http://connector.eu", "connectorNode issuerId");
         Map<String, AbstractXMLObject> eidasResponseAttributes = getEidasResponseAttributes(response);
         Assertion authnAssertion = response.getAssertions()
                 .stream()
@@ -61,7 +53,7 @@ public class EidasResponseBuilderTest extends SamlInitializedTest {
         assertTrue(issueInstant.isEqual(response.getAssertions().get(0).getIssueInstant()));
         assertTrue(issueInstant.isEqual(authnAssertion.getAuthnStatements().get(0).getAuthnInstant()));
         assertEquals("proxyNodeMetadataForConnectorNodeUrl", response.getIssuer().getValue());
-        assertEquals(connectorNodeIssuerId, response.getAssertions().get(0).getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).getAudienceURI());
+        assertEquals("connectorNode issuerId", response.getAssertions().get(0).getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).getAudienceURI());
         assertEquals("UK/EU/pid", response.getAssertions().get(0).getSubject().getNameID().getValue());
     }
 

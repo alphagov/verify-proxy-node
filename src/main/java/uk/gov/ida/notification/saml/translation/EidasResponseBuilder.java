@@ -24,101 +24,87 @@ import java.util.List;
 
 public class EidasResponseBuilder {
 
-    public static final String TEMPORARY_PID_TRANSLATION = "UK/EU/";
-    private final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
-    private final String connectorNodeIssuerId;
+    private static final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
+    private Response eidasResponse;
 
-    public EidasResponseBuilder(String connectorNodeIssuerId) {
-        this.connectorNodeIssuerId = connectorNodeIssuerId;
+    public EidasResponseBuilder() {
+        eidasResponse = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
     }
 
-    public Response createEidasResponse(String responseIssuerId, String statusCodeValue, String pid, String loa, List<Attribute> attributes, String inResponseTo, DateTime issueInstant, DateTime assertionIssueInstant, DateTime authnStatementAuthnInstant, String destinationUrl) {
-        String responseId = generateRandomId();
-        String assertionId = generateRandomId();
-
-        Status status = createStatus(statusCodeValue);
-
-        AuthnStatement authnStatement = createAuthnStatement(loa);
-        authnStatement.setAuthnInstant(authnStatementAuthnInstant);
-
-        Subject subject = createSubject(pid);
-        AttributeStatement attributeStatement = createAttributeStatement(attributes);
-        Issuer responseIssuer = createIssuer(responseIssuerId);
-        Issuer assertionIssuer = createIssuer(responseIssuerId);
-        Assertion assertion = createAssertion(
-                authnStatement,
-                subject,
-                attributeStatement,
-                assertionIssuer,
-                assertionId,
-                assertionIssueInstant);
-
-        Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
-        response.setStatus(status);
-        response.setIssuer(responseIssuer);
-        response.getAssertions().add(assertion);
-        response.setID(responseId);
-        response.setInResponseTo(inResponseTo);
-        response.setDestination(destinationUrl);
-        response.setIssueInstant(issueInstant);
-
-        return response;
+    public EidasResponseBuilder withId(String id) {
+        eidasResponse.setID(id);
+        return this;
     }
 
-    private String generateRandomId(){
+    public EidasResponseBuilder withIssuer(String issuerId) {
+        eidasResponse.setIssuer(createIssuer(issuerId));
+        return this;
+    }
+
+    public EidasResponseBuilder withStatus(String statusCodeValue) {
+        eidasResponse.setStatus(createStatus(statusCodeValue));
+        return this;
+    }
+
+    public EidasResponseBuilder withInResponseTo(String inResponseTo) {
+        eidasResponse.setInResponseTo(inResponseTo);
+        return this;
+    }
+
+    public EidasResponseBuilder withDestination(String destination) {
+        eidasResponse.setDestination(destination);
+        return this;
+    }
+
+    public EidasResponseBuilder withIssueInstant(DateTime issueInstant) {
+        eidasResponse.setIssueInstant(issueInstant);
+        return this;
+    }
+
+    public EidasResponseBuilder addAssertion(Assertion assertion) {
+        eidasResponse.getAssertions().add(assertion);
+        return this;
+    }
+    public Response build() {
+        return eidasResponse;
+    }
+
+    public static Response createEidasResponse(
+        String responseIssuerId,
+        String statusCodeValue,
+        String pid,
+        String loa,
+        List<Attribute> attributes,
+        String inResponseTo,
+        DateTime issueInstant,
+        DateTime assertionIssueInstant,
+        DateTime authnStatementAuthnInstant,
+        String destinationUrl,
+        String connectorNodeIssuerId
+    ) {
+        Assertion assertion = new EidasAssertionBuilder()
+            .withId(generateRandomId())
+            .withSubject(pid)
+            .withIssuer(responseIssuerId)
+            .withIssueInstant(assertionIssueInstant)
+            .withConditions(connectorNodeIssuerId)
+            .addAuthnStatement(loa, authnStatementAuthnInstant)
+            .addAttributeStatement(attributes)
+            .build();
+
+        return new EidasResponseBuilder()
+                .withId(generateRandomId())
+                .withIssuer(responseIssuerId)
+                .withStatus(statusCodeValue)
+                .withInResponseTo(inResponseTo)
+                .withDestination(destinationUrl)
+                .withIssueInstant(issueInstant)
+                .addAssertion(assertion)
+                .build();
+    }
+
+    private static String generateRandomId(){
         return idGeneratorStrategy.generateIdentifier(true);
-    }
-
-    private Assertion createAssertion(AuthnStatement authnStatement, Subject subject, AttributeStatement attributeStatement, Issuer assertionIssuer, String assertionId, DateTime assertionIssueInstant) {
-        Assertion assertion = SamlBuilder.build(Assertion.DEFAULT_ELEMENT_NAME);
-        assertion.getAuthnStatements().add(authnStatement);
-        assertion.setSubject(subject);
-        assertion.getAttributeStatements().add(attributeStatement);
-        assertion.setIssuer(assertionIssuer);
-        assertion.setID(assertionId);
-        assertion.setIssueInstant(assertionIssueInstant);
-        assertion.setConditions(createCondition());
-        return assertion;
-    }
-
-    private Conditions createCondition() {
-        Audience audience = SamlBuilder.build(Audience.DEFAULT_ELEMENT_NAME);
-        audience.setAudienceURI(connectorNodeIssuerId);
-
-        AudienceRestriction audienceRestriction = SamlBuilder.build(AudienceRestriction.DEFAULT_ELEMENT_NAME);
-        audienceRestriction.getAudiences().add(audience);
-
-        Conditions conditions = SamlBuilder.build(Conditions.DEFAULT_ELEMENT_NAME);
-        DateTime now = DateTime.now();
-        conditions.setNotBefore(now);
-        conditions.setNotOnOrAfter(now.plusMinutes(5));
-        conditions.getAudienceRestrictions().add(audienceRestriction);
-        return conditions;
-    }
-
-    private AttributeStatement createAttributeStatement(List<Attribute> attributes) {
-        AttributeStatement attributeStatement = SamlBuilder.build(AttributeStatement.DEFAULT_ELEMENT_NAME);
-        attributeStatement.getAttributes().addAll(attributes);
-        return attributeStatement;
-    }
-
-    private AuthnStatement createAuthnStatement(String loa) {
-        AuthnStatement authnStatement = SamlBuilder.build(AuthnStatement.DEFAULT_ELEMENT_NAME);
-        AuthnContext authnContext = SamlBuilder.build(AuthnContext.DEFAULT_ELEMENT_NAME);
-        AuthnContextClassRef authnContextClassRef = SamlBuilder.build(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
-        authnContextClassRef.setAuthnContextClassRef(loa);
-        authnContext.setAuthnContextClassRef(authnContextClassRef);
-        authnStatement.setAuthnContext(authnContext);
-        return authnStatement;
-    }
-
-    private Subject createSubject(String pid) {
-        Subject subject = SamlBuilder.build(Subject.DEFAULT_ELEMENT_NAME);
-        NameID nameID = SamlBuilder.build(NameID.DEFAULT_ELEMENT_NAME);
-        nameID.setValue(TEMPORARY_PID_TRANSLATION + pid);
-        nameID.setFormat(NameIDType.PERSISTENT);
-        subject.setNameID(nameID);
-        return subject;
     }
 
     private Status createStatus(String statusCodeValue) {
@@ -129,10 +115,10 @@ public class EidasResponseBuilder {
         return status;
     }
 
-    private Issuer createIssuer(String responseIssuerId) {
-        Issuer responseIssuer = SamlBuilder.build(Issuer.DEFAULT_ELEMENT_NAME);
-        responseIssuer.setFormat(NameIDType.ENTITY);
-        responseIssuer.setValue(responseIssuerId);
-        return responseIssuer;
+    private Issuer createIssuer(String issuerId) {
+        Issuer issuer = SamlBuilder.build(Issuer.DEFAULT_ELEMENT_NAME);
+        issuer.setFormat(NameIDType.ENTITY);
+        issuer.setValue(issuerId);
+        return issuer;
     }
 }
