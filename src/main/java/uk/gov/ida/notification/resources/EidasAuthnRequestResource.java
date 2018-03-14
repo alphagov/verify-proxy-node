@@ -2,6 +2,7 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 import uk.gov.ida.notification.HubAuthnRequestGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -10,6 +11,7 @@ import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.views.SamlFormView;
+import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -28,15 +30,18 @@ public class EidasAuthnRequestResource {
     private final HubAuthnRequestGenerator hubAuthnRequestGenerator;
     private SamlFormViewBuilder samlFormViewBuilder;
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
+    private SamlRequestSignatureValidator samlRequestSignatureValidator;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
                                      HubAuthnRequestGenerator authnRequestGenerator,
                                      SamlFormViewBuilder samlFormViewBuilder,
-                                     EidasAuthnRequestValidator eidasAuthnRequestValidator) {
+                                     EidasAuthnRequestValidator eidasAuthnRequestValidator,
+                                     SamlRequestSignatureValidator samlRequestSignatureValidator) {
         this.configuration = configuration;
         this.hubAuthnRequestGenerator = authnRequestGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
+        this.samlRequestSignatureValidator = samlRequestSignatureValidator;
     }
 
     @GET
@@ -59,6 +64,7 @@ public class EidasAuthnRequestResource {
     private View handleAuthnRequest(AuthnRequest authnRequest, String relayState) {
         try {
             eidasAuthnRequestValidator.validate(authnRequest);
+            samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
             EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
             logAuthnRequestInformation(eidasAuthnRequest);
             AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);

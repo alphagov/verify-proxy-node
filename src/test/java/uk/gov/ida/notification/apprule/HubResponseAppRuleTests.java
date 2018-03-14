@@ -71,8 +71,8 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
         String publicCert = BEGIN_CERT + STUB_IDP_PUBLIC_PRIMARY_CERT + END_CERT;
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(publicCert.getBytes(StandardCharsets.UTF_8));
-        X509Certificate X509certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(byteArrayInputStream);
-        PublicKey publicKey = X509certificate.getPublicKey();
+        X509Certificate x509certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(byteArrayInputStream);
+        PublicKey publicKey = x509certificate.getPublicKey();
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY))));
 
         hubSigningCredential = new BasicCredential(publicKey, privateKey);
