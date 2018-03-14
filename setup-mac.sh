@@ -25,6 +25,11 @@ function install_pre_commit() {
 	colour_print $GREEN "pre-commit installation complete!"
 }
 
+function install_chromedriver() {
+	brew update && brew install chromedriver
+	colour_print $GREEN "chromedriver installation complete!"
+}
+
 colour_print $ORANGE "========================="
 colour_print $YELLOW "Installing Cloud Foundry"
 if command -v cf >/dev/null; then
@@ -40,6 +45,16 @@ if command -v pre-commit >/dev/null; then
 	colour_print $GRAY "pre-commit already exists! Doing nothing"
 else
 	install_pre_commit
+fi
+echo
+
+colour_print $ORANGE "========================="
+colour_print $YELLOW "Installing chromedriver"
+if [ "$(which chromedriver)" <> "0" ]; then
+  CHROMEDRIVER_VERSION=$(chromedriver --version)
+	colour_print $GRAY "chromedriver $CHROMEDRIVER_VERSION already exists! Doing nothing"
+else
+	install_chromedriver
 fi
 echo
 
