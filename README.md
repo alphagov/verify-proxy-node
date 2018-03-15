@@ -21,7 +21,11 @@ If the script spends a very long time "waiting for CEF SP", try the following:
 1. To check that your application is running POST to url `http://localhost:6600/verify-uk`
 1. To reach the front page of CEF, browse to `http://localhost:56000`
 
-## Pushing to PaaS
+## Clicking through a journey
+
+0. Run `./automated_journey.rb` to see a journey in action
+
+## Pushing to PaaS
 
 1. Authenticate with PaaS using `cf login`
 1. Run `./gradle pushToPaas`
