@@ -45,10 +45,9 @@ pushd ida-stub-idp
   ./gradlew -x test distZip -PincludeDirectories="$PN_PROJECT_DIR/stub-idp/resources"
 
   # Setup Stub IDP DB
+  cf bind-service verify-eidas-notification-stub-idp ida-stub-idp-db
   LOCAL_DB_URI="$(cf env verify-eidas-notification-stub-idp | grep -o '"jdbc:postgresql://[^"]*' | tr -d '"' |sed 's/\\u0026/\&/g')"
   cf set-env verify-eidas-notification-stub-idp DB_URI "$LOCAL_DB_URI"
-  cf bind-service verify-eidas-notification-stub-idp ida-stub-idp-db
-  
   cf push
 popd
 rm -rf ida-stub-idp
