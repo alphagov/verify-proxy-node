@@ -43,6 +43,12 @@ git clone git@github.com:alphagov/ida-stub-idp
 pushd ida-stub-idp
   cp "$PKI_OUTPUT_DIR/stub_idp.manifest.yml" manifest.yml
   ./gradlew -x test distZip -PincludeDirectories="$PN_PROJECT_DIR/stub-idp/resources"
+
+  # Setup Stub IDP DB
+  LOCAL_DB_URI="$(cf env ida-stub-idp | grep -o '"jdbc:postgresql://[^"]*' | tr -d '"' |sed 's/\\u0026/\&/g')"
+  cf set-env ida-stub-idp DB_URI "$LOCAL_DB_URI"
+  cf bind-service ida-stub-idp ida-stub-idp-db
+  
   cf push
 popd
 rm -rf ida-stub-idp
