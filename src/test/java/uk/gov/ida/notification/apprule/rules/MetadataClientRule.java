@@ -38,15 +38,19 @@ public class MetadataClientRule extends DropwizardClientRule {
         }
 
         private EntityDescriptor buildConnectorEntityDescriptor() throws Exception {
-            KeyDescriptor keyDescriptor = KeyDescriptorBuilder.aKeyDescriptor()
-                    .withX509ForSigning(TEST_RP_PUBLIC_SIGNING_CERT)
+            KeyDescriptor encryptionKeyDescriptor = KeyDescriptorBuilder.aKeyDescriptor()
                     .withX509ForEncryption(TEST_RP_PUBLIC_ENCRYPTION_CERT)
+                    .build();
+
+            KeyDescriptor signingKeyDescriptor = KeyDescriptorBuilder.aKeyDescriptor()
+                    .withX509ForSigning(TEST_RP_PUBLIC_SIGNING_CERT)
                     .build();
 
             SPSSODescriptor spssoDescriptor = SPSSODescriptorBuilder.anSpServiceDescriptor()
                     .withoutDefaultSigningKey()
                     .withoutDefaultEncryptionKey()
-                    .addKeyDescriptor(keyDescriptor)
+                    .addKeyDescriptor(signingKeyDescriptor)
+                    .addKeyDescriptor(encryptionKeyDescriptor)
                     .build();
 
             Signature signature = SignatureBuilder.aSignature()

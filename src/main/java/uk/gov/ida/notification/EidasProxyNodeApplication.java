@@ -29,7 +29,6 @@ import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
-import uk.gov.ida.notification.saml.translation.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
@@ -61,6 +60,7 @@ import uk.gov.ida.saml.security.SamlAssertionsSignatureValidator;
 import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
 import uk.gov.ida.saml.security.validators.encryptedelementtype.EncryptionAlgorithmValidator;
 import uk.gov.ida.saml.security.validators.issuer.IssuerValidator;
+import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
 import java.net.URI;
@@ -172,11 +172,14 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
         HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
+        SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
+
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder,
-                eidasAuthnRequestValidator));
+                eidasAuthnRequestValidator,
+                samlRequestSignatureValidator));
 
         environment.jersey().register(new HubResponseResource(
                 eidasResponseGenerator,
@@ -267,6 +270,11 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         ExplicitKeySignatureTrustEngine explicitKeySignatureTrustEngine = new ExplicitKeySignatureTrustEngine(hubMetadataCredentialResolver, keyInfoCredentialResolver);
         MetadataBackedSignatureValidator metadataBackedSignatureValidator = MetadataBackedSignatureValidator.withoutCertificateChainValidation(explicitKeySignatureTrustEngine);
         return new SamlMessageSignatureValidator(metadataBackedSignatureValidator);
+    }
+
+    private SamlRequestSignatureValidator createSamlRequestSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
+        SamlMessageSignatureValidator samlMessageSignatureValidator = createSamlMessagesSignatureValidator(hubMetadataResolverBundle);
+        return new SamlRequestSignatureValidator(samlMessageSignatureValidator);
     }
 
     private HubAuthnRequestGenerator createHubAuthnRequestGenerator(EidasProxyNodeConfiguration configuration) {
