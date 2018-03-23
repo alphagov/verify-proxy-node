@@ -143,7 +143,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         String message = response.readEntity(String.class);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(message).contains("SAML 'Issuer' element has no value.");
+        assertThat(message).contains("Error handling hub response");
     }
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {

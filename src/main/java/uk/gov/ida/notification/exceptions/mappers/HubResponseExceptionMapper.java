@@ -26,7 +26,7 @@ public class HubResponseExceptionMapper implements ExceptionMapper<HubResponseEx
                 exception.getCause())
         );
 
-        String message = MessageFormat.format("Error handling hub response. logId: {0}, cause: {1}", logId, exception.getCause().getMessage());
+        String message = MessageFormat.format("Error handling hub response. logId: {0}", logId);
         return Response.status(Response.Status.BAD_REQUEST)
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(

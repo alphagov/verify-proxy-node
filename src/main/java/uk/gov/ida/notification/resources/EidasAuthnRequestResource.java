@@ -63,8 +63,8 @@ public class EidasAuthnRequestResource {
 
     private View handleAuthnRequest(AuthnRequest authnRequest, String relayState) {
         try {
-            eidasAuthnRequestValidator.validate(authnRequest);
             samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            eidasAuthnRequestValidator.validate(authnRequest);
             EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
             logAuthnRequestInformation(eidasAuthnRequest);
             AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);

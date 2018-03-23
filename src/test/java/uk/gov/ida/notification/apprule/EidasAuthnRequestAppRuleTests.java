@@ -17,7 +17,6 @@ import uk.gov.ida.notification.saml.SamlParser;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
-
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -98,11 +97,10 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
         AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
 
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
+        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
 
-        Response response = proxyNodeAppRule.target("/SAML2/SSO/Redirect")
-                .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
-                .request()
-                .get();
+        Response response = proxyNodeAppRule.target("/SAML2/SSO/POST").request()
+            .post(Entity.form(postForm));
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
         assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
