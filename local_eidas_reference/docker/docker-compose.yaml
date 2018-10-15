@@ -48,11 +48,12 @@ services:
       CERT_TYPE: encoded
       TRUSTSTORE_TYPE: encoded
       GRAPHITE_REPORTING_FREQUENCY: 24h
+      DB_URI: jdbc:postgresql://postgres:5432/postgres?user=postgres&password=password
     env_file: ./pki/stub_idp.env
     volumes:
       - ./pki:/ida-stub-idp/pki:ro
   stub-sp:
-    image: govukverify/verify-eidas-reference
+    image: govukverify/verify-eidas-reference:48
     ports:
       - "56000:8080"
     networks:
@@ -93,7 +94,7 @@ services:
       check_certificate_validity_period: "false"
       disallow_self_signed_certificate: "false"
   connector-node:
-    image: govukverify/verify-eidas-reference
+    image: govukverify/verify-eidas-reference:48
     ports:
       - "56001:8080"
     networks:
@@ -145,5 +146,12 @@ services:
     volumes:
       - ./metadata/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./pki:/usr/share/nginx/html:ro
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - global
+
 networks:
   global:

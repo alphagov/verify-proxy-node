@@ -45,17 +45,16 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference
   source "${PN_SCRIPTS_DIR}"/setup-verify-eidas-reference.sh
 
   reference_scripts_dir="${PN_PROJECT_DIR}"/local_eidas_reference/verify-eidas-reference/scripts
-
   if [ "$stub_idp_rebuild" = true ]
   then
-    test -d "ida-stub-idp-repo" || git clone --quiet --depth 1 "git@github.com:alphagov/ida-stub-idp" "ida-stub-idp-repo"
-    pushd "ida-stub-idp-repo"
+    test -d "verify-stub-idp-repo" || git clone --quiet --depth 1 "git@github.com:alphagov/verify-stub-idp" "verify-stub-idp-repo"
+    pushd "verify-stub-idp-repo"
       git pull --quiet
-      echo "rootProject.name = 'ida-stub-idp'" > settings.gradle
+      echo "rootProject.name = 'verify-stub-idp'" >> settings.gradle
       ./gradlew clean distZip -Pversion=local -PincludeDirs=configuration -x test
     popd
-    rm -rf ida-stub-idp
-    unzip ida-stub-idp-repo/build/distributions/ida-stub-idp-local.zip
+    rm -rf stub-idp
+    unzip verify-stub-idp-repo/stub-idp/build/distributions/stub-idp-local.zip
     docker build -f docker/Dockerfile.stub-idp . -t notification-stub-idp
   fi
 
@@ -71,7 +70,9 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference
 
   if [ "$reference_rebuild" = true ]
   then
-    "$reference_scripts_dir"/build_docker_image.sh
+		pushd "$reference_scripts_dir"/../docker
+    	"$reference_scripts_dir"/../docker/build_docker_image.sh
+		popd
   fi
 popd
 
@@ -96,4 +97,3 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference/docker
     docker-compose logs -f
   fi
 popd
-

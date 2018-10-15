@@ -3,7 +3,7 @@ set -ueo pipefail
 
 # pull down verify-eidas-reference
 
-REMOTE="git@github.com:alphagov/verify-eidas-reference-1.4.git"
+REMOTE="git@github.com:alphagov/verify-eidas-reference.git"
 RUN_DIR="verify-eidas-reference"
 SCRIPTS_DIR="$RUN_DIR"/scripts
 
