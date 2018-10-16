@@ -14,30 +14,30 @@ stub_idp_rebuild=false
 
 while [ ! $# -eq 0 ]
 do
-	case "$1" in
-		--follow)
+  case "$1" in
+    --follow)
       follow=true
-			;;
-		--reference-rebuild)
+      ;;
+    --reference-rebuild)
       reference_rebuild=true
-			;;
-		--stub-idp-rebuild)
+      ;;
+    --stub-idp-rebuild)
       stub_idp_rebuild=true
-			;;
-		--proxy-node-rebuild)
+      ;;
+    --proxy-node-rebuild)
       proxy_node_rebuild=true
-			;;
+      ;;
     --build)
       reference_rebuild=true
       stub_idp_rebuild=true
       proxy_node_rebuild=true
       ;;
-		*)
+    *)
       echo "Usage $0 [--follow --proxy-node-rebuild --stub-idp-rebuild --reference-rebuild]"
-			exit 1
-			;;
-	esac
-	shift
+      exit 1
+      ;;
+  esac
+  shift
 done
 
 pushd "${PN_PROJECT_DIR}"/local_eidas_reference
@@ -70,9 +70,9 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference
 
   if [ "$reference_rebuild" = true ]
   then
-		pushd "$reference_scripts_dir"/../docker
-    	"$reference_scripts_dir"/../docker/build_docker_image.sh
-		popd
+    pushd "$reference_scripts_dir"/../docker
+      "$reference_scripts_dir"/../docker/build_docker_image.sh
+    popd
   fi
 popd
 
