@@ -33,8 +33,8 @@ buildNumber.properties
 /**/*.orig
 
 metadata/*.xml
-local_eidas_reference/ida-stub-idp
-local_eidas_reference/ida-stub-idp-repo
+local_eidas_reference/stub-idp
+local_eidas_reference/verify-stub-idp-repo
 local_eidas_reference/verify-eidas-proxy-node
 local_eidas_reference/verify-metadata
 local_eidas_reference/verify-eidas-reference

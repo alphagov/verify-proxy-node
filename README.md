@@ -21,6 +21,17 @@ If the script spends a very long time "waiting for CEF SP", try the following:
 1. To check that your application is running POST to url `http://localhost:6600/verify-uk`
 1. To reach the front page of CEF, browse to `http://localhost:56000`
 
+## How to start the eidas-proxy-node in a container with stub-idp and CEF eIDAS reference
+
+* Run `./startup.sh`. Use the rebuild flags described below if this is your first time running it.
+
+The following options are available:
+
+    --follow                Will display logs in the console
+    --proxy-node-rebuild    If you want/need to build/rebuild the proxy-node image
+    --stub-idp-rebuild      If you want/need to build/rebuild the stub-idp image
+    --reference-rebuild     If you want/need to build/rebuild the CEF reference service image 
+
 ## Clicking through a journey
 
 0. Run `./automated_journey.rb` to see a journey in action

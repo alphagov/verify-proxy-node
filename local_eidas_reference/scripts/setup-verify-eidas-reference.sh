@@ -3,7 +3,7 @@ set -ueo pipefail
 
 # pull down verify-eidas-reference
 
-REMOTE="git@github.com:alphagov/verify-eidas-reference-1.4.git"
+REMOTE="git@github.com:alphagov/verify-eidas-reference.git"
 RUN_DIR="verify-eidas-reference"
 SCRIPTS_DIR="$RUN_DIR"/scripts
 
@@ -24,4 +24,5 @@ then
   "$SCRIPTS_DIR"/build_docker_image.sh
 fi
 
+test -d "$RUN_DIR/metadata-proxy" || mkdir -p $RUN_DIR/metadata-proxy
 cp $RUN_DIR/../verify-metadata/signed/local-connector/metadata.xml $RUN_DIR/metadata-proxy/metadata.xml || (echo "Could not find signed metadata file" && exit 1)
