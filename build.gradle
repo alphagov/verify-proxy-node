@@ -1,55 +1,92 @@
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'com.github.ben-manes.versions'
-apply plugin: 'maven-publish'
-
-mainClassName = 'uk.gov.ida.notification.EidasProxyNodeApplication'
-version = "1.0.0-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
-
 buildscript {
     repositories {
-        maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos/' }
+        if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {
+            logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
+            maven { url 'https://dl.bintray.com/alphagov/maven-test' }
+            jcenter()
+        }
+        else {
+            maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+        }
+    }
+    dependencies {
+        classpath 'com.github.spullara.mustache.java:compiler:0.8.10',
+                'org.yaml:snakeyaml:1.10',
+                'uk.gov.ida:ida-gradle:1.1.0-23',
+                'com.google.guava:guava:14.0.1',
+                'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'com.github.ben-manes.versions'
+
+ext {
+    opensaml_version = '3.3.0'
+    dropwizard_version = '1.2.0'
+    utilsVersion = '2.0.0'
+    build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
+}
+
+
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'application'
+    apply plugin: 'maven-publish'
+
+    group = "uk.gov.ida"
+    version = "0.1.$version"
+
+    repositories {
+        if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {
+            logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
+            maven { url 'https://dl.bintray.com/alphagov/maven' } // For dropwizard-logstash
+            maven { url 'https://dl.bintray.com/alphagov/maven-test' } // For other public verify binaries
+            jcenter()
+        }
+        else {
+            maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+        }
+    }
+
+    configurations {
+        common
+        dropwizard
+        saml
     }
 
     dependencies {
-      classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+
+        dropwizard (
+                "io.dropwizard:dropwizard-core:${dropwizard_version}",
+                "io.dropwizard:dropwizard-client:${dropwizard_version}",
+                "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}"
+        )
+        saml (
+                "org.opensaml:opensaml-core:${opensaml_version}",
+                "org.opensaml:opensaml-saml-impl:${opensaml_version}",
+                "uk.gov.ida:ida-saml-extensions:${opensaml_version}-1.2a-41",
+                "uk.gov.ida:saml-metadata-bindings:${opensaml_version}-68",
+                "uk.gov.ida:saml-security:${opensaml_version}-58",
+                "uk.gov.ida:hub-saml:${opensaml_version}-115",
+                "se.litsec.eidas:eidas-opensaml3:1.0.5"
+        )
+        common (
+                "uk.gov.ida:security-utils:${utilsVersion}-331"
+        )
+
+        testCompile(
+                "junit:junit:4.12",
+                "org.hamcrest:hamcrest-core:1.3",
+                "org.hamcrest:hamcrest-library:1.3",
+                "io.dropwizard:dropwizard-testing:${dropwizard_version}",
+                "net.sourceforge.htmlunit:htmlunit:2.28",
+                "uk.gov.ida:common-test-utils:${utilsVersion}-38",
+                "uk.gov.ida:saml-metadata-bindings-test:${opensaml_version}-68",
+                "uk.gov.verify:saml-test-utils:${opensaml_version}-2",
+        )
     }
-}
-
-project.ext {
-    dropwizardVersion = '1.2.0'
-    openSamlVersion = '3.3.0'
-    utilsVersion = '2.0.0'
-}
-
-repositories {
-    maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos/' }
-}
-
-dependencies {
-    compile ( 
-        "io.dropwizard:dropwizard-core:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-client:${dropwizardVersion}",
-        "io.dropwizard:dropwizard-views-mustache:${dropwizardVersion}",
-        "org.opensaml:opensaml-core:${openSamlVersion}",
-        "org.opensaml:opensaml-saml-impl:${openSamlVersion}",
-        "uk.gov.ida:ida-saml-extensions:${openSamlVersion}-1.2a-41",
-        "uk.gov.ida:saml-metadata-bindings:${openSamlVersion}-68",
-        "uk.gov.ida:saml-security:${openSamlVersion}-58",
-        "uk.gov.ida:security-utils:${utilsVersion}-331",
-        "se.litsec.eidas:eidas-opensaml3:1.0.5",
-        "uk.gov.ida:hub-saml:${openSamlVersion}-115",
-    )
-    testCompile(
-        'junit:junit:4.12',
-        'org.hamcrest:hamcrest-core:1.3',
-        'org.hamcrest:hamcrest-library:1.3',
-        "io.dropwizard:dropwizard-testing:${dropwizardVersion}",
-        'net.sourceforge.htmlunit:htmlunit:2.28',
-        "uk.gov.ida:common-test-utils:${utilsVersion}-38",
-        "uk.gov.ida:saml-metadata-bindings-test:${openSamlVersion}-68",
-        "uk.gov.verify:saml-test-utils:${openSamlVersion}-2",
-    )
 }
 
 task paasManifestFileCheck {
@@ -63,64 +100,4 @@ task paasManifestFileCheck {
     }
 }
 
-task pushToPaas(type: Exec, dependsOn: [paasManifestFileCheck, distZip]) {
-    doFirst {
-        commandLine 'cf', 'push', '-f', manifestFile
-    }
-}
-
-pushToPaas.dependsOn distZip
-
-task wrapper(type: Wrapper) {
-  gradleVersion = '3.3'
-}
-
-run {
-  args 'server', './src/dist/config.yml'
-}
-
-// Acceptance Tests
-sourceSets {
-    acceptanceTest {
-        java.srcDir file('src/acceptance-test/java')
-        resources.srcDir file('src/acceptance-test/resources')
-        compileClasspath += main.output + test.output + configurations.testRuntime
-        runtimeClasspath += output + compileClasspath
-    }
-}
-
-task acceptanceTest(type: Test) {
-    description = 'Runs the acceptance tests'
-    group = 'verification'
-    classpath = sourceSets.acceptanceTest.runtimeClasspath
-    setTestClassesDirs sourceSets.acceptanceTest.output.classesDirs
-    reports.junitXml.setDestination new File("$buildDir/acceptance-test-results")
-    reports.html.setDestination new File("$buildDir/reports/acceptance-test")
-}
-
-distZip {
-    archiveName baseName+'.zip'
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId = "uk.gov.ida"
-            artifactId = "eidas-notification"
-
-            artifact sourceJar {
-                classifier "sources"
-            }
-        }
-    }
-    repositories {
-        maven {
-            url "/srv/maven"
-        }
-    }
-}
+defaultTasks 'clean', 'test', 'jar'
