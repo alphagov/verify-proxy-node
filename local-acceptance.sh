@@ -15,13 +15,14 @@ function wait_for {
   echo " READY"
 }
 
-(./startup.sh --gateway-rebuild --follow &) > ./logs/docker.log 2>&1
+(./startup.sh --build --follow &) > ./logs/docker.log 2>&1
 
 wait_for "CEF SP" localhost:56000
 wait_for "CEF Connector" localhost:56001/ServiceProvider 500
 wait_for "Stub IDP" localhost:56027/healthcheck
 wait_for "Metadata" localhost:55000 403
 wait_for "Gateway" localhost:56026/healthcheck
+wait_for "Translator" localhost:56028/healthcheck
 
 echo "Waiting 10 seconds for services."
 sleep 10

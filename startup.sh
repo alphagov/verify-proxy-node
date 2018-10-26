@@ -6,11 +6,13 @@ PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PN_SCRIPTS_DIR="${PN_PROJECT_DIR}"/local_eidas_reference/scripts
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}"/local_eidas_reference/docker/pki
 GATEWAY_PROJECT_DIR="${PN_PROJECT_DIR}"/gateway
+TRANSLATOR_PROJECT_DIR="${PN_PROJECT_DIR}"/translator
 
 follow=false
 
 reference_rebuild=false
 gateway_rebuild=false
+translator_rebuild=false
 stub_idp_rebuild=false
 
 while [ ! $# -eq 0 ]
@@ -28,13 +30,17 @@ do
     --gateway-rebuild)
       gateway_rebuild=true
       ;;
+    --translator-rebuild)
+      translator_rebuild=true
+      ;;
     --build)
       reference_rebuild=true
       stub_idp_rebuild=true
       gateway_rebuild=true
+      translator_rebuild=true
       ;;
     *)
-      echo "Usage $0 [--follow --gateway-rebuild --stub-idp-rebuild --reference-rebuild]"
+      echo "Usage $0 [--follow --gateway-rebuild --translator-rebuild --stub-idp-rebuild --reference-rebuild]"
       exit 1
       ;;
   esac
@@ -62,11 +68,22 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference
   if [ "$gateway_rebuild" = true ]
   then
     pushd "$PN_PROJECT_DIR"
-      ./gradlew clean distZip -x test
+      ./gradlew -p gateway clean distZip -x test
     popd
     rm -rf gateway
     unzip "${GATEWAY_PROJECT_DIR}/build/distributions/gateway.zip"
     docker build -f docker/Dockerfile.gateway . -t notification-gateway
+  fi
+
+
+  if [ "$translator_rebuild" = true ]
+  then
+    pushd "$PN_PROJECT_DIR"
+      ./gradlew -p translator clean distZip -x test
+    popd
+    rm -rf translator
+    unzip "${TRANSLATOR_PROJECT_DIR}/build/distributions/translator.zip"
+    docker build -f docker/Dockerfile.translator . -t notification-translator
   fi
 
   if [ "$reference_rebuild" = true ]

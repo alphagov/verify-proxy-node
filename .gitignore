@@ -41,3 +41,4 @@ local_eidas_reference/verify-metadata
 local_eidas_reference/verify-eidas-reference
 local_eidas_reference/docker/pki
 local_eidas_reference/gateway
+local_eidas_reference/translator

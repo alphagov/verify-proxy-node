@@ -1,2 +1,3 @@
 rootProject.name = 'verify-eidas-notification'
 include 'gateway'
+include 'translator'
