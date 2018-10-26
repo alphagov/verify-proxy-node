@@ -28,7 +28,8 @@ If the script spends a very long time "waiting for CEF SP", try the following:
 The following options are available:
 
     --follow                Will display logs in the console
-    --proxy-node-rebuild    If you want/need to build/rebuild the proxy-node image
+    --build                 If you want/need to build/rebuild all the images used
+    --gateway-rebuild       If you want/need to build/rebuild the gateway image
     --stub-idp-rebuild      If you want/need to build/rebuild the stub-idp image
     --reference-rebuild     If you want/need to build/rebuild the CEF reference service image 
 

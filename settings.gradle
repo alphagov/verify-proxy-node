@@ -1,1 +1,2 @@
-rootProject.name = 'verify-eidas-proxy-node'
+rootProject.name = 'verify-eidas-notification'
+include 'gateway'

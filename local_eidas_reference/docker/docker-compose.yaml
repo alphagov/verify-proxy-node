@@ -1,7 +1,7 @@
 version: '2.3'
 services:
-  notification-proxy-node:
-    image: notification-proxy-node
+  notification-gateway:
+    image: notification-gateway
     mem_limit: 512M
     ports:
       - "56016:6600"

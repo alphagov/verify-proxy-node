@@ -5,11 +5,12 @@ set -euo pipefail
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PN_SCRIPTS_DIR="${PN_PROJECT_DIR}"/local_eidas_reference/scripts
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}"/local_eidas_reference/docker/pki
+GATEWAY_PROJECT_DIR="${PN_PROJECT_DIR}"/gateway
 
 follow=false
 
 reference_rebuild=false
-proxy_node_rebuild=false
+gateway_rebuild=false
 stub_idp_rebuild=false
 
 while [ ! $# -eq 0 ]
@@ -24,16 +25,16 @@ do
     --stub-idp-rebuild)
       stub_idp_rebuild=true
       ;;
-    --proxy-node-rebuild)
-      proxy_node_rebuild=true
+    --gateway-rebuild)
+      gateway_rebuild=true
       ;;
     --build)
       reference_rebuild=true
       stub_idp_rebuild=true
-      proxy_node_rebuild=true
+      gateway_rebuild=true
       ;;
     *)
-      echo "Usage $0 [--follow --proxy-node-rebuild --stub-idp-rebuild --reference-rebuild]"
+      echo "Usage $0 [--follow --gateway-rebuild --stub-idp-rebuild --reference-rebuild]"
       exit 1
       ;;
   esac
@@ -58,14 +59,14 @@ pushd "${PN_PROJECT_DIR}"/local_eidas_reference
     docker build -f docker/Dockerfile.stub-idp . -t notification-stub-idp
   fi
 
-  if [ "$proxy_node_rebuild" = true ]
+  if [ "$gateway_rebuild" = true ]
   then
     pushd "$PN_PROJECT_DIR"
       ./gradlew clean distZip -x test
     popd
-    rm -rf verify-eidas-proxy-node
-    unzip "${PN_PROJECT_DIR}/build/distributions/verify-eidas-proxy-node.zip"
-    docker build -f docker/Dockerfile.proxy-node . -t notification-proxy-node
+    rm -rf gateway
+    unzip "${GATEWAY_PROJECT_DIR}/build/distributions/gateway.zip"
+    docker build -f docker/Dockerfile.gateway . -t notification-gateway
   fi
 
   if [ "$reference_rebuild" = true ]
