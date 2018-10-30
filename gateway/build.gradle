@@ -15,24 +15,6 @@ distZip {
     archiveName baseName + '.zip'
 }
 
-sourceSets {
-    acceptanceTest {
-        java.srcDir file('src/acceptance-test/java')
-        resources.srcDir file('src/acceptance-test/resources')
-        compileClasspath += main.output + test.output + configurations.testRuntime
-        runtimeClasspath += output + compileClasspath
-    }
-}
-
-task acceptanceTest(type: Test) {
-    description = 'Runs the acceptance tests'
-    group = 'verification'
-    classpath = sourceSets.acceptanceTest.runtimeClasspath
-    setTestClassesDirs sourceSets.acceptanceTest.output.classesDirs
-    reports.junitXml.setDestination new File("$buildDir/acceptance-test-results")
-    reports.html.setDestination new File("$buildDir/reports/acceptance-test")
-}
-
 task sourceJar(type: Jar) {
     from sourceSets.main.allJava
 }

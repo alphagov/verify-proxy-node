@@ -48,6 +48,8 @@ def run
   #Submit on proxy node
   @driver.find_element(css: 'input[type="submit"]').click
 
+
+
   # Fill in stub-idp username and password
   @driver.find_element(id: 'username').send_keys('stub-idp-demo')
   @driver.find_element(id: 'password').send_keys('bar')
@@ -56,12 +58,12 @@ def run
   #Submit consent with stub-idp
   @driver.find_element(id: 'agree').click
 
+
   #Submit on proxy node
-  encodedResponse = @driver.find_element(css: 'input[name="SAMLResponse"]').attribute('value')
+  encodedResponse = @driver.find_element(id: 'SAMLResponse').attribute('value')
   puts header('SAML EIDAS RESPONSE').green
   puts `echo #{encodedResponse} | base64 -D | xmllint --format -`
   puts footer.green
-  @driver.find_element(css: 'input[type="submit"]').click
 
   #Submit connector node to Service Provider
   @driver.find_element(id: 'submit_saml').click

@@ -81,9 +81,9 @@ public class EidasProxyNodeAcceptanceTests {
         return new URI(connectorNodeUrl).resolve(path).toString();
     }
 
-    private String proxyNodeBase(String path) throws URISyntaxException {
-        String proxyNodeUrl = getEnv("PROXY_NODE_URL", "http://localhost:56016");
-        return new URI(proxyNodeUrl).resolve(path).toString();
+    private String gatewayBase(String path) throws URISyntaxException {
+        String gatewayUrl = getEnv("GATEWAY_URL", "http://localhost:56016");
+        return new URI(gatewayUrl).resolve(path).toString();
     }
 
     private String serviceProviderBase(String path) throws URISyntaxException {

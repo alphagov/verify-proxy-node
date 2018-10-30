@@ -101,7 +101,7 @@ pushd "${PN_PROJECT_DIR}/pki"
     --hub-entity-id "https://dev-hub.local" \
     --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
     --proxy-node-entity-id "_verify_proxy_node" \
-    --hub-response-url "http://localhost:56016/SAML2/SSO/Response/POST" \
+    --hub-response-url "http://localhost:56018/SAML2/SSO/Response/POST" \
     --idp-sso-url "http://localhost:56017/stub-idp-demo/SAML2/SSO" \
     --proxy-sso-url "http://localhost:56016/SAML2/SSO/POST" \
     --env \
