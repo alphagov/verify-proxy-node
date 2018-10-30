@@ -4,10 +4,10 @@ services:
     image: notification-gateway
     mem_limit: 512M
     ports:
-      - "56016:6600"
-      - "56026:6601"
+    - "56016:6600"
+    - "56026:6601"
     networks:
-      - global
+    - global
     environment:
       CONFIG_FILE: ./config.yml
       GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
@@ -27,15 +27,26 @@ services:
       TRUSTSTORE_TYPES: encoded
     env_file: ./pki/proxy_node.env
     volumes:
-      - ./pki:/verify-eidas-proxy-node/pki:ro
+    - ./pki:/verify-eidas-proxy-node/pki:ro
+  notification-translator:
+    image: notification-translator
+    mem_limit: 512M
+    ports:
+    - "56018:6660"
+    - "56028:6661"
+    networks:
+    - global
+    environment:
+      CONFIG_FILE: ./config.yml
+      GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
   notification-stub-idp:
     image: notification-stub-idp
     mem_limit: 512M
     ports:
-      - "56017:50140"
-      - "56027:50141"
+    - "56017:50140"
+    - "56027:50141"
     networks:
-      - global
+    - global
     environment:
       CONFIG_FILE: ./stub-idp.yml
       LOG_PATH: ./logs
@@ -51,13 +62,13 @@ services:
       DB_URI: jdbc:postgresql://postgres:5432/postgres?user=postgres&password=password
     env_file: ./pki/stub_idp.env
     volumes:
-      - ./pki:/ida-stub-idp/pki:ro
+    - ./pki:/ida-stub-idp/pki:ro
   stub-sp:
     image: govukverify/verify-eidas-reference:48
     ports:
-      - "56000:8080"
+    - "56000:8080"
     networks:
-      - global
+    - global
     environment:
       APP: stub_sp
       country_code: CEF
@@ -96,9 +107,9 @@ services:
   connector-node:
     image: govukverify/verify-eidas-reference:48
     ports:
-      - "56001:8080"
+    - "56001:8080"
     networks:
-      - global
+    - global
     environment:
       APP: connector_node
       country_code: CEF
@@ -139,19 +150,19 @@ services:
       disallow_self_signed_certificate: "false"
   proxy-node-metadata:
     ports:
-      - "55000:55000"
+    - "55000:55000"
     image: nginx
     networks:
-          - global
+    - global
     volumes:
-      - ./metadata/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./pki:/usr/share/nginx/html:ro
+    - ./metadata/nginx.conf:/etc/nginx/nginx.conf:ro
+    - ./pki:/usr/share/nginx/html:ro
   postgres:
     image: postgres
     ports:
-      - "5432:5432"
+    - "5432:5432"
     networks:
-      - global
+    - global
 
 networks:
   global:

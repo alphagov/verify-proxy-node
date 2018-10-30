@@ -1,0 +1,17 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: ${PORT:-6660}
+  adminConnectors:
+    - type: http
+      port: ${ADMIN_PORT:-6661}
+
+logging:
+  level: INFO
+  loggers:
+    uk.gov.ida: DEBUG
+  appenders:
+    - type: console
+    - type: file
+      currentLogFilename: logs/translator.log
+      archive: false
