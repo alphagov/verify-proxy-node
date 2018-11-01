@@ -32,8 +32,6 @@ ext {
 subprojects {
 
     apply plugin: 'java'
-    apply plugin: 'application'
-    apply plugin: 'maven-publish'
 
     group = "uk.gov.ida"
     version = "0.1.$version"
@@ -54,17 +52,16 @@ subprojects {
         common
         dropwizard
         saml
-        eidas
+        saml_test
     }
 
     dependencies {
-
-        eidas project(":proxy-node-shared")
         dropwizard (
                 "io.dropwizard:dropwizard-core:${dropwizard_version}",
                 "io.dropwizard:dropwizard-client:${dropwizard_version}",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}"
         )
+
         saml (
                 "org.opensaml:opensaml-core:${opensaml_version}",
                 "org.opensaml:opensaml-saml-impl:${opensaml_version}",
@@ -74,6 +71,15 @@ subprojects {
                 "uk.gov.ida:hub-saml:${opensaml_version}-115",
                 "se.litsec.eidas:eidas-opensaml3:1.0.5"
         )
+
+        saml_test (
+                "net.sourceforge.htmlunit:htmlunit:2.28",
+                "uk.gov.ida:common-test-utils:${utilsVersion}-38",
+                "uk.gov.ida:saml-metadata-bindings-test:${opensaml_version}-68",
+                "uk.gov.verify:saml-test-utils:${opensaml_version}-2",
+                "io.dropwizard:dropwizard-testing:${dropwizard_version}",
+        )
+
         common (
                 "uk.gov.ida:security-utils:${utilsVersion}-331"
         )
@@ -87,6 +93,7 @@ subprojects {
             "uk.gov.ida:common-test-utils:${utilsVersion}-38",
             "uk.gov.ida:saml-metadata-bindings-test:${opensaml_version}-68",
             "uk.gov.verify:saml-test-utils:${opensaml_version}-2"
+            project(':proxy-node-test')
         )
 
     }

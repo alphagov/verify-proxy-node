@@ -1,0 +1,26 @@
+dependencies {
+    compile configurations.dropwizard,
+            configurations.saml,
+            configurations.common,
+            project(':proxy-node-shared')
+}
+
+group = 'uk.gov.ida.notification.translator'
+version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
+
+apply plugin: 'application'
+mainClassName = 'uk.gov.ida.notification.translator.TranslatorApplication'
+
+run {
+    args 'server', './src/dist/config.yml'
+}
+
+distZip {
+    archiveName baseName + '.zip'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}

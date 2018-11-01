@@ -4,27 +4,11 @@ dependencies {
             configurations.common
 }
 
-group = 'uk.gov.ida.notification'
-version = '1.0-SNAPSHOT'
+group = 'uk.gov.ida.notification.common'
+version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
-description = """proxy-node-shared"""
-
-mainClassName = ''
-
-sourceSets {
-    acceptanceTest {
-        java.srcDir file('src/acceptance-test/java')
-        resources.srcDir file('src/acceptance-test/resources')
-        compileClasspath += main.output + test.output + configurations.testRuntime
-        runtimeClasspath += output + compileClasspath
-    }
-}
-
-task acceptanceTest(type: Test) {
-    description = 'Runs the acceptance tests'
-    group = 'verification'
-    classpath = sourceSets.acceptanceTest.runtimeClasspath
-    setTestClassesDirs sourceSets.acceptanceTest.output.classesDirs
-    reports.junitXml.setDestination new File("$buildDir/acceptance-test-results")
-    reports.html.setDestination new File("$buildDir/reports/acceptance-test")
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
 }
