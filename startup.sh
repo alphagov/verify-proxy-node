@@ -27,7 +27,7 @@ pushd "${PN_PROJECT_DIR}/pki"
   bundle exec generate \
     --hub-entity-id "https://dev-hub.local" \
     --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
-    --proxy-node-entity-id "_verify_proxy_node" \
+    --proxy-node-entity-id "http://proxy-node" \
     --hub-response-url "http://proxy-node-gateway/SAML2/SSO/Response/POST" \
     --idp-sso-url "http://stub-idp/stub-idp-demo/SAML2/SSO" \
     --proxy-sso-url "http://proxy-node-gateway/SAML2/SSO/POST" \
