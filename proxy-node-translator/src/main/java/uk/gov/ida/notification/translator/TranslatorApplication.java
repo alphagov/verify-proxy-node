@@ -41,7 +41,7 @@ import uk.gov.ida.saml.core.validators.assertion.IdentityProviderAssertionValida
 import uk.gov.ida.saml.core.validators.assertion.MatchingDatasetAssertionValidator;
 import uk.gov.ida.saml.core.validators.subject.AssertionSubjectValidator;
 import uk.gov.ida.saml.core.validators.subjectconfirmation.AssertionSubjectConfirmationValidator;
-import uk.gov.ida.saml.hub.transformers.inbound.SamlStatusToIdpIdaStatusMappingsFactory;
+import uk.gov.ida.saml.hub.transformers.inbound.SamlStatusToIdaStatusCodeMapper;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
 import uk.gov.ida.saml.hub.validators.response.idp.components.EncryptedResponseFromIdpValidator;
 import uk.gov.ida.saml.hub.validators.response.idp.components.ResponseAssertionsFromIdpValidator;
@@ -178,13 +178,12 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
         SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessagesSignatureValidator(hubMetadataResolverBundle);
-        SamlStatusToIdpIdaStatusMappingsFactory statusMappings = new SamlStatusToIdpIdaStatusMappingsFactory();
 
         IdpResponseValidator idpResponseValidator = new IdpResponseValidator(
                 new SamlResponseSignatureValidator(hubResponseMessageSignatureValidator),
                 createDecrypter(configuration.getHubFacingEncryptionKeyPair()),
                 new SamlAssertionsSignatureValidator(hubResponseMessageSignatureValidator),
-                new EncryptedResponseFromIdpValidator(statusMappings),
+                new EncryptedResponseFromIdpValidator<>(new SamlStatusToIdaStatusCodeMapper()),
                 new DestinationValidator(proxyNodeResponseUrl, proxyNodeResponseUrl.getPath()),
                 createResponseAssertionsFromIdpValidator(proxyNodeEntityId)
         );
