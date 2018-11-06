@@ -5,22 +5,6 @@ set -euo pipefail
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}"/.local_pki
 
-follow=false
-
-while [ ! $# -eq 0 ]
-do
-  case "$1" in
-    --follow)
-      follow=true
-      ;;
-    *)
-      echo "Usage $0 [--follow]"
-      exit 1
-      ;;
-  esac
-  shift
-done
-
 pushd "${PN_PROJECT_DIR}/pki"
   rm -f "${PKI_OUTPUT_DIR}/*"
   bundle install --quiet
@@ -35,8 +19,4 @@ pushd "${PN_PROJECT_DIR}/pki"
     "${PKI_OUTPUT_DIR}"
 popd
 
-docker-compose up -d
-if [ "$follow" = true ]
-then
-  docker-compose logs -f
-fi
+docker-compose up $@

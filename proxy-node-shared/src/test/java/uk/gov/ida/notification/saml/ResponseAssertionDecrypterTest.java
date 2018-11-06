@@ -17,7 +17,9 @@ public class ResponseAssertionDecrypterTest extends SamlInitializedTest {
         TestKeyPair testKeyPair = new TestKeyPair();
         BasicCredential credential = new BasicCredential(testKeyPair.publicKey, testKeyPair.privateKey);
 
-        EncryptedAssertion assertion = AssertionBuilder.anAssertion().withId("hi").buildWithEncrypterCredential(credential);
+        EncryptedAssertion assertion = AssertionBuilder.anAssertion()
+                .withId("hi")
+                .buildWithEncrypterCredential(credential);
         Response encryptedResponse = ResponseBuilder.aResponse().addEncryptedAssertion(assertion).build();
 
         ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(credential);

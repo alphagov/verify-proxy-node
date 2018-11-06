@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.stubconnector;
 
-import com.google.common.collect.ImmutableList;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -12,11 +11,9 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
-import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
@@ -25,6 +22,7 @@ import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
+import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
@@ -35,14 +33,9 @@ import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
-import uk.gov.ida.saml.security.AssertionDecrypter;
-import uk.gov.ida.saml.security.DecrypterFactory;
 import uk.gov.ida.saml.security.MetadataBackedSignatureValidator;
 import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
-import uk.gov.ida.saml.security.validators.encryptedelementtype.EncryptionAlgorithmValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
-
-import java.util.List;
 
 public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
@@ -168,18 +161,12 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         return new Metadata(metadataCredentialResolver);
     }
 
-    private AssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
+    private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
         BasicCredential decryptionCredential = new BasicCredential(
             configuration.getPublicKey().getPublicKey(),
             configuration.getPrivateKey().getPrivateKey()
         );
-        List<Credential> decryptionCredentials = ImmutableList.of(decryptionCredential);
-        Decrypter decrypter = new DecrypterFactory().createDecrypter(decryptionCredentials);
-        EncryptionAlgorithmValidator encryptionAlgorithmValidator = new EncryptionAlgorithmValidator();
-        return new AssertionDecrypter(
-            encryptionAlgorithmValidator,
-            decrypter
-        );
+        return new ResponseAssertionDecrypter(decryptionCredential);
     }
 
     private SamlMessageSignatureValidator createSamlMessagesSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {

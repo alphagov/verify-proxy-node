@@ -2,7 +2,7 @@ dependencies {
     compile configurations.dropwizard,
             configurations.saml,
             configurations.common,
-            project(':proxy-node-common')
+            project(':proxy-node-shared')
 }
 
 group = 'uk.gov.ida.notification.stubconnector'
