@@ -14,6 +14,8 @@ COPY proxy-node-gateway/ proxy-node-gateway/
 COPY proxy-node-translator/ proxy-node-translator/
 COPY stub-connector/ stub-connector/
 
-RUN gradle --no-daemon compileTestJava
+# Travis needs to get the libraries from public repositories
+ENV VERIFY_USE_PUBLIC_BINARIES true
+RUN gradle --no-daemon --quiet compileTestJava
 
-CMD gradle --no-daemon clean test
+CMD gradle --no-daemon --quiet clean test

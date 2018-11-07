@@ -77,7 +77,6 @@ subprojects {
                 "net.sourceforge.htmlunit:htmlunit:2.28",
                 "uk.gov.ida:common-test-utils:${utils_version}",
                 "uk.gov.ida:saml-metadata-bindings-test:${saml_libs_version}",
-                "uk.gov.verify:saml-test-utils:${opensaml_version}-46",
                 "io.dropwizard:dropwizard-testing:${dropwizard_version}",
         )
 
