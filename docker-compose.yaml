@@ -22,7 +22,27 @@ services:
     env_file: ./.local_pki/proxy_node.env
     volumes:
       - ./.local_pki:/verify-eidas-proxy-node/pki:ro
-
+  proxy-node-translator:
+    build:
+      context: .
+      args:
+        component: proxy-node-translator
+    ports:
+      - "6300:80"
+    environment:
+      PORT: 80
+      PROXY_NODE_ENTITY_ID: https://dev-hub.local
+      PROXY_NODE_RESPONSE_ENDPOINT: http://localhost:6100/SAML2/SSO/Response/POST
+      HUB_URL: http://localhost:6200/stub-idp-demo/SAML2/SSO
+      HUB_METADATA_URL: http://proxy-node-metadata/metadata_for_hub.xml
+      PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata/metadata_for_connector_node.xml
+      CONNECTOR_NODE_URL: http://localhost:5000/SAML2/Response/POST
+      CONNECTOR_NODE_ISSUER_ID: http://localhost:5000/Metadata
+      CONNECTOR_NODE_METADATA_URL: http://stub-connector/Metadata
+      CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
+    env_file: ./.local_pki/proxy_node.env
+    volumes:
+    - ./pki:/verify-eidas-proxy-node/pki:ro
   stub-connector:
     build:
       context: .
