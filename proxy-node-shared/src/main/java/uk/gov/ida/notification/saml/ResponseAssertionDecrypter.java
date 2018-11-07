@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.saml;
 
 import com.google.common.collect.ImmutableSet;
+import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.Credential;
@@ -11,6 +12,7 @@ import uk.gov.ida.saml.security.validators.ValidatedResponse;
 import uk.gov.ida.saml.security.validators.encryptedelementtype.EncryptionAlgorithmValidator;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class ResponseAssertionDecrypter {
@@ -35,8 +37,11 @@ public class ResponseAssertionDecrypter {
     }
 
     public Response decrypt(Response response) {
+        ValidatedResponse validatedResponse = new ValidatedResponse(response);
+        List<Assertion> assertions = assertionDecrypter.decryptAssertions(validatedResponse);
+
         response.getAssertions().clear();
-        response.getAssertions().addAll(assertionDecrypter.decryptAssertions(new ValidatedResponse(response)));
+        response.getAssertions().addAll(assertions);
         response.getEncryptedAssertions().clear();
 
         return response;
