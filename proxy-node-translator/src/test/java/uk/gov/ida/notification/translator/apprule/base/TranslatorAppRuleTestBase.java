@@ -36,7 +36,7 @@ public class TranslatorAppRuleTestBase {
     }
 
     @Rule
-    public TranslatorAppRule proxyNodeAppRule = new TranslatorAppRule(
+    public TranslatorAppRule translatorAppRule = new TranslatorAppRule(
             ConfigOverride.config("proxyNodeEntityId", "http://proxy-node.uk"),
             ConfigOverride.config("proxyNodeResponseUrl", "http://proxy-node/SAML2/SSO/Response"),
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),

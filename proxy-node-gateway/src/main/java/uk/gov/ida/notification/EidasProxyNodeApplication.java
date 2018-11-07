@@ -27,7 +27,6 @@ import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
-import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
@@ -160,7 +159,6 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     private void registerResources(EidasProxyNodeConfiguration configuration, Environment environment) throws ComponentInitializationException {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
 
-        EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
@@ -176,12 +174,12 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 samlRequestSignatureValidator));
 
         environment.jersey().register(new HubResponseResource(
-                eidasResponseGenerator,
                 samlFormViewBuilder,
                 configuration.getConnectorNodeUrl().toString(),
-                configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
-                connectorMetadata,
-                hubResponseValidator));
+                hubResponseValidator,
+                environment,
+                configuration.getTranslatorUrl().toString()
+            ));
     }
 
     public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
@@ -278,19 +276,5 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
             configuration.getHubFacingSigningKeyPair().getPublicKey().getCert()
         );
         return new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, signer);
-    }
-
-    private EidasResponseGenerator createEidasResponseGenerator(EidasProxyNodeConfiguration configuration) {
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
-            configuration.getConnectorNodeIssuerId(),
-            configuration.getConnectorNodeUrl().toString(),
-            configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
-        );
-        SamlObjectSigner signer = new SamlObjectSigner(
-            configuration.getConnectorFacingSigningKeyPair().getPublicKey().getPublicKey(),
-            configuration.getConnectorFacingSigningKeyPair().getPrivateKey().getPrivateKey(),
-            configuration.getConnectorFacingSigningKeyPair().getPublicKey().getCert()
-        );
-        return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 }

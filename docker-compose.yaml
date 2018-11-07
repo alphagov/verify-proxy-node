@@ -20,6 +20,7 @@ services:
       CONNECTOR_NODE_METADATA_URL: http://stub-connector/Metadata
       CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
       METADATA_REFRESH_DELAY: 10000
+      TRANSLATOR_URL: http://proxy-node-translator/SAML2/SSO/Response/POST
     env_file: ./.local_pki/proxy_node.env
     volumes:
       - ./.local_pki:/verify-eidas-proxy-node/pki:ro

@@ -24,6 +24,11 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
+    private URI translatorUrl;
+
+    @JsonProperty
+    @Valid
+    @NotNull
     private String proxyNodeEntityId;
 
     @JsonProperty
@@ -73,6 +78,8 @@ public class EidasProxyNodeConfiguration extends Configuration {
     public URI getConnectorNodeUrl() {
         return connectorNodeUrl;
     }
+
+    public URI getTranslatorUrl() { return translatorUrl; }
 
     public String getProxyNodeEntityId() {
         return proxyNodeEntityId;
