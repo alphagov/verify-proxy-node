@@ -12,9 +12,9 @@ pushd "${PN_PROJECT_DIR}/pki"
     --hub-entity-id "https://dev-hub.local" \
     --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
     --proxy-node-entity-id "http://proxy-node" \
-    --hub-response-url "http://proxy-node-gateway/SAML2/SSO/Response/POST" \
-    --idp-sso-url "http://stub-idp/stub-idp-demo/SAML2/SSO" \
-    --proxy-sso-url "http://proxy-node-gateway/SAML2/SSO/POST" \
+    --hub-response-url "http://localhost:6100/SAML2/SSO/Response/POST" \
+    --idp-sso-url "http://localhost:6200/stub-idp-demo/SAML2/SSO" \
+    --proxy-sso-url "http://localhost:6100/SAML2/SSO/POST" \
     --env \
     "${PKI_OUTPUT_DIR}"
 popd

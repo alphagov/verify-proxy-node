@@ -6,19 +6,19 @@ services:
       context: .
       args:
         component: proxy-node-gateway
-    expose:
-      - "80"
+    ports:
+      - "6100:80"
     environment:
       PORT: 80
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
-      PROXY_NODE_RESPONSE_ENDPOINT: http://proxy-node-gateway/SAML2/SSO/Response/POST
-      HUB_URL: http://stub-idp/stub-idp-demo/SAML2/SSO
+      PROXY_NODE_RESPONSE_ENDPOINT: http://localhost:6100/SAML2/SSO/Response/POST
+      HUB_URL: http://localhost:6200/stub-idp-demo/SAML2/SSO
       HUB_METADATA_URL: http://proxy-node-metadata/metadata_for_hub.xml
       PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata/metadata_for_connector_node.xml
-      CONNECTOR_NODE_URL: http://stub-connector/SAML2/Response/POST
-      CONNECTOR_NODE_ISSUER_ID: http://stub-connector/Metadata
+      CONNECTOR_NODE_URL: http://localhost:5000/SAML2/Response/POST
+      CONNECTOR_NODE_ISSUER_ID: http://localhost:5000/Metadata
       CONNECTOR_NODE_METADATA_URL: http://stub-connector/Metadata
-      CONNECTOR_NODE_ENTITY_ID: http://stub-connector/Metadata
+      CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
     env_file: ./.local_pki/proxy_node.env
     volumes:
       - ./.local_pki:/verify-eidas-proxy-node/pki:ro
@@ -28,11 +28,11 @@ services:
       context: .
       args:
         component: stub-connector
-    expose:
-      - "80"
+    ports:
+      - "5000:80"
     environment:
       PORT: 80
-      CONNECTOR_NODE_BASE_URL: http://stub-connector
+      CONNECTOR_NODE_BASE_URL: http://localhost:5000
       PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata/metadata_for_connector_node.xml
       PROXY_NODE_ENTITY_ID: http://proxy-node
     env_file: ./.local_pki/stub_connector.env
@@ -41,8 +41,8 @@ services:
 
   stub-idp:
     image: govukverify/stub-idp
-    expose:
-      - "80"
+    ports:
+      - "6200:80"
     environment:
       PORT: 80
       CONFIG_FILE: ./stub-idp.yml
@@ -64,8 +64,8 @@ services:
 
   proxy-node-metadata:
     build: metadata
-    expose:
-      - "80"
+    ports:
+      - "7000:80"
     volumes:
       - ./.local_pki:/srv:ro
 
@@ -73,8 +73,3 @@ services:
     image: postgres
     expose:
       - "5432"
-
-  socks-proxy:
-    image: vimagick/dante
-    ports:
-      - "8888:1080"
