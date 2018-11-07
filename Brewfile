@@ -1,6 +1,6 @@
 tap "cloudfoundry/tap"
 
-brew "docker"
+cask "docker"
 brew "docker-compose"
 brew "pre-commit"
 brew "xmlsectool"

@@ -1,0 +1,19 @@
+# Base builder image
+
+FROM gradle:jdk8 AS build
+WORKDIR /app
+USER root
+ENV GRADLE_USER_HOME ~/.gradle
+
+COPY build.gradle build.gradle
+COPY settings.gradle settings.gradle
+
+COPY proxy-node-shared/ proxy-node-shared/
+COPY proxy-node-test/ proxy-node-test/
+COPY proxy-node-gateway/ proxy-node-gateway/
+COPY proxy-node-translator/ proxy-node-translator/
+COPY stub-connector/ stub-connector/
+
+RUN gradle --no-daemon compileTestJava
+
+CMD gradle --no-daemon clean test
