@@ -1,5 +1,7 @@
 rootProject.name = 'verify-eidas-notification'
-include 'gateway'
-include 'translator'
-include 'proxy-node-shared'
-
+include 'proxy-node-gateway',
+        'proxy-node-translator',
+        'proxy-node-shared',
+        'proxy-node-test',
+        'stub-connector',
+        'acceptance-tests'

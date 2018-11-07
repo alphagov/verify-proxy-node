@@ -87,6 +87,12 @@ idp_signing_keypair = sub_keypair(root_keypair, 'IDP Signing', USAGE_SIGNING)
 # Proxy Node Signing
 proxy_signing_keypair = sub_keypair(root_keypair, 'Proxy Node Signing', USAGE_SIGNING)
 
+# Stub Connector Signing
+stub_connector_signing_keypair = sub_keypair(root_keypair, 'Stub Connector Signing', USAGE_SIGNING)
+
+# Stub Connector Encryption
+stub_connector_encryption_keypair = sub_keypair(root_keypair, 'Stub Connector Encryption', USAGE_ENCRYPTION)
+
 # Generate Hub Metadata
 hub_config = {
   'id' => 'VERIFY-HUB',
@@ -145,6 +151,18 @@ Dir.chdir(output_dir) do
     'HUB_FACING_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
     'HUB_METADATA_TRUSTSTORE' => b64(metadata_truststore),
     'HUB_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
+    'CONNECTOR_NODE_METADATA_TRUSTSTORE' => b64(metadata_truststore),
+    'CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
+  }
+
+  stub_connector_vars = {
+    'PROXY_NODE_ENTITY_ID' => options.proxy_entity_id,
+    'SIGNING_CERT' => b64(stub_connector_signing_keypair.cert.to_pem),
+    'SIGNING_KEY' => b64(der2pk8(stub_connector_signing_keypair.key.to_der)),
+    'ENCRYPTION_CERT' => b64(stub_connector_encryption_keypair.cert.to_pem),
+    'ENCRYPTION_KEY' => b64(der2pk8(stub_connector_encryption_keypair.key.to_der)),
+    'PROXY_NODE_METADATA_TRUSTSTORE' => b64(metadata_truststore),
+    'PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
   }
 
   stub_idp_vars = {
@@ -172,11 +190,15 @@ Dir.chdir(output_dir) do
     create_file('stub_idp_signing.der', idp_signing_keypair.key.to_der)
     create_file('proxy_node_signing.crt', proxy_signing_keypair.cert.to_pem)
     create_file('proxy_node_signing.der', proxy_signing_keypair.key.to_der)
+    create_file('stub_connector_signing.crt', stub_connector_signing_keypair.cert.to_pem)
+    create_file('stub_connector_signing.der', stub_connector_signing_keypair.key.to_der)
 
     create_file('hub_signing.pk8', der2pk8(hub_signing_keypair.key.to_der))
     create_file('hub_encryption.pk8', der2pk8(hub_encryption_keypair.key.to_der))
     create_file('stub_idp_signing.pk8', der2pk8(idp_signing_keypair.key.to_der))
     create_file('proxy_node_signing.pk8', der2pk8(proxy_signing_keypair.key.to_der))
+    create_file('stub_connector_signing.pk8', der2pk8(stub_connector_signing_keypair.key.to_der))
+    create_file('stub_connector_encryption.pk8', der2pk8(stub_connector_encryption_keypair.key.to_der))
   end
 
   if options.do_manifests
@@ -196,6 +218,7 @@ Dir.chdir(output_dir) do
   if options.do_env
     puts('Generating environment files')
     create_file('proxy_node.env', proxy_node_vars.map { |k,v| "#{k}=#{v}\n" }.join)
+    create_file('stub_connector.env', stub_connector_vars.map { |k,v| "#{k}=#{v}\n" }.join)
     create_file('stub_idp.env', stub_idp_vars.map { |k,v| "#{k}=#{v}\n" }.join)
   end
 end

@@ -1,0 +1,75 @@
+version: '3.7'
+
+services:
+  proxy-node-gateway:
+    build:
+      context: .
+      args:
+        component: proxy-node-gateway
+    ports:
+      - "6100:80"
+    environment:
+      PORT: 80
+      PROXY_NODE_ENTITY_ID: https://dev-hub.local
+      PROXY_NODE_RESPONSE_ENDPOINT: http://localhost:6100/SAML2/SSO/Response/POST
+      HUB_URL: http://localhost:6200/stub-idp-demo/SAML2/SSO
+      HUB_METADATA_URL: http://proxy-node-metadata/metadata_for_hub.xml
+      PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata/metadata_for_connector_node.xml
+      CONNECTOR_NODE_URL: http://localhost:5000/SAML2/Response/POST
+      CONNECTOR_NODE_ISSUER_ID: http://localhost:5000/Metadata
+      CONNECTOR_NODE_METADATA_URL: http://stub-connector/Metadata
+      CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
+    env_file: ./.local_pki/proxy_node.env
+    volumes:
+      - ./.local_pki:/verify-eidas-proxy-node/pki:ro
+
+  stub-connector:
+    build:
+      context: .
+      args:
+        component: stub-connector
+    ports:
+      - "5000:80"
+    environment:
+      PORT: 80
+      CONNECTOR_NODE_BASE_URL: http://localhost:5000
+      PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL: http://proxy-node-metadata/metadata_for_connector_node.xml
+      PROXY_NODE_ENTITY_ID: http://proxy-node
+    env_file: ./.local_pki/stub_connector.env
+    volumes:
+      - ./.local_pki:/verify-eidas-proxy-node/pki:ro
+
+  stub-idp:
+    image: govukverify/stub-idp
+    ports:
+      - "6200:80"
+    environment:
+      PORT: 80
+      CONFIG_FILE: ./stub-idp.yml
+      LOG_PATH: ./logs
+      STUB_IDP_BASIC_AUTH: 'true'
+      STUB_IDPS_FILE_PATH: ./stub-idps.yml
+      METADATA_URL: http://proxy-node-metadata/metadata_for_hub.xml
+      TRUSTSTORE_PASSWORD: marshmallow
+      GRADLE_OPTS: "-Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'"
+      KEY_TYPE: encoded
+      CERT_TYPE: encoded
+      TRUSTSTORE_TYPE: encoded
+      GRAPHITE_REPORTING_FREQUENCY: 24h
+      DB_URI: jdbc:postgresql://stub-idp-postgres:5432/postgres?user=postgres&password=password
+    env_file: ./.local_pki/stub_idp.env
+    volumes:
+      - ./stub-idp/resources/stub-idps.yml:/stub-idp/stub-idps.yml:ro
+      - ./.local_pki:/stub-idp/pki:ro
+
+  proxy-node-metadata:
+    build: metadata
+    ports:
+      - "7000:80"
+    volumes:
+      - ./.local_pki:/srv:ro
+
+  stub-idp-postgres:
+    image: postgres
+    expose:
+      - "5432"
