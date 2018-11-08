@@ -1,3 +1,6 @@
+.git/
+.gradle/
+doc/
 logs/
 out/
 .DS_Store
@@ -25,6 +28,7 @@ buildNumber.properties
 # Gradle
 .gradle
 build/
+*/build/
 .gradletasknamecache
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)

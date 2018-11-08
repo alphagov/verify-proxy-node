@@ -1,22 +1,24 @@
 # Base builder image
 
-FROM gradle:jdk8 AS build
+FROM gradle:jdk11 AS build
 WORKDIR /app
 USER root
 ENV GRADLE_USER_HOME ~/.gradle
 
 COPY build.gradle build.gradle
 COPY settings.gradle settings.gradle
-COPY proxy-node-shared/src proxy-node-shared/src
-COPY proxy-node-shared/build.gradle proxy-node-shared/build.gradle
+COPY gradle.properties gradle.properties
+COPY proxy-node-test/ proxy-node-test/
+COPY proxy-node-shared/ proxy-node-shared/
 
-ARG component
+ARG component=proxy-node-gateway
 COPY ${component}/src ${component}/src
 COPY ${component}/build.gradle ${component}/build.gradle
 
-RUN gradle --no-daemon --quiet -p ${component} install
+RUN gradle --no-daemon --quiet -p ${component} --parallel install
+ENTRYPOINT ["gradle", "--no-daemon"]
 
-FROM openjdk:8-jre-slim
+FROM openjdk:11-jre-slim
 WORKDIR /app
 USER root
 

@@ -1,21 +1,8 @@
-# Base builder image
+# Tester image
 
-FROM gradle:jdk8 AS build
+FROM gradle:jdk11 AS build
 WORKDIR /app
 USER root
 ENV GRADLE_USER_HOME ~/.gradle
-
-COPY build.gradle build.gradle
-COPY settings.gradle settings.gradle
-
-COPY proxy-node-shared/ proxy-node-shared/
-COPY proxy-node-test/ proxy-node-test/
-COPY proxy-node-gateway/ proxy-node-gateway/
-COPY proxy-node-translator/ proxy-node-translator/
-COPY stub-connector/ stub-connector/
-
-# Travis needs to get the libraries from public repositories
 ENV VERIFY_USE_PUBLIC_BINARIES true
-RUN gradle --no-daemon --quiet compileTestJava
-
-CMD gradle --no-daemon --quiet clean test
+CMD gradle --no-daemon --quiet test
