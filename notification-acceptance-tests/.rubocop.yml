@@ -1,0 +1,9 @@
+Style/FrozenStringLiteralComment:
+  Exclude:
+    - 'features/step_definitions/user_steps.rb'
+    - 'features/support/env.rb'
+
+Metrics/LineLength:
+  Max: 130
+  Exclude:
+    - 'features/support/env.rb'

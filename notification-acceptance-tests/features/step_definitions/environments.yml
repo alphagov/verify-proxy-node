@@ -1,0 +1,2 @@
+local:
+  stub-connector: http://localhost:5000/Request
