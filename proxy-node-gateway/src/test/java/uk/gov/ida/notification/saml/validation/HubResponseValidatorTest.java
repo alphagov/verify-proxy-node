@@ -74,6 +74,12 @@ public class HubResponseValidatorTest {
         verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
     }
 
+    @Test
+    public void shouldVaidateLoA() throws Exception {
+        hubResponseValidator.validate(response);
+        verify(loaValidator, times(1)).validate(authnStatementAssertion.getAuthnStatements().get(0).getAuthnContext());
+    }
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -84,8 +90,15 @@ public class HubResponseValidatorTest {
         when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(authnStatementAssertion)));
 
         hubResponseValidator.validate(response);
+    }
 
-        verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
+    @Test
+    public void shouldThrowExceptionIfAuthnStatementAssertionNotAvailable() throws Exception {
+        expectedException.expect(InvalidHubResponseException.class);
+        expectedException.expectMessage("Bad IDP Response from Hub: Missing Authn Statement Assertion");
+        when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(matchingDatasetAssertion)));
+
+        hubResponseValidator.validate(response);
     }
 
     @Test
