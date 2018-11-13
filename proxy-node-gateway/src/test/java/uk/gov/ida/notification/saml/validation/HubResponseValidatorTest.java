@@ -16,6 +16,7 @@ import org.slf4j.event.Level;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
+import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
@@ -36,6 +37,8 @@ public class HubResponseValidatorTest {
     @Mock
     private ResponseAttributesValidator responseAttributesValidator;
     @Mock
+    private LoaValidator loaValidator;
+    @Mock
     private Response response;
 
     private Assertion matchingDatasetAssertion;
@@ -51,7 +54,8 @@ public class HubResponseValidatorTest {
     public void setUp() throws Exception {
         hubResponseValidator = new HubResponseValidator(
             idpResponseValidator,
-            responseAttributesValidator
+            responseAttributesValidator,
+            loaValidator
         );
         authnStatementAssertion = HubAssertionBuilder.anAuthnStatementAssertion().build();
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion().build();
@@ -70,6 +74,12 @@ public class HubResponseValidatorTest {
         verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
     }
 
+    @Test
+    public void shouldVaidateLoA() throws Exception {
+        hubResponseValidator.validate(response);
+        verify(loaValidator, times(1)).validate(authnStatementAssertion.getAuthnStatements().get(0).getAuthnContext());
+    }
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -80,8 +90,15 @@ public class HubResponseValidatorTest {
         when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(authnStatementAssertion)));
 
         hubResponseValidator.validate(response);
+    }
 
-        verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
+    @Test
+    public void shouldThrowExceptionIfAuthnStatementAssertionNotAvailable() throws Exception {
+        expectedException.expect(InvalidHubResponseException.class);
+        expectedException.expectMessage("Bad IDP Response from Hub: Missing Authn Statement Assertion");
+        when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(matchingDatasetAssertion)));
+
+        hubResponseValidator.validate(response);
     }
 
     @Test

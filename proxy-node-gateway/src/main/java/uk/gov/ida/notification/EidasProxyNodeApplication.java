@@ -210,7 +210,10 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
             createResponseAssertionsFromIdpValidator(proxyNodeEntityId)
         );
         ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
-        return new HubResponseValidator(idpResponseValidator, responseAttributesValidator);
+        return new HubResponseValidator(
+            idpResponseValidator,
+            responseAttributesValidator,
+            new LoaValidator());
     }
 
     private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId) {
