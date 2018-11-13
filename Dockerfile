@@ -7,15 +7,13 @@ ENV GRADLE_USER_HOME ~/.gradle
 
 COPY build.gradle build.gradle
 COPY settings.gradle settings.gradle
-COPY gradle.properties gradle.properties
-COPY proxy-node-test/ proxy-node-test/
 COPY proxy-node-shared/ proxy-node-shared/
 
 ARG component=proxy-node-gateway
 COPY ${component}/src ${component}/src
 COPY ${component}/build.gradle ${component}/build.gradle
 
-RUN gradle --no-daemon --quiet -p ${component} --parallel install
+RUN gradle --no-daemon --quiet -p ${component} --parallel install -x test
 ENTRYPOINT ["gradle", "--no-daemon"]
 
 FROM openjdk:11-jre-slim
