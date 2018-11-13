@@ -1,0 +1,16 @@
+version: '3.3'
+
+services:
+  proxy-node-tests:
+    build:
+      dockerfile: Dockerfile.test
+      context: .
+    volumes:
+      - ./build.gradle:/app/build.gradle
+      - ./settings.gradle:/app/settings.gradle
+      - ./gradle.properties:/app/gradle.properties
+      - ./proxy-node-shared:/app/proxy-node-shared
+      - ./proxy-node-test:/app/proxy-node-test
+      - ./proxy-node-gateway:/app/proxy-node-gateway
+      - ./proxy-node-translator:/app/proxy-node-translator
+      - ./stub-connector:/app/stub-connector

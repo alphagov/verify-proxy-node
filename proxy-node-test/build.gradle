@@ -7,9 +7,3 @@ dependencies {
 
 group = 'uk.gov.ida.notification.test'
 version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
-}

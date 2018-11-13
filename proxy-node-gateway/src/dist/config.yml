@@ -28,6 +28,7 @@ connectorMetadataConfiguration:
   url: ${CONNECTOR_NODE_METADATA_URL}
   expectedEntityId: ${CONNECTOR_NODE_ENTITY_ID}
   jerseyClientName: connector-metadata-client
+  maxRefreshDelay: ${METADATA_REFRESH_DELAY:-600000}
   trustStore:
     type: ${TRUSTSTORE_TYPES:-encoded}
     store: ${CONNECTOR_NODE_METADATA_TRUSTSTORE}
@@ -37,6 +38,7 @@ hubMetadataConfiguration:
   url: ${HUB_METADATA_URL}
   expectedEntityId: ${HUB_ENTITY_ID}
   jerseyClientName: hub-metadata-client
+  maxRefreshDelay: ${METADATA_REFRESH_DELAY:-600000}
   trustStore:
     type: ${TRUSTSTORE_TYPES:-encoded}
     store: ${HUB_METADATA_TRUSTSTORE}
