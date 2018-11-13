@@ -3,6 +3,7 @@ package uk.gov.ida.notification.translator.apprule.rules;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import org.glassfish.jersey.client.ClientProperties;
 import uk.gov.ida.notification.translator.TranslatorApplication;
 import uk.gov.ida.notification.translator.TranslatorConfiguration;
 
@@ -42,6 +43,8 @@ public class TranslatorAppRule extends DropwizardAppRule<TranslatorConfiguration
     public WebTarget target(String path, int port) throws URISyntaxException {
         if (client == null) {
             client = new JerseyClientBuilder(getEnvironment())
+                    .withProperty(ClientProperties.CONNECT_TIMEOUT, 10000)
+                    .withProperty(ClientProperties.READ_TIMEOUT, 10000)
                     .build("test client");
         }
         return client.target(new URI("http://localhost:" + port).resolve(path));

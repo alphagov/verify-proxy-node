@@ -1,8 +1,0 @@
-# Tester image
-
-FROM gradle:jdk11 AS build
-WORKDIR /app
-USER root
-ENV GRADLE_USER_HOME ~/.gradle
-ENV VERIFY_USE_PUBLIC_BINARIES true
-CMD gradle --no-daemon --quiet test

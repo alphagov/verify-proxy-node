@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  docker-gradle:
+    image: gradle:jdk11
+    working_dir: /home/gradle/project
+    user: root
+    entrypoint: gradle --no-daemon
+    environment:
+      VERIFY_USE_PUBLIC_BINARIES: 'true'
+    volumes:
+      - gradle-cache:/home/gradle/.gradle
+      - .:/home/gradle/project
+        
+volumes:
+  gradle-cache:

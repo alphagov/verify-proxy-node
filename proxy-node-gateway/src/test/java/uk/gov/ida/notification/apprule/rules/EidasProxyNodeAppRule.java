@@ -3,6 +3,7 @@ package uk.gov.ida.notification.apprule.rules;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import org.glassfish.jersey.client.ClientProperties;
 import uk.gov.ida.notification.EidasProxyNodeApplication;
 import uk.gov.ida.notification.EidasProxyNodeConfiguration;
 
@@ -42,6 +43,8 @@ public class EidasProxyNodeAppRule extends DropwizardAppRule<EidasProxyNodeConfi
     public WebTarget target(String path, int port) throws URISyntaxException {
         if (client == null) {
             client = new JerseyClientBuilder(getEnvironment())
+                    .withProperty(ClientProperties.CONNECT_TIMEOUT, 10000)
+                    .withProperty(ClientProperties.READ_TIMEOUT, 10000)
                     .build("test client");
         }
         return client.target(new URI("http://localhost:" + port).resolve(path));
