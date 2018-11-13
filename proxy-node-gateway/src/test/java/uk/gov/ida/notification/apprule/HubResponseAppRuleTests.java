@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.BasicCredential;
@@ -16,6 +17,7 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
@@ -30,8 +32,6 @@ import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -58,6 +58,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private static final String END_CERT = "\n-----END CERTIFICATE-----";
     private SamlObjectMarshaller marshaller;
     private BasicCredential hubSigningCredential;
+    private AuthnRequest eidasAuthnRequest;
     private EncryptedAssertion authnAssertion;
     private EncryptedAssertion matchingDatasetAssertion;
 
@@ -76,15 +77,18 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY))));
 
         hubSigningCredential = new BasicCredential(publicKey, privateKey);
+
+        eidasAuthnRequest = new EidasAuthnRequestBuilder().withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
+        samlObjectSigner.sign(eidasAuthnRequest);
         authnAssertion = HubAssertionBuilder.anAuthnStatementAssertion()
             .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
             .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID)
+            .withSubject(PROXY_NODE_ENTITY_ID, eidasAuthnRequest.getID())
             .buildEncrypted(hubAssertionsEncryptionCredential);
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion()
             .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
             .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID)
+            .withSubject(PROXY_NODE_ENTITY_ID, eidasAuthnRequest.getID())
             .buildEncrypted(hubAssertionsEncryptionCredential);
     }
 
@@ -153,13 +157,8 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     }
 
     private javax.ws.rs.core.Response postHubResponseToProxyNode(Response hubResponse) throws URISyntaxException {
-        String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
-
-        return proxyNodeAppRule
-                .target("/SAML2/SSO/Response/POST")
-                .request()
-                .post(Entity.form(postForm));
+        postEidasAuthnRequest(eidasAuthnRequest);
+        return postHubResponse(hubResponse);
     }
 
     private static Response decryptResponse(Response response, Credential credential) {
@@ -179,6 +178,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
                 .withDestination("http://proxy-node/SAML2/SSO/Response")
+                .withInResponseTo(eidasAuthnRequest.getID())
                 .addEncryptedAssertion(authnAssertion)
                 .addEncryptedAssertion(matchingDatasetAssertion);
     }

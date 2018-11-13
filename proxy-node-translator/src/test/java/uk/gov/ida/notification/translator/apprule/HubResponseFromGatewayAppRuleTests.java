@@ -25,6 +25,7 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
+import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
@@ -78,12 +79,12 @@ public class HubResponseFromGatewayAppRuleTests extends TranslatorAppRuleTestBas
         authnAssertion = HubAssertionBuilder.anAuthnStatementAssertion()
             .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
             .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID)
+            .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
             .buildEncrypted(hubAssertionsEncryptionCredential);
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion()
             .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
             .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID)
+            .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
             .buildEncrypted(hubAssertionsEncryptionCredential);
     }
 

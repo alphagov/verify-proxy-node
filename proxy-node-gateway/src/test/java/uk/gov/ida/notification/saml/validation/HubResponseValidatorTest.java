@@ -17,6 +17,7 @@ import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
@@ -39,6 +40,8 @@ public class HubResponseValidatorTest {
     @Mock
     private LoaValidator loaValidator;
     @Mock
+    private RequestIdWatcher requestIdWatcher;
+    @Mock
     private Response response;
 
     private Assertion matchingDatasetAssertion;
@@ -55,7 +58,8 @@ public class HubResponseValidatorTest {
         hubResponseValidator = new HubResponseValidator(
             idpResponseValidator,
             responseAttributesValidator,
-            loaValidator
+            loaValidator,
+            requestIdWatcher
         );
         authnStatementAssertion = HubAssertionBuilder.anAuthnStatementAssertion().build();
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion().build();

@@ -10,6 +10,7 @@ import uk.gov.ida.notification.exceptions.authnrequest.AuthnRequestException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
@@ -31,17 +32,20 @@ public class EidasAuthnRequestResource {
     private SamlFormViewBuilder samlFormViewBuilder;
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
     private SamlRequestSignatureValidator samlRequestSignatureValidator;
+    private final RequestIdWatcher requestIdWatcher;
 
     public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
                                      HubAuthnRequestGenerator authnRequestGenerator,
                                      SamlFormViewBuilder samlFormViewBuilder,
                                      EidasAuthnRequestValidator eidasAuthnRequestValidator,
-                                     SamlRequestSignatureValidator samlRequestSignatureValidator) {
+                                     SamlRequestSignatureValidator samlRequestSignatureValidator,
+                                     RequestIdWatcher requestIdWatcher) {
         this.configuration = configuration;
         this.hubAuthnRequestGenerator = authnRequestGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
         this.samlRequestSignatureValidator = samlRequestSignatureValidator;
+        this.requestIdWatcher = requestIdWatcher;
     }
 
     @GET
@@ -68,6 +72,7 @@ public class EidasAuthnRequestResource {
             EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
             logAuthnRequestInformation(eidasAuthnRequest);
             AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
+            requestIdWatcher.observe(authnRequest);
             return buildSamlFormView(hubAuthnRequest, relayState);
         } catch (Throwable example) {
             throw new AuthnRequestException(example, authnRequest);

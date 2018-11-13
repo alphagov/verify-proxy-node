@@ -17,10 +17,15 @@ public class HubResponseBuilder {
         responseBuilder = new ResponseBuilder();
     }
 
+    public static HubResponseBuilder aHubResponse() {
+        return new HubResponseBuilder();
+    }
+
     public HubResponseBuilder addEncryptedAssertion(EncryptedAssertion assertion) {
         responseBuilder.addEncryptedAssertion(assertion);
         return this;
     }
+
     public HubResponseBuilder withIssuer(String issuer) {
         responseBuilder.withIssuer(anIssuer().withIssuerId(issuer).build());
         return this;
@@ -28,6 +33,11 @@ public class HubResponseBuilder {
 
     public HubResponseBuilder withDestination(String destination) {
         responseBuilder.withDestination(destination);
+        return this;
+    }
+
+    public HubResponseBuilder withInResponseTo(String requestId) {
+        responseBuilder.withInResponseTo(requestId);
         return this;
     }
 

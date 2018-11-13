@@ -30,6 +30,7 @@ import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
@@ -158,11 +159,12 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
 
     private void registerResources(EidasProxyNodeConfiguration configuration, Environment environment) throws ComponentInitializationException {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+        RequestIdWatcher requestIdWatcher = new RequestIdWatcher();
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
-        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
+        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration, requestIdWatcher);
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
 
@@ -171,7 +173,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder,
                 eidasAuthnRequestValidator,
-                samlRequestSignatureValidator));
+                samlRequestSignatureValidator,
+                requestIdWatcher));
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
@@ -192,7 +195,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
-    private HubResponseValidator createHubResponseValidator(EidasProxyNodeConfiguration configuration) throws ComponentInitializationException {
+    private HubResponseValidator createHubResponseValidator(EidasProxyNodeConfiguration configuration, RequestIdWatcher requestIdWatcher) throws ComponentInitializationException {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
@@ -211,7 +214,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         return new HubResponseValidator(
             idpResponseValidator,
             responseAttributesValidator,
-            new LoaValidator());
+            new LoaValidator(),
+            requestIdWatcher);
     }
 
     private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId) {

@@ -2,6 +2,8 @@ dependencies {
     compile configurations.dropwizard,
             configurations.saml,
             configurations.common
+
+    testCompile project(':proxy-node-test')
 }
 
 group = 'uk.gov.ida.notification.shared'

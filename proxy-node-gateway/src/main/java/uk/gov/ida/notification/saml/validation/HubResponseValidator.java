@@ -4,6 +4,7 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
@@ -15,11 +16,17 @@ public class HubResponseValidator {
     private final IdpResponseValidator idpResponseValidator;
     private final ResponseAttributesValidator responseAttributesValidator;
     private final LoaValidator loaValidator;
+    private final RequestIdWatcher requestIdWatcher;
 
-    public HubResponseValidator(IdpResponseValidator idpResponseValidator, ResponseAttributesValidator responseAttributesValidator, LoaValidator loaValidator) {
+    public HubResponseValidator(
+        IdpResponseValidator idpResponseValidator,
+        ResponseAttributesValidator responseAttributesValidator,
+        LoaValidator loaValidator,
+        RequestIdWatcher requestIdWatcher) {
         this.idpResponseValidator = idpResponseValidator;
         this.responseAttributesValidator = responseAttributesValidator;
         this.loaValidator = loaValidator;
+        this.requestIdWatcher = requestIdWatcher;
     }
 
     public ValidatedResponse getValidatedResponse() {
@@ -33,6 +40,7 @@ public class HubResponseValidator {
     public void validate(Response response) {
         try {
             idpResponseValidator.validate(response);
+            requestIdWatcher.validateSeenRequestFor(response);
 
             Assertion matchingDatasetAssertion = getValidatedAssertions()
                 .getMatchingDatasetAssertion()
