@@ -12,7 +12,6 @@ buildscript {
     dependencies {
         classpath 'com.github.spullara.mustache.java:compiler:0.8.10',
                 'org.yaml:snakeyaml:1.10',
-                'uk.gov.ida:ida-gradle:1.1.0-23',
                 'com.google.guava:guava:14.0.1',
                 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
     }
@@ -103,17 +102,6 @@ subprojects {
             project(':proxy-node-test')
         )
 
-    }
-}
-
-task paasManifestFileCheck {
-    doFirst {
-        if (!project.hasProperty('manifestFile')) {
-            def usage = './gradlew pushToPaas -PmanifestFile=<path to file>'
-            println 'Manifest file is missing!!'
-            println "Please run " + usage
-            throw new GradleException("Usage: " + usage)
-        }
     }
 }
 
