@@ -5,13 +5,13 @@ set -e
 
 ./startup.sh
 
-echo "Waiting 30 seconds for services."
-sleep 30
+echo "Waiting 60 seconds for services."
+sleep 60
 
 echo ===========================================================
 echo Running acceptance tests
 echo ===========================================================
 
-pushd notification-acceptance-tests > /dev/null
+pushd proxy-node-acceptance-tests > /dev/null
   $(pwd)/pre-commit.sh
 popd > /dev/null
