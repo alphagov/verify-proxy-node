@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+docker-compose -f gradle-compose.yaml run --rm docker-gradle $@

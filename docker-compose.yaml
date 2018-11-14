@@ -84,7 +84,8 @@ services:
       - ./.local_pki:/stub-idp/pki:ro
 
   proxy-node-metadata:
-    build: metadata
+    image: ruby:2.4.4
+    command: ruby -run -ehttpd /srv -p80
     ports:
       - "7000:80"
     volumes:
