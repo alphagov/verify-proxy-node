@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
@@ -21,6 +22,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.logging.Logger;
 
+@Timed
 @Path("/SAML2/SSO/Response")
 public class HubResponseFromGatewayResource {
     private static final Logger LOG = Logger.getLogger(HubResponseFromGatewayResource.class.getName());

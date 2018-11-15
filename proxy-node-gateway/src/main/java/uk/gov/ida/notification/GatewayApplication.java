@@ -1,5 +1,6 @@
 package uk.gov.ida.notification;
 
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -100,6 +101,9 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 new EnvironmentVariableSubstitutor(false)
             )
         );
+
+        // Prometheus metrics endpoint
+        bootstrap.addBundle(new PrometheusBundle());
 
         // Needed to initialise OpenSAML libraries
         // The eidas-opensaml3 library provides its own initializer that will be executed

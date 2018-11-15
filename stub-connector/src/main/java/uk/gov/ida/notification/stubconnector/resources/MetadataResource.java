@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.stubconnector.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.xml.SAMLConstants;
@@ -29,6 +30,7 @@ import javax.ws.rs.Produces;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 
+@Timed
 @Path("/Metadata")
 @Produces("application/samlmetadata+xml")
 public class MetadataResource {

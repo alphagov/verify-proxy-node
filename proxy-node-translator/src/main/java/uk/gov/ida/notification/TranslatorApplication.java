@@ -1,6 +1,7 @@
 package uk.gov.ida.notification;
 
 import com.google.common.collect.ImmutableList;
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -103,6 +104,9 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         } catch(InitializationException e) {
             throw new RuntimeException(e);
         }
+
+        // Prometheus metrics endpoint
+        bootstrap.addBundle(new PrometheusBundle());
 
         // Verify SAML
         VerifySamlInitializer.init();

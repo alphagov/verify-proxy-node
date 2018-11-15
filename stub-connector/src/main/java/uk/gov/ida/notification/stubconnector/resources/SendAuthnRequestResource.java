@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.stubconnector.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
@@ -17,7 +18,7 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.List;
 
-
+@Timed
 @Path("/Request")
 public class SendAuthnRequestResource {
     private final StubConnectorConfiguration configuration;

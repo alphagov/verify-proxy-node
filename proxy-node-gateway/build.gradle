@@ -2,6 +2,7 @@ dependencies {
     compile configurations.dropwizard,
             configurations.saml,
             configurations.common,
+            configurations.prometheus,
             project(':proxy-node-shared')
 }
 

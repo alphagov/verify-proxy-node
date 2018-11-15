@@ -1,5 +1,6 @@
 package uk.gov.ida.notification;
 
+import engineering.reliability.gds.metrics.config.PrometheusConfiguration;
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.*;
@@ -10,7 +11,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.net.URI;
 
-public class TranslatorConfiguration extends Configuration {
+public class TranslatorConfiguration extends Configuration implements PrometheusConfiguration {
 
     @JsonProperty
     @Valid
@@ -62,6 +63,11 @@ public class TranslatorConfiguration extends Configuration {
     @NotNull
     private TrustStoreBackedMetadataConfiguration hubMetadataConfiguration;
 
+    @JsonProperty
+    @Valid
+    @NotNull
+    private boolean prometheusEnabled = true;
+
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -98,7 +104,11 @@ public class TranslatorConfiguration extends Configuration {
         return hubMetadataConfiguration;
     }
 
-        public URI getProxyNodeResponseUrl() {
+    public URI getProxyNodeResponseUrl() {
             return proxyNodeResponseUrl;
         }
+
+    public boolean isPrometheusEnabled() {
+        return prometheusEnabled;
+    }
 }

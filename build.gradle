@@ -26,6 +26,8 @@ ext {
     utils_version = '2.0.0-346'
     saml_libs_version = "${opensaml_version}-160"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
+    gds_metrics_lib_version = '0.1.0'
+    dropwizard_metrics_version = '4.0.3'
 }
 
 
@@ -60,6 +62,7 @@ subprojects {
         dropwizard
         saml
         saml_test
+        prometheus
     }
 
     dependencies {
@@ -90,6 +93,11 @@ subprojects {
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
                 "uk.gov.ida:security-utils:${utils_version}"
+        )
+
+        prometheus (
+                "engineering.gds-reliability:gds-metrics-dropwizard:${gds_metrics_lib_version}",
+                "io.dropwizard.metrics:metrics-core:${dropwizard_metrics_version}",
         )
 
         testCompile (

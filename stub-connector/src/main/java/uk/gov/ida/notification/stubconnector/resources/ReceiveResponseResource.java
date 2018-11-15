@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.stubconnector.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.Response;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Timed
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
     private final ResponseAssertionDecrypter decrypter;

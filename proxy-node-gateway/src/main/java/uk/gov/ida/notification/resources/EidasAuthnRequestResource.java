@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
@@ -23,6 +24,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.logging.Logger;
 
+@Timed
 @Path("/SAML2/SSO")
 public class EidasAuthnRequestResource {
     private static final Logger LOG = Logger.getLogger(EidasAuthnRequestResource.class.getName());

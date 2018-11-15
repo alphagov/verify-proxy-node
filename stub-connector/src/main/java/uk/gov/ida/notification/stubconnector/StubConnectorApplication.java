@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.stubconnector;
 
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -82,6 +83,9 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         } catch(InitializationException e) {
             throw new RuntimeException(e);
         }
+
+        // Prometheus metrics endpoint
+        bootstrap.addBundle(new PrometheusBundle());
 
         // Verify SAML
         VerifySamlInitializer.init();
