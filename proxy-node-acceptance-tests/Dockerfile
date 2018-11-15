@@ -1,4 +1,4 @@
-FROM ruby:2.4.2
+FROM ruby:2.5.3
 
 COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock

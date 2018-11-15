@@ -6,8 +6,8 @@ docker-compose build
 echo "Docker compose build"
 docker-compose run \
                -e TEST_ENV=${TEST_ENV:-"local"} \
-               test-runner -f pretty -f junit -o testreport/ "$@"
+               acceptance-tests -f pretty -f junit -o testreport/ "$@"
 exit_status=$?
-docker cp $(docker ps -a -q -f name="test-runner"):/testreport .
+docker cp $(docker ps -a -q -f name="acceptance-tests"):/testreport .
 docker-compose down
 exit $exit_status

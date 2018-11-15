@@ -4,7 +4,7 @@ services:
   selenium-hub:
     image: selenium/standalone-firefox
 
-  test-runner:
+  acceptane-tests:
     build: .
     depends_on:
       - selenium-hub
