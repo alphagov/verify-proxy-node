@@ -15,6 +15,7 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
+import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 import uk.gov.ida.notification.exceptions.hubresponse.TranslatorResponseException;
 import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -22,6 +23,7 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -44,19 +46,21 @@ public class HubResponseResource {
     private HubResponseValidator hubResponseValidator;
     private Environment environment;
     private String translatorUrl;
+    private final RequestIdWatcher requestIdWatcher;
 
     public HubResponseResource(
             SamlFormViewBuilder samlFormViewBuilder,
             String connectorNodeUrl,
             HubResponseValidator hubResponseValidator,
             Environment environment,
-            String translatorUrl) {
-
-        this.connectorNodeUrl = connectorNodeUrl;
+            String translatorUrl,
+            RequestIdWatcher requestIdWatcher) {
         this.samlFormViewBuilder = samlFormViewBuilder;
+        this.connectorNodeUrl = connectorNodeUrl;
         this.hubResponseValidator = hubResponseValidator;
         this.environment = environment;
         this.translatorUrl = translatorUrl;
+        this.requestIdWatcher = requestIdWatcher;
     }
 
     @POST
@@ -71,6 +75,10 @@ public class HubResponseResource {
         try (CloseableHttpClient client = new HttpClientBuilder(environment).build("translator")) {
 
             hubResponseValidator.validate(encryptedHubResponse);
+            if (!requestIdWatcher.haveSeenRequestFor(encryptedHubResponse)) {
+                throw new InvalidHubResponseException(
+                    String.format("Received a Response from Hub for an AuthnRequest we have not seen (ID: %s)", encryptedHubResponse.getInResponseTo()));
+            }
 
             HubResponseContainer hubResponseContainer = HubResponseContainer.from(
                     hubResponseValidator.getValidatedResponse(),

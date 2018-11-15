@@ -164,7 +164,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
-        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration, requestIdWatcher);
+        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
 
@@ -181,7 +181,8 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 configuration.getConnectorNodeUrl().toString(),
                 hubResponseValidator,
                 environment,
-                configuration.getTranslatorUrl().toString()
+                configuration.getTranslatorUrl().toString(),
+                requestIdWatcher
             ));
     }
 
@@ -195,7 +196,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
-    private HubResponseValidator createHubResponseValidator(EidasProxyNodeConfiguration configuration, RequestIdWatcher requestIdWatcher) throws ComponentInitializationException {
+    private HubResponseValidator createHubResponseValidator(EidasProxyNodeConfiguration configuration) throws ComponentInitializationException {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
@@ -214,8 +215,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         return new HubResponseValidator(
             idpResponseValidator,
             responseAttributesValidator,
-            new LoaValidator(),
-            requestIdWatcher);
+            new LoaValidator());
     }
 
     private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId) {

@@ -2,7 +2,6 @@ package uk.gov.ida.notification.saml.validation.components;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.ida.notification.helpers.HubResponseBuilder.aHubResponse;
 import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
@@ -35,7 +34,6 @@ public class RequestIdWatcherTest {
     Response response = aHubResponse().withInResponseTo(ResponseBuilder.DEFAULT_REQUEST_ID).build();
 
     assertFalse(this.requestIdWatcher.haveSeenRequestFor(response));
-    assertThrows(InvalidHubResponseException.class, () -> this.requestIdWatcher.validateSeenRequestFor(response));
   }
 
   @Test
@@ -45,7 +43,6 @@ public class RequestIdWatcherTest {
 
     this.requestIdWatcher.observe(authnRequest);
     assertTrue(this.requestIdWatcher.haveSeenRequestFor(response));
-    this.requestIdWatcher.validateSeenRequestFor(response);
   }
 
   @Test
@@ -55,7 +52,6 @@ public class RequestIdWatcherTest {
       Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
 
       assertTrue(this.requestIdWatcher.haveSeenRequestFor(response));
-      this.requestIdWatcher.validateSeenRequestFor(response);
     }
   }
 }
