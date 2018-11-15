@@ -1,8 +1,0 @@
-- repo: local
-  hooks:
-    - id: java-tests
-      name: Run Java tests
-      entry: ./gradlew clean build
-      language: system
-      always_run: true
-      pass_filenames: false

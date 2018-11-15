@@ -4,4 +4,4 @@ include 'proxy-node-gateway',
         'proxy-node-shared',
         'proxy-node-test',
         'stub-connector',
-        'acceptance-tests'
+        'proxy-node-acceptance-tests'

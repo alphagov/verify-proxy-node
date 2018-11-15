@@ -2,6 +2,19 @@
 
 set -euo pipefail
 
+function wait_for {
+  local service="$1"
+  local url="$2"
+  local expected_code="${3:-200}"
+
+  echo -n "Waiting for $service "
+  until test "$expected_code" = $(curl --output /dev/null --silent --write-out '%{http_code}' "$url"); do
+    echo -n "."
+    sleep 1
+  done
+  echo " READY"
+}
+
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}"/.local_pki
 
@@ -19,4 +32,7 @@ pushd "${PN_PROJECT_DIR}/pki"
     "${PKI_OUTPUT_DIR}"
 popd
 
-docker-compose up $@
+docker-compose up $@ -d
+
+wait_for "Metadata" localhost:5000/Metadata
+
