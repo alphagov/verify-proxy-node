@@ -1,10 +1,14 @@
 package uk.gov.ida.notification.apprule;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.util.Strings;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -15,6 +19,7 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
@@ -47,6 +52,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
@@ -148,6 +155,35 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
         assertThat(message).contains("Error handling hub response");
+    }
+
+    @Test
+    public void shouldNotAcceptHubResponseWithNoSeenCorrespondingEidasRequest() throws Exception {
+        Appender mockAppender = mock(Appender.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        logger.addAppender(mockAppender);
+
+        Response hubResponse = buildSignedHubResponse();
+
+        javax.ws.rs.core.Response response = postHubResponse(hubResponse);
+        String responseMessage = response.readEntity(String.class);
+
+        ArgumentCaptor<LoggingEvent> loggingEventCaptor = ArgumentCaptor.forClass(LoggingEvent.class);
+        verify(mockAppender).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getValue();
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(responseMessage).contains("Error handling hub response");
+        assertThat(loggingEvent.getMessage())
+            .contains(String
+                .format(
+                    "Received a Response from Hub for an AuthnRequest we have not seen (ID: %s)",
+                    hubResponse.getInResponseTo()
+                )
+            );
+
+        logger.detachAppender(mockAppender);
+
     }
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {
