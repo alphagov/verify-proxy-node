@@ -18,7 +18,6 @@ import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.EidasResponseGenerator;
-import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
@@ -31,7 +30,7 @@ import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializ
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.notification.translator.resources.HubResponseResource;
+import uk.gov.ida.notification.translator.resources.HubResponseFromGatewayResource;
 import uk.gov.ida.saml.core.validators.DestinationValidator;
 import uk.gov.ida.saml.core.validators.assertion.AssertionAttributeStatementValidator;
 import uk.gov.ida.saml.core.validators.assertion.AuthnStatementAssertionValidator;
@@ -143,16 +142,13 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) throws ComponentInitializationException {
-        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
-
         EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
 
         HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
 
-        environment.jersey().register(new HubResponseResource(
+        environment.jersey().register(new HubResponseFromGatewayResource(
                 eidasResponseGenerator,
-                samlFormViewBuilder,
                 configuration.getConnectorNodeUrl().toString(),
                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 connectorMetadata,

@@ -1,16 +1,25 @@
 package uk.gov.ida.notification.resources;
 
+import io.dropwizard.client.HttpClientBuilder;
+import io.dropwizard.setup.Environment;
 import io.dropwizard.views.View;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.saml2.core.Response;
-import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.security.credential.UsageType;
-import org.opensaml.security.x509.X509Credential;
-import uk.gov.ida.notification.EidasResponseGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
-import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
+import uk.gov.ida.notification.exceptions.hubresponse.TranslatorResponseException;
+import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.saml.metadata.Metadata;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.translation.HubResponseContainer;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 
@@ -19,32 +28,35 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 @Path("/SAML2/SSO/Response")
 public class HubResponseResource {
     private static final Logger LOG = Logger.getLogger(HubResponseResource.class.getName());
 
-    private final EidasResponseGenerator eidasResponseGenerator;
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final String connectorNodeUrl;
-    private final String connectorEntityId;
-    private final Metadata connectorMetadata;
     private HubResponseValidator hubResponseValidator;
+    private Environment environment;
+    private String translatorUrl;
 
     public HubResponseResource(
-        EidasResponseGenerator eidasResponseGenerator,
-        SamlFormViewBuilder samlFormViewBuilder,
-        String connectorNodeUrl,
-        String connectorEntityId,
-        Metadata connectorMetadata,
-        HubResponseValidator hubResponseValidator) {
+            SamlFormViewBuilder samlFormViewBuilder,
+            String connectorNodeUrl,
+            HubResponseValidator hubResponseValidator,
+            Environment environment,
+            String translatorUrl) {
+
         this.connectorNodeUrl = connectorNodeUrl;
-        this.eidasResponseGenerator = eidasResponseGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
-        this.connectorEntityId = connectorEntityId;
-        this.connectorMetadata = connectorMetadata;
         this.hubResponseValidator = hubResponseValidator;
+        this.environment = environment;
+        this.translatorUrl = translatorUrl;
     }
 
     @POST
@@ -53,29 +65,44 @@ public class HubResponseResource {
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
             @FormParam("RelayState") String relayState) {
-        try {
+
+        CloseableHttpResponse translatorResponse = null;
+
+        try (CloseableHttpClient client = new HttpClientBuilder(environment).build("translator")) {
+
             hubResponseValidator.validate(encryptedHubResponse);
 
             HubResponseContainer hubResponseContainer = HubResponseContainer.from(
-                hubResponseValidator.getValidatedResponse(),
-                hubResponseValidator.getValidatedAssertions()
+                    hubResponseValidator.getValidatedResponse(),
+                    hubResponseValidator.getValidatedAssertions()
             );
             logHubResponse(hubResponseContainer);
 
-            ResponseAssertionEncrypter assertionEncrypter = createAssertionEncrypter();
+            String samlMessage = new SamlObjectMarshaller().transformToString(encryptedHubResponse);
 
-            Response securedEidasResponse = eidasResponseGenerator.generate(hubResponseContainer, assertionEncrypter);
-            logEidasResponse(securedEidasResponse);
+            HttpPost httpPost = new HttpPost(UriBuilder.fromUri(translatorUrl).build());
 
-            return samlFormViewBuilder.buildResponse(connectorNodeUrl, securedEidasResponse, "Post eIDAS Response SAML to Connector Node", relayState);
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair(SamlFormMessageType.SAML_RESPONSE, Base64.encodeAsString(samlMessage)));
+            httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+            translatorResponse = client.execute(httpPost);
+
+            ResponseHandler<String> handler = new BasicResponseHandler();
+            String response = handler.handleResponse(translatorResponse);
+
+            Response samlObject = new SamlParser().parseSamlString(response);
+            logEidasResponse(samlObject);
+
+            return samlFormViewBuilder.buildResponse(connectorNodeUrl, samlObject, "Post eIDAS Response SAML to Connector Node", relayState);
+
+        } catch (UnsupportedEncodingException e) {
+            throw new HubResponseException(e, encryptedHubResponse);
+        } catch (SamlParsingException | IOException e) {
+            throw new TranslatorResponseException(e, translatorResponse);
         } catch (Throwable e) {
             throw new HubResponseException(e, encryptedHubResponse);
         }
-    }
-
-    private ResponseAssertionEncrypter createAssertionEncrypter() {
-        X509Credential encryptionCredential = (X509Credential) connectorMetadata.getCredential(UsageType.ENCRYPTION, connectorEntityId, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-        return new ResponseAssertionEncrypter(encryptionCredential);
     }
 
     private void logHubResponse(HubResponseContainer hubResponseContainer) {

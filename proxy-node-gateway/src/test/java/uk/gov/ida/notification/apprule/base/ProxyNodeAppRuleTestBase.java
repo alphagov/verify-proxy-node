@@ -8,6 +8,7 @@ import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.EidasProxyNodeAppRule;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
+import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
@@ -20,6 +21,9 @@ public class ProxyNodeAppRuleTestBase {
     @ClassRule
     public static final MetadataClientRule metadataClientRule;
 
+    @ClassRule
+    public static final TranslatorClientRule translatorClientRule;
+
     private static final KeyStoreResource truststore = aKeyStoreResource()
             .withCertificate("VERIFY-FEDERATION", aCertificate().withCertificate(METADATA_SIGNING_A_PUBLIC_CERT).build().getCertificate())
             .build();
@@ -29,6 +33,7 @@ public class ProxyNodeAppRuleTestBase {
             InitializationService.initialize();
             VerifySamlInitializer.init();
             metadataClientRule = new MetadataClientRule();
+            translatorClientRule = new TranslatorClientRule();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -43,6 +48,7 @@ public class ProxyNodeAppRuleTestBase {
             ConfigOverride.config("hubUrl", "http://hub"),
             ConfigOverride.config("connectorNodeUrl", "http://connector-node:8080"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
+            ConfigOverride.config("translatorUrl", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
             ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
             ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),

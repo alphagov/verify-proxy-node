@@ -16,7 +16,6 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
-import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
@@ -52,7 +51,7 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_P
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
-public class HubResponseAppRuleTests extends TranslatorAppRuleTestBase {
+public class HubResponseFromGatewayAppRuleTests extends TranslatorAppRuleTestBase {
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
     private static final String END_CERT = "\n-----END CERTIFICATE-----";
@@ -63,7 +62,7 @@ public class HubResponseAppRuleTests extends TranslatorAppRuleTestBase {
 
     @Before
     public void setup() throws Throwable {
-        KeyPairConfiguration hubFacingEncryptionKeyPair = proxyNodeAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
+        KeyPairConfiguration hubFacingEncryptionKeyPair = translatorAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
         Credential hubAssertionsEncryptionCredential = new BasicCredential(
             hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
         );
@@ -90,7 +89,7 @@ public class HubResponseAppRuleTests extends TranslatorAppRuleTestBase {
 
     @Test
     public void shouldReturnASignedEidasResponse() throws Exception {
-        KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
+        KeyPairConfiguration signingKeyPair = translatorAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
 
         Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
@@ -127,7 +126,7 @@ public class HubResponseAppRuleTests extends TranslatorAppRuleTestBase {
 
     @Test
     public void shouldNotAcceptUnsignedHubResponse() throws Exception {
-        javax.ws.rs.core.Response response = postHubResponseToProxyNode(buildUnsignedHubResponse());
+        javax.ws.rs.core.Response response = postHubResponseToTranslator(buildUnsignedHubResponse());
         String message = response.readEntity(String.class);
         assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
         assertThat(message).contains("Error handling hub response");
@@ -139,7 +138,7 @@ public class HubResponseAppRuleTests extends TranslatorAppRuleTestBase {
             .withIssuer(null)
             .buildSigned(hubSigningCredential);
 
-        javax.ws.rs.core.Response response = postHubResponseToProxyNode(invalidResponse);
+        javax.ws.rs.core.Response response = postHubResponseToTranslator(invalidResponse);
         String message = response.readEntity(String.class);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
@@ -147,16 +146,15 @@ public class HubResponseAppRuleTests extends TranslatorAppRuleTestBase {
     }
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {
-        String html = postHubResponseToProxyNode(hubResponse).readEntity(String.class);
-        String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
+        String decodedEidasResponse = postHubResponseToTranslator(hubResponse).readEntity(String.class);
         return new SamlParser().parseSamlString(decodedEidasResponse);
     }
 
-    private javax.ws.rs.core.Response postHubResponseToProxyNode(Response hubResponse) throws URISyntaxException {
+    private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws URISyntaxException {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 
-        return proxyNodeAppRule
+        return translatorAppRule
                 .target("/SAML2/SSO/Response/POST")
                 .request()
                 .post(Entity.form(postForm));

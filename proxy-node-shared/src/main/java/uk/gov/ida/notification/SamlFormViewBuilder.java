@@ -21,4 +21,8 @@ public class SamlFormViewBuilder {
         String encodedSamlMessage = Base64.encodeAsString(samlMessage);
         return new SamlFormView(url, SamlFormMessageType.SAML_RESPONSE, encodedSamlMessage, submitText, relayState);
     }
+
+    public SamlFormView buildResponse(String url, String encodedSamlMessage, String submitText, String relayState) {
+        return new SamlFormView(url, SamlFormMessageType.SAML_RESPONSE, encodedSamlMessage, submitText, relayState);
+    }
 }
