@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import org.joda.time.DateTime;
 import uk.gov.ida.saml.security.validators.ValidatedResponse;

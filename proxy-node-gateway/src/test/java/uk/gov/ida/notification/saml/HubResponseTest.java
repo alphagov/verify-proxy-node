@@ -1,10 +1,9 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.FileHelpers;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.security.validators.ValidatedResponse;
 
 import static junit.framework.TestCase.assertEquals;

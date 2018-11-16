@@ -1,15 +1,16 @@
 package uk.gov.ida.notification;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.*;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.net.URI;
 
-public class EidasProxyNodeConfiguration extends Configuration {
+public class TranslatorConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
@@ -20,11 +21,6 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @Valid
     @NotNull
     private URI connectorNodeUrl;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private URI translatorUrl;
 
     @JsonProperty
     @Valid
@@ -44,17 +40,12 @@ public class EidasProxyNodeConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private KeyPairConfiguration connectorFacingSigningKeyPair;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private KeyPairConfiguration hubFacingSigningKeyPair;
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private KeyPairConfiguration hubFacingEncryptionKeyPair;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private KeyPairConfiguration connectorFacingSigningKeyPair;
 
     @JsonProperty
     @Valid
@@ -79,18 +70,16 @@ public class EidasProxyNodeConfiguration extends Configuration {
         return connectorNodeUrl;
     }
 
-    public URI getTranslatorUrl() { return translatorUrl; }
-
     public String getProxyNodeEntityId() {
         return proxyNodeEntityId;
     }
 
-    public KeyPairConfiguration getConnectorFacingSigningKeyPair() {
-        return connectorFacingSigningKeyPair;
-    }
-
     public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
         return hubFacingEncryptionKeyPair;
+    }
+
+    public KeyPairConfiguration getConnectorFacingSigningKeyPair() {
+        return connectorFacingSigningKeyPair;
     }
 
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
@@ -109,11 +98,7 @@ public class EidasProxyNodeConfiguration extends Configuration {
         return hubMetadataConfiguration;
     }
 
-    public KeyPairConfiguration getHubFacingSigningKeyPair() {
-        return hubFacingSigningKeyPair;
-    }
-
-    public URI getProxyNodeResponseUrl() {
-        return proxyNodeResponseUrl;
-    }
+        public URI getProxyNodeResponseUrl() {
+            return proxyNodeResponseUrl;
+        }
 }

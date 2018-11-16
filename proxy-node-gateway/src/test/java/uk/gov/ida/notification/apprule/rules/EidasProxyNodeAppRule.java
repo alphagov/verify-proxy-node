@@ -4,8 +4,8 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
-import uk.gov.ida.notification.EidasProxyNodeApplication;
-import uk.gov.ida.notification.EidasProxyNodeConfiguration;
+import uk.gov.ida.notification.GatewayApplication;
+import uk.gov.ida.notification.GatewayConfiguration;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -17,12 +17,12 @@ import java.util.List;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
-public class EidasProxyNodeAppRule extends DropwizardAppRule<EidasProxyNodeConfiguration> {
+public class EidasProxyNodeAppRule extends DropwizardAppRule<GatewayConfiguration> {
     private Client client;
 
     public EidasProxyNodeAppRule(ConfigOverride... configOverrides) {
         super(
-            EidasProxyNodeApplication.class,
+            GatewayApplication.class,
             resourceFilePath("config.yml"),
             getConfigOverrides(configOverrides)
         );

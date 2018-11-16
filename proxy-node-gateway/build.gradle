@@ -9,7 +9,7 @@ group = 'uk.gov.ida.notification.gateway'
 version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
 apply plugin: 'application'
-mainClassName = 'uk.gov.ida.notification.EidasProxyNodeApplication'
+mainClassName = 'uk.gov.ida.notification.GatewayApplication'
 
 run {
     args 'server', './src/dist/config.yml'

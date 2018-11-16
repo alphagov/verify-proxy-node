@@ -1,16 +1,15 @@
-package uk.gov.ida.notification.translator;
+package uk.gov.ida.notification;
 
-import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.*;
+import io.dropwizard.Configuration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class TranslatorConfiguration extends Configuration {
+public class GatewayConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
@@ -21,6 +20,11 @@ public class TranslatorConfiguration extends Configuration {
     @Valid
     @NotNull
     private URI connectorNodeUrl;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private URI translatorUrl;
 
     @JsonProperty
     @Valid
@@ -40,12 +44,17 @@ public class TranslatorConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private KeyPairConfiguration hubFacingEncryptionKeyPair;
+    private KeyPairConfiguration connectorFacingSigningKeyPair;
 
     @JsonProperty
     @Valid
     @NotNull
-    private KeyPairConfiguration connectorFacingSigningKeyPair;
+    private KeyPairConfiguration hubFacingSigningKeyPair;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private KeyPairConfiguration hubFacingEncryptionKeyPair;
 
     @JsonProperty
     @Valid
@@ -70,16 +79,18 @@ public class TranslatorConfiguration extends Configuration {
         return connectorNodeUrl;
     }
 
+    public URI getTranslatorUrl() { return translatorUrl; }
+
     public String getProxyNodeEntityId() {
         return proxyNodeEntityId;
     }
 
-    public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
-        return hubFacingEncryptionKeyPair;
-    }
-
     public KeyPairConfiguration getConnectorFacingSigningKeyPair() {
         return connectorFacingSigningKeyPair;
+    }
+
+    public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
+        return hubFacingEncryptionKeyPair;
     }
 
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
@@ -98,7 +109,11 @@ public class TranslatorConfiguration extends Configuration {
         return hubMetadataConfiguration;
     }
 
-        public URI getProxyNodeResponseUrl() {
-            return proxyNodeResponseUrl;
-        }
+    public KeyPairConfiguration getHubFacingSigningKeyPair() {
+        return hubFacingSigningKeyPair;
+    }
+
+    public URI getProxyNodeResponseUrl() {
+        return proxyNodeResponseUrl;
+    }
 }

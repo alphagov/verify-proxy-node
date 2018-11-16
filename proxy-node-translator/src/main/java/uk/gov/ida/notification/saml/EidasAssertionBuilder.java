@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -14,7 +14,6 @@ import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.Subject;
-import uk.gov.ida.notification.saml.SamlBuilder;
 
 import java.util.List;
 

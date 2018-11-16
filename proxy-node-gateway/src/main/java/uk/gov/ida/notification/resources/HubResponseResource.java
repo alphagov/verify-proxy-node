@@ -21,7 +21,7 @@ import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.notification.saml.translation.HubResponseContainer;
+import uk.gov.ida.notification.saml.HubResponseContainer;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 

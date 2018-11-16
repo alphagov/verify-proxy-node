@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator.resources;
+package uk.gov.ida.notification.resources;
 
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
@@ -10,7 +10,7 @@ import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.metadata.Metadata;
-import uk.gov.ida.notification.saml.translation.HubResponseContainer;
+import uk.gov.ida.notification.saml.HubResponseContainer;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 
 import javax.ws.rs.Consumes;
