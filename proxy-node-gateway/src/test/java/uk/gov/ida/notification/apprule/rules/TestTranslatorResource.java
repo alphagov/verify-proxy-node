@@ -1,9 +1,8 @@
 package uk.gov.ida.notification.apprule.rules;
 
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.*;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.xmlsec.signature.support.SignatureException;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
@@ -22,7 +21,7 @@ public class TestTranslatorResource {
     @Path("/SAML2/SSO/Response")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_XML)
-    public String hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) String encryptedHubResponse) throws MarshallingException, SignatureException {
+    public String hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) String encryptedHubResponse) throws Throwable {
         Credential encryptingCredential = new TestCredentialFactory(
                 TEST_RP_PUBLIC_ENCRYPTION_CERT,
                 TEST_RP_PRIVATE_ENCRYPTION_KEY
@@ -54,6 +53,7 @@ public class TestTranslatorResource {
 
         Response response = ResponseBuilder
                 .aResponse()
+                .withInResponseTo(new EidasAuthnRequestBuilder().build().getID())
                 .addEncryptedAssertion(encryptedAssertion)
                 .build();
 

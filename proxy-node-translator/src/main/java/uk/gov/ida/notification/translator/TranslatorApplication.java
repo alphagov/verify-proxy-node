@@ -29,6 +29,7 @@ import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
 import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
+import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.translator.resources.HubResponseFromGatewayResource;
 import uk.gov.ida.saml.core.validators.DestinationValidator;
@@ -184,7 +185,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 createResponseAssertionsFromIdpValidator(proxyNodeEntityId)
         );
         ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
-        return new HubResponseValidator(idpResponseValidator, responseAttributesValidator);
+        return new HubResponseValidator(idpResponseValidator, responseAttributesValidator, new LoaValidator());
     }
 
     private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId) {

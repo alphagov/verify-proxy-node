@@ -80,8 +80,13 @@ public class HubAssertionBuilder {
     }
 
     public HubAssertionBuilder withSubject(String recipient) {
+        return withSubject(recipient, null);
+    }
+
+    public HubAssertionBuilder withSubject(String recipient, String inResponseTo) {
         SubjectConfirmationData subjectConfirmationData = aSubjectConfirmationData()
             .withRecipient(recipient)
+            .withInResponseTo(inResponseTo)
             .build();
         SubjectConfirmation subjectConfirmation = aSubjectConfirmation()
             .withSubjectConfirmationData(subjectConfirmationData)

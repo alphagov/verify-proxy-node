@@ -10,39 +10,26 @@ import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.saml.core.test.TestCredentialFactory;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
 public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
 
-    private static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
-
-    private SamlObjectMarshaller marshaller;
     private SamlParser parser;
     private EidasAuthnRequestBuilder eidasAuthnRequestBuilder;
-    private SamlObjectSigner samlObjectSigner;
 
     @Before
     public void setup() throws Throwable {
-        marshaller = new SamlObjectMarshaller();
         parser = new SamlParser();
         eidasAuthnRequestBuilder = new EidasAuthnRequestBuilder();
 
-        Credential signingCredential = new TestCredentialFactory(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY).getSigningCredential();
-        samlObjectSigner = new SamlObjectSigner(signingCredential.getPublicKey(), signingCredential.getPrivateKey(), TEST_RP_PUBLIC_SIGNING_CERT);
     }
 
     @Test
@@ -50,13 +37,7 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
         AuthnRequest eidasAuthnRequest = eidasAuthnRequestBuilder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
         samlObjectSigner.sign(eidasAuthnRequest);
 
-        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
-
-        String html = proxyNodeAppRule.target("/SAML2/SSO/POST").request()
-                .post(Entity.form(postForm))
-                .readEntity(String.class);
-
+        String html = postEidasAuthnRequest(eidasAuthnRequest).readEntity(String.class);
         AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(html);
 
         assertEquals(eidasAuthnRequest.getID(), hubAuthnRequest.getID());
@@ -68,11 +49,7 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
         AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).withoutRequestId().build();
         samlObjectSigner.sign(eidasAuthnRequest);
 
-        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
-
-        Response response = proxyNodeAppRule.target("/SAML2/SSO/POST").request()
-                .post(Entity.form(postForm));
+        Response response = postEidasAuthnRequest(eidasAuthnRequest);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
         assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
@@ -83,11 +60,7 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
         EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
         AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
 
-        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
-
-        Response response = proxyNodeAppRule.target("/SAML2/SSO/POST").request()
-                .post(Entity.form(postForm));
+        Response response = postEidasAuthnRequest(eidasAuthnRequest);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
         assertThat(response.readEntity(String.class), containsString("Error handling authn request."));

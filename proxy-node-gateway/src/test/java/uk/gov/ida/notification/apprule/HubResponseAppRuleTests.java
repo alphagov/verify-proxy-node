@@ -1,12 +1,17 @@
 package uk.gov.ida.notification.apprule;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.util.Strings;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.BasicCredential;
@@ -14,8 +19,10 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
@@ -30,8 +37,6 @@ import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +52,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
@@ -58,6 +65,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     private static final String END_CERT = "\n-----END CERTIFICATE-----";
     private SamlObjectMarshaller marshaller;
     private BasicCredential hubSigningCredential;
+    private AuthnRequest eidasAuthnRequest;
     private EncryptedAssertion authnAssertion;
     private EncryptedAssertion matchingDatasetAssertion;
 
@@ -76,15 +84,18 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY))));
 
         hubSigningCredential = new BasicCredential(publicKey, privateKey);
+
+        eidasAuthnRequest = new EidasAuthnRequestBuilder().withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
+        samlObjectSigner.sign(eidasAuthnRequest);
         authnAssertion = HubAssertionBuilder.anAuthnStatementAssertion()
             .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
             .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID)
+            .withSubject(PROXY_NODE_ENTITY_ID, eidasAuthnRequest.getID())
             .buildEncrypted(hubAssertionsEncryptionCredential);
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion()
             .withSignature(hubSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
             .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID)
+            .withSubject(PROXY_NODE_ENTITY_ID, eidasAuthnRequest.getID())
             .buildEncrypted(hubAssertionsEncryptionCredential);
     }
 
@@ -146,6 +157,35 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         assertThat(message).contains("Error handling hub response");
     }
 
+    @Test
+    public void shouldNotAcceptHubResponseWithNoSeenCorrespondingEidasRequest() throws Exception {
+        Appender mockAppender = mock(Appender.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        logger.addAppender(mockAppender);
+
+        Response hubResponse = buildSignedHubResponse();
+
+        javax.ws.rs.core.Response response = postHubResponse(hubResponse);
+        String responseMessage = response.readEntity(String.class);
+
+        ArgumentCaptor<LoggingEvent> loggingEventCaptor = ArgumentCaptor.forClass(LoggingEvent.class);
+        verify(mockAppender).doAppend(loggingEventCaptor.capture());
+        LoggingEvent loggingEvent = loggingEventCaptor.getValue();
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(responseMessage).contains("Error handling hub response");
+        assertThat(loggingEvent.getMessage())
+            .contains(String
+                .format(
+                    "Received a Response from Hub for an AuthnRequest we have not seen (ID: %s)",
+                    hubResponse.getInResponseTo()
+                )
+            );
+
+        logger.detachAppender(mockAppender);
+
+    }
+
     private Response extractEidasResponse(Response hubResponse) throws Exception {
         String html = postHubResponseToProxyNode(hubResponse).readEntity(String.class);
         String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
@@ -153,13 +193,8 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
     }
 
     private javax.ws.rs.core.Response postHubResponseToProxyNode(Response hubResponse) throws URISyntaxException {
-        String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
-
-        return proxyNodeAppRule
-                .target("/SAML2/SSO/Response/POST")
-                .request()
-                .post(Entity.form(postForm));
+        postEidasAuthnRequest(eidasAuthnRequest);
+        return postHubResponse(hubResponse);
     }
 
     private static Response decryptResponse(Response response, Credential credential) {
@@ -179,6 +214,7 @@ public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
                 .withDestination("http://proxy-node/SAML2/SSO/Response")
+                .withInResponseTo(eidasAuthnRequest.getID())
                 .addEncryptedAssertion(authnAssertion)
                 .addEncryptedAssertion(matchingDatasetAssertion);
     }
