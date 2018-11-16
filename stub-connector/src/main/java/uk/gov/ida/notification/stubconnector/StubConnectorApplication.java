@@ -27,6 +27,7 @@ import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
+import uk.gov.ida.notification.stubconnector.healthcheck.StubConnectorHealthCheck;
 import uk.gov.ida.notification.stubconnector.resources.MetadataResource;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
@@ -99,6 +100,9 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
             ComponentInitializationException {
 
         proxyNodeMetadata = createMetadata(proxyNodeMetadataResolverBundle);
+
+        StubConnectorHealthCheck stubConnectorHealthCheck = new StubConnectorHealthCheck();
+        environment.healthChecks().register(stubConnectorHealthCheck.getName(), stubConnectorHealthCheck);
 
         registerMetadataHealthCheck(
                 proxyNodeMetadataResolverBundle.getMetadataResolver(),

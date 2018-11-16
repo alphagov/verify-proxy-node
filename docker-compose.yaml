@@ -8,6 +8,7 @@ services:
         component: proxy-node-gateway
     ports:
       - "6100:80"
+      - "6601:6601"
     environment:
       PORT: 80
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
@@ -31,6 +32,7 @@ services:
         component: proxy-node-translator
     ports:
       - "6300:80"
+      - "6661:6661"
     environment:
       PORT: 80
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
@@ -52,6 +54,7 @@ services:
         component: stub-connector
     ports:
       - "5000:80"
+      - "6667:6667"
     environment:
       PORT: 80
       CONNECTOR_NODE_BASE_URL: http://localhost:5000
