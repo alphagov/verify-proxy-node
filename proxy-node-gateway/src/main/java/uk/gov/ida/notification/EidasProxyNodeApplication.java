@@ -17,6 +17,7 @@ import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.healthcheck.GatewayHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
@@ -128,6 +129,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
             ComponentInitializationException {
 
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
+        GatewayHealthCheck gatewayHealthCheck = new GatewayHealthCheck();
+
+        environment.healthChecks().register(gatewayHealthCheck.getName(), gatewayHealthCheck);
 
         registerMetadataHealthCheck(
                 hubMetadataResolverBundle.getMetadataResolver(),

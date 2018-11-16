@@ -18,6 +18,7 @@ import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.EidasResponseGenerator;
+import uk.gov.ida.notification.healthcheck.TranslatorHealthCheck;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
@@ -124,6 +125,9 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                     final Environment environment) throws ComponentInitializationException {
 
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
+
+        TranslatorHealthCheck translatorHealthCheck = new TranslatorHealthCheck();
+        environment.healthChecks().register(translatorHealthCheck.getName(), translatorHealthCheck);
 
         registerProviders(environment);
         registerExceptionMappers(environment);

@@ -1,4 +1,4 @@
-rootProject.name = 'verify-eidas-notification'
+rootProject.name = 'verify-proxy-node'
 include 'proxy-node-gateway',
         'proxy-node-translator',
         'proxy-node-shared',

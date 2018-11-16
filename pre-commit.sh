@@ -5,8 +5,6 @@ set -e
 
 ./startup.sh
 
-echo "Waiting 60 seconds for services."
-sleep 60
 
 echo ===========================================================
 echo Running acceptance tests
