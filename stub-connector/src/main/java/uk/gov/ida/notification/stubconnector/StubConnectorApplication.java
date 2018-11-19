@@ -21,13 +21,13 @@ import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
-import uk.gov.ida.notification.stubconnector.healthcheck.StubConnectorHealthCheck;
 import uk.gov.ida.notification.stubconnector.resources.MetadataResource;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
@@ -101,8 +101,8 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
 
         proxyNodeMetadata = createMetadata(proxyNodeMetadataResolverBundle);
 
-        StubConnectorHealthCheck stubConnectorHealthCheck = new StubConnectorHealthCheck();
-        environment.healthChecks().register(stubConnectorHealthCheck.getName(), stubConnectorHealthCheck);
+        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
+        environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
         registerMetadataHealthCheck(
                 proxyNodeMetadataResolverBundle.getMetadataResolver(),

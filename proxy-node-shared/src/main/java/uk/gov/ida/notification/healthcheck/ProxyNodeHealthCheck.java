@@ -2,10 +2,16 @@ package uk.gov.ida.notification.healthcheck;
 
 import com.codahale.metrics.health.HealthCheck;
 
-public class TranslatorHealthCheck extends HealthCheck {
+public class ProxyNodeHealthCheck extends HealthCheck {
+
+    private String serviceName;
+
+    public ProxyNodeHealthCheck(String serviceName) {
+        this.serviceName = serviceName;
+    }
 
     public String getName() {
-        return "translator";
+        return serviceName;
     }
 
     @Override

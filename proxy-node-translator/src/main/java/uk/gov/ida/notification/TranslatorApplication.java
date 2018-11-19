@@ -17,7 +17,7 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
-import uk.gov.ida.notification.healthcheck.TranslatorHealthCheck;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
@@ -125,8 +125,9 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
 
-        TranslatorHealthCheck translatorHealthCheck = new TranslatorHealthCheck();
-        environment.healthChecks().register(translatorHealthCheck.getName(), translatorHealthCheck);
+        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
+        environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
+
 
         registerProviders(environment);
         registerExceptionMappers(environment);
