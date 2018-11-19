@@ -55,14 +55,13 @@ public class TestKeyPair {
 
     private X509Certificate readX509Certificate(String certificateFile) throws CertificateException, IOException {
         CertificateFactory certificateFactory = CertificateFactory.getInstance(X509);
-        String certString = FileHelpers.readFileAsString(certificateFile);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certString.getBytes(StandardCharsets.UTF_8));
+        byte[] cert = FileHelpers.readFileAsBytes(certificateFile);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cert);
         return (X509Certificate) certificateFactory.generateCertificate(byteArrayInputStream);
     }
 
     private PrivateKey readPrivateKey(String privateKeyFile) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        Path path = Paths.get(ResourceHelpers.resourceFilePath(privateKeyFile));
-        byte[] bytes = Files.readAllBytes(path);
+        byte bytes[] = FileHelpers.readFileAsBytes(privateKeyFile);
         KeyFactory keyFactory = KeyFactory.getInstance(RSA);
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
     }
