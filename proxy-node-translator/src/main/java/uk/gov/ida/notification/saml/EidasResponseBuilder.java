@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.joda.time.DateTime;
@@ -9,7 +9,6 @@ import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.core.StatusCode;
-import uk.gov.ida.notification.saml.SamlBuilder;
 
 import java.util.List;
 

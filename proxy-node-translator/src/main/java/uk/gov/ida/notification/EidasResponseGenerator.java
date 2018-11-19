@@ -3,8 +3,8 @@ package uk.gov.ida.notification;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
-import uk.gov.ida.notification.saml.translation.HubResponseContainer;
-import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
+import uk.gov.ida.notification.saml.HubResponseContainer;
+import uk.gov.ida.notification.saml.HubResponseTranslator;
 
 public class EidasResponseGenerator {
     private final HubResponseTranslator translator;

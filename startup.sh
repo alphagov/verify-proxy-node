@@ -34,5 +34,7 @@ popd
 
 docker-compose up $@ -d
 
-wait_for "Metadata" localhost:5000/Metadata
+wait_for "Gateway"  localhost:6601/healthcheck
+wait_for "Translator" localhost:6661/healthcheck
+wait_for "Stub Connector" localhost:6667/healthcheck
 

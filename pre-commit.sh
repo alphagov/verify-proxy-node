@@ -3,10 +3,8 @@ set -e
 
 ./docker-gradle clean test
 
-./startup.sh
+./startup.sh --build
 
-echo "Waiting 60 seconds for services."
-sleep 60
 
 echo ===========================================================
 echo Running acceptance tests

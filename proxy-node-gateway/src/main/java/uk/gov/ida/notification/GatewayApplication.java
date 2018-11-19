@@ -17,6 +17,7 @@ import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
@@ -26,7 +27,7 @@ import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
-import uk.gov.ida.notification.saml.translation.EidasAuthnRequestTranslator;
+import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
@@ -61,15 +62,15 @@ import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValida
 import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfiguration> {
+public class GatewayApplication extends Application<GatewayConfiguration> {
 
     private Metadata connectorMetadata;
 
-    private MetadataResolverBundle<EidasProxyNodeConfiguration> hubMetadataResolverBundle;
-    private MetadataResolverBundle<EidasProxyNodeConfiguration> connectorMetadataResolverBundle;
+    private MetadataResolverBundle<GatewayConfiguration> hubMetadataResolverBundle;
+    private MetadataResolverBundle<GatewayConfiguration> connectorMetadataResolverBundle;
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
-    public EidasProxyNodeApplication() {
+    public GatewayApplication() {
     }
 
     public static void main(final String[] args) throws Exception {
@@ -80,9 +81,9 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
                 throw new RuntimeException("CONFIG_FILE environment variable should be set with path to configuration file");
             }
 
-            new EidasProxyNodeApplication().run("server", configFile);
+            new GatewayApplication().run("server", configFile);
         } else {
-            new EidasProxyNodeApplication().run(args);
+            new GatewayApplication().run(args);
         }
     }
 
@@ -92,7 +93,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
     }
 
     @Override
-    public void initialize(final Bootstrap<EidasProxyNodeConfiguration> bootstrap) {
+    public void initialize(final Bootstrap<GatewayConfiguration> bootstrap) {
         // Needed to correctly interpolate environment variables in config file
         bootstrap.setConfigurationSourceProvider(
             new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
@@ -116,19 +117,22 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         bootstrap.addBundle(new ViewBundle<>());
 
         // Metadata
-        hubMetadataResolverBundle = new MetadataResolverBundle<>(EidasProxyNodeConfiguration::getHubMetadataConfiguration);
+        hubMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getHubMetadataConfiguration);
         bootstrap.addBundle(hubMetadataResolverBundle);
 
-        connectorMetadataResolverBundle = new MetadataResolverBundle<>(EidasProxyNodeConfiguration::getConnectorMetadataConfiguration);
+        connectorMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getConnectorMetadataConfiguration);
         bootstrap.addBundle(connectorMetadataResolverBundle);
     }
 
     @Override
-    public void run(final EidasProxyNodeConfiguration configuration,
+    public void run(final GatewayConfiguration configuration,
                     final Environment environment) throws
             ComponentInitializationException {
 
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
+
+        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
+        environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
         registerMetadataHealthCheck(
                 hubMetadataResolverBundle.getMetadataResolver(),
@@ -157,7 +161,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.jersey().register(new AuthnRequestExceptionMapper());
     }
 
-    private void registerResources(EidasProxyNodeConfiguration configuration, Environment environment) throws ComponentInitializationException {
+    private void registerResources(GatewayConfiguration configuration, Environment environment) throws ComponentInitializationException {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
         RequestIdWatcher requestIdWatcher = new RequestIdWatcher();
 
@@ -196,7 +200,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
-    private HubResponseValidator createHubResponseValidator(EidasProxyNodeConfiguration configuration) throws ComponentInitializationException {
+    private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration) throws ComponentInitializationException {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
@@ -270,7 +274,7 @@ public class EidasProxyNodeApplication extends Application<EidasProxyNodeConfigu
         return new SamlRequestSignatureValidator(samlMessageSignatureValidator);
     }
 
-    private HubAuthnRequestGenerator createHubAuthnRequestGenerator(EidasProxyNodeConfiguration configuration) {
+    private HubAuthnRequestGenerator createHubAuthnRequestGenerator(GatewayConfiguration configuration) {
         EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
             configuration.getProxyNodeEntityId(),
             configuration.getHubUrl().toString());

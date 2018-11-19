@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator;
+package uk.gov.ida.notification;
 
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.Application;
@@ -17,8 +17,7 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
-import uk.gov.ida.notification.EidasResponseGenerator;
-import uk.gov.ida.notification.VerifySamlInitializer;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
@@ -27,11 +26,11 @@ import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
-import uk.gov.ida.notification.saml.translation.HubResponseTranslator;
+import uk.gov.ida.notification.saml.HubResponseTranslator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.notification.translator.resources.HubResponseFromGatewayResource;
+import uk.gov.ida.notification.resources.HubResponseFromGatewayResource;
 import uk.gov.ida.saml.core.validators.DestinationValidator;
 import uk.gov.ida.saml.core.validators.assertion.AssertionAttributeStatementValidator;
 import uk.gov.ida.saml.core.validators.assertion.AuthnStatementAssertionValidator;
@@ -125,6 +124,10 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                     final Environment environment) throws ComponentInitializationException {
 
         connectorMetadata = createMetadata(connectorMetadataResolverBundle);
+
+        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
+        environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
+
 
         registerProviders(environment);
         registerExceptionMappers(environment);

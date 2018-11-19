@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import uk.gov.ida.saml.security.validators.ValidatedAssertions;
 import uk.gov.ida.saml.security.validators.ValidatedResponse;

@@ -21,6 +21,7 @@ import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -99,6 +100,9 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
             ComponentInitializationException {
 
         proxyNodeMetadata = createMetadata(proxyNodeMetadataResolverBundle);
+
+        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
+        environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
         registerMetadataHealthCheck(
                 proxyNodeMetadataResolverBundle.getMetadataResolver(),

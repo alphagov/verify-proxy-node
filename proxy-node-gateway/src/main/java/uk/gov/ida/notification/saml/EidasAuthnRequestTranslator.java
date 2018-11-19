@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.util.XMLObjectSupport;
@@ -12,7 +12,6 @@ import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.exceptions.authnrequest.EidasAuthnRequestTranslationException;
-import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
 
 public class EidasAuthnRequestTranslator {

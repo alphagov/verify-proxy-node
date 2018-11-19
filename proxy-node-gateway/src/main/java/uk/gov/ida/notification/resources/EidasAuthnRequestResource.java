@@ -3,12 +3,12 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import uk.gov.ida.notification.EidasProxyNodeConfiguration;
+import uk.gov.ida.notification.GatewayConfiguration;
 import uk.gov.ida.notification.HubAuthnRequestGenerator;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.exceptions.authnrequest.AuthnRequestException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.saml.translation.EidasAuthnRequest;
+import uk.gov.ida.notification.saml.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -27,14 +27,14 @@ import java.util.logging.Logger;
 public class EidasAuthnRequestResource {
     private static final Logger LOG = Logger.getLogger(EidasAuthnRequestResource.class.getName());
 
-    private EidasProxyNodeConfiguration configuration;
+    private GatewayConfiguration configuration;
     private final HubAuthnRequestGenerator hubAuthnRequestGenerator;
     private SamlFormViewBuilder samlFormViewBuilder;
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
     private SamlRequestSignatureValidator samlRequestSignatureValidator;
     private final RequestIdWatcher requestIdWatcher;
 
-    public EidasAuthnRequestResource(EidasProxyNodeConfiguration configuration,
+    public EidasAuthnRequestResource(GatewayConfiguration configuration,
                                      HubAuthnRequestGenerator authnRequestGenerator,
                                      SamlFormViewBuilder samlFormViewBuilder,
                                      EidasAuthnRequestValidator eidasAuthnRequestValidator,

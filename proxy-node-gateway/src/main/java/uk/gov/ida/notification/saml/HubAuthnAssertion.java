@@ -1,11 +1,8 @@
-package uk.gov.ida.notification.saml.translation;
+package uk.gov.ida.notification.saml;
 
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AuthnStatement;
-import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
-
-import java.util.List;
 
 public class HubAuthnAssertion {
     private final String pid;
