@@ -3,7 +3,7 @@ set -e
 
 ./docker-gradle clean test
 
-./startup.sh
+./startup.sh --build
 
 
 echo ===========================================================
