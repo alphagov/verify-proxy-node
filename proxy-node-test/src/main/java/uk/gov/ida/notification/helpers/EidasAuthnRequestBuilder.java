@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.helpers;
 
+import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class EidasAuthnRequestBuilder {
     private final String EIDAS_AUTHN_REQUEST_XML = "eidas_authn_request.xml";
@@ -59,6 +62,31 @@ public class EidasAuthnRequestBuilder {
         return this;
     }
 
+    public EidasAuthnRequestBuilder withRandomRequestId() throws XPathExpressionException {
+        String randomId = "_" + UUID.randomUUID().toString().replace("-", "");
+        return withRequestId(randomId);
+    }
+
+    public EidasAuthnRequestBuilder withForceAuthn(boolean forceAuthn) throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("ForceAuthn").setNodeValue(forceAuthn ? "true" : "false");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withIsPassive(boolean isPassive) throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("IsPassive").setNodeValue(isPassive ? "true" : "false");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withDestination(String destination) throws DOMException, XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("Destination").setNodeValue(destination);
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withComparison(AuthnContextComparisonTypeEnumeration comparison) throws DOMException, XPathExpressionException {
+        findNode("//saml2p:RequestedAuthnContext").getAttributes().getNamedItem("Comparison").setNodeValue(comparison.toString());
+        return this;
+    }
+
     public EidasAuthnRequestBuilder withRequestedAttribute(String attributeName, Map<String, String> xmlAttributes) throws XPathExpressionException {
         Element requestedAttribute = (Element) findNode(requestedAttributeXPath(attributeName));
         requestedAttribute = requestedAttribute == null
@@ -80,6 +108,21 @@ public class EidasAuthnRequestBuilder {
 
     public EidasAuthnRequestBuilder withoutRequestId() throws XPathExpressionException {
         findNode("//saml2p:AuthnRequest").getAttributes().removeNamedItem("ID");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutForceAuthn() throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().removeNamedItem("ForceAuthn");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutIsPassive() throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().removeNamedItem("IsPassive");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withoutDestination() throws XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().removeNamedItem("Destination");
         return this;
     }
 

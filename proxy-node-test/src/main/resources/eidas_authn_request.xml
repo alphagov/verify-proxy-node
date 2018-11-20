@@ -1,5 +1,5 @@
 <?xml version="1.0"  encoding="UTF-8" ?>
-<saml2p:AuthnRequest Destination="https://eidas-service.eu/post" ID="_171ccc6b39b1e8f6e762c2e4ee4ded3a" IssueInstant="2015-04-30T19:25:14.273Z" Version="2.0" xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:eidas="http://eidas.europa.eu/saml-extensions" >
+<saml2p:AuthnRequest Destination="http://proxy-node/SAML2/SSO/Response" ID="_171ccc6b39b1e8f6e762c2e4ee4ded3a" IssueInstant="2015-04-30T19:25:14.273Z" Version="2.0" ForceAuthn="true" IsPassive="false" xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:eidas="http://eidas.europa.eu/saml-extensions" >
   <saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" >
     https://eidas-connector.eu
   </saml2:Issuer>

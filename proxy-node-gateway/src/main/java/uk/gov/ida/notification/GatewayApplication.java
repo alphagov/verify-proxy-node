@@ -7,6 +7,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+
+import org.joda.time.Duration;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
@@ -30,6 +32,8 @@ import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializ
 import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
+import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
+import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
@@ -46,6 +50,7 @@ import uk.gov.ida.saml.core.validators.assertion.MatchingDatasetAssertionValidat
 import uk.gov.ida.saml.core.validators.subject.AssertionSubjectValidator;
 import uk.gov.ida.saml.core.validators.subjectconfirmation.AssertionSubjectConfirmationValidator;
 import uk.gov.ida.saml.hub.transformers.inbound.SamlStatusToIdaStatusCodeMapper;
+import uk.gov.ida.saml.hub.validators.authnrequest.DuplicateAuthnRequestValidator;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
 import uk.gov.ida.saml.hub.validators.response.idp.components.EncryptedResponseFromIdpValidator;
 import uk.gov.ida.saml.hub.validators.response.idp.components.ResponseAssertionsFromIdpValidator;
@@ -167,7 +172,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
-        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator();
+        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
@@ -252,13 +257,21 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         return new ResponseAssertionDecrypter(decryptionCredential);
     }
 
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator() {
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasProxyNodeConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) {
         return new EidasAuthnRequestValidator(
             new RequestIssuerValidator(),
             new SpTypeValidator(),
             new LoaValidator(),
-            new RequestedAttributesValidator()
+            new RequestedAttributesValidator(),
+            new DuplicateAuthnRequestValidator(new ConcurrentHashMap<>(), Duration.standardMinutes(5)),
+            new ComparisonValidator(),
+            createDestinationValidator(configuration),
+            new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())
         );
+    }
+
+    private DestinationValidator createDestinationValidator(EidasProxyNodeConfiguration configuration) {
+        return new DestinationValidator(configuration.getProxyNodeResponseUrl(), configuration.getProxyNodeResponseUrl().getPath());
     }
 
     private SamlMessageSignatureValidator createSamlMessagesSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
