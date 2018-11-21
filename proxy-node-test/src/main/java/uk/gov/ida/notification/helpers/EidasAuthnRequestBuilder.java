@@ -9,12 +9,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +92,12 @@ public class EidasAuthnRequestBuilder {
 
     public EidasAuthnRequestBuilder withSamlVersion(SAMLVersion samlVersion) throws DOMException, XPathExpressionException {
         findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("Version").setNodeValue(samlVersion.toString());
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withAssertionConsumerServiceURL(String assertionConsumerServiceUrl) throws DOMException, XPathExpressionException {
+        createAuthnRequestAttribute("AssertionConsumerServiceURL");
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("AssertionConsumerServiceURL").setNodeValue(assertionConsumerServiceUrl);
         return this;
     }
 

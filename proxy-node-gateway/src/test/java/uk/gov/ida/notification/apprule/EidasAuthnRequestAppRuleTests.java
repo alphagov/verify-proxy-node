@@ -3,8 +3,10 @@ package uk.gov.ida.notification.apprule;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
@@ -75,6 +77,54 @@ public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
     @Test
     public void bindingsValidateAuthnRequestHasCorrectComparison() throws Throwable {
         assertBadRequest(request.withComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasExtensions() throws Throwable {
+        assertBadRequest(request.withoutExtensions());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasNoProtocolBinding() throws Throwable {
+        assertBadRequest(request.withProtocolBinding("protocol-binding-attribute"));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasCorrectSamlVersion() throws Throwable {
+        assertBadRequest(request.withSamlVersion(SAMLVersion.VERSION_10));
+        assertBadRequest(request.withSamlVersion(SAMLVersion.VERSION_11));
+        assertGoodRequest(request.withSamlVersion(SAMLVersion.VERSION_20));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasIssuer() throws Throwable {
+        assertBadRequest(request.withIssuer(""));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasSPTypePublicOrMissing() throws Throwable {
+        assertBadRequest(request.withSpType("private"));
+        assertGoodRequest(request.withSpType("public"));
+        assertGoodRequest(request.withoutSpType());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasSupportedLOA() throws Throwable {
+        assertGoodRequest(request.withLoa(EidasConstants.EIDAS_LOA_SUBSTANTIAL));
+
+        assertBadRequest(request.withLoa(EidasConstants.EIDAS_LOA_LOW));
+        assertBadRequest(request.withLoa(EidasConstants.EIDAS_LOA_HIGH));
+        assertBadRequest(request.withoutLoa());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasRequestedAttributes() throws Throwable {
+        assertBadRequest(request.withoutRequestedAttributes());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasCorrectAssertionConsumerServiceUrl() throws Throwable {
+        assertBadRequest(request.withAssertionConsumerServiceURL("invalid-assertion-consumer-service-url"));
     }
 
     @Test
