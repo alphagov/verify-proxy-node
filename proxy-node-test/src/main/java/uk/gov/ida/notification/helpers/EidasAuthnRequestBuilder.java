@@ -1,11 +1,15 @@
 package uk.gov.ida.notification.helpers;
 
+import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.xml.transform.TransformerException;
@@ -29,7 +33,7 @@ public class EidasAuthnRequestBuilder {
     public EidasAuthnRequestBuilder() throws Exception {
         parser = new SamlParser();
         authnRequestDocument = XmlHelpers.readDocumentFromFile(EIDAS_AUTHN_REQUEST_XML);
-        namespaceMap = new HashMap<String, String>(){{
+        namespaceMap = new HashMap<>() {{
             put("saml2", saml2);
             put("saml2p", saml2p);
             put("ds", ds);
@@ -37,7 +41,7 @@ public class EidasAuthnRequestBuilder {
         }};
     }
 
-    public AuthnRequest build() throws IOException, TransformerException {
+    public AuthnRequest build() throws TransformerException {
         String authnRequestString = XmlHelpers.serializeDomElementToString(authnRequestDocument.getDocumentElement());
         return parser.parseSamlString(authnRequestString);
     }
@@ -79,6 +83,17 @@ public class EidasAuthnRequestBuilder {
 
     public EidasAuthnRequestBuilder withDestination(String destination) throws DOMException, XPathExpressionException {
         findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("Destination").setNodeValue(destination);
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withProtocolBinding(String protocolBinding) throws DOMException, XPathExpressionException {
+        createAuthnRequestAttribute("ProtocolBinding");
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("ProtocolBinding").setNodeValue(protocolBinding);
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withSamlVersion(SAMLVersion samlVersion) throws DOMException, XPathExpressionException {
+        findNode("//saml2p:AuthnRequest").getAttributes().getNamedItem("Version").setNodeValue(samlVersion.toString());
         return this;
     }
 
@@ -169,5 +184,11 @@ public class EidasAuthnRequestBuilder {
         Element newRequestedAttribute = authnRequestDocument.createElement("eidas:RequestedAttribute");
         newRequestedAttribute.setAttribute("Name", eidasAttribute);
         return requestedAttributes.appendChild(newRequestedAttribute);
+    }
+
+    private Node createAuthnRequestAttribute(String attributeName) throws XPathExpressionException {
+        final NamedNodeMap authnRequestAttributes = findNode("//saml2p:AuthnRequest").getAttributes();
+        final Attr newAttribute = authnRequestDocument.createAttribute(attributeName);
+        return authnRequestAttributes.setNamedItem(newAttribute);
     }
 }

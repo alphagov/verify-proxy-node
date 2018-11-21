@@ -102,8 +102,8 @@ public class ProxyNodeAppRuleTestBase {
 
         try {
             return proxyNodeAppRule.target("/SAML2/SSO/POST")
-                .request()
-                .post(Entity.form(postForm));
+                    .request()
+                    .post(Entity.form(postForm));
         } catch (URISyntaxException e) {
             fail(e);
             return null;
@@ -115,9 +115,9 @@ public class ProxyNodeAppRuleTestBase {
 
         try {
             return proxyNodeAppRule.target("/SAML2/SSO/Redirect")
-                .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
-                .request()
-                .get();
+                    .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
+                    .request()
+                    .get();
         } catch (URISyntaxException e) {
             fail(e);
             return null;
@@ -130,8 +130,8 @@ public class ProxyNodeAppRuleTestBase {
 
         try {
             return proxyNodeAppRule.target("/SAML2/SSO/Response/POST")
-                .request()
-                .post(Entity.form(postForm));
+                    .request()
+                    .post(Entity.form(postForm));
         } catch (URISyntaxException e) {
             fail(e);
             return null;

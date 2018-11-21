@@ -37,8 +37,7 @@ public class EidasAuthnRequestValidator {
                                       DuplicateAuthnRequestValidator duplicateAuthnRequestValidator,
                                       ComparisonValidator comparisonValidator,
                                       DestinationValidator destinationValidator,
-                                      AssertionConsumerServiceValidator assertionConsumerServiceValidator)
-    {
+                                      AssertionConsumerServiceValidator assertionConsumerServiceValidator) {
         this.requestIssuerValidator = requestIssuerValidator;
         this.spTypeValidator = spTypeValidator;
         this.loaValidator = loaValidator;
@@ -50,20 +49,33 @@ public class EidasAuthnRequestValidator {
     }
 
     public void validate(AuthnRequest request) {
-        if (request == null)
+        if (request == null) {
             throw new InvalidAuthnRequestException("Null request");
-        if (Strings.isNullOrEmpty(request.getID()))
+        }
+
+        if (Strings.isNullOrEmpty(request.getID())) {
             throw new InvalidAuthnRequestException("Missing Request ID");
-        if (request.getExtensions() == null)
+        }
+
+        if (request.getExtensions() == null) {
             throw new InvalidAuthnRequestException("Missing Extensions");
-        if (request.isPassive() == true)
+        }
+
+        if (request.isPassive()) {
             throw new InvalidAuthnRequestException("Request should not require zero user interaction (isPassive should be missing or false)");
-        if (request.isForceAuthn() != true)
+        }
+
+        if (!request.isForceAuthn()) {
             throw new InvalidAuthnRequestException("Request should require fresh authentication (forceAuthn should be true)");
-        if (!Strings.isNullOrEmpty(request.getProtocolBinding()))
+        }
+
+        if (!Strings.isNullOrEmpty(request.getProtocolBinding())) {
             throw new InvalidAuthnRequestException("Request should not specify protocol binding");
-        if (request.getVersion() != SAMLVersion.VERSION_20)
+        }
+
+        if (request.getVersion() != SAMLVersion.VERSION_20) {
             throw new InvalidAuthnRequestException("SAML Version should be " + SAMLVersion.VERSION_20.toString());
+        }
 
         SPType spTypeElement = (SPType) getExtension(request, SPType.DEFAULT_ELEMENT_NAME);
         RequestedAttributes requestedAttributesElement = (RequestedAttributes) getExtension(request, RequestedAttributes.DEFAULT_ELEMENT_NAME);
