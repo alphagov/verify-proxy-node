@@ -18,7 +18,7 @@ public class AuthnRequestExceptionMapper implements ExceptionMapper<AuthnRequest
         String message = exception.getCause().getMessage();
         String logId = String.format("%016x", ThreadLocalRandom.current().nextLong());
 
-        log.log(Level.WARNING, String.format("logId=%s, requestId=%s, issuer=%s, issueInstant=%s, cause=%s",
+        log.log(Level.WARNING, String.format("Error for logId: %s; requestId: %s; issuer: %s; issueInstant: %s; cause: %s",
                 logId,
                 exception.getAuthnRequest().getID(),
                 exception.getAuthnRequest().getIssuer().getValue(),
@@ -31,5 +31,4 @@ public class AuthnRequestExceptionMapper implements ExceptionMapper<AuthnRequest
                 .entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "Error handling authn request. logId: " + logId))
                 .build();
     }
-
 }

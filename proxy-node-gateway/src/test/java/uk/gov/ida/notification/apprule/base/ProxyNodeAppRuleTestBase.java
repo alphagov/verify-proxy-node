@@ -68,6 +68,7 @@ public class ProxyNodeAppRuleTestBase {
     @Rule
     public EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule(
             ConfigOverride.config("proxyNodeEntityId", "http://proxy-node.uk"),
+            ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/SAML2/SSO/POST"),
             ConfigOverride.config("proxyNodeResponseUrl", "http://proxy-node/SAML2/SSO/Response"),
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("hubUrl", "http://hub"),

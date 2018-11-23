@@ -271,7 +271,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private DestinationValidator createDestinationValidator(GatewayConfiguration configuration) {
-        return new DestinationValidator(configuration.getProxyNodeResponseUrl(), configuration.getProxyNodeResponseUrl().getPath());
+        return new DestinationValidator(configuration.getProxyNodeAuthnRequestUrl(), configuration.getProxyNodeAuthnRequestUrl().getPath());
     }
 
     private SamlMessageSignatureValidator createSamlMessagesSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {

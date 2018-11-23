@@ -34,6 +34,11 @@ public class GatewayConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
+    private URI proxyNodeAuthnRequestUrl;
+
+    @JsonProperty
+    @Valid
+    @NotNull
     private URI proxyNodeResponseUrl;
 
     @JsonProperty
@@ -115,5 +120,9 @@ public class GatewayConfiguration extends Configuration {
 
     public URI getProxyNodeResponseUrl() {
         return proxyNodeResponseUrl;
+    }
+
+    public URI getProxyNodeAuthnRequestUrl() {
+        return proxyNodeAuthnRequestUrl;
     }
 }

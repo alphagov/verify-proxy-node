@@ -12,6 +12,7 @@ services:
     environment:
       PORT: 80
       PROXY_NODE_ENTITY_ID: https://dev-hub.local
+      PROXY_NODE_AUTHN_REQUEST_ENDPOINT: http://localhost:6100/SAML2/SSO/POST
       PROXY_NODE_RESPONSE_ENDPOINT: http://localhost:6100/SAML2/SSO/Response/POST
       HUB_URL: http://localhost:6200/stub-idp-demo/SAML2/SSO
       HUB_METADATA_URL: http://proxy-node-metadata/metadata_for_hub.xml
