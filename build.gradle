@@ -76,7 +76,8 @@ subprojects {
                 "uk.gov.ida:saml-metadata-bindings:${saml_libs_version}",
                 "uk.gov.ida:saml-security:${saml_libs_version}",
                 "uk.gov.ida:hub-saml:${opensaml_version}-15682",
-                "se.litsec.eidas:eidas-opensaml3:1.2.0"
+                "se.litsec.eidas:eidas-opensaml3:1.2.0",
+                "se.litsec.opensaml:opensaml3-ext:1.1.0"
         )
 
         saml_test (

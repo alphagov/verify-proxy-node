@@ -16,6 +16,7 @@ logging:
       currentLogFilename: logs/stub-connector.log
       archive: false
 
+proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
 
 proxyNodeMetadataConfiguration:
