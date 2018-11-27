@@ -6,6 +6,8 @@ import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
+import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
+import se.litsec.opensaml.saml2.common.response.MessageReplayException;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
 import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
@@ -15,7 +17,6 @@ import uk.gov.ida.notification.saml.validation.components.RequestedAttributesVal
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 import uk.gov.ida.saml.core.validators.DestinationValidator;
 import uk.gov.ida.saml.hub.exception.SamlValidationException;
-import uk.gov.ida.saml.hub.validators.authnrequest.DuplicateAuthnRequestValidator;
 
 import javax.xml.namespace.QName;
 
@@ -25,7 +26,7 @@ public class EidasAuthnRequestValidator {
     private LoaValidator loaValidator;
     private RequestedAttributesValidator requestedAttributesValidator;
     private RequestIssuerValidator requestIssuerValidator;
-    private final DuplicateAuthnRequestValidator duplicateAuthnRequestValidator;
+    private final MessageReplayChecker messageReplayChecker;
     private final ComparisonValidator comparisonValidator;
     private final DestinationValidator destinationValidator;
     private final AssertionConsumerServiceValidator assertionConsumerServiceValidator;
@@ -34,7 +35,7 @@ public class EidasAuthnRequestValidator {
                                       SpTypeValidator spTypeValidator,
                                       LoaValidator loaValidator,
                                       RequestedAttributesValidator requestedAttributesValidator,
-                                      DuplicateAuthnRequestValidator duplicateAuthnRequestValidator,
+                                      MessageReplayChecker duplicateAuthnRequestValidator,
                                       ComparisonValidator comparisonValidator,
                                       DestinationValidator destinationValidator,
                                       AssertionConsumerServiceValidator assertionConsumerServiceValidator) {
@@ -42,7 +43,7 @@ public class EidasAuthnRequestValidator {
         this.spTypeValidator = spTypeValidator;
         this.loaValidator = loaValidator;
         this.requestedAttributesValidator = requestedAttributesValidator;
-        this.duplicateAuthnRequestValidator = duplicateAuthnRequestValidator;
+        this.messageReplayChecker = duplicateAuthnRequestValidator;
         this.comparisonValidator = comparisonValidator;
         this.destinationValidator = destinationValidator;
         this.assertionConsumerServiceValidator = assertionConsumerServiceValidator;
@@ -87,13 +88,10 @@ public class EidasAuthnRequestValidator {
         assertionConsumerServiceValidator.validate(request);
         comparisonValidator.validate(request.getRequestedAuthnContext());
 
-        if (!duplicateAuthnRequestValidator.valid(request.getID())) {
-            throw new InvalidAuthnRequestException(String.format("Request ID has been seen before: %s", request.getID()));
-        }
-
         try {
+            messageReplayChecker.checkReplay(request.getID());
             destinationValidator.validate(request.getDestination());
-        } catch (SamlValidationException e) {
+        } catch (SamlValidationException | MessageReplayException e) {
             throw new InvalidAuthnRequestException(e.getMessage(), e);
         }
     }
