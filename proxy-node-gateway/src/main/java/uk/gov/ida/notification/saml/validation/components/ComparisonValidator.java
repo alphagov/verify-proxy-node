@@ -4,14 +4,13 @@ import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
-import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 
 public class ComparisonValidator {
     public static final AuthnContextComparisonTypeEnumeration validType = AuthnContextComparisonTypeEnumeration.MINIMUM;
 
     public void validate(RequestedAuthnContext authnContext) {
         if (authnContext == null) {
-            throw new InvalidHubResponseException("Request has no requested authentication context");
+            throw new InvalidAuthnRequestException("Request has no requested authentication context");
         }
 
         AuthnContextComparisonTypeEnumeration comparisonType = authnContext.getComparison();

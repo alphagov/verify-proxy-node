@@ -2,7 +2,7 @@ package uk.gov.ida.notification.saml.validation.components;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.core.impl.RequestedAuthnContextBuilder;
