@@ -32,7 +32,7 @@ pushd "${PN_PROJECT_DIR}/pki"
     "${PKI_OUTPUT_DIR}"
 popd
 
-docker-compose up $@
+docker-compose up $@ -d
 
 wait_for "Gateway"  localhost:6601/healthcheck
 wait_for "Translator" localhost:6661/healthcheck
