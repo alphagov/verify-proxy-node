@@ -7,8 +7,6 @@ import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.stubconnector.views.ResponseView;
-import uk.gov.ida.saml.security.AssertionDecrypter;
-import uk.gov.ida.saml.security.validators.ValidatedResponse;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
