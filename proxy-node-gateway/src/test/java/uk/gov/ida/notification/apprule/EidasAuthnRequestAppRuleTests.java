@@ -1,16 +1,16 @@
 package uk.gov.ida.notification.apprule;
 
 import org.apache.http.HttpStatus;
-import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.saml.common.SAMLVersion;
+import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.security.credential.Credential;
+import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
@@ -23,102 +23,153 @@ import static org.junit.Assert.assertThat;
 public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
 
     private SamlParser parser;
-    private EidasAuthnRequestBuilder eidasAuthnRequestBuilder;
+    private EidasAuthnRequestBuilder request;
 
     @Before
     public void setup() throws Throwable {
         parser = new SamlParser();
-        eidasAuthnRequestBuilder = new EidasAuthnRequestBuilder();
-
+        request = new EidasAuthnRequestBuilder().withIssuer(CONNECTOR_NODE_ENTITY_ID);
     }
 
     @Test
-    public void postBindingReturnsHubAuthnRequestForm() throws Throwable {
-        AuthnRequest eidasAuthnRequest = eidasAuthnRequestBuilder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
-        samlObjectSigner.sign(eidasAuthnRequest);
-
-        String html = postEidasAuthnRequest(eidasAuthnRequest).readEntity(String.class);
-        AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(html);
-
-        assertEquals(eidasAuthnRequest.getID(), hubAuthnRequest.getID());
+    public void bindingsReturnHubAuthnRequestForm() throws Throwable {
+        assertGoodRequest(request);
     }
 
     @Test
-    public void postBindingValidatesAuthnRequest_noRequestId() throws Throwable {
-        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
-        AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).withoutRequestId().build();
-        samlObjectSigner.sign(eidasAuthnRequest);
+    public void bindingsValidateAuthnRequestHasRequestId() throws Throwable {
+        AuthnRequest requestWithoutId = request.withoutRequestId().build();
+        samlObjectSigner.sign(requestWithoutId);
 
-        Response response = postEidasAuthnRequest(eidasAuthnRequest);
-
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
+        assertErrorResponse(postEidasAuthnRequest(requestWithoutId));
+        assertErrorResponse(redirectEidasAuthnRequest(requestWithoutId));
     }
 
     @Test
-    public void postBindingValidatesAuthnRequest_noSignature() throws Throwable {
-        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
-        AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
+    public void bindingsValidateAuthnRequestHasSignature() throws Throwable {
+        AuthnRequest postedRequest = request.withRandomRequestId().build();
+        assertErrorResponse(postEidasAuthnRequest(postedRequest));
 
-        Response response = postEidasAuthnRequest(eidasAuthnRequest);
-
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
+        AuthnRequest redirectedRequest = request.withRandomRequestId().build();
+        assertErrorResponse(redirectEidasAuthnRequest(redirectedRequest));
     }
 
     @Test
-    public void redirectBindingReturnsHubAuthnRequestForm() throws Throwable {
-        AuthnRequest eidasAuthnRequest = eidasAuthnRequestBuilder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
-        samlObjectSigner.sign(eidasAuthnRequest);
-
-        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
-
-        String html = proxyNodeAppRule.target("/SAML2/SSO/Redirect")
-                .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
-                .request()
-                .get()
-                .readEntity(String.class);
-
-        AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(html);
-
-        assertEquals(eidasAuthnRequest.getID(), hubAuthnRequest.getID());
+    public void bindingsValidateAuthnRequestHasForceAuthn() throws Throwable {
+        assertBadRequest(request.withForceAuthn(false));
     }
 
     @Test
-    public void redirectBindingValidatesAuthnRequest_noRequestId() throws Throwable {
-        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
-        AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).withoutRequestId().build();
-        samlObjectSigner.sign(eidasAuthnRequest);
-
-        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
-
-        Response response = proxyNodeAppRule.target("/SAML2/SSO/Redirect")
-                .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
-                .request()
-                .get();
-
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
+    public void bindingsValidateAuthnRequestIsPassiveIsNotTrue() throws Throwable {
+        assertBadRequest(request.withIsPassive(true));
     }
 
     @Test
-    public void redirectBindingValidatesAuthnRequest_noSignature() throws Throwable {
-        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder();
-        AuthnRequest eidasAuthnRequest = builder.withIssuer(CONNECTOR_NODE_ENTITY_ID).build();
+    public void bindingsValidateAuthnRequestWhenIsPassiveIsMissing() throws Throwable {
+        assertGoodRequest(request.withoutIsPassive());
+    }
 
-        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
+    @Test
+    public void bindingsValidateAuthnRequestHasCorrectDestination() throws Throwable {
+        assertBadRequest(request.withDestination("https://bogus.eu/"));
+    }
 
-        Response response = proxyNodeAppRule.target("/SAML2/SSO/Redirect")
-                .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
-                .request()
-                .get();
+    @Test
+    public void bindingsValidateAuthnRequestHasCorrectComparison() throws Throwable {
+        assertBadRequest(request.withComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM));
+    }
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
+    @Test
+    public void bindingsValidateAuthnRequestHasExtensions() throws Throwable {
+        assertBadRequest(request.withoutExtensions());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasNoProtocolBinding() throws Throwable {
+        assertBadRequest(request.withProtocolBinding("protocol-binding-attribute"));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasCorrectSamlVersion() throws Throwable {
+        assertBadRequest(request.withSamlVersion(SAMLVersion.VERSION_10));
+        assertBadRequest(request.withSamlVersion(SAMLVersion.VERSION_11));
+        assertGoodRequest(request.withSamlVersion(SAMLVersion.VERSION_20));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasIssuer() throws Throwable {
+        assertBadRequest(request.withIssuer(""));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasSPTypePublicOrMissing() throws Throwable {
+        assertBadRequest(request.withSpType("private"));
+        assertGoodRequest(request.withSpType("public"));
+        assertGoodRequest(request.withoutSpType());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasSupportedLOA() throws Throwable {
+        assertGoodRequest(request.withLoa(EidasConstants.EIDAS_LOA_SUBSTANTIAL));
+
+        assertBadRequest(request.withLoa(EidasConstants.EIDAS_LOA_LOW));
+        assertBadRequest(request.withLoa(EidasConstants.EIDAS_LOA_HIGH));
+        assertBadRequest(request.withoutLoa());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasRequestedAttributes() throws Throwable {
+        assertBadRequest(request.withoutRequestedAttributes());
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestHasCorrectAssertionConsumerServiceUrl() throws Throwable {
+        assertBadRequest(request.withAssertionConsumerServiceURL("invalid-assertion-consumer-service-url"));
+    }
+
+    @Test
+    public void bindingsValidateAuthnRequestIsNotDuplicated() throws Throwable {
+        AuthnRequest duplicatedRequest = request.build();
+        samlObjectSigner.sign(duplicatedRequest);
+
+        assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(duplicatedRequest));
+        assertErrorResponse(postEidasAuthnRequest(duplicatedRequest));
     }
 
     private AuthnRequest getHubAuthnRequestFromHtml(String html) throws IOException {
         String decodedHubAuthnRequest = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_REQUEST);
         return parser.parseSamlString(decodedHubAuthnRequest);
+    }
+
+    private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Throwable {
+        AuthnRequest postedRequest = builder.withRandomRequestId().build();
+        samlObjectSigner.sign(postedRequest);
+        assertGoodResponse(postedRequest, postEidasAuthnRequest(postedRequest));
+
+        AuthnRequest redirectedRequest = builder.withRandomRequestId().build();
+        samlObjectSigner.sign(redirectedRequest);
+        assertGoodResponse(redirectedRequest, redirectEidasAuthnRequest(redirectedRequest));
+    }
+
+    private void assertBadRequest(EidasAuthnRequestBuilder builder) throws Throwable {
+        AuthnRequest postedRequest = builder.withRandomRequestId().build();
+        samlObjectSigner.sign(postedRequest);
+        assertErrorResponse(postEidasAuthnRequest(postedRequest));
+
+        AuthnRequest redirectedRequest = builder.withRandomRequestId().build();
+        samlObjectSigner.sign(redirectedRequest);
+        assertErrorResponse(redirectEidasAuthnRequest(redirectedRequest));
+    }
+
+    private void assertGoodResponse(AuthnRequest eidasAuthnRequest, Response response) throws IOException {
+        String html = response.readEntity(String.class);
+        AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(html);
+
+        assertEquals(eidasAuthnRequest.getID(), hubAuthnRequest.getID());
+    }
+
+    private void assertErrorResponse(Response response) {
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
     }
 }

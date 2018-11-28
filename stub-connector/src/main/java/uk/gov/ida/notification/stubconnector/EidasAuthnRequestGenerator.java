@@ -43,6 +43,7 @@ public class EidasAuthnRequestGenerator {
 
         // Add the request attributes.
         //
+        request.setForceAuthn(true);
         request.setID(requestID);
         request.setDestination(destination);
         request.setIssueInstant(new DateTime());

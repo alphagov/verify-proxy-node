@@ -21,6 +21,7 @@ import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
@@ -67,6 +68,7 @@ public class ProxyNodeAppRuleTestBase {
     @Rule
     public EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule(
             ConfigOverride.config("proxyNodeEntityId", "http://proxy-node.uk"),
+            ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/SAML2/SSO/POST"),
             ConfigOverride.config("proxyNodeResponseUrl", "http://proxy-node/SAML2/SSO/Response"),
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("hubUrl", "http://hub"),
@@ -94,21 +96,46 @@ public class ProxyNodeAppRuleTestBase {
             ConfigOverride.config("hubFacingEncryptionKeyPair.privateKey.key", TEST_PRIVATE_KEY)
     );
 
-    protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest) throws URISyntaxException {
+    protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest) {
+        System.out.println(marshaller.transformToString(eidasAuthnRequest));
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
         Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
 
-        return proxyNodeAppRule.target("/SAML2/SSO/POST")
-            .request()
-            .post(Entity.form(postForm));
+        try {
+            return proxyNodeAppRule.target("/SAML2/SSO/POST")
+                    .request()
+                    .post(Entity.form(postForm));
+        } catch (URISyntaxException e) {
+            fail(e);
+            return null;
+        }
     }
 
-    protected Response postHubResponse(org.opensaml.saml.saml2.core.Response hubResponse) throws URISyntaxException {
+    protected Response redirectEidasAuthnRequest(AuthnRequest eidasAuthnRequest) {
+        String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
+
+        try {
+            return proxyNodeAppRule.target("/SAML2/SSO/Redirect")
+                    .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
+                    .request()
+                    .get();
+        } catch (URISyntaxException e) {
+            fail(e);
+            return null;
+        }
+    }
+
+    protected Response postHubResponse(org.opensaml.saml.saml2.core.Response hubResponse) {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
         Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
 
-        return proxyNodeAppRule.target("/SAML2/SSO/Response/POST")
-            .request()
-            .post(Entity.form(postForm));
+        try {
+            return proxyNodeAppRule.target("/SAML2/SSO/Response/POST")
+                    .request()
+                    .post(Entity.form(postForm));
+        } catch (URISyntaxException e) {
+            fail(e);
+            return null;
+        }
     }
 }
