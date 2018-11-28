@@ -7,6 +7,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -14,9 +15,6 @@ import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
-import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
@@ -34,9 +32,6 @@ import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
-import uk.gov.ida.saml.security.MetadataBackedSignatureValidator;
-import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
-import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
@@ -117,6 +112,8 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
 
     private void registerProviders(Environment environment) {
         environment.jersey().register(ResponseParameterProvider.class);
+
+        environment.servlets().setSessionHandler(new SessionHandler());
     }
 
     private void registerExceptionMappers(Environment environment) {
@@ -147,10 +144,16 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
             e.printStackTrace();
         }
 
-        environment.jersey().register(new ReceiveResponseResource(createDecrypter(configuration.getEncryptionKeyPair())));
+        environment.jersey().register(
+                new ReceiveResponseResource(
+                        configuration,
+                        createDecrypter(configuration.getEncryptionKeyPair()),
+                        proxyNodeMetadataResolverBundle
+                )
+        );
     }
 
-    public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
+    private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
         MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
                 metadataResolver,
                 name,
@@ -171,19 +174,6 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
             configuration.getPrivateKey().getPrivateKey()
         );
         return new ResponseAssertionDecrypter(decryptionCredential);
-    }
-
-    private SamlMessageSignatureValidator createSamlMessagesSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
-        MetadataCredentialResolver hubMetadataCredentialResolver = new MetadataCredentialResolverInitializer(hubMetadataResolverBundle.getMetadataResolver()).initialize();
-        KeyInfoCredentialResolver keyInfoCredentialResolver = DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver();
-        ExplicitKeySignatureTrustEngine explicitKeySignatureTrustEngine = new ExplicitKeySignatureTrustEngine(hubMetadataCredentialResolver, keyInfoCredentialResolver);
-        MetadataBackedSignatureValidator metadataBackedSignatureValidator = MetadataBackedSignatureValidator.withoutCertificateChainValidation(explicitKeySignatureTrustEngine);
-        return new SamlMessageSignatureValidator(metadataBackedSignatureValidator);
-    }
-
-    private SamlRequestSignatureValidator createSamlResponseSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
-        SamlMessageSignatureValidator samlMessageSignatureValidator = createSamlMessagesSignatureValidator(hubMetadataResolverBundle);
-        return new SamlRequestSignatureValidator(samlMessageSignatureValidator);
     }
 
     private EidasAuthnRequestGenerator createEidasAuthnRequestGenerator(SamlObjectSigner signer) {

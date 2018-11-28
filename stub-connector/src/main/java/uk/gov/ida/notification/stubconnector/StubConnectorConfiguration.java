@@ -28,6 +28,11 @@ public class StubConnectorConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
+    private String proxyNodeEntityId;
+
+    @JsonProperty
+    @Valid
+    @NotNull
     private TrustStoreBackedMetadataConfiguration proxyNodeMetadataConfiguration;
 
     public KeyPairConfiguration getEncryptionKeyPair() {
@@ -36,6 +41,10 @@ public class StubConnectorConfiguration extends Configuration {
 
     public URI getConnectorNodeBaseUrl() {
         return connectorNodeBaseUrl;
+    }
+
+    public String getProxyNodeEntityId() {
+        return proxyNodeEntityId;
     }
 
     public TrustStoreBackedMetadataConfiguration getProxyNodeMetadataConfiguration() {
