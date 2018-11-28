@@ -1,15 +1,16 @@
 package uk.gov.ida.notification.helpers;
 
-import io.dropwizard.testing.ResourceHelpers;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
 
 public class FileHelpers {
     public static String readFileAsString(String resourceFilename) throws IOException {
-        Path authnRequestPath = Paths.get(ResourceHelpers.resourceFilePath(resourceFilename));
-        return new String(Files.readAllBytes(authnRequestPath));
+        return IOUtils.toString(FileHelpers.class.getResourceAsStream("/" + resourceFilename), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] readFileAsBytes(String resourceFilename) throws IOException {
+        return IOUtils.toByteArray(FileHelpers.class.getResourceAsStream("/" + resourceFilename));
     }
 }
