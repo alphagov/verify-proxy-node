@@ -6,7 +6,6 @@ import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
-import uk.gov.ida.notification.saml.SamlBuilder;
 
 import javax.xml.namespace.QName;
 
