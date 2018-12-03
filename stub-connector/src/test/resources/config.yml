@@ -1,0 +1,47 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: ${PORT:-6666}
+  adminConnectors:
+    - type: http
+      port: ${ADMIN_PORT:-6667}
+
+logging:
+  level: INFO
+  loggers:
+    uk.gov.ida: DEBUG
+  appenders:
+    - type: console
+    - type: file
+      currentLogFilename: logs/stub-connector.log
+      archive: false
+
+proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
+connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
+
+proxyNodeMetadataConfiguration:
+  url: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
+  expectedEntityId: ${PROXY_NODE_ENTITY_ID}
+  jerseyClientName: proxy-node-metadata-client
+  trustStore:
+    type: ${TRUSTSTORE_TYPES:-encoded}
+    store: ${PROXY_NODE_METADATA_TRUSTSTORE}
+    password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD}
+
+signingKeyPair:
+  publicKey:
+    type: ${CERT_TYPES:-encoded}
+    cert: ${SIGNING_CERT}
+    name: proxy_node_signing
+  privateKey:
+    type: ${KEY_TYPES:-encoded}
+    key: ${SIGNING_KEY}
+
+encryptionKeyPair:
+  publicKey:
+    type: ${CERT_TYPES:-encoded}
+    cert: ${ENCRYPTION_CERT}
+    name: proxy_node_encryption
+  privateKey:
+    type: ${KEY_TYPES:-encoded}
+    key: ${ENCRYPTION_KEY}

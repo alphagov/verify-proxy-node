@@ -3,12 +3,14 @@ package uk.gov.ida.notification.stubconnector.resources;
 import io.dropwizard.jersey.sessions.Session;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.common.assertion.ValidationContext;
 import org.opensaml.saml.common.assertion.ValidationResult;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.criterion.ProtocolCriterion;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
@@ -30,6 +32,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,11 +75,22 @@ public class ReceiveResponseResource {
 
         // The eIDAS Response should only contain one Assertion with one AttributeStatement which contains
         // the user's requested attributes
-        Assertion assertion = decrypter.decrypt(response).getAssertions().get(0);
-        AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
-        List<String> attributes = attributeStatement.getAttributes().stream()
-                .map(attr -> ((EidasAttributeValueType) attr.getAttributeValues().get(0)).toStringValue())
-                .collect(Collectors.toList());
+
+        List<String> attributes = new ArrayList<>();
+
+        Response decrypted = decrypter.decrypt(response);
+        List<Assertion> assertions = decrypted.getAssertions();
+
+        if (assertions.size() > 0) {
+            Assertion assertion = assertions.get(0);
+            AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
+
+            attributes = attributeStatement
+                    .getAttributes()
+                    .stream()
+                    .map(attr -> ((EidasAttributeValueType) attr.getAttributeValues().get(0)).toStringValue())
+                    .collect(Collectors.toList());
+        }
 
         return new ResponseView(attributes, validate.toString());
     }
