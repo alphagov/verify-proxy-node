@@ -30,13 +30,13 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_S
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
 
-public class SamlRequestValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
+public class SamlResponseValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
 
     @Test
-    public void validSamlRequest() throws Exception {
+    public void shouldReturnValidSamlResponse() throws Exception {
         String authnId = getAuthnRequestIdFromSession();
 
-        Response unsignedSamlResponse = eidasSamlMessage(authnId);
+        Response unsignedSamlResponse = getEidasSamlMessage(authnId);
         Response signedSamlResponse = signResponse(unsignedSamlResponse);
 
         String validSamlMessage = responseToString(signedSamlResponse);
@@ -46,10 +46,10 @@ public class SamlRequestValidatorAppRuleTests extends StubConnectorAppRuleTestBa
     }
 
     @Test
-    public void invalidSamlRequest() throws Exception {
+    public void shouldReturnInvalidSamlResponse() throws Exception {
         String authnId = getAuthnRequestIdFromSession();
 
-        Response unsignedSamlResponse = eidasSamlMessage(authnId);
+        Response unsignedSamlResponse = getEidasSamlMessage(authnId);
         String invalidSamlMessage = responseToString(unsignedSamlResponse);
 
         String result = getValidity(invalidSamlMessage);
@@ -60,7 +60,7 @@ public class SamlRequestValidatorAppRuleTests extends StubConnectorAppRuleTestBa
     public void shouldBeInvalidAsNoneSeenAuthId() throws Exception {
         String authnId = UUID.randomUUID().toString();
 
-        Response unsignedSamlResponse = eidasSamlMessage(authnId);
+        Response unsignedSamlResponse = getEidasSamlMessage(authnId);
         Response signedSamlResponse = signResponse(unsignedSamlResponse);
 
         String validSamlMessage = responseToString(signedSamlResponse);
@@ -101,7 +101,7 @@ public class SamlRequestValidatorAppRuleTests extends StubConnectorAppRuleTestBa
         return result;
     }
 
-    private Response eidasSamlMessage(String authid) {
+    private Response getEidasSamlMessage(String authid) {
 
         Attribute firstname = new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME,
