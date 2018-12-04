@@ -7,6 +7,10 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 
@@ -16,6 +20,8 @@ import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
+import org.opensaml.storage.ReplayCache;
+import org.opensaml.storage.StorageService;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
@@ -62,7 +68,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMessageReplayChecker;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.*;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
 
@@ -178,11 +184,25 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 
+    private StorageService createStorageService(TranslatorConfiguration configuration) throws ComponentInitializationException {
+        if (configuration.getRedisServerUrl() != null) {
+            RedisClient client = RedisClient.create(RedisURI.create(configuration.getRedisServerUrl()));
+            StatefulRedisConnection<String, String> connection = client.connect();
+            RedisCommands<String, String> syncCommands = connection.sync();
+            return createRedisCacheStorage("translator-cache-storage", syncCommands);
+        } else {
+            return createMemoryCacheStorage("translator-cache-storage");
+        }
+    }
+
     private HubResponseValidator createHubResponseValidator(TranslatorConfiguration configuration) throws Exception {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
         SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessagesSignatureValidator(hubMetadataResolverBundle);
+
+        StorageService storage = createStorageService(configuration);
+        ReplayCache cache = createReplayCache("translator-replay-cache", storage);
 
         IdpResponseValidator idpResponseValidator = new IdpResponseValidator(
                 new SamlResponseSignatureValidator(hubResponseMessageSignatureValidator),
@@ -190,20 +210,20 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 new SamlAssertionsSignatureValidator(hubResponseMessageSignatureValidator),
                 new EncryptedResponseFromIdpValidator<>(new SamlStatusToIdaStatusCodeMapper()),
                 new DestinationValidator(proxyNodeResponseUrl, proxyNodeResponseUrl.getPath()),
-                createResponseAssertionsFromIdpValidator(proxyNodeEntityId)
+                createResponseAssertionsFromIdpValidator(proxyNodeEntityId, cache)
         );
         ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
         return new HubResponseValidator(idpResponseValidator, responseAttributesValidator, new LoaValidator());
     }
 
-    private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId) throws Exception {
+    private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId, ReplayCache cache) throws Exception {
         IdentityProviderAssertionValidator assertionValidator = new IdentityProviderAssertionValidator(
                 new IssuerValidator(),
                 new AssertionSubjectValidator(),
                 new AssertionAttributeStatementValidator(),
                 new AssertionSubjectConfirmationValidator()
         );
-        MessageReplayChecker messageReplayChecker = createMessageReplayChecker(ResponseAssertionsFromIdpValidator.class.getName());
+        MessageReplayChecker messageReplayChecker = createMessageReplayChecker(ResponseAssertionsFromIdpValidator.class.getName(), cache);
         DuplicateAssertionValidator duplicateAssertionValidator = new DuplicateAssertionChecker(messageReplayChecker);
         return new ResponseAssertionsFromIdpValidator(
                 assertionValidator,

@@ -25,6 +25,7 @@ hubUrl: ${HUB_URL}
 connectorNodeUrl: ${CONNECTOR_NODE_URL}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 translatorUrl: ${TRANSLATOR_URL}
+redisServerUrl: ${REDIS_SERVER_URL}
 
 connectorMetadataConfiguration:
   url: ${CONNECTOR_NODE_METADATA_URL}

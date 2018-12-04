@@ -6,6 +6,10 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 
@@ -14,6 +18,8 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.storage.ReplayCache;
+import org.opensaml.storage.StorageService;
 import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
@@ -66,7 +72,7 @@ import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValida
 
 import java.net.URI;
 
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMessageReplayChecker;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.*;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
 
@@ -172,8 +178,11 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
-        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
-        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
+        StorageService storage = createStorageService(configuration);
+        ReplayCache cache = createReplayCache("gateway-replay-cache", storage);
+
+        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle, cache);
+        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration, cache);
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
 
@@ -195,6 +204,17 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         ));
     }
 
+    private StorageService createStorageService(GatewayConfiguration configuration) throws ComponentInitializationException {
+        if (configuration.getRedisServerUrl() != null) {
+            RedisClient client = RedisClient.create(RedisURI.create(configuration.getRedisServerUrl()));
+            StatefulRedisConnection<String, String> connection = client.connect();
+            RedisCommands<String, String> syncCommands = connection.sync();
+            return createRedisCacheStorage("gateway-cache-storage", syncCommands);
+        } else {
+            return createMemoryCacheStorage("gateway-cache-storage");
+        }
+    }
+
     public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
         MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
                 metadataResolver,
@@ -205,7 +225,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
-    private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration) throws Exception {
+    private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration, ReplayCache cache) throws Exception {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
@@ -218,7 +238,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 new SamlAssertionsSignatureValidator(hubResponseMessageSignatureValidator),
                 new EncryptedResponseFromIdpValidator<>(new SamlStatusToIdaStatusCodeMapper()),
                 new DestinationValidator(proxyNodeResponseUrl, proxyNodeResponseUrl.getPath()),
-                createResponseAssertionsFromIdpValidator(proxyNodeEntityId)
+                createResponseAssertionsFromIdpValidator(proxyNodeEntityId, cache)
         );
         ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
         return new HubResponseValidator(
@@ -227,14 +247,14 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 new LoaValidator());
     }
 
-    private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId) throws Exception {
+    private ResponseAssertionsFromIdpValidator createResponseAssertionsFromIdpValidator(String proxyNodeEntityId, ReplayCache cache) throws Exception {
         IdentityProviderAssertionValidator assertionValidator = new IdentityProviderAssertionValidator(
                 new IssuerValidator(),
                 new AssertionSubjectValidator(),
                 new AssertionAttributeStatementValidator(),
                 new AssertionSubjectConfirmationValidator()
         );
-        MessageReplayChecker messageReplayChecker = createMessageReplayChecker(ResponseAssertionsFromIdpValidator.class.getName());
+        MessageReplayChecker messageReplayChecker = createMessageReplayChecker(ResponseAssertionsFromIdpValidator.class.getName(), cache);
         DuplicateAssertionValidator duplicateAssertionValidator = new DuplicateAssertionChecker(messageReplayChecker);
         return new ResponseAssertionsFromIdpValidator(
                 assertionValidator,
@@ -258,13 +278,13 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         return new ResponseAssertionDecrypter(decryptionCredential);
     }
 
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(GatewayConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(GatewayConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle, ReplayCache cache) throws Exception {
         return new EidasAuthnRequestValidator(
             new RequestIssuerValidator(),
             new SpTypeValidator(),
             new LoaValidator(),
             new RequestedAttributesValidator(),
-            createMessageReplayChecker(EidasAuthnRequestValidator.class.getName()),
+            createMessageReplayChecker(EidasAuthnRequestValidator.class.getName(), cache),
             new ComparisonValidator(),
             createDestinationValidator(configuration),
             new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())

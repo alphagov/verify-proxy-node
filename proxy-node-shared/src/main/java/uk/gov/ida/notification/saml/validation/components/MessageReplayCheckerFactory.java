@@ -4,31 +4,40 @@ import org.opensaml.storage.ReplayCache;
 import org.opensaml.storage.StorageService;
 import org.opensaml.storage.impl.MemoryStorageService;
 
+import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayCheckerImpl;
+import uk.gov.ida.notification.RedisStorageService;
 
 public class MessageReplayCheckerFactory {
     private MessageReplayCheckerFactory() {
     }
 
-    public static MessageReplayChecker createMessageReplayChecker(String name) throws Exception {
+    public static MessageReplayChecker createMessageReplayChecker(String name, ReplayCache replayCache) throws Exception {
         MessageReplayCheckerImpl checker = new MessageReplayCheckerImpl();
-        checker.setReplayCache(createReplayCache(name + "-cache"));
+        checker.setReplayCache(replayCache);
         checker.setReplayCacheName(name);
         checker.afterPropertiesSet();
         return checker;
     }
 
-    private static ReplayCache createReplayCache(String name) throws ComponentInitializationException {
+    public static ReplayCache createReplayCache(String name, StorageService storageService) throws ComponentInitializationException {
         ReplayCache cache = new ReplayCache();
         cache.setId(name);
-        cache.setStorage(createCacheStorage(name + "-storage"));
+        cache.setStorage(storageService);
         cache.initialize();
         return cache;
     }
 
-    private static StorageService createCacheStorage(String name) throws ComponentInitializationException {
+    public static StorageService createRedisCacheStorage(String name, RedisCommands<String, String> redis) throws ComponentInitializationException {
+        RedisStorageService storage = new RedisStorageService(redis);
+        storage.setId(name);
+        storage.initialize();
+        return storage;
+    }
+
+    public static StorageService createMemoryCacheStorage(String name) throws ComponentInitializationException {
         MemoryStorageService storage = new MemoryStorageService();
         storage.setId(name);
         storage.initialize();
