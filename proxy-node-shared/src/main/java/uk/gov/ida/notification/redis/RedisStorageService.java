@@ -1,9 +1,8 @@
-package uk.gov.ida.notification;
+package uk.gov.ida.notification.redis;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import org.opensaml.storage.AbstractStorageService;
 import org.opensaml.storage.StorageRecord;
@@ -16,6 +15,7 @@ import io.lettuce.core.ScanCursor;
 import io.lettuce.core.TransactionResult;
 import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.collection.Pair;
+import uk.gov.ida.notification.redis.RedisStorageRecord;
 
 public class RedisStorageService extends AbstractStorageService {
 
@@ -24,6 +24,7 @@ public class RedisStorageService extends AbstractStorageService {
     private final RedisCommands<String, String> redis;
 
     public RedisStorageService(RedisCommands<String, String> redis) {
+        this.setContextSize(1024);
         this.redis = redis;
     }
 
@@ -32,7 +33,7 @@ public class RedisStorageService extends AbstractStorageService {
     }
 
     @Override
-    public boolean create(String context, String key, String value, Long expiration) throws IOException {
+    public boolean create(String context, String key, String value, Long expiration) {
         Boolean result = redis.hsetnx(key(context, key), "value", value);
         if (!result) return false;
 
@@ -128,7 +129,7 @@ public class RedisStorageService extends AbstractStorageService {
     }
 
     @Override
-    public boolean delete(String context, String key) throws IOException {
+    public boolean delete(String context, String key) {
         return redis.del(key(context, key)) > 0;
     }
 
@@ -154,12 +155,12 @@ public class RedisStorageService extends AbstractStorageService {
     }
 
     @Override
-    public void reap(String context) throws IOException {
+    public void reap(String context) {
         // Don't need to do anything here as Redis will handle key expiry.
     }
 
     @Override
-    public void updateContextExpiration(String context, Long expiration) throws IOException {
+    public void updateContextExpiration(String context, Long expiration) {
         ScanCursor cursor = ScanCursor.INITIAL;
         do {
             KeyScanCursor<String> keyCursor = redis.scan(cursor, ScanArgs.Builder.matches(context + ":"));
@@ -171,7 +172,7 @@ public class RedisStorageService extends AbstractStorageService {
     }
 
     @Override
-    public void deleteContext(String context) throws IOException {
+    public void deleteContext(String context) {
         ScanCursor cursor = ScanCursor.INITIAL;
         do {
             KeyScanCursor<String> keyCursor = redis.scan(cursor, ScanArgs.Builder.matches(context + ":"));

@@ -254,7 +254,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 new AssertionAttributeStatementValidator(),
                 new AssertionSubjectConfirmationValidator()
         );
-        MessageReplayChecker messageReplayChecker = createMessageReplayChecker(ResponseAssertionsFromIdpValidator.class.getName(), cache);
+        MessageReplayChecker messageReplayChecker = createMessageReplayChecker("Gateway:" + ResponseAssertionsFromIdpValidator.class.getName(), cache);
         DuplicateAssertionValidator duplicateAssertionValidator = new DuplicateAssertionChecker(messageReplayChecker);
         return new ResponseAssertionsFromIdpValidator(
                 assertionValidator,
@@ -284,7 +284,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             new SpTypeValidator(),
             new LoaValidator(),
             new RequestedAttributesValidator(),
-            createMessageReplayChecker(EidasAuthnRequestValidator.class.getName(), cache),
+            createMessageReplayChecker("Gateway:EidasAuthnRequestValidator", cache),
             new ComparisonValidator(),
             createDestinationValidator(configuration),
             new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())

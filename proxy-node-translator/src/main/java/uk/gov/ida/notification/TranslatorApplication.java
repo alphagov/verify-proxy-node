@@ -223,7 +223,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 new AssertionAttributeStatementValidator(),
                 new AssertionSubjectConfirmationValidator()
         );
-        MessageReplayChecker messageReplayChecker = createMessageReplayChecker(ResponseAssertionsFromIdpValidator.class.getName(), cache);
+        MessageReplayChecker messageReplayChecker = createMessageReplayChecker("Translator:" + ResponseAssertionsFromIdpValidator.class.getName(), cache);
         DuplicateAssertionValidator duplicateAssertionValidator = new DuplicateAssertionChecker(messageReplayChecker);
         return new ResponseAssertionsFromIdpValidator(
                 assertionValidator,

@@ -1,4 +1,4 @@
-package uk.gov.ida.notification;
+package uk.gov.ida.notification.redis;
 
 import java.util.Map;
 
