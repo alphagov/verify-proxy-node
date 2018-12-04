@@ -72,7 +72,10 @@ import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValida
 
 import java.net.URI;
 
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.*;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMemoryCacheStorage;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMessageReplayChecker;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createRedisCacheStorage;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createReplayCache;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
 

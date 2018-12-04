@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import org.opensaml.storage.StorageRecord;
 
 
-class RedisStorageRecord extends StorageRecord {
+public class RedisStorageRecord extends StorageRecord {
     public RedisStorageRecord(String value, Long expiration) {
         super(value, expiration);
     }

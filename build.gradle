@@ -1,13 +1,8 @@
 buildscript {
     repositories {
-        if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {
             logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
             maven { url 'https://dl.bintray.com/alphagov/maven-test' }
             jcenter()
-        }
-        else {
-            maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
-        }
     }
     dependencies {
         classpath 'com.github.spullara.mustache.java:compiler:0.8.10',
@@ -44,15 +39,10 @@ subprojects {
     }
 
     repositories {
-        if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {
             logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
             maven { url 'https://dl.bintray.com/alphagov/maven' } // For dropwizard-logstash
             maven { url 'https://dl.bintray.com/alphagov/maven-test' } // For other public verify binaries
             jcenter()
-        }
-        else {
-            maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
-        }
     }
 
     configurations {

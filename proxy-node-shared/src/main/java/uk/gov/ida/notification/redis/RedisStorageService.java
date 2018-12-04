@@ -15,7 +15,6 @@ import io.lettuce.core.ScanCursor;
 import io.lettuce.core.TransactionResult;
 import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.collection.Pair;
-import uk.gov.ida.notification.redis.RedisStorageRecord;
 
 public class RedisStorageService extends AbstractStorageService {
 
