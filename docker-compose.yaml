@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3'
 
 services:
   proxy-node-gateway:
@@ -91,7 +91,7 @@ services:
       - ./.local_pki:/stub-idp/pki:ro
 
   proxy-node-metadata:
-    image: ruby:2.4.4
+    image: ruby:2.5.3-alpine
     command: ruby -run -ehttpd /srv -p80
     ports:
       - "7000:80"
