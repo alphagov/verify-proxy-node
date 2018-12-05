@@ -76,6 +76,10 @@ public class GatewayConfiguration extends Configuration {
     @NotNull
     private TrustStoreBackedMetadataConfiguration hubMetadataConfiguration;
 
+    @JsonProperty
+    @Valid
+    private URI redisServerUrl;
+
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -124,5 +128,9 @@ public class GatewayConfiguration extends Configuration {
 
     public URI getProxyNodeAuthnRequestUrl() {
         return proxyNodeAuthnRequestUrl;
+    }
+
+    public URI getRedisServerUrl() {
+        return redisServerUrl;
     }
 }

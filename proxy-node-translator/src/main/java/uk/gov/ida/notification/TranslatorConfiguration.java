@@ -62,6 +62,10 @@ public class TranslatorConfiguration extends Configuration {
     @NotNull
     private TrustStoreBackedMetadataConfiguration hubMetadataConfiguration;
 
+    @JsonProperty
+    @Valid
+    private URI redisServerUrl;
+
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -98,7 +102,11 @@ public class TranslatorConfiguration extends Configuration {
         return hubMetadataConfiguration;
     }
 
-        public URI getProxyNodeResponseUrl() {
-            return proxyNodeResponseUrl;
-        }
+    public URI getProxyNodeResponseUrl() {
+        return proxyNodeResponseUrl;
+    }
+
+    public URI getRedisServerUrl() {
+        return redisServerUrl;
+    }
 }

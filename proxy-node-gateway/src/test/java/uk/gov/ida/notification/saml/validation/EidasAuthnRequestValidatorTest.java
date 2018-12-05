@@ -13,6 +13,7 @@ import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
+import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
@@ -22,17 +23,14 @@ import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 import uk.gov.ida.saml.core.validators.DestinationValidator;
-import uk.gov.ida.saml.hub.validators.authnrequest.DuplicateAuthnRequestValidator;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class EidasAuthnRequestValidatorTest {
 
@@ -45,7 +43,7 @@ public class EidasAuthnRequestValidatorTest {
     private SpTypeValidator spTypeValidator;
     private LoaValidator loaValidator;
     private RequestedAttributesValidator requestedAttributesValidator;
-    private DuplicateAuthnRequestValidator duplicateAuthnRequestValidator;
+    private MessageReplayChecker messageReplayChecker;
     private ComparisonValidator comparisonValidator;
     private DestinationValidator destinationValidator;
     private AssertionConsumerServiceValidator assertionConsumerServiceValidator;
@@ -61,17 +59,16 @@ public class EidasAuthnRequestValidatorTest {
         spTypeValidator = mock(SpTypeValidator.class);
         loaValidator = mock(LoaValidator.class);
         requestedAttributesValidator = mock(RequestedAttributesValidator.class);
-        duplicateAuthnRequestValidator = mock(DuplicateAuthnRequestValidator.class);
+        messageReplayChecker = mock(MessageReplayChecker.class);
         comparisonValidator = mock(ComparisonValidator.class);
         destinationValidator = mock(DestinationValidator.class);
         assertionConsumerServiceValidator = mock(AssertionConsumerServiceValidator.class);
-        when(duplicateAuthnRequestValidator.valid(any())).thenReturn(true);
 
         eidasAuthnRequestValidator = new EidasAuthnRequestValidator(requestIssuerValidator,
                 spTypeValidator,
                 loaValidator,
                 requestedAttributesValidator,
-                duplicateAuthnRequestValidator,
+                messageReplayChecker,
                 comparisonValidator,
                 destinationValidator,
                 assertionConsumerServiceValidator);
@@ -252,7 +249,7 @@ public class EidasAuthnRequestValidatorTest {
         final String requestID = request.getID();
 
         eidasAuthnRequestValidator.validate(request);
-        verify(duplicateAuthnRequestValidator, times(1)).valid(requestID);
+        verify(messageReplayChecker, times(1)).checkReplay(requestID);
     }
 
     @Test

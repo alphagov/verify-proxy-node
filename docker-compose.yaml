@@ -23,6 +23,7 @@ services:
       CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
       METADATA_REFRESH_DELAY: 10000
       TRANSLATOR_URL: http://proxy-node-translator/SAML2/SSO/Response/POST
+      REDIS_SERVER_URI: redis://gateway-redis:6379/
     env_file: ./.local_pki/proxy_node.env
     volumes:
       - ./.local_pki:/verify-eidas-proxy-node/pki:ro
@@ -45,6 +46,7 @@ services:
       CONNECTOR_NODE_ISSUER_ID: http://localhost:5000/Metadata
       CONNECTOR_NODE_METADATA_URL: http://stub-connector/Metadata
       CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
+      REDIS_SERVER_URI: redis://gateway-redis:6379/
     env_file: ./.local_pki/proxy_node.env
     volumes:
     - ./pki:/verify-eidas-proxy-node/pki:ro
@@ -100,3 +102,8 @@ services:
     image: postgres
     expose:
       - "5432"
+
+  gateway-redis:
+    image: redis:latest
+    expose:
+      - "6379"
