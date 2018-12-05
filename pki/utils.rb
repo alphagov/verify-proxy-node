@@ -10,7 +10,7 @@ end
 def in_tmp_dir(dn)
   Dir.mktmpdir(dn) do |dir|
     puts("-- in_tmp_dir #{dir}")
-    Dir.chdir(dir) { yield }
+    Dir.chdir(dir) { yield(dir) }
   end
 end
 
