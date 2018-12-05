@@ -12,7 +12,6 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
-import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -25,13 +24,14 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
-import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
 import uk.gov.ida.notification.stubconnector.resources.MetadataResource;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
+
+import static uk.gov.ida.notification.saml.metadata.MetadataFactory.createMetadataFromBundle;
 
 public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
@@ -94,7 +94,7 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
                     final Environment environment) throws
             ComponentInitializationException {
 
-        proxyNodeMetadata = createMetadata(proxyNodeMetadataResolverBundle);
+        proxyNodeMetadata = createMetadataFromBundle(proxyNodeMetadataResolverBundle);
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
@@ -161,11 +161,6 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         );
 
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
-    }
-
-    private Metadata createMetadata(MetadataResolverBundle bundle) throws ComponentInitializationException {
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(bundle.getMetadataResolver()).initialize();
-        return new Metadata(metadataCredentialResolver);
     }
 
     private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
