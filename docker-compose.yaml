@@ -2,10 +2,7 @@ version: '3'
 
 services:
   proxy-node-gateway:
-    build:
-      context: .
-      args:
-        component: proxy-node-gateway
+    image: govukverify/proxy-node-gateway
     ports:
       - "6100:80"
       - "6601:6601"
@@ -41,6 +38,7 @@ services:
         softHSMSigningKeyId: DEF0
         softHSMSigningKeyPin: CHANGE-ME-123
         softHSMSigningKeySoPin: CHANGE-ME-456
+    image: govukverify/proxy-node-translator
     ports:
       - "6300:80"
       - "6661:6661"
@@ -68,10 +66,7 @@ services:
         baseImage: openjdk:11-jre-slim
     image: govukverify/soft-hsm
   stub-connector:
-    build:
-      context: .
-      args:
-        component: stub-connector
+    image: govukverify/stub-connector
     ports:
       - "5000:80"
       - "6667:6667"
