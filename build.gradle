@@ -1,8 +1,7 @@
 buildscript {
     repositories {
-            logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
-            maven { url 'https://dl.bintray.com/alphagov/maven-test' }
-            jcenter()
+        maven { url 'https://dl.bintray.com/alphagov/maven-test' }
+        jcenter()
     }
     dependencies {
         classpath 'com.github.spullara.mustache.java:compiler:0.8.10',
@@ -39,10 +38,8 @@ subprojects {
     }
 
     repositories {
-            logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
-            maven { url 'https://dl.bintray.com/alphagov/maven' } // For dropwizard-logstash
-            maven { url 'https://dl.bintray.com/alphagov/maven-test' } // For other public verify binaries
-            jcenter()
+        maven { url 'https://dl.bintray.com/alphagov/maven-test' }
+        jcenter()
     }
 
     configurations {
@@ -93,7 +90,6 @@ subprojects {
             "org.mockito:mockito-core:2.23.0",
             "io.dropwizard:dropwizard-testing:${dropwizard_version}",
             "net.sourceforge.htmlunit:htmlunit:2.28",
-            "org.jsoup:jsoup:1.11.3",
             project(':proxy-node-test')
         )
 

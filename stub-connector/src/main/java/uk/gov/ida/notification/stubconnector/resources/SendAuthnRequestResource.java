@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.stubconnector.resources;
 
+import io.dropwizard.jersey.sessions.Session;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
@@ -15,11 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 
 @Path("/Request")
@@ -40,11 +40,7 @@ public class SendAuthnRequestResource {
     }
 
     @GET
-    public SamlFormView setupAuthnRequest(ContainerRequestContext requestContext) throws ResolverException {
-        assert requestContext != null && request != null;
-
-        HttpSession session = request.getSession(true);
-
+    public SamlFormView setupAuthnRequest(@Session HttpSession session) throws ResolverException {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
         String ssoUrl = proxyNodeMetadata.getSsoUrl(proxyNodeEntityId);
         String connectorEntityId = configuration.getConnectorNodeBaseUrl() + "/Metadata";

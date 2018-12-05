@@ -60,7 +60,7 @@ public class ReceiveResponseResource {
     @Path("/POST")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public ResponseView receiveResponse(
-            @Session() HttpSession session,
+            @Session HttpSession session,
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response response,
             @FormParam("RelayState") String relayState) {
 

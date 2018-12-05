@@ -1,13 +1,9 @@
 package uk.gov.ida.notification.apprule;
 
-import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
 import org.opensaml.security.credential.Credential;
@@ -15,22 +11,23 @@ import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
-import uk.gov.ida.notification.saml.EidasAttributeBuilder;
-import uk.gov.ida.notification.saml.EidasResponseBuilder;
-import uk.gov.ida.notification.saml.SamlObjectMarshaller;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.saml.*;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
 
-public class SamlResponseValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
+public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
 
     @Test
     public void shouldReturnValidSamlResponse() throws Exception {
@@ -41,8 +38,7 @@ public class SamlResponseValidatorAppRuleTests extends StubConnectorAppRuleTestB
 
         String validSamlMessage = responseToString(signedSamlResponse);
 
-        String result = getValidity(validSamlMessage);
-        assertEquals("VALID", result);
+        hasValidity(validSamlMessage, "VALID");
     }
 
     @Test
@@ -52,8 +48,7 @@ public class SamlResponseValidatorAppRuleTests extends StubConnectorAppRuleTestB
         Response unsignedSamlResponse = getEidasSamlMessage(authnId);
         String invalidSamlMessage = responseToString(unsignedSamlResponse);
 
-        String result = getValidity(invalidSamlMessage);
-        assertEquals("INVALID", result);
+        hasValidity(invalidSamlMessage, "INVALID");
     }
 
     @Test
@@ -65,40 +60,20 @@ public class SamlResponseValidatorAppRuleTests extends StubConnectorAppRuleTestB
 
         String validSamlMessage = responseToString(signedSamlResponse);
 
-        String result = getValidity(validSamlMessage);
-        assertEquals("INDETERMINATE", result);
+        hasValidity(validSamlMessage, "INDETERMINATE");
     }
 
 
-    private String getRequestSaml() throws URISyntaxException {
+    private String getAuthnRequestIdFromSession() throws URISyntaxException, IOException, ParserConfigurationException {
         String html = getEidasRequest();
-
-        Document document = Jsoup.parse(html);
-        Element samlRequest = document.select("input[name=\"SAMLRequest\"]").first();
-        return Base64.decodeAsString(samlRequest.val());
+        String decodedSaml = HtmlHelpers.getValueFromForm(html, "saml-form", "SAMLRequest");
+        AuthnRequest request = new SamlParser().parseSamlString(decodedSaml);
+        return request.getID();
     }
 
-    private String getAuthnRequestIdFromSession() throws URISyntaxException {
-        String decodedSaml = getRequestSaml();
-
-        Document saml = Jsoup.parse(decodedSaml, "", Parser.xmlParser());
-        Element entityDescriptor = saml.select("saml2p|AuthnRequest").first();
-        return entityDescriptor.attr("ID");
-    }
-
-    private String getValidity(String samlMessage) throws URISyntaxException {
+    private void hasValidity(String samlMessage, String validity) throws URISyntaxException {
         String html = postEidasResponse(samlMessage);
-
-        Document responseDoc = Jsoup.parse(html);
-        Element validityDiv = responseDoc.select("h2").first();
-
-        String result = validityDiv.text();
-
-        String subStringForValidity = "Saml Validity: ";
-        if (result.contains(subStringForValidity))
-            result = result.replace(subStringForValidity, "");
-
-        return result;
+        assertThat(html, containsString("Saml Validity: "+validity));
     }
 
     private Response getEidasSamlMessage(String authid) {
