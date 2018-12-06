@@ -1,0 +1,91 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stub-idp
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: stub-idp
+    spec:
+      containers:
+      - env:
+        - name: CERT_TYPE
+          value: encoded
+        - name: CONFIG_FILE
+          value: ./stub-idp.yml
+        - name: DB_URI
+          value: jdbc:postgresql://stub-idp-postgres.default.svc.cluster.local:5432/postgres?user=postgres&password=password
+        - name: ENTITY_ID
+          value: http://stub_idp.acme.org/stub-idp-demo/SSO/POST
+        - name: GRADLE_OPTS
+          value: -Xmx64m -Dorg.gradle.jvmargs='-Xmx128m -XX:MaxPermSize=64m'
+        - name: GRAPHITE_REPORTING_FREQUENCY
+          value: 24h
+        - name: KEY_TYPE
+          value: encoded
+        - name: LOG_PATH
+          value: ./logs
+        - name: METADATA_ENTITY_ID
+          value: https://dev-hub.local
+        - name: METADATA_TRUSTSTORE
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: METADATA_TRUSTSTORE
+        - name: METADATA_TRUSTSTORE_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: METADATA_TRUSTSTORE_PASSWORD
+        - name: METADATA_URL
+          value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_hub.xml
+        - name: PORT
+          value: "80"
+        - name: STUB_COUNTRY_SIGNING_CERT
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: STUB_COUNTRY_SIGNING_CERT
+        - name: STUB_COUNTRY_SIGNING_PRIVATE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: STUB_COUNTRY_SIGNING_PRIVATE_KEY
+        - name: STUB_IDPS_FILE_PATH
+          value: ./config/stub-idps.yml
+        - name: STUB_IDP_BASIC_AUTH
+          value: "true"
+        - name: STUB_IDP_SIGNING_CERT
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: STUB_IDP_SIGNING_CERT
+        - name: STUB_IDP_SIGNING_PRIVATE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: STUB_IDP_SIGNING_PRIVATE_KEY
+        - name: TRUSTSTORE_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: stub-idp-pki 
+              key: METADATA_TRUSTSTORE_PASSWORD
+        - name: TRUSTSTORE_TYPE
+          value: encoded
+        image: govukverify/stub-idp
+        name: stub-idp
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /stub-idp/config/
+          name: stub-idp-config
+          readOnly: true
+      restartPolicy: Always
+      volumes:
+      - name: stub-idp-config
+        configMap:
+          name: stub-idps

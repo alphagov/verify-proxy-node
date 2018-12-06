@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stub-idp-postgres
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: stub-idp-postgres
+    spec:
+      containers:
+      - image: postgres
+        name: stub-idp-postgres
+      restartPolicy: Always
