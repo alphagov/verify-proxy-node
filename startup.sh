@@ -5,6 +5,8 @@ set -euo pipefail
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}"/.local_pki
 
+minikube start
+
 pushd "${PN_PROJECT_DIR}/pki"
   rm -f "${PKI_OUTPUT_DIR}/*"
   bundle install --quiet
@@ -23,3 +25,6 @@ popd
 kubectl delete -R -f yaml/ || :
 kubectl apply -R -f .local_pki/
 kubectl apply -R -f yaml/
+
+echo ""
+echo "http://$(minikube ip):31100/Request"
