@@ -2,7 +2,16 @@ dependencies {
     compile configurations.dropwizard,
             configurations.saml,
             configurations.common,
+            configurations.soft_hsm,
             project(':proxy-node-shared')
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDir '../.local_pki'
+        }
+    }
 }
 
 group = 'uk.gov.ida.notification.translator'

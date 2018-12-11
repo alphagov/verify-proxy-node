@@ -2,12 +2,17 @@ version: '3'
 
 services:
   docker-gradle:
-    image: gradle:jdk11
+    build:
+      context: .
+      dockerfile: softHSM.baseImage.Dockerfile
+      args:
+        baseImage: gradle:jdk11
     working_dir: /home/gradle/project
     user: root
     entrypoint: gradle --no-daemon
     environment:
       VERIFY_USE_PUBLIC_BINARIES: 'true'
+      SOFT_HSM_LIB_PATH: /usr/lib/softhsm/libsofthsm2.so
     volumes:
       - gradle-cache:/home/gradle/.gradle
       - .:/home/gradle/project

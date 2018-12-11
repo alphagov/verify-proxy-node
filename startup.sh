@@ -29,7 +29,8 @@ pushd "${PN_PROJECT_DIR}/pki"
     --idp-sso-url "http://localhost:6200/stub-idp-demo/SAML2/SSO" \
     --proxy-sso-url "http://localhost:6100/SAML2/SSO/POST" \
     --env \
-    "${PKI_OUTPUT_DIR}"
+    "${PKI_OUTPUT_DIR}" \
+    --softhsm
 popd
 
 docker-compose up $@ -d
