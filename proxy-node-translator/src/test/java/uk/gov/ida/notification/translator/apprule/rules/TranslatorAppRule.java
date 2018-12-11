@@ -33,6 +33,7 @@ public class TranslatorAppRule extends DropwizardAppRule<TranslatorConfiguration
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("redisServerUrl", ""));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 

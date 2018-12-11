@@ -17,10 +17,10 @@ import java.util.List;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
-public class EidasProxyNodeAppRule extends DropwizardAppRule<GatewayConfiguration> {
+public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
     private Client client;
 
-    public EidasProxyNodeAppRule(ConfigOverride... configOverrides) {
+    public GatewayAppRule(ConfigOverride... configOverrides) {
         super(
             GatewayApplication.class,
             resourceFilePath("config.yml"),
@@ -33,6 +33,7 @@ public class EidasProxyNodeAppRule extends DropwizardAppRule<GatewayConfiguratio
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("redisServerUrl", ""));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 

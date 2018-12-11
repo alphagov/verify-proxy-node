@@ -2,7 +2,6 @@ package uk.gov.ida.notification;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.*;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
@@ -64,7 +63,8 @@ public class TranslatorConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    private URI redisServerUrl;
+    @NotNull
+    private String redisServerUrl = "";
 
     public URI getHubUrl() {
         return hubUrl;
@@ -106,7 +106,7 @@ public class TranslatorConfiguration extends Configuration {
         return proxyNodeResponseUrl;
     }
 
-    public URI getRedisServerUrl() {
+    public String getRedisServerUrl() {
         return redisServerUrl;
     }
 }

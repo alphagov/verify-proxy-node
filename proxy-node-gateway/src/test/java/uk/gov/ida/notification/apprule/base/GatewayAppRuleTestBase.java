@@ -11,7 +11,7 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.security.credential.Credential;
 
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.apprule.rules.EidasProxyNodeAppRule;
+import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
 import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -35,7 +35,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 
-public class ProxyNodeAppRuleTestBase {
+public class GatewayAppRuleTestBase {
 
     protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
 
@@ -66,7 +66,7 @@ public class ProxyNodeAppRuleTestBase {
     protected final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(countrySigningCredential.getPublicKey(), countrySigningCredential.getPrivateKey(), TEST_RP_PUBLIC_SIGNING_CERT);
 
     @Rule
-    public EidasProxyNodeAppRule proxyNodeAppRule = new EidasProxyNodeAppRule(
+    public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
             ConfigOverride.config("proxyNodeEntityId", "http://proxy-node.uk"),
             ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/SAML2/SSO/POST"),
             ConfigOverride.config("proxyNodeResponseUrl", "http://proxy-node/SAML2/SSO/Response"),
@@ -74,7 +74,7 @@ public class ProxyNodeAppRuleTestBase {
             ConfigOverride.config("hubUrl", "http://hub"),
             ConfigOverride.config("connectorNodeUrl", "http://connector-node:8080"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
-            ConfigOverride.config("translatorUrl", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
             ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
             ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),

@@ -1,20 +1,20 @@
 server:
   applicationConnectors:
-  - type: http
-    port: ${PORT:-6600}
+    - type: http
+      port: ${PORT:-6660}
   adminConnectors:
-  - type: http
-    port: ${ADMIN_PORT:-6601}
+    - type: http
+      port: ${ADMIN_PORT:-6661}
 
 logging:
   level: INFO
   loggers:
     uk.gov.ida: DEBUG
   appenders:
-  - type: console
-  - type: file
-    currentLogFilename: logs/proxy-node.log
-    archive: false
+    - type: console
+    - type: file
+      currentLogFilename: logs/translator.log
+      archive: false
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 proxyNodeResponseUrl: ${PROXY_NODE_RESPONSE_ENDPOINT}
@@ -23,6 +23,8 @@ proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_U
 hubUrl: ${HUB_URL}
 connectorNodeUrl: ${CONNECTOR_NODE_URL}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
+
+redisServerUrl: ${REDIS_SERVER_URI}
 
 connectorMetadataConfiguration:
   url: ${CONNECTOR_NODE_METADATA_URL}

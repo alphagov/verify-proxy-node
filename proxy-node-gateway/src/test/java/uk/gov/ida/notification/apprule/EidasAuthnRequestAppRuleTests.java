@@ -7,7 +7,7 @@ import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasConstants;
-import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
+import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class EidasAuthnRequestAppRuleTests extends ProxyNodeAppRuleTestBase {
+public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     private SamlParser parser;
     private EidasAuthnRequestBuilder request;

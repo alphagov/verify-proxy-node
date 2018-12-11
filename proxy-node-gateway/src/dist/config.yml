@@ -24,8 +24,12 @@ proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_U
 hubUrl: ${HUB_URL}
 connectorNodeUrl: ${CONNECTOR_NODE_URL}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
-translatorUrl: ${TRANSLATOR_URL}
 redisServerUrl: ${REDIS_SERVER_URI}
+
+translatorService:
+  url: ${TRANSLATOR_URL}
+  client:
+    connectionTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
 
 connectorMetadataConfiguration:
   url: ${CONNECTOR_NODE_METADATA_URL}
