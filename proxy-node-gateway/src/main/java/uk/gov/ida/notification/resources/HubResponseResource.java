@@ -1,5 +1,7 @@
 package uk.gov.ida.notification.resources;
 
+import io.dropwizard.jersey.sessions.Session;
+import io.dropwizard.setup.Environment;
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -9,8 +11,8 @@ import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseExceptio
 import uk.gov.ida.notification.saml.HubResponseContainer;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -26,19 +28,16 @@ public class HubResponseResource {
     private final String connectorNodeUrl;
     private final TranslatorService translatorService;
     private HubResponseValidator hubResponseValidator;
-    private RequestIdWatcher requestIdWatcher;
 
     public HubResponseResource(
             SamlFormViewBuilder samlFormViewBuilder,
             String connectorNodeUrl,
             TranslatorService translatorService,
-            HubResponseValidator hubResponseValidator,
-            RequestIdWatcher requestIdWatcher) {
+            HubResponseValidator hubResponseValidator) {
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.connectorNodeUrl = connectorNodeUrl;
         this.translatorService = translatorService;
         this.hubResponseValidator = hubResponseValidator;
-        this.requestIdWatcher = requestIdWatcher;
     }
 
     @POST
@@ -46,14 +45,16 @@ public class HubResponseResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response encryptedHubResponse,
-            @FormParam("RelayState") String relayState) {
+            @FormParam("RelayState") String relayState,
+            @Session HttpSession session) {
 
         try {
+            String expectedRequestId = (String) session.getAttribute("gateway_request_id");
             hubResponseValidator.validate(encryptedHubResponse);
 
-            if (!requestIdWatcher.haveSeenRequestFor(encryptedHubResponse)) {
+            if (!expectedRequestId.contains(encryptedHubResponse.getInResponseTo())) {
                 throw new InvalidHubResponseException(
-                        String.format("Received a Response from Hub for an AuthnRequest we have not seen (ID: %s)", encryptedHubResponse.getInResponseTo()));
+                    String.format("Received a Response from Hub for an AuthnRequest we have not seen (ID: %s)", encryptedHubResponse.getInResponseTo()));
             }
 
             HubResponseContainer hubResponseContainer = HubResponseContainer.from(
@@ -86,4 +87,5 @@ public class HubResponseResource {
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
     }
+
 }
