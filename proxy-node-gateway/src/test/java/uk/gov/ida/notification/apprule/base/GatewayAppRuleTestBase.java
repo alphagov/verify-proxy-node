@@ -30,12 +30,17 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_S
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 public class GatewayAppRuleTestBase {
+
+    private Map<String, NewCookie> cookies;
 
     protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
 
@@ -101,14 +106,19 @@ public class GatewayAppRuleTestBase {
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
         Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
 
+        Response response = null;
+
         try {
-            return proxyNodeAppRule.target("/SAML2/SSO/POST")
-                    .request()
-                    .post(Entity.form(postForm));
+            response = proxyNodeAppRule.target("/SAML2/SSO/POST").request().post(Entity.form(postForm));
         } catch (URISyntaxException e) {
             fail(e);
-            return null;
         }
+
+        if (response != null) {
+            cookies = response.getCookies();
+        }
+
+        return response;
     }
 
     protected Response redirectEidasAuthnRequest(AuthnRequest eidasAuthnRequest) {
@@ -125,17 +135,25 @@ public class GatewayAppRuleTestBase {
         }
     }
 
-    protected Response postHubResponse(org.opensaml.saml.saml2.core.Response hubResponse) {
+    protected Response postHubResponse(org.opensaml.saml.saml2.core.Response hubResponse) throws URISyntaxException {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
+        Form postForm = new Form()
+                .param(SamlFormMessageType.SAML_RESPONSE, encodedResponse)
+                .param("RelayState", "relay");
+
+        Invocation.Builder request;
 
         try {
-            return proxyNodeAppRule.target("/SAML2/SSO/Response/POST")
-                    .request()
-                    .post(Entity.form(postForm));
+            request = proxyNodeAppRule.target("/SAML2/SSO/Response/POST").request();
         } catch (URISyntaxException e) {
             fail(e);
             return null;
         }
+
+        if (cookies != null) {
+            request.cookie(cookies.get("gateway-session"));
+        }
+
+        return request.post(Entity.form(postForm));
     }
 }

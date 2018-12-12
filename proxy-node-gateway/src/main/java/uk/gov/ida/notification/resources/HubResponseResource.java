@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.resources;
 
 import io.dropwizard.jersey.sessions.Session;
-import io.dropwizard.setup.Environment;
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.SamlFormViewBuilder;

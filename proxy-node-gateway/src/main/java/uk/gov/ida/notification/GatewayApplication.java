@@ -36,7 +36,6 @@ import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
 import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
@@ -162,7 +161,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
     private void registerResources(GatewayConfiguration configuration, Environment environment) throws Exception {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
-        RequestIdWatcher requestIdWatcher = new RequestIdWatcher();
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
