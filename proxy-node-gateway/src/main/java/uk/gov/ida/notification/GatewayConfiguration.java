@@ -24,7 +24,7 @@ public class GatewayConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI translatorUrl;
+    private TranslatorServiceConfiguration translatorService;
 
     @JsonProperty
     @Valid
@@ -78,7 +78,8 @@ public class GatewayConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    private URI redisServerUrl;
+    @NotNull
+    private String redisServerUrl = "";
 
     public URI getHubUrl() {
         return hubUrl;
@@ -88,7 +89,7 @@ public class GatewayConfiguration extends Configuration {
         return connectorNodeUrl;
     }
 
-    public URI getTranslatorUrl() { return translatorUrl; }
+    public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }
 
     public String getProxyNodeEntityId() {
         return proxyNodeEntityId;
@@ -130,7 +131,7 @@ public class GatewayConfiguration extends Configuration {
         return proxyNodeAuthnRequestUrl;
     }
 
-    public URI getRedisServerUrl() {
+    public String getRedisServerUrl() {
         return redisServerUrl;
     }
 }

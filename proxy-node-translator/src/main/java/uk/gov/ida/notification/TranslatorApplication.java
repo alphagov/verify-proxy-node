@@ -164,13 +164,14 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     private StorageService createStorageService(TranslatorConfiguration configuration) throws ComponentInitializationException {
-        if (configuration.getRedisServerUrl() != null) {
-            RedisClient client = RedisClient.create(RedisURI.create(configuration.getRedisServerUrl()));
-            StatefulRedisConnection<String, String> connection = client.connect();
-            RedisCommands<String, String> syncCommands = connection.sync();
-            return createRedisCacheStorage("translator-cache-storage", syncCommands);
-        } else {
+        if (configuration.getRedisServerUrl().isEmpty()) {
             return createMemoryCacheStorage("translator-cache-storage");
+        } else {
+            RedisCommands<String, String> sync = RedisClient
+                .create(configuration.getRedisServerUrl())
+                .connect()
+                .sync();
+            return createRedisCacheStorage("translator-cache-storage", sync);
         }
     }
 

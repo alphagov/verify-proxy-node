@@ -21,7 +21,7 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-import uk.gov.ida.notification.apprule.base.ProxyNodeAppRuleTestBase;
+import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
@@ -59,7 +59,7 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_P
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
-public class HubResponseAppRuleTests extends ProxyNodeAppRuleTestBase {
+public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----\n";
     private static final String END_CERT = "\n-----END CERTIFICATE-----";

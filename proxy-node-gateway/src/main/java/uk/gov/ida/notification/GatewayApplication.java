@@ -1,17 +1,15 @@
 package uk.gov.ida.notification;
 
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
@@ -21,16 +19,16 @@ import org.opensaml.storage.StorageService;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
-import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
+import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
+import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
-import uk.gov.ida.notification.saml.metadata.Metadata;
-import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
@@ -53,19 +51,17 @@ import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
+import javax.ws.rs.client.Client;
 import java.net.URI;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
-import static uk.gov.ida.notification.saml.metadata.MetadataFactory.createMetadataFromBundle;
 import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMemoryCacheStorage;
 import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMessageReplayChecker;
 import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createRedisCacheStorage;
 import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createReplayCache;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
-
-    private Metadata connectorMetadata;
 
     private MetadataResolverBundle<GatewayConfiguration> hubMetadataResolverBundle;
     private MetadataResolverBundle<GatewayConfiguration> connectorMetadataResolverBundle;
@@ -129,8 +125,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     public void run(final GatewayConfiguration configuration,
                     final Environment environment) throws Exception {
 
-        connectorMetadata = createMetadataFromBundle(connectorMetadataResolverBundle);
-
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
@@ -175,6 +169,9 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
 
+        Client translatorClient = new JerseyClientBuilder(environment).using(configuration.getTranslatorServiceConfiguration().getClient()).build("translator");
+        TranslatorService translatorService = new TranslatorService(translatorClient, configuration.getTranslatorServiceConfiguration().getUrl().toString(), new SamlParser());
+
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
                 hubAuthnRequestGenerator,
@@ -186,21 +183,20 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
                 configuration.getConnectorNodeUrl().toString(),
+                translatorService,
                 hubResponseValidator,
-                environment,
-                configuration.getTranslatorUrl().toString(),
-                requestIdWatcher
-        ));
+                requestIdWatcher));
     }
 
     private StorageService createStorageService(GatewayConfiguration configuration) throws ComponentInitializationException {
-        if (configuration.getRedisServerUrl() != null) {
-            RedisClient client = RedisClient.create(RedisURI.create(configuration.getRedisServerUrl()));
-            StatefulRedisConnection<String, String> connection = client.connect();
-            RedisCommands<String, String> syncCommands = connection.sync();
-            return createRedisCacheStorage("gateway-cache-storage", syncCommands);
-        } else {
+        if (configuration.getRedisServerUrl().isEmpty()) {
             return createMemoryCacheStorage("gateway-cache-storage");
+        } else {
+            RedisCommands<String, String> sync = RedisClient
+                .create(configuration.getRedisServerUrl())
+                .connect()
+                .sync();
+            return createRedisCacheStorage("gateway-cache-storage", sync);
         }
     }
 
