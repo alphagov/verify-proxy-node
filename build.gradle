@@ -19,6 +19,7 @@ ext {
     dropwizard_version = '1.2.0'
     utils_version = '2.0.0-346'
     saml_libs_version = "${opensaml_version}-160"
+    soft_hsm_version = '1.1.1'
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
@@ -47,6 +48,7 @@ subprojects {
         dropwizard
         saml
         saml_test
+        soft_hsm
     }
 
     dependencies {
@@ -80,6 +82,10 @@ subprojects {
                 "javax.activation:activation:1.1.1",
                 "io.lettuce:lettuce-core:5.1.3.RELEASE",
                 "uk.gov.ida:security-utils:${utils_version}"
+        )
+
+        soft_hsm (
+                "se.swedenconnect.opensaml:opensaml-pkcs11-support:${soft_hsm_version}"
         )
 
         testCompile (

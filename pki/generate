@@ -62,6 +62,11 @@ def der2pk8(der)
   stdout
 end
 
+def der2p8(der)
+  stdout, status = Open3.capture2('openssl pkcs8 -topk8 -inform DER -outform PEM -nocrypt', stdin_data: der)
+  stdout
+end
+
 def b64(s)
   strip_pem(Base64.encode64(s))
 end
@@ -199,6 +204,13 @@ Dir.chdir(output_dir) do
     create_file('proxy_node_signing.pk8', der2pk8(proxy_signing_keypair.key.to_der))
     create_file('stub_connector_signing.pk8', der2pk8(stub_connector_signing_keypair.key.to_der))
     create_file('stub_connector_encryption.pk8', der2pk8(stub_connector_encryption_keypair.key.to_der))
+  end
+
+  if options.softhsm
+      puts('Creating proxy_node_signing files for softhsm testing...')
+      create_file('proxy_node_signing.crt', proxy_signing_keypair.cert.to_pem)
+      create_file('proxy_node_signing.pk8', der2pk8(proxy_signing_keypair.key.to_der))
+      create_file('../proxy-node-translator/src/dist/proxy_node_signing.p8', der2p8(proxy_signing_keypair.key.to_der))
   end
 
   if options.do_manifests

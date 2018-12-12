@@ -43,3 +43,4 @@ local_eidas_reference/docker/pki
 local_eidas_reference/gateway
 local_eidas_reference/translator
 .local_pki
+proxy-node-translator/src/dist/proxy_node_signing.*

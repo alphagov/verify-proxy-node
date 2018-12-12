@@ -28,10 +28,19 @@ services:
     volumes:
       - ./.local_pki:/verify-eidas-proxy-node/pki:ro
   proxy-node-translator:
+    depends_on:
+      - soft-hsm
     build:
       context: .
+      dockerfile: translator.softHSM.Dockerfile
       args:
         component: proxy-node-translator
+        softHSMSigningKeyLabel: vfpn-uk-signing
+        softHSMSigningKeyToken: vfpn-uk-signing
+        softHSMSigningKeySlot: 0
+        softHSMSigningKeyId: DEF0
+        softHSMSigningKeyPin: CHANGE-ME-123
+        softHSMSigningKeySoPin: CHANGE-ME-456
     ports:
       - "6300:80"
       - "6661:6661"
@@ -47,9 +56,17 @@ services:
       CONNECTOR_NODE_METADATA_URL: http://stub-connector/Metadata
       CONNECTOR_NODE_ENTITY_ID: http://localhost:5000/Metadata
       REDIS_SERVER_URI: redis://gateway-redis:6379/
+      SOFT_HSM_LIB_PATH: /usr/lib/softhsm/libsofthsm2.so
     env_file: ./.local_pki/proxy_node.env
     volumes:
-    - ./pki:/verify-eidas-proxy-node/pki:ro
+      - ./pki:/verify-eidas-proxy-node/pki:ro
+  soft-hsm:
+    build:
+      context: .
+      dockerfile: softHSM.baseImage.Dockerfile
+      args:
+        baseImage: openjdk:11-jre-slim
+    image: govukverify/soft-hsm
   stub-connector:
     build:
       context: .

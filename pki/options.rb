@@ -2,7 +2,20 @@ require 'optparse'
 
 USAGE = 'Usage: generate.rb [options] <output directory>'
 
-Options = Struct.new(:hub_entity_id, :idp_entity_id, :proxy_entity_id, :hub_response_url, :idp_sso_url, :proxy_sso_url, :do_files, :do_manifests, :do_env, :xmlsectool_path, :truststore_pass)
+Options =
+    Struct.new(
+        :hub_entity_id,
+        :idp_entity_id,
+        :proxy_entity_id,
+        :hub_response_url,
+        :idp_sso_url,
+        :proxy_sso_url,
+        :do_files,
+        :do_manifests,
+        :do_env,
+        :xmlsectool_path,
+        :truststore_pass,
+        :softhsm)
 
 class Parser
   def self.parse(args)
@@ -33,6 +46,7 @@ class Parser
       opts.on('--env', "Output environment files for Docker Compose") { |_| options.do_env = true }
       opts.on('--xmlsectool PATH', "Path to xmlsectool (default: xmlsectool)") { |s| options.xmlsectool_path = s }
       opts.on('--truststore-pass PASSWORD', "Password for generated truststores (default: marshmallow)") { |s| options.truststore_pass = s }
+      opts.on('--softhsm', "Use softhsm for testing") { |_| options.softhsm = true }
       opts.on('-h', '--help', 'Print help message') { |_| abort(opts.to_s) }
     end
 
