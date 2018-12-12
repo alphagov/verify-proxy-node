@@ -43,6 +43,12 @@ subprojects {
         jcenter()
     }
 
+    sourceSets {
+        test {
+            resources.srcDirs += ["src/dist"]
+        }
+    }
+
     configurations {
         common
         dropwizard

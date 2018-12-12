@@ -8,30 +8,27 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.storage.ReplayCache;
 import org.opensaml.storage.StorageService;
-import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
+import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
-import uk.gov.ida.notification.saml.ResponseAssertionFactory;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
+import uk.gov.ida.notification.resources.HubResponseFromGatewayResource;
+import uk.gov.ida.notification.saml.HubResponseTranslator;
+import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
-import uk.gov.ida.notification.saml.HubResponseTranslator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.notification.resources.HubResponseFromGatewayResource;
 import uk.gov.ida.saml.core.validators.DestinationValidator;
 import uk.gov.ida.saml.hub.transformers.inbound.SamlStatusToIdaStatusCodeMapper;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
@@ -49,7 +46,8 @@ import java.util.List;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
 import static uk.gov.ida.notification.saml.metadata.MetadataFactory.createMetadataFromBundle;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.*;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMemoryCacheStorage;
+import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createRedisCacheStorage;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
 
@@ -163,26 +161,15 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         return new EidasResponseGenerator(hubResponseTranslator, signer);
     }
 
-    private StorageService createStorageService(TranslatorConfiguration configuration) throws ComponentInitializationException {
-        if (configuration.getRedisServerUrl().isEmpty()) {
-            return createMemoryCacheStorage("translator-cache-storage");
-        } else {
-            RedisCommands<String, String> sync = RedisClient
-                .create(configuration.getRedisServerUrl())
-                .connect()
-                .sync();
-            return createRedisCacheStorage("translator-cache-storage", sync);
-        }
-    }
-
     private HubResponseValidator createHubResponseValidator(TranslatorConfiguration configuration) throws Exception {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
         SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataResolverBundle);
 
-        StorageService storage = createStorageService(configuration);
-        ReplayCache cache = createReplayCache("translator-replay-cache", storage);
+        MessageReplayChecker messageReplayChecker = configuration
+            .getReplayChecker()
+            .createMessageReplayChecker("translator-hub");
 
         IdpResponseValidator idpResponseValidator = new IdpResponseValidator(
                 new SamlResponseSignatureValidator(hubResponseMessageSignatureValidator),
@@ -190,7 +177,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 new SamlAssertionsSignatureValidator(hubResponseMessageSignatureValidator),
                 new EncryptedResponseFromIdpValidator<>(new SamlStatusToIdaStatusCodeMapper()),
                 new DestinationValidator(proxyNodeResponseUrl, proxyNodeResponseUrl.getPath()),
-                ResponseAssertionFactory.createResponseAssertionsFromIdpValidator("Translator", proxyNodeEntityId, cache)
+                ResponseAssertionFactory.createResponseAssertionsFromIdpValidator("Translator", proxyNodeEntityId, messageReplayChecker)
         );
         ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
         return new HubResponseValidator(idpResponseValidator, responseAttributesValidator, new LoaValidator());

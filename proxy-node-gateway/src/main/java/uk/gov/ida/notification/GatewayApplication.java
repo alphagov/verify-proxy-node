@@ -1,23 +1,17 @@
 package uk.gov.ida.notification;
 
 import io.dropwizard.Application;
-import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.api.sync.RedisCommands;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.storage.ReplayCache;
-import org.opensaml.storage.StorageService;
+import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
@@ -52,15 +46,10 @@ import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
-import javax.ws.rs.client.Client;
 import java.net.URI;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMemoryCacheStorage;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMessageReplayChecker;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createRedisCacheStorage;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createReplayCache;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
 
@@ -164,16 +153,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
-        StorageService storage = createStorageService(configuration);
-        ReplayCache cache = createReplayCache("gateway-replay-cache", storage);
-
-        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle, cache);
-        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration, cache);
+        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
+        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
-
-        Client translatorClient = new JerseyClientBuilder(environment).using(configuration.getTranslatorServiceConfiguration().getClient()).build("translator");
-        TranslatorService translatorService = new TranslatorService(translatorClient, configuration.getTranslatorServiceConfiguration().getUrl().toString(), new SamlParser());
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
@@ -182,24 +165,16 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 eidasAuthnRequestValidator,
                 samlRequestSignatureValidator));
 
+        TranslatorService translatorService = configuration
+            .getTranslatorServiceConfiguration()
+            .buildTranslatorService(environment, new SamlParser());
+
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
                 configuration.getConnectorNodeUrl().toString(),
                 translatorService,
                 hubResponseValidator
         ));
-    }
-
-    private StorageService createStorageService(GatewayConfiguration configuration) throws ComponentInitializationException {
-        if (configuration.getRedisServerUrl().isEmpty()) {
-            return createMemoryCacheStorage("gateway-cache-storage");
-        } else {
-            RedisCommands<String, String> sync = RedisClient
-                .create(configuration.getRedisServerUrl())
-                .connect()
-                .sync();
-            return createRedisCacheStorage("gateway-cache-storage", sync);
-        }
     }
 
     public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
@@ -212,12 +187,14 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
-    private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration, ReplayCache cache) throws Exception {
+    private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration) throws Exception {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
         SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataResolverBundle);
         ResponseAssertionDecrypter responseAssertionDecrypter = createDecrypter(configuration.getHubFacingEncryptionKeyPair());
+
+        MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("gateway-hub");
 
         IdpResponseValidator idpResponseValidator = new IdpResponseValidator(
                 new SamlResponseSignatureValidator(hubResponseMessageSignatureValidator),
@@ -225,7 +202,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 new SamlAssertionsSignatureValidator(hubResponseMessageSignatureValidator),
                 new EncryptedResponseFromIdpValidator<>(new SamlStatusToIdaStatusCodeMapper()),
                 new DestinationValidator(proxyNodeResponseUrl, proxyNodeResponseUrl.getPath()),
-                ResponseAssertionFactory.createResponseAssertionsFromIdpValidator("Gateway", proxyNodeEntityId, cache)
+                ResponseAssertionFactory.createResponseAssertionsFromIdpValidator("Gateway", proxyNodeEntityId, replayChecker)
         );
         ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
         return new HubResponseValidator(
@@ -242,13 +219,15 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         return new ResponseAssertionDecrypter(decryptionCredential);
     }
 
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(GatewayConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle, ReplayCache cache) throws Exception {
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(GatewayConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
+        MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("gateway-hub");
+
         return new EidasAuthnRequestValidator(
             new RequestIssuerValidator(),
             new SpTypeValidator(),
             new LoaValidator(),
             new RequestedAttributesValidator(),
-            createMessageReplayChecker("Gateway:EidasAuthnRequestValidator", cache),
+            replayChecker,
             new ComparisonValidator(),
             createDestinationValidator(configuration),
             new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())

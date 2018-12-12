@@ -2,6 +2,7 @@ package uk.gov.ida.notification;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
@@ -63,8 +64,7 @@ public class TranslatorConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    @NotNull
-    private String redisServerUrl = "";
+    private ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
 
     public URI getHubUrl() {
         return hubUrl;
@@ -106,7 +106,7 @@ public class TranslatorConfiguration extends Configuration {
         return proxyNodeResponseUrl;
     }
 
-    public String getRedisServerUrl() {
-        return redisServerUrl;
+    public ReplayCheckerConfiguration getReplayChecker() {
+        return replayChecker;
     }
 }
