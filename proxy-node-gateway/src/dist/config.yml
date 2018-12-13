@@ -24,7 +24,9 @@ proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_U
 hubUrl: ${HUB_URL}
 connectorNodeUrl: ${CONNECTOR_NODE_URL}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
-redisServerUrl: ${REDIS_SERVER_URI}
+
+replayChecker:
+  redisUrl: ${REDIS_SERVER_URI}
 
 translatorService:
   url: ${TRANSLATOR_URL}
