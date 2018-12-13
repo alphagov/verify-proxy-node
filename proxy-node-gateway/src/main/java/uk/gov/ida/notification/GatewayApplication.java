@@ -10,6 +10,8 @@ import io.dropwizard.views.ViewBundle;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
@@ -19,12 +21,12 @@ import org.opensaml.storage.StorageService;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
+import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
-import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
@@ -34,7 +36,6 @@ import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
 import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
@@ -148,6 +149,9 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     private void registerProviders(Environment environment) {
         environment.jersey().register(AuthnRequestParameterProvider.class);
         environment.jersey().register(ResponseParameterProvider.class);
+        SessionHandler sessionHandler = new SessionHandler();
+        sessionHandler.setSessionCookie("gateway-session");
+        environment.servlets().setSessionHandler(sessionHandler);
     }
 
     private void registerExceptionMappers(Environment environment) {
@@ -157,7 +161,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
     private void registerResources(GatewayConfiguration configuration, Environment environment) throws Exception {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
-        RequestIdWatcher requestIdWatcher = new RequestIdWatcher();
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
@@ -177,15 +180,14 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 hubAuthnRequestGenerator,
                 samlFormViewBuilder,
                 eidasAuthnRequestValidator,
-                samlRequestSignatureValidator,
-                requestIdWatcher));
+                samlRequestSignatureValidator));
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
                 configuration.getConnectorNodeUrl().toString(),
                 translatorService,
-                hubResponseValidator,
-                requestIdWatcher));
+                hubResponseValidator
+        ));
     }
 
     private StorageService createStorageService(GatewayConfiguration configuration) throws ComponentInitializationException {

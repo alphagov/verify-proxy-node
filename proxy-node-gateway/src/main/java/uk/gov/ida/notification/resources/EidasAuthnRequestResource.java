@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
@@ -10,10 +11,10 @@ import uk.gov.ida.notification.exceptions.authnrequest.AuthnRequestException;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.EidasAuthnRequest;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestIdWatcher;
 import uk.gov.ida.notification.views.SamlFormView;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -32,28 +33,26 @@ public class EidasAuthnRequestResource {
     private SamlFormViewBuilder samlFormViewBuilder;
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
     private SamlRequestSignatureValidator samlRequestSignatureValidator;
-    private final RequestIdWatcher requestIdWatcher;
 
     public EidasAuthnRequestResource(GatewayConfiguration configuration,
                                      HubAuthnRequestGenerator authnRequestGenerator,
                                      SamlFormViewBuilder samlFormViewBuilder,
                                      EidasAuthnRequestValidator eidasAuthnRequestValidator,
-                                     SamlRequestSignatureValidator samlRequestSignatureValidator,
-                                     RequestIdWatcher requestIdWatcher) {
+                                     SamlRequestSignatureValidator samlRequestSignatureValidator) {
         this.configuration = configuration;
         this.hubAuthnRequestGenerator = authnRequestGenerator;
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
         this.samlRequestSignatureValidator = samlRequestSignatureValidator;
-        this.requestIdWatcher = requestIdWatcher;
     }
 
     @GET
     @Path("/Redirect")
     public View handleRedirectBinding(
             @QueryParam(SamlFormMessageType.SAML_REQUEST) AuthnRequest encodedEidasAuthnRequest,
-            @QueryParam("RelayState") String relayState) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState);
+            @QueryParam("RelayState") String relayState,
+            @Session HttpSession session) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
     }
 
     @POST
@@ -61,18 +60,19 @@ public class EidasAuthnRequestResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) AuthnRequest encodedEidasAuthnRequest,
-            @FormParam("RelayState") String relayState) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState);
+            @FormParam("RelayState") String relayState,
+            @Session HttpSession session) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
     }
 
-    private View handleAuthnRequest(AuthnRequest authnRequest, String relayState) {
+    private View handleAuthnRequest(AuthnRequest authnRequest, String relayState, HttpSession session) {
         try {
             samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
             eidasAuthnRequestValidator.validate(authnRequest);
             EidasAuthnRequest eidasAuthnRequest = EidasAuthnRequest.buildFromAuthnRequest(authnRequest);
             logAuthnRequestInformation(eidasAuthnRequest);
             AuthnRequest hubAuthnRequest = hubAuthnRequestGenerator.generate(eidasAuthnRequest);
-            requestIdWatcher.observe(authnRequest);
+            session.setAttribute("gateway_request_id", eidasAuthnRequest.getRequestId());
             return buildSamlFormView(hubAuthnRequest, relayState);
         } catch (Throwable example) {
             throw new AuthnRequestException(example, authnRequest);

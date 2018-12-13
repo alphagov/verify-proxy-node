@@ -97,7 +97,7 @@ public class StubConnectorAppRuleTestBase {
                 .request();
 
         if (cookies != null)
-            request.cookie(cookies.get("JSESSIONID"));
+            request.cookie(cookies.get("stub-connector-session"));
 
         Response response = request.post(Entity.form(postForm));
         return response.readEntity(String.class);
