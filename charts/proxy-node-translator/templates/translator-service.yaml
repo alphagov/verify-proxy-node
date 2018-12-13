@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "proxy-node-translator.fullname" . }}
+spec:
+  ports:
+  - name: "6300"
+    port: 6300
+    targetPort: 80
+  - name: "6661"
+    port: 6661
+    targetPort: 6661
+  selector:
+    app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

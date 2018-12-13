@@ -8,12 +8,18 @@ spec:
     type: Recreate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         service: stub-connector
     spec:
+      restartPolicy: Always
       containers:
-      - env:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 80
+        - containerPort: 6667
+        env:
         - name: CONNECTOR_NODE_BASE_URL
           valueFrom:
             configMapKeyRef:
@@ -58,9 +64,3 @@ spec:
             configMapKeyRef:
               name: stub-connector-pki
               key: SIGNING_KEY
-        image: govukverify/stub-connector
-        name: stub-connector
-        ports:
-        - containerPort: 80
-        - containerPort: 6667
-      restartPolicy: Always

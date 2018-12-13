@@ -13,4 +13,5 @@ spec:
     port: 6601
     targetPort: 6601
   selector:
-    service: proxy-node-gateway
+    app.kubernetes.io/name: {{ include "proxy-node-gateway.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

@@ -1,4 +1,7 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stub-idps
 data:
   stub-idps.yml: |
     stubIdps:
@@ -8,7 +11,3 @@ data:
         idpUserCredentials:
             - user: ida
               password: $2a$10$4fHHh0Q8QbbcQ7E6sn4iJOkcGvyZBbsGD43fJdd318vDeee74Pti6
-kind: ConfigMap
-metadata:
-  name: stub-idps
-  namespace: default

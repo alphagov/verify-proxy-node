@@ -1,18 +1,33 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: proxy-node-gateway
+  name: {{ include "proxy-node-translator.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   strategy:
     type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        service: proxy-node-gateway
+        app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      restartPolicy: Always
       containers:
-      - env:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 80
+        - containerPort: 6661
+        env:
         - name: CONNECTOR_NODE_ENTITY_ID
           valueFrom:
             configMapKeyRef:
@@ -26,12 +41,12 @@ spec:
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: CONNECTOR_NODE_METADATA_TRUSTSTORE
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
         - name: CONNECTOR_NODE_METADATA_URL
           value: http://stub-connector.default.svc.cluster.local/Metadata
@@ -45,49 +60,39 @@ spec:
         - name: HUB_FACING_ENCRYPTION_CERT
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: HUB_FACING_ENCRYPTION_CERT
         - name: HUB_FACING_ENCRYPTION_KEY
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: HUB_FACING_ENCRYPTION_KEY
         - name: HUB_FACING_SIGNING_CERT
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: HUB_FACING_SIGNING_CERT
         - name: HUB_FACING_SIGNING_KEY
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: HUB_FACING_SIGNING_KEY
         - name: HUB_METADATA_TRUSTSTORE
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: HUB_METADATA_TRUSTSTORE
         - name: HUB_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: HUB_METADATA_TRUSTSTORE_PASSWORD
         - name: HUB_METADATA_URL
           value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_hub.xml
         - name: HUB_URL
-          valueFrom:
-            configMapKeyRef:
-              name: proxy-node-pki
-              key: HUB_URL
-        - name: METADATA_REFRESH_DELAY
-          value: "60000"
+          value: http://localhost:6200/stub-idp-demo/SAML2/SSO
         - name: PORT
           value: "80"
-        - name: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
-          valueFrom:
-            configMapKeyRef:
-              name: proxy-node-pki
-              key: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
         - name: PROXY_NODE_ENTITY_ID
           value: https://dev-hub.local
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
@@ -102,18 +107,10 @@ spec:
         - name: SIGNING_CERT
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: SIGNING_CERT
         - name: SIGNING_KEY
           valueFrom:
             configMapKeyRef:
-              name: proxy-node-pki
+              name: proxy-node-pki 
               key: SIGNING_KEY
-        - name: TRANSLATOR_URL
-          value: http://proxy-node-translator.default.svc.cluster.local:6300/SAML2/SSO/Response/POST
-        image: govukverify/proxy-node-gateway
-        name: proxy-node-gateway
-        ports:
-        - containerPort: 80
-        - containerPort: 6601
-      restartPolicy: Always
