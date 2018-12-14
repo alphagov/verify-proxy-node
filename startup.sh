@@ -12,14 +12,14 @@ PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 (minikube status | grep -i running) || minikube start --memory 4096
 
 # clean
-if [[ -e "${BUILD_DIR}" ]]; then
-	kubectl delete -R -f "${BUILD_DIR}" || echo 'fine, continue'
-	rm -rf "${BUILD_DIR}"
-fi
-if [[ -e "${PKI_DIR}" ]]; then
-	kubectl delete -R -f "${PKI_DIR}" || echo 'fine, continue'
-	rm -rf "${PKI_DIR}"
-fi
+# if [[ -e "${BUILD_DIR}" ]]; then
+# 	kubectl delete -R -f "${BUILD_DIR}" || echo 'fine, continue'
+# 	rm -rf "${BUILD_DIR}"
+# fi
+# if [[ -e "${PKI_DIR}" ]]; then
+# 	kubectl delete -R -f "${PKI_DIR}" || echo 'fine, continue'
+# 	rm -rf "${PKI_DIR}"
+# fi
 
 # build all the images locally
 # send all the images to the dockerdaemon in minikube
@@ -38,23 +38,25 @@ for component in $COMPONENTS; do
 	helm template "charts/${component}" \
 		--name "${component}" \
 		--output-dir "${BUILD_DIR}" \
-		--set image.tag=latest
+		--set image.tag=${tag}
 done
 
-pushd "${PN_PROJECT_DIR}/pki"
-  rm -f "${PKI_OUTPUT_DIR}/*"
-  bundle install --quiet
-  bundle exec generate \
-    --hub-entity-id "https://dev-hub.local" \
-    --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
-    --proxy-node-entity-id "http://proxy-node" \
-    --connector-url "http://$(minikube ip):31100" \
-    --proxy-url "http://$(minikube ip):31200" \
-    --idp-url "http://$(minikube ip):31300" \
-    --softhsm \
-    --configmaps \
-    "${PKI_OUTPUT_DIR}"
-popd
+if [[ ! -e "${PKI_DIR}" ]]; then
+	pushd "${PN_PROJECT_DIR}/pki"
+	  rm -f "${PKI_OUTPUT_DIR}/*"
+	  bundle install --quiet
+	  bundle exec generate \
+	    --hub-entity-id "https://dev-hub.local" \
+	    --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
+	    --proxy-node-entity-id "http://proxy-node" \
+	    --connector-url "http://$(minikube ip):31100" \
+	    --proxy-url "http://$(minikube ip):31200" \
+	    --idp-url "http://$(minikube ip):31300" \
+	    --softhsm \
+	    --configmaps \
+	    "${PKI_OUTPUT_DIR}"
+	popd
+fi
 
 # generate yaml from helm charts
 
