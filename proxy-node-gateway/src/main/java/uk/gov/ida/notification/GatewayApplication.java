@@ -9,22 +9,22 @@ import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
-import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.credential.BasicCredential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
-import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
+import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
+import uk.gov.ida.notification.saml.metadata.MetadataFactory;
 import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
@@ -38,8 +38,6 @@ import uk.gov.ida.saml.core.validators.DestinationValidator;
 import uk.gov.ida.saml.hub.transformers.inbound.SamlStatusToIdaStatusCodeMapper;
 import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
 import uk.gov.ida.saml.hub.validators.response.idp.components.EncryptedResponseFromIdpValidator;
-import uk.gov.ida.saml.metadata.MetadataConfiguration;
-import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.saml.security.SamlAssertionsSignatureValidator;
 import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
@@ -53,8 +51,8 @@ import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createS
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
 
-    private MetadataResolverBundle<GatewayConfiguration> hubMetadataResolverBundle;
-    private MetadataResolverBundle<GatewayConfiguration> connectorMetadataResolverBundle;
+    private MetadataFactory<GatewayConfiguration> hubMetadataFactory;
+    private MetadataFactory<GatewayConfiguration> connectorMetadataFactory;
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
     public GatewayApplication() {
@@ -104,11 +102,11 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         bootstrap.addBundle(new ViewBundle<>());
 
         // Metadata
-        hubMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getHubMetadataConfiguration);
-        bootstrap.addBundle(hubMetadataResolverBundle);
+        hubMetadataFactory = new MetadataFactory<>(GatewayConfiguration::getHubMetadataConfiguration);
+        bootstrap.addBundle(hubMetadataFactory.getBundle());
 
-        connectorMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getConnectorMetadataConfiguration);
-        bootstrap.addBundle(connectorMetadataResolverBundle);
+        connectorMetadataFactory = new MetadataFactory<>(GatewayConfiguration::getConnectorMetadataConfiguration);
+        bootstrap.addBundle(connectorMetadataFactory.getBundle());
     }
 
     @Override
@@ -117,18 +115,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
-
-        registerMetadataHealthCheck(
-                hubMetadataResolverBundle.getMetadataResolver(),
-                configuration.getHubMetadataConfiguration(),
-                environment,
-                "hub-metadata");
-
-        registerMetadataHealthCheck(
-                connectorMetadataResolverBundle.getMetadataResolver(),
-                configuration.getConnectorMetadataConfiguration(),
-                environment,
-                "connector-metadata");
+        environment.healthChecks().register("hub-metadata", hubMetadataFactory.buildHealthCheck(configuration));
+        environment.healthChecks().register("connector-metadata", connectorMetadataFactory.buildHealthCheck(configuration));
 
         registerProviders(environment);
         registerExceptionMappers(environment);
@@ -153,10 +141,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
 
-        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
+        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataFactory.getBundle());
         HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
-        SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
+        SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataFactory.getBundle());
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
@@ -177,21 +165,11 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         ));
     }
 
-    public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
-        MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
-                metadataResolver,
-                name,
-                connectorMetadataConfiguration.getExpectedEntityId()
-        );
-
-        environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
-    }
-
     private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration) throws Exception {
         URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
         String proxyNodeEntityId = configuration.getProxyNodeEntityId();
 
-        SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataResolverBundle);
+        SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataFactory.getBundle());
         ResponseAssertionDecrypter responseAssertionDecrypter = createDecrypter(configuration.getHubFacingEncryptionKeyPair());
 
         MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("gateway-hub");

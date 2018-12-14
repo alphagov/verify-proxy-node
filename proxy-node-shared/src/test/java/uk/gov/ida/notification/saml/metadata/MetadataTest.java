@@ -12,6 +12,7 @@ import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.notification.helpers.TestMetadataBuilder;
+import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -36,7 +37,7 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert(encryptionCert)
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new CredentialResolverFactory().create(metadataResolver);
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
         PublicKey connectorNodeEncryptionPublicKey = metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
@@ -51,7 +52,7 @@ public class MetadataTest {
 
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_HUB_METADATA_FILE)
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new CredentialResolverFactory().create(metadataResolver);
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
         PublicKey hubSigningPublicKey = metadata.getCredential(UsageType.SIGNING, TEST_HUB_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
@@ -64,7 +65,7 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert("")
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new CredentialResolverFactory().create(metadataResolver);
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
         metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
@@ -75,7 +76,7 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withNoEncryptionCert()
                 .buildResolver("someId");
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+        MetadataCredentialResolver metadataCredentialResolver = new CredentialResolverFactory().create(metadataResolver);
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
         metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);

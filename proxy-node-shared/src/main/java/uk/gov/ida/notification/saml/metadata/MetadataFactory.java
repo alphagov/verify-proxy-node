@@ -1,13 +1,35 @@
 package uk.gov.ida.notification.saml.metadata;
 
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
-import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import io.dropwizard.Configuration;
+import uk.gov.ida.saml.metadata.MetadataHealthCheck;
+import uk.gov.ida.saml.metadata.MetadataResolverConfiguration;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
-public class MetadataFactory {
+public class MetadataFactory<T extends Configuration> {
+    private final Metadata metadata;
+    private final MetadataResolverBundle<T> bundle;
+    private final MetadataResolverBundle.MetadataConfigurationExtractor<T> extractor;
 
-    public static Metadata createMetadataFromBundle(MetadataResolverBundle bundle) throws ComponentInitializationException {
-        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(bundle.getMetadataResolver()).initialize();
-        return new Metadata(metadataCredentialResolver);
+    public MetadataFactory(MetadataResolverBundle.MetadataConfigurationExtractor<T> extractor) {
+        this.extractor = extractor;
+        this.bundle = new MetadataResolverBundle<>(extractor);
+        this.metadata = new Metadata(bundle.getMetadataCredentialResolver());
+    }
+
+    public MetadataHealthCheck buildHealthCheck(T configuration) {
+        MetadataResolverConfiguration metadataConfiguration = extractor.getMetadataConfiguration(configuration);
+        return new MetadataHealthCheck(
+                bundle.getMetadataResolver(),
+                metadataConfiguration.getUri().toString(),
+                metadataConfiguration.getExpectedEntityId()
+        );
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
+    public MetadataResolverBundle<T> getBundle() {
+        return bundle;
     }
 }

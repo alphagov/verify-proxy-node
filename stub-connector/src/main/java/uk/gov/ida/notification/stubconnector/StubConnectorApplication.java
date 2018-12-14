@@ -6,12 +6,10 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -25,18 +23,13 @@ import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
+import uk.gov.ida.notification.saml.metadata.MetadataFactory;
 import uk.gov.ida.notification.stubconnector.resources.MetadataResource;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
-import uk.gov.ida.saml.metadata.MetadataConfiguration;
-import uk.gov.ida.saml.metadata.MetadataHealthCheck;
-import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
-
-import static uk.gov.ida.notification.saml.metadata.MetadataFactory.createMetadataFromBundle;
 
 public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
-    private Metadata proxyNodeMetadata;
-    private MetadataResolverBundle<StubConnectorConfiguration> proxyNodeMetadataResolverBundle;
+    private MetadataFactory<StubConnectorConfiguration> proxyNodeMetadataFactory;
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
     public StubConnectorApplication() {
@@ -86,25 +79,17 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         bootstrap.addBundle(new ViewBundle<>());
 
         // Metadata
-        proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(StubConnectorConfiguration::getProxyNodeMetadataConfiguration);
-        bootstrap.addBundle(proxyNodeMetadataResolverBundle);
+        proxyNodeMetadataFactory = new MetadataFactory<>(StubConnectorConfiguration::getProxyNodeMetadataConfiguration);
+        bootstrap.addBundle(proxyNodeMetadataFactory.getBundle());
     }
 
     @Override
     public void run(final StubConnectorConfiguration configuration,
-                    final Environment environment) throws
-            ComponentInitializationException {
-
-        proxyNodeMetadata = createMetadataFromBundle(proxyNodeMetadataResolverBundle);
+                    final Environment environment) {
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
-
-        registerMetadataHealthCheck(
-                proxyNodeMetadataResolverBundle.getMetadataResolver(),
-                configuration.getProxyNodeMetadataConfiguration(),
-                environment,
-                "proxy-node-metadata");
+        environment.healthChecks().register("proxy-node-metadata", proxyNodeMetadataFactory.buildHealthCheck(configuration));
 
         registerProviders(environment);
         registerExceptionMappers(environment);
@@ -136,7 +121,7 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
 
         environment.jersey().register(new SendAuthnRequestResource(
                 configuration,
-                proxyNodeMetadata,
+                proxyNodeMetadataFactory.getMetadata(),
                 authnRequestGenerator,
                 samlFormViewBuilder));
 
@@ -152,19 +137,9 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
                 new ReceiveResponseResource(
                         configuration,
                         createDecrypter(configuration.getEncryptionKeyPair()),
-                        proxyNodeMetadataResolverBundle
+                        proxyNodeMetadataFactory.getBundle()
                 )
         );
-    }
-
-    private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
-        MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
-                metadataResolver,
-                name,
-                connectorMetadataConfiguration.getExpectedEntityId()
-        );
-
-        environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
     private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
