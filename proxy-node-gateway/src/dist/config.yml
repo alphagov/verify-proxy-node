@@ -31,7 +31,9 @@ replayChecker:
 translatorService:
   url: ${TRANSLATOR_URL}
   client:
+    timeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
     connectionTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
+    connectionRequestTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
 
 connectorMetadataConfiguration:
   url: ${CONNECTOR_NODE_METADATA_URL}
