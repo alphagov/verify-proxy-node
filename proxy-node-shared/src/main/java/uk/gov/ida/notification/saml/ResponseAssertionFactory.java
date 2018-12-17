@@ -1,16 +1,16 @@
 package uk.gov.ida.notification.saml;
 
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
+import uk.gov.ida.notification.saml.deprecate.AssertionAttributeStatementValidator;
+import uk.gov.ida.notification.saml.deprecate.AssertionSubjectConfirmationValidator;
+import uk.gov.ida.notification.saml.deprecate.AssertionSubjectValidator;
+import uk.gov.ida.notification.saml.deprecate.AuthnStatementAssertionValidator;
+import uk.gov.ida.notification.saml.deprecate.DuplicateAssertionValidator;
+import uk.gov.ida.notification.saml.deprecate.IPAddressValidator;
+import uk.gov.ida.notification.saml.deprecate.IdentityProviderAssertionValidator;
+import uk.gov.ida.notification.saml.deprecate.MatchingDatasetAssertionValidator;
+import uk.gov.ida.notification.saml.deprecate.ResponseAssertionsFromIdpValidator;
 import uk.gov.ida.notification.saml.validation.components.DuplicateAssertionChecker;
-import uk.gov.ida.saml.core.validators.assertion.AssertionAttributeStatementValidator;
-import uk.gov.ida.saml.core.validators.assertion.AuthnStatementAssertionValidator;
-import uk.gov.ida.saml.core.validators.assertion.DuplicateAssertionValidator;
-import uk.gov.ida.saml.core.validators.assertion.IPAddressValidator;
-import uk.gov.ida.saml.core.validators.assertion.IdentityProviderAssertionValidator;
-import uk.gov.ida.saml.core.validators.assertion.MatchingDatasetAssertionValidator;
-import uk.gov.ida.saml.core.validators.subject.AssertionSubjectValidator;
-import uk.gov.ida.saml.core.validators.subjectconfirmation.AssertionSubjectConfirmationValidator;
-import uk.gov.ida.saml.hub.validators.response.idp.components.ResponseAssertionsFromIdpValidator;
 import uk.gov.ida.saml.security.validators.issuer.IssuerValidator;
 
 public class ResponseAssertionFactory {

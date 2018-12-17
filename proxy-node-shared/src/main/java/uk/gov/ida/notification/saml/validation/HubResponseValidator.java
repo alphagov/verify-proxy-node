@@ -3,10 +3,10 @@ package uk.gov.ida.notification.saml.validation;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
+import uk.gov.ida.notification.saml.deprecate.IdpResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
-import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
 import uk.gov.ida.saml.security.validators.ValidatedAssertions;
 import uk.gov.ida.saml.security.validators.ValidatedResponse;
 

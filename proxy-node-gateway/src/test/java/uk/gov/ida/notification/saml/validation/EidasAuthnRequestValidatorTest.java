@@ -16,13 +16,13 @@ import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
+import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
 import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
-import uk.gov.ida.saml.core.validators.DestinationValidator;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;

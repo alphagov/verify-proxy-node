@@ -32,8 +32,6 @@ import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
-import static uk.gov.ida.notification.saml.metadata.MetadataFactory.createMetadataFromBundle;
-
 public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
     private MetadataResolverBundle<StubConnectorConfiguration> proxyNodeMetadataResolverBundle;
@@ -95,7 +93,7 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
                     final Environment environment) throws
             ComponentInitializationException {
 
-        proxyNodeMetadata = createMetadataFromBundle(proxyNodeMetadataResolverBundle);
+        proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);

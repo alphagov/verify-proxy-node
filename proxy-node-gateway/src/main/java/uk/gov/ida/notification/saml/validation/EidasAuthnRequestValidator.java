@@ -9,14 +9,14 @@ import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayException;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
+import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
+import uk.gov.ida.notification.saml.deprecate.SamlValidationException;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
 import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
-import uk.gov.ida.saml.core.validators.DestinationValidator;
-import uk.gov.ida.saml.hub.exception.SamlValidationException;
 
 import javax.xml.namespace.QName;
 

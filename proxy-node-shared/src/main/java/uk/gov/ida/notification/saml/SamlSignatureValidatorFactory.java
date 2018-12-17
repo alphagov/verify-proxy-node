@@ -2,7 +2,7 @@ package uk.gov.ida.notification.saml;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
-import org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap;
+import org.opensaml.xmlsec.config.impl.DefaultSecurityConfigurationBootstrap;
 import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.saml.metadata.MetadataCredentialResolverInitializer;
@@ -15,7 +15,7 @@ public class SamlSignatureValidatorFactory {
 
 
     public static SamlMessageSignatureValidator createSamlMessageSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
-        MetadataCredentialResolver hubMetadataCredentialResolver = new MetadataCredentialResolverInitializer(hubMetadataResolverBundle.getMetadataResolver()).initialize();
+        MetadataCredentialResolver hubMetadataCredentialResolver = hubMetadataResolverBundle.getMetadataCredentialResolver();
         KeyInfoCredentialResolver keyInfoCredentialResolver = DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver();
         ExplicitKeySignatureTrustEngine explicitKeySignatureTrustEngine = new ExplicitKeySignatureTrustEngine(hubMetadataCredentialResolver, keyInfoCredentialResolver);
         MetadataBackedSignatureValidator metadataBackedSignatureValidator = MetadataBackedSignatureValidator.withoutCertificateChainValidation(explicitKeySignatureTrustEngine);
