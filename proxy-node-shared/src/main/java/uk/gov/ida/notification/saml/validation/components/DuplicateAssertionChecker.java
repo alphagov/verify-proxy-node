@@ -4,11 +4,11 @@ import org.opensaml.saml.saml2.core.Assertion;
 
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayException;
-import uk.gov.ida.saml.core.validators.assertion.DuplicateAssertionValidator;
-import uk.gov.ida.saml.hub.exception.SamlValidationException;
+import uk.gov.ida.notification.saml.deprecate.DuplicateAssertionValidator;
+import uk.gov.ida.notification.saml.deprecate.SamlValidationException;
 
-import static uk.gov.ida.saml.core.errors.SamlTransformationErrorFactory.authnStatementAlreadyReceived;
-import static uk.gov.ida.saml.core.errors.SamlTransformationErrorFactory.duplicateMatchingDataset;
+import static uk.gov.ida.notification.saml.deprecate.SamlTransformationErrorFactory.authnStatementAlreadyReceived;
+import static uk.gov.ida.notification.saml.deprecate.SamlTransformationErrorFactory.duplicateMatchingDataset;
 
 public class DuplicateAssertionChecker implements DuplicateAssertionValidator {
     private final MessageReplayChecker messageReplayChecker;

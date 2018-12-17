@@ -7,15 +7,12 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.api.sync.RedisCommands;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
-import org.opensaml.storage.StorageService;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
@@ -25,14 +22,16 @@ import uk.gov.ida.notification.saml.HubResponseTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
+import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
+import uk.gov.ida.notification.saml.deprecate.EncryptedResponseFromIdpValidator;
+import uk.gov.ida.notification.saml.deprecate.IdpIdaStatus;
+import uk.gov.ida.notification.saml.deprecate.IdpResponseValidator;
+import uk.gov.ida.notification.saml.deprecate.SamlStatusToAuthenticationStatusCodeMapper;
+import uk.gov.ida.notification.saml.deprecate.SamlStatusToIdaStatusCodeMapper;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.saml.core.validators.DestinationValidator;
-import uk.gov.ida.saml.hub.transformers.inbound.SamlStatusToIdaStatusCodeMapper;
-import uk.gov.ida.saml.hub.validators.response.idp.IdpResponseValidator;
-import uk.gov.ida.saml.hub.validators.response.idp.components.EncryptedResponseFromIdpValidator;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.saml.security.AssertionDecrypter;
 import uk.gov.ida.saml.security.DecrypterFactory;
@@ -43,11 +42,9 @@ import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValida
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
-import static uk.gov.ida.notification.saml.metadata.MetadataFactory.createMetadataFromBundle;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createMemoryCacheStorage;
-import static uk.gov.ida.notification.saml.validation.components.MessageReplayCheckerFactory.createRedisCacheStorage;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
 
@@ -113,7 +110,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     public void run(final TranslatorConfiguration configuration,
                     final Environment environment) throws Exception {
 
-        connectorMetadata = createMetadataFromBundle(connectorMetadataResolverBundle);
+        connectorMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
