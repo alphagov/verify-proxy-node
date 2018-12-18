@@ -2,15 +2,8 @@ require 'yaml'
 require 'uri'
 require 'securerandom'
 
-TEST_ENV = ENV.fetch('TEST_ENV', 'local')
-ENVIRONMENTS = YAML.load_file(File.join(__dir__, 'environments.yml'))
-
-def env(key)
-  ENVIRONMENTS.dig(TEST_ENV, key)
-end
-
 Given('the user is at Stub Connector') do
-  visit(env('stub-connector'))
+  visit(ENV.fetch('STUB_CONNECTOR_URL'))
 end
 
 Given('they login as {string}') do |username|

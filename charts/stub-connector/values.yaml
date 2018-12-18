@@ -1,0 +1,11 @@
+# Default values for stub-connector.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: govukverify/stub-connector
+  tag: latest
+  pullPolicy: IfNotPresent
+

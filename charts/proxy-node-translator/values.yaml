@@ -1,0 +1,8 @@
+
+replicaCount: 1
+
+image:
+  repository: govukverify/proxy-node-translator
+  tag: latest
+  pullPolicy: IfNotPresent
+

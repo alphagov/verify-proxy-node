@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: proxy-node-metadata
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: proxy-node-metadata
+    spec:
+      containers:
+      - args:
+        - ruby
+        - -run
+        - -ehttpd
+        - /srv
+        - -p80
+        image: ruby:2.4.4
+        name: proxy-node-metadata
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /srv
+          name: saml-metadata
+          readOnly: true
+      restartPolicy: Always
+      volumes:
+      - name: saml-metadata
+        configMap:
+          name: saml-metadata

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy-node-gateway
+spec:
+  type: NodePort
+  ports:
+  - name: "6100"
+    port: 6100
+    targetPort: 80
+    nodePort: 31200
+  - name: "6601"
+    port: 6601
+    targetPort: 6601
+  selector:
+    app.kubernetes.io/name: {{ include "proxy-node-gateway.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

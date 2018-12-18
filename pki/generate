@@ -16,6 +16,7 @@ output_dir = ARGV.pop || abort(USAGE)
 SCRIPT_DIR = File.expand_path(File.dirname(__FILE__))
 PROXY_NODE_MANIFEST = File.join(SCRIPT_DIR, 'proxy_node_manifest.yml')
 STUB_IDP_MANIFEST = File.join(SCRIPT_DIR, 'stub_idp_manifest.yml')
+CONFIGMAP = File.join(SCRIPT_DIR, 'configmap.yaml')
 
 puts <<-EOS
 🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  🇪🇺🇪🇺    🇪🇺🇪🇺 🇪🇺🇪🇺🇪🇺🇪🇺     🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺    🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  
@@ -102,8 +103,8 @@ stub_connector_encryption_keypair = sub_keypair(root_keypair, 'Stub Connector En
 hub_config = {
   'id' => 'VERIFY-HUB',
   'entity_id' => options.hub_entity_id,
-  'assertion_consumer_service_uri' => options.hub_response_url,
-  'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://localhost' },
+  'assertion_consumer_service_uri' => "#{options.proxy_url}/SAML2/SSO/Response/POST",
+  'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://dev-hub.local' },
   'signing_certificates' => [
     { 'name' => 'hub_signing', 'x509' => strip_pem(hub_signing_keypair.cert.to_pem) }
   ],
@@ -112,8 +113,8 @@ hub_config = {
 stub_idp_config = {
   'id' => 'stub-idp-demo',
   'entity_id' => options.idp_entity_id,
-  'sso_uri' => options.idp_sso_url,
-  'organization' => { 'name' => 'stub-idp-demo', 'display_name' => 'Stub IDP', 'url' => 'http://localhost' },
+  'sso_uri' => "#{options.idp_url}/SAML2/SSO",
+  'organization' => { 'name' => 'stub-idp-demo', 'display_name' => 'Stub IDP', 'url' => options.idp_url },
   'signing_certificates' => [
     { 'x509' => strip_pem(idp_signing_keypair.cert.to_pem) }
   ],
@@ -126,8 +127,8 @@ hub_metadata_xml_signed = sign_metadata(hub_metadata_xml, hub_meta_keypair, opti
 proxy_node_config = {
   'id' => '_entities',
   'entity_id' => options.proxy_entity_id,
-  'sso_uri' => options.proxy_sso_url,
-  'organization' => { 'name' => 'eIDAS Service', 'display_name' => 'eIDAS Service', 'url' => 'https://eidas-service.eu' },
+  'sso_uri' => "#{options.proxy_url}/SAML2/SSO/POST",
+  'organization' => { 'name' => 'eIDAS Service', 'display_name' => 'eIDAS Service', 'url' => options.proxy_url },
   'signing_certificates' => [
     { 'x509' => strip_pem(proxy_signing_keypair.cert.to_pem) }
   ],
@@ -148,6 +149,7 @@ Dir.chdir(output_dir) do
 
   proxy_node_vars = {
     'HUB_ENTITY_ID' => options.hub_entity_id,
+    'HUB_URL' => "#{options.idp_url}/stub-idp-demo/SAML2/SSO",
     'SIGNING_CERT' => b64(proxy_signing_keypair.cert.to_pem),
     'SIGNING_KEY' => b64(der2pk8(proxy_signing_keypair.key.to_der)),
     'HUB_FACING_SIGNING_CERT' => b64(hub_signing_keypair.cert.to_pem),
@@ -158,6 +160,11 @@ Dir.chdir(output_dir) do
     'HUB_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
     'CONNECTOR_NODE_METADATA_TRUSTSTORE' => b64(metadata_truststore),
     'CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
+    'CONNECTOR_NODE_ENTITY_ID' => "#{options.connector_url}/Metadata",
+    'CONNECTOR_NODE_ISSUER_ID' => "#{options.connector_url}/Metadata",
+    'CONNECTOR_NODE_URL' => "#{options.connector_url}/SAML2/Response/POST",
+    'PROXY_NODE_RESPONSE_ENDPOINT' => "#{options.proxy_url}/SAML2/SSO/Response/POST",
+    'PROXY_NODE_AUTHN_REQUEST_ENDPOINT' => "#{options.proxy_url}/SAML2/SSO/POST",
   }
 
   stub_connector_vars = {
@@ -168,6 +175,7 @@ Dir.chdir(output_dir) do
     'ENCRYPTION_KEY' => b64(der2pk8(stub_connector_encryption_keypair.key.to_der)),
     'PROXY_NODE_METADATA_TRUSTSTORE' => b64(metadata_truststore),
     'PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
+    'CONNECTOR_NODE_BASE_URL' => options.connector_url,
   }
 
   stub_idp_vars = {
@@ -225,6 +233,34 @@ Dir.chdir(output_dir) do
     puts('Generating manifests')
     create_file('proxy_node.manifest.yml', YAML.dump(proxy_node_manifest))
     create_file('stub_idp.manifest.yml', YAML.dump(stub_idp_manifest))
+  end
+
+  if options.do_configmaps
+    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+      cfg['metadata']['name'] = 'proxy-node-pki'
+      cfg['data'] = proxy_node_vars
+    end
+    create_file('proxy-node-configmap.yaml', YAML.dump(configmap))
+
+    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+      cfg['metadata']['name'] = 'stub-connector-pki'
+      cfg['data'] = stub_connector_vars
+    end
+    create_file('stub-connector-configmap.yaml', YAML.dump(configmap))
+
+    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+      cfg['metadata']['name'] = 'stub-idp-pki'
+      cfg['data'] = stub_idp_vars
+    end
+    create_file('stub-idp-configmap.yaml', YAML.dump(configmap))
+
+    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+      cfg['metadata']['name'] = 'saml-metadata'
+      cfg['data'] = {}
+      cfg['data']['metadata_for_hub.xml'] = hub_metadata_xml_signed
+      cfg['data']['metadata_for_connector_node.xml'] = proxy_node_metadata_xml_signed
+    end
+    create_file('metadata-configmap.yaml', YAML.dump(configmap))
   end
 
   if options.do_env

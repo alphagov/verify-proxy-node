@@ -13,3 +13,13 @@ need to be on the GDS VPN.
 
 1. Run `./startup.sh`
 1. Visit `http://localhost:5000/Request` to start a journey from `stub-connector`.
+
+## How to do a Kubernetes locally
+
+1. `minikube start`
+1. Run `./startup.sh`
+1. Apply the `ConfigMap`s containing PKI-related things: `kubectl apply -R -f .local_pki/`.
+1. Apply the configuration of the deployments and services: `kubectl apply -R -f yaml/`.
+1. Visit `http://$(minikube ip):31100/Request`.
+
+NB. The first journey seems to fail.
