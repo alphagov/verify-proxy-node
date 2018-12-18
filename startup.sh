@@ -8,21 +8,8 @@ COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector"
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 
-# boot a local k8s cluster
 (minikube status | grep -i running) || minikube start --memory 4096
 
-# clean
-# if [[ -e "${BUILD_DIR}" ]]; then
-# 	kubectl delete -R -f "${BUILD_DIR}" || echo 'fine, continue'
-# 	rm -rf "${BUILD_DIR}"
-# fi
-# if [[ -e "${PKI_DIR}" ]]; then
-# 	kubectl delete -R -f "${PKI_DIR}" || echo 'fine, continue'
-# 	rm -rf "${PKI_DIR}"
-# fi
-
-# build all the images locally
-# send all the images to the dockerdaemon in minikube
 mkdir -p "${BUILD_DIR}"
 for component in $COMPONENTS; do
 	tag="local-$(tar c $component | md5sum | awk '{print $1}')"
@@ -57,8 +44,6 @@ if [[ ! -e "${PKI_DIR}" ]]; then
 	    "${PKI_OUTPUT_DIR}"
 	popd
 fi
-
-# generate yaml from helm charts
 
 kubectl apply -R -f "${PKI_DIR}"
 sleep 1
