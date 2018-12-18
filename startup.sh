@@ -28,11 +28,11 @@ for component in $COMPONENTS; do
 	tag="local-$(tar c $component | md5sum | awk '{print $1}')"
 	image="govukverify/${component}:${tag}"
 	echo "building $component as $image"
-	if (eval $(minikube docker-env) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
+	if (eval $(minikube docker-env --shell bash) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
 		echo "already built"
 	else
 		docker build --build-arg "component=${component}" -t "${image}" .
-		docker save "${image}" | (eval $(minikube docker-env) && docker load)
+		docker save "${image}" | (eval $(minikube docker-env --shell bash) && docker load)
 	fi
 	echo "generating kubeyaml from chart for ${image}"
 	helm template "charts/${component}" \
