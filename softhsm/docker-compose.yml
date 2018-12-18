@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  proxy:
+    build: .
+    volumes:
+      - softhsm:/softhsm
+  tester:
+    depends_on:
+      - proxy
+    build:
+      context: .
+      dockerfile: Dockerfile.tester 
+    environment:
+      PKCS11_PROXY_SOCKET: "tcp://proxy:5656"
+    volumes:
+      - softhsm:/softhsm
+
+volumes:
+  softhsm:
