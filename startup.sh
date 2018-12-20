@@ -4,7 +4,7 @@ set -euo pipefail
 
 BUILD_DIR=".local_yaml"
 PKI_DIR=".local_pki"
-COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector"
+COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector softhsm"
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 
@@ -18,7 +18,7 @@ for component in $COMPONENTS; do
 	if (eval $(minikube docker-env --shell bash) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
 		echo "already built"
 	else
-		docker build --build-arg "component=${component}" -t "${image}" .
+		docker build --file "${component}/Dockerfile" --build-arg "component=${component}" -t "${image}" .
 		docker save "${image}" | (eval $(minikube docker-env --shell bash) && docker load)
 	fi
 	echo "generating kubeyaml from chart for ${image}"
