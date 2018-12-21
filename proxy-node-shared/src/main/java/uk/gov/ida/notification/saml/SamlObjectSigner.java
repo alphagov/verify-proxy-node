@@ -3,6 +3,7 @@ package uk.gov.ida.notification.saml;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.security.credential.BasicCredential;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.X509Certificate;
@@ -23,12 +24,18 @@ public class SamlObjectSigner {
     private final PublicKey publicKey;
     private final PrivateKey privateKey;
     private final String certificate;
+    private Credential signingCredential;
 
     public SamlObjectSigner(PublicKey publicKey, PrivateKey privateKey, String certificate) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.certificate = certificate;
         this.marshaller = new SamlObjectMarshaller();
+    }
+
+    public SamlObjectSigner(Credential signingBasicCredential, String certificate) {
+        this(null, null, certificate);
+        this.signingCredential = signingBasicCredential;
     }
 
     public void sign(SignableSAMLObject signableSAMLObject) {
@@ -46,7 +53,7 @@ public class SamlObjectSigner {
         String signatureAlgorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
         Signature signature = SamlBuilder.build(Signature.DEFAULT_ELEMENT_NAME);
         signature.setSignatureAlgorithm(signatureAlgorithm);
-        signature.setSigningCredential(new BasicCredential(publicKey, privateKey));
+        signature.setSigningCredential(signingCredential != null ? signingCredential : new BasicCredential(publicKey, privateKey));
         signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
         signature.setKeyInfo(buildKeyInfo());
         return signature;

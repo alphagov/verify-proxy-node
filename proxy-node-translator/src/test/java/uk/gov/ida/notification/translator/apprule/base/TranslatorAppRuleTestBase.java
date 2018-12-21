@@ -58,6 +58,7 @@ public class TranslatorAppRuleTestBase {
             ConfigOverride.config("connectorFacingSigningKeyPair.privateKey.key", TEST_PRIVATE_KEY),
             ConfigOverride.config("hubFacingEncryptionKeyPair.publicKey.type", "x509"),
             ConfigOverride.config("hubFacingEncryptionKeyPair.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("hubFacingEncryptionKeyPair.privateKey.key", TEST_PRIVATE_KEY)
+            ConfigOverride.config("hubFacingEncryptionKeyPair.privateKey.key", TEST_PRIVATE_KEY),
+            ConfigOverride.config("keyRetrieverServiceName", "config")
     );
 }

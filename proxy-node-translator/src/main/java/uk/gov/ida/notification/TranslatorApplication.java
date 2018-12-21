@@ -32,6 +32,8 @@ import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
+import uk.gov.ida.notification.signing.KeyRetrieverService;
+import uk.gov.ida.notification.signing.KeyRetrieverServiceFactory;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.saml.security.AssertionDecrypter;
 import uk.gov.ida.saml.security.DecrypterFactory;
@@ -150,12 +152,9 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 configuration.getConnectorNodeUrl().toString(),
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
-        SamlObjectSigner signer = new SamlObjectSigner(
-                configuration.getConnectorFacingSigningKeyPair().getPublicKey().getPublicKey(),
-                configuration.getConnectorFacingSigningKeyPair().getPrivateKey().getPrivateKey(),
-                configuration.getConnectorFacingSigningKeyPair().getPublicKey().getCert()
-        );
-        return new EidasResponseGenerator(hubResponseTranslator, signer);
+        KeyRetrieverService keyRetrieverService = KeyRetrieverServiceFactory.createKeyRetrieverService(configuration);
+        return new EidasResponseGenerator(hubResponseTranslator, keyRetrieverService.createSamlObjectSigner());
+
     }
 
     private HubResponseValidator createHubResponseValidator(TranslatorConfiguration configuration) throws Exception {

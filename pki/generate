@@ -152,6 +152,7 @@ Dir.chdir(output_dir) do
     'HUB_URL' => "#{options.idp_url}/stub-idp-demo/SAML2/SSO",
     'SIGNING_CERT' => b64(proxy_signing_keypair.cert.to_pem),
     'SIGNING_KEY' => b64(der2pk8(proxy_signing_keypair.key.to_der)),
+    'SIGNING_PRIVATE_KEY_SOFTHSM' => b64(der2p8(proxy_signing_keypair.key.to_der)),
     'HUB_FACING_SIGNING_CERT' => b64(hub_signing_keypair.cert.to_pem),
     'HUB_FACING_SIGNING_KEY' => b64(der2pk8(hub_signing_keypair.key.to_der)),
     'HUB_FACING_ENCRYPTION_CERT' => b64(hub_encryption_keypair.cert.to_pem),
@@ -218,7 +219,7 @@ Dir.chdir(output_dir) do
       puts('Creating proxy_node_signing files for softhsm testing...')
       create_file('proxy_node_signing.crt', proxy_signing_keypair.cert.to_pem)
       create_file('proxy_node_signing.pk8', der2pk8(proxy_signing_keypair.key.to_der))
-      create_file('../proxy-node-translator/src/dist/proxy_node_signing.p8', der2p8(proxy_signing_keypair.key.to_der))
+      create_file('proxy_node_signing.p8', der2p8(proxy_signing_keypair.key.to_der))
   end
 
   if options.do_manifests

@@ -20,6 +20,10 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: Always
+      volumes:
+        - name: proxy-node-pki
+          configMap:
+            name: proxy-node-pki
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -27,6 +31,10 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 6661
+        volumeMounts:
+          - mountPath: /app/keys/
+            name: proxy-node-pki
+            readOnly: true
         env:
         - name: CONNECTOR_NODE_ENTITY_ID
           valueFrom:
@@ -114,3 +122,19 @@ spec:
             configMapKeyRef:
               name: proxy-node-pki 
               key: SIGNING_KEY
+        - name: SOFT_HSM_LIB_PATH
+          value: /usr/lib/softhsm/libsofthsm2.so
+        - name: SOFT_HSM_SIGNING_KEY_LABEL
+          value: vfpn-uk-signing
+        - name: SOFT_HSM_SIGNING_KEY_TOKEN
+          value: vfpn-uk-signing
+        - name: SOFT_HSM_SIGNING_KEY_SLOT
+          value: "0"
+        - name: SOFT_HSM_SIGNING_KEY_ID
+          value: DEF0
+        - name: SOFT_HSM_SIGNING_KEY_PIN
+          value: CHANGE-ME-123
+        - name: SOFT_HSM_SIGNING_KEY_SO_PIN
+          value: CHANGE-ME-456
+        - name: KEY_RETRIEVER_SERVICE_NAME
+          value: softHSM
