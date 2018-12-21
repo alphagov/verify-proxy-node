@@ -4,13 +4,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.security.credential.Credential;
 import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
-import se.swedenconnect.opensaml.pkcs11.PKCS11ProviderFactory;
 import se.swedenconnect.opensaml.pkcs11.configuration.PKCS11ProviderConfiguration;
 import se.swedenconnect.opensaml.pkcs11.configuration.PKCS11SoftHsmProviderConfiguration;
 import se.swedenconnect.opensaml.pkcs11.configuration.SoftHsmCredentialConfiguration;
 import se.swedenconnect.opensaml.pkcs11.credential.PKCS11Credential;
-import se.swedenconnect.opensaml.pkcs11.providerimpl.PKCS11ProviderInstance;
 import uk.gov.ida.notification.helpers.TestKeyPair;
+import uk.gov.ida.notification.signing.PKCS11ProviderHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +17,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -48,7 +45,7 @@ public class SoftHSMIntegrationTest {
     private static final String CRED_ALIAS_PREFIX = "vfpn-uk";
     private static final String CRED_ENV = "dev";
     private static final String CRED_PIN = "1234";
-    private static final String CRED_SLOT = "0";
+    private static final String CRED_SLOT = "101";
     private static final String CRED_NAME = "vfpn-uk";
     private static final String CRED_ALIAS = CRED_ALIAS_PREFIX + "-" + CRED_ENV;
 
@@ -67,11 +64,15 @@ public class SoftHSMIntegrationTest {
         assumeTrue(softHSMLibPath != null && softHSMLibPath.length() > 0);
     }
 
-    @Test(expected = java.lang.NullPointerException.class)
+    @Test(expected = java.security.UnrecoverableKeyException.class)
     public void shouldThrowExceptionForPKCS11ProviderConfigurationWithoutCredentials() throws Exception {
 
-        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithoutCredentials(CRED_SLOT, CRED_NAME);
-        PKCS11Provider pkcs11Provider = getPkcs11ProviderForConfiguration(configuration);
+        PKCS11ProviderConfiguration configuration =
+                PKCS11ProviderHelper.createPKCS11SoftHSMProviderConfigurationWithoutCredentials(
+                        softHSMLibPath,
+                        CRED_NAME,
+                        CRED_PIN);
+        PKCS11Provider pkcs11Provider = PKCS11ProviderHelper.createPKCS11ProviderForConfiguration(configuration);
 
         TestKeyPair signingTestKeyPair = new TestKeyPair(PROXY_NODE_SIGNING_CRT, PROXY_NODE_SIGNING_PK_8);
         Credential credential = new PKCS11Credential(
@@ -82,7 +83,7 @@ public class SoftHSMIntegrationTest {
 
     @Test
     public void shouldCreateCredentialConfigurationList() {
-        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithCredentials(CRED_ALIAS, CRED_ENV, CRED_PIN, CRED_SLOT, CRED_NAME);
+        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithCredentials(CRED_ALIAS, CRED_PIN, CRED_SLOT);
         assertNotNull("PKCS11ProviderConfiguration not loaded from credentials", configuration);
     }
 
@@ -90,20 +91,17 @@ public class SoftHSMIntegrationTest {
     @Test
     public void shouldCreatePKSC11ProviderFromFactory() throws Exception {
 
-        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithCredentials(CRED_ALIAS, CRED_ENV, CRED_PIN, CRED_SLOT, CRED_NAME);
-        PKCS11Provider pkcs11Provider = getPkcs11ProviderForConfiguration(configuration);
+        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithCredentials(CRED_ALIAS, CRED_PIN, CRED_SLOT);
+        PKCS11Provider pkcs11Provider = PKCS11ProviderHelper.createPKCS11ProviderForConfiguration(configuration);
         assertNotNull(pkcs11Provider);
     }
 
-
     @Test
-    public void shouldRetrieveCredentialsFromHSM() throws Exception {
+    public void shouldAddAndRetrieveCredentialsFromHSM() throws Exception {
 
-        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithCredentials(CRED_ALIAS, CRED_ENV, CRED_PIN, "162624334", CRED_NAME);
-        PKCS11Provider pkcs11Provider = getPkcs11ProviderForConfiguration(configuration);
+        PKCS11ProviderConfiguration configuration = createPKCS11SoftHSMProviderConfigurationWithCredentials(CRED_ALIAS, CRED_PIN, CRED_SLOT);
+        PKCS11Provider pkcs11Provider = PKCS11ProviderHelper.createPKCS11ProviderForConfiguration(configuration);
         TestKeyPair signingTestKeyPair = new TestKeyPair(PROXY_NODE_SIGNING_CRT, PROXY_NODE_SIGNING_PK_8);
-
-        addPrivateKeyToKeyStore(signingTestKeyPair, CRED_ALIAS, CRED_PIN);
 
         Credential credential = new PKCS11Credential(
                 signingTestKeyPair.certificate,
@@ -113,58 +111,22 @@ public class SoftHSMIntegrationTest {
         assertNotNull(credential.getPrivateKey());
     }
 
-    private void addPrivateKeyToKeyStore(TestKeyPair signingTestKeyPair, String alias, String pin) throws KeyStoreException, NoSuchProviderException, IOException, NoSuchAlgorithmException, CertificateException {
-
-        KeyStore keyStore = KeyStore.getInstance("PKCS11", PROVIDER_SUN_PKCS_11 + "-" + alias);
-        keyStore.load((InputStream) null, pin.toCharArray());
-
-        Certificate[] chain = {signingTestKeyPair.certificate};
-
-        keyStore.setKeyEntry(alias, signingTestKeyPair.privateKey, pin.toCharArray(), chain);
-        keyStore.store(null);
-    }
-
-
-    private PKCS11Provider getPkcs11ProviderForConfiguration(PKCS11ProviderConfiguration configuration) throws Exception {
-
-        PKCS11ProviderFactory factory = new PKCS11ProviderFactory(configuration,
-                new PKCS11ProviderInstance() {
-                    @Override
-                    public Provider getProviderInstance(String configString) {
-                        Provider sunPKCS11 = Security.getProvider(PROVIDER_SUN_PKCS_11);
-                        // In Java 9+ in-line config data preceded with "--" (or else treated as file path).
-                        sunPKCS11 = sunPKCS11.configure("--" + configString);
-                        return sunPKCS11;
-                    }
-                });
-        return factory.createInstance();
-    }
-
-    private PKCS11ProviderConfiguration createPKCS11SoftHSMProviderConfigurationWithCredentials(String alias, String environment, String pin, String slot, String name) {
+    private PKCS11ProviderConfiguration createPKCS11SoftHSMProviderConfigurationWithCredentials(String alias, String pin, String slot) {
 
         PKCS11SoftHsmProviderConfiguration configuration
                 = new PKCS11SoftHsmProviderConfiguration();
         List<SoftHsmCredentialConfiguration> credentials = new ArrayList<>();
         credentials.add(new SoftHsmCredentialConfiguration(
                 alias,
-                PROXY_NODE_SIGNING_PK_8,
-                PROXY_NODE_SIGNING_CRT));
-        configuration.setPin(pin);
-        configuration.setSlot(slot);
+                "./../.local_pki/" + PROXY_NODE_SIGNING_PK_8,
+                "./../.local_pki/" + PROXY_NODE_SIGNING_CRT));
+
         configuration.setName(alias);
         configuration.setCredentialConfigurationList(credentials);
         configuration.setLibrary(softHSMLibPath);
-        return configuration;
-    }
-
-    private PKCS11ProviderConfiguration createPKCS11SoftHSMProviderConfigurationWithoutCredentials(String slot, String name) {
-
-        PKCS11ProviderConfiguration configuration
-                = new PKCS11SoftHsmProviderConfiguration();
-        configuration.setName(name);
-        configuration.setLibrary(softHSMLibPath);
+        configuration.setPin(pin);
         configuration.setSlot(slot);
-        configuration.setSlotListIndexMaxRange(4);
+
         return configuration;
     }
 

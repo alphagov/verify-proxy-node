@@ -4,7 +4,7 @@ set -euo pipefail
 
 BUILD_DIR=".local_yaml"
 PKI_DIR=".local_pki"
-COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector softhsm"
+COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector"
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 

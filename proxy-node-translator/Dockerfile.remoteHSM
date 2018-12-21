@@ -1,9 +1,6 @@
-#
-#   Docker Image for Translator Component with local softHSM.
-#   Translator depends on softHSM and OpenSC installations in Test environments.
-#
-FROM gradle:jdk11 AS build
+# Base builder image
 
+FROM gradle:jdk11 AS build
 WORKDIR /app
 USER root
 ENV GRADLE_USER_HOME ~/.gradle
@@ -19,17 +16,13 @@ COPY ${component}/build.gradle ${component}/build.gradle
 RUN gradle --no-daemon --quiet -p ${component} --parallel install -x test
 ENTRYPOINT ["gradle", "--no-daemon"]
 
-# -------------------- Runtime Image --------------------
-FROM govukverify/soft-hsm
-
-# Copy java app from build to runtime image
+FROM openjdk:11-jre-slim
 WORKDIR /app
 USER root
 
 ARG component
 COPY --from=build /app/${component}/build/install/${component} /app
-COPY --from=build /app/${component}/src/dist/init.sh /bin/init.sh
 
 ENV CONFIG_FILE config.yml
 ENV COMPONENT $component
-CMD "/bin/init.sh"
+CMD "bin/$COMPONENT"

@@ -66,6 +66,27 @@ public class TranslatorConfiguration extends Configuration {
     @Valid
     private ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
 
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String keyRetrieverServiceName = "";
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String softHSMLibPath = "";
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String softHSMSigningKeyPin = "";
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private String softHSMSigningKeyLabel = "";
+
+
     public URI getHubUrl() {
         return hubUrl;
     }
@@ -109,4 +130,12 @@ public class TranslatorConfiguration extends Configuration {
     public ReplayCheckerConfiguration getReplayChecker() {
         return replayChecker;
     }
+
+    public String getKeyRetrieverServiceName() { return keyRetrieverServiceName; }
+
+    public String getSoftHSMLibPath() { return softHSMLibPath; }
+
+    public String getSoftHSMSigningKeyPin() { return softHSMSigningKeyPin; }
+
+    public String getSoftHSMSigningKeyLabel() { return softHSMSigningKeyLabel; }
 }
