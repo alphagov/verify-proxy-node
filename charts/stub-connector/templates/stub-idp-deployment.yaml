@@ -11,8 +11,28 @@ spec:
       labels:
         service: stub-idp
     spec:
+      terminationGracePeriodSeconds: 2
       containers:
-      - env:
+      - name: stub-idp
+        image: govukverify/stub-idp
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 50141
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        env:
         - name: CERT_TYPE
           value: encoded
         - name: CONFIG_FILE
@@ -76,10 +96,6 @@ spec:
               key: METADATA_TRUSTSTORE_PASSWORD
         - name: TRUSTSTORE_TYPE
           value: encoded
-        image: govukverify/stub-idp
-        name: stub-idp
-        ports:
-        - containerPort: 80
         volumeMounts:
         - mountPath: /stub-idp/config/
           name: stub-idp-config

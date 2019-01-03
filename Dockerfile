@@ -25,4 +25,5 @@ COPY --from=build /app/${component}/build/install/${component} /app
 
 ENV CONFIG_FILE config.yml
 ENV COMPONENT $component
-CMD "bin/$COMPONENT"
+ENTRYPOINT ["/app/bin/proxy-node-gateway"]
+CMD []
