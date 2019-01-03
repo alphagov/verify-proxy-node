@@ -25,13 +25,13 @@ spec:
           httpGet:
             path: /healthcheck
             port: mgmt
-          initialDelaySeconds: 20
+          initialDelaySeconds: 10
           periodSeconds: 5
         readinessProbe:
           httpGet:
             path: /healthcheck
             port: mgmt
-          initialDelaySeconds: 20
+          initialDelaySeconds: 10
           periodSeconds: 5
         env:
         - name: CONNECTOR_NODE_BASE_URL
