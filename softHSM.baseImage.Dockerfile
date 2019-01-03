@@ -3,9 +3,7 @@
 #
 #   Used as a base for the Translator component in Test environments needing softHSM.
 #
-ARG baseImage
-
-FROM ${baseImage}
+FROM gradle:jdk11
 
 USER root
 
@@ -21,3 +19,5 @@ RUN wget https://github.com/OpenSC/OpenSC/releases/download/${OPEN_SC_VERSION}/o
     make && make install && \
     cd .. && rm -rf opensc* && \
     rm -rf /var/lib/apt/lists/*
+
+CMD []

@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: softHSM.baseImage.Dockerfile
-      args:
-        baseImage: gradle:jdk11
     working_dir: /home/gradle/project
     user: root
     entrypoint: gradle --no-daemon
@@ -15,7 +13,7 @@ services:
     volumes:
       - gradle-cache:/home/gradle/.gradle
       - .:/home/gradle/project
-    image: govukverify/soft-hsm
+    image: govukverify/gradle-with-softhsm
         
 volumes:
   gradle-cache:
