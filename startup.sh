@@ -49,5 +49,23 @@ kubectl apply -R -f "${PKI_DIR}"
 sleep 1
 kubectl apply -R -f "${BUILD_DIR}"
 
+function not_ready_count() {
+	kubectl get po -o json | jq -r '.items[].status.conditions[].status' | grep False | wc -l | awk '{ print $1 }'
+}
+
+function not_running_count() {
+	kubectl get po -o json | jq -r '.items[].status.phase' | grep -v Running | wc -l | awk '{ print $1 }'
+}
+
+sleep 2
+while [[ "$(not_running_count)" != "0" ]]; do
+	echo "waiting for $(not_running_count) pods to start"
+	sleep 3
+done
+while [[ "$(not_ready_count)" != "0" ]]; do
+	echo "waiting for $(not_ready_count) status probes to pass"
+	sleep 3
+done
+
 echo ""
 echo "http://$(minikube ip):31100/Request"
