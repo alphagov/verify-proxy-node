@@ -28,9 +28,8 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 5
         readinessProbe:
-          httpGet:
-            path: /healthcheck
-            port: mgmt
+          tcpSocket:
+            port: http
           initialDelaySeconds: 10
           periodSeconds: 5
         env:
