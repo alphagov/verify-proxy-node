@@ -21,5 +21,5 @@ pkcs11-tool --module $SOFT_HSM_LIB_PATH -p $SOFT_HSM_SIGNING_KEY_PIN -l -w /app/
 pkcs11-tool --module $SOFT_HSM_LIB_PATH -p $SOFT_HSM_SIGNING_KEY_PIN -l -w /app/signing_cert.crt -y cert -a $SOFT_HSM_SIGNING_KEY_LABEL -d $SOFT_HSM_SIGNING_KEY_ID
 
 # Run the Translator app
-exec "bin/$COMPONENT" $@
+exec "/app/bin/$COMPONENT" $@
 
