@@ -42,4 +42,5 @@ run openssl ecparam -name secp384r1 | \
 
 expose 5656
 env PKCS11_DAEMON_SOCKET="tcp://0.0.0.0:5656"
-cmd ["/usr/local/bin/pkcs11-daemon", "/usr/local/lib/softhsm/libsofthsm2.so"]
+entrypoint ["/usr/local/bin/pkcs11-daemon", "/usr/local/lib/softhsm/libsofthsm2.so"]
+cmd []
