@@ -12,7 +12,7 @@ COPY build.gradle build.gradle
 COPY settings.gradle settings.gradle
 COPY proxy-node-shared/ proxy-node-shared/
 
-ARG component=proxy-node-gateway
+ARG component=proxy-node-translator
 COPY ${component}/src ${component}/src
 COPY ${component}/build.gradle ${component}/build.gradle
 
@@ -35,13 +35,14 @@ RUN wget https://github.com/OpenSC/OpenSC/releases/download/${OPEN_SC_VERSION}/o
     make && make install && \
     cd .. && rm -rf opensc* && \
     rm -rf /var/lib/apt/lists/*
+
 # ----------------------------------------------------------
 
 # Copy java app from build to runtime image
 WORKDIR /app
 USER root
 
-ARG component
+ARG component=proxy-node-translator
 COPY --from=build /app/${component}/build/install/${component} /app
 COPY --from=build /app/${component}/src/dist/init.sh /bin/init.sh
 
