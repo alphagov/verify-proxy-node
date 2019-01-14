@@ -1,2 +1,10 @@
 #!/usr/bin/env bash
-docker-compose -f gradle-compose.yaml run --rm docker-gradle $@
+#
+# runs gradle in docker
+image="gradle-with-hsm"
+docker build -f docker-gradle.dockerfile -t "${image}" .
+docker run --rm -it \
+	-v "gradle-cache:/home/gradle/.gradle" \
+	-v "${PWD}:/home/gradle/project" \
+	-w "/home/gradle/project" \
+	"${image}" $@

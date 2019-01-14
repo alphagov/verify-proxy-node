@@ -25,8 +25,21 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: 80
-        - containerPort: 6601
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6601
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
         env:
         - name: CONNECTOR_NODE_ENTITY_ID
           valueFrom:
