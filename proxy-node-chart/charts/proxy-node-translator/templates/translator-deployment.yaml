@@ -24,10 +24,12 @@ spec:
         - name: proxy-node-pki
           configMap:
             name: proxy-node-pki
+        - name: softhsm-dir
+          emptyDir: {}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: {{ include "docker_image" (tuple .Chart.Name .) }}
+        imagePullPolicy: IfNotPresent
         ports:
         - name: http
           containerPort: 80
@@ -47,6 +49,9 @@ spec:
         volumeMounts:
           - mountPath: /app/keys/
             name: proxy-node-pki
+            readOnly: true
+          - mountPath: /softhsm
+            name: softhsm-dir
             readOnly: true
         env:
         - name: CONNECTOR_NODE_ENTITY_ID
@@ -135,8 +140,12 @@ spec:
             configMapKeyRef:
               name: proxy-node-pki 
               key: SIGNING_KEY
+        - name: PKCS11_PROXY_SOCKET
+          value: tcp://localhost:5656
         - name: SOFT_HSM_LIB_PATH
-          value: /usr/lib/softhsm/libsofthsm2.so
+          value: /softhsm/libpkcs11-proxy.so
+        - name: SOFT_HSM_SIGNING_KEY_PIN
+          value: CHANGE-ME-123
         - name: SOFT_HSM_SIGNING_KEY_LABEL
           value: vfpn-uk-signing
         - name: SOFT_HSM_SIGNING_KEY_TOKEN
@@ -145,8 +154,38 @@ spec:
           value: "0"
         - name: SOFT_HSM_SIGNING_KEY_ID
           value: DEF0
+        - name: SOFT_HSM_SIGNING_KEY_SO_PIN
+          value: CHANGE-ME-456
+        - name: KEY_RETRIEVER_SERVICE_NAME
+          value: softHSM
+      - name: softhsm
+        image: {{ include "docker_image" (tuple "softhsm" .) }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: pkcs11
+          containerPort: 5656
+        readinessProbe:
+          tcpSocket:
+            port: pkcs11
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+          - mountPath: /keys/
+            name: proxy-node-pki
+            readOnly: true
+          - mountPath: /softhsm
+            name: softhsm-dir
+        env:
         - name: SOFT_HSM_SIGNING_KEY_PIN
           value: CHANGE-ME-123
+        - name: SOFT_HSM_SIGNING_KEY_LABEL
+          value: vfpn-uk-signing
+        - name: SOFT_HSM_SIGNING_KEY_TOKEN
+          value: vfpn-uk-signing
+        - name: SOFT_HSM_SIGNING_KEY_SLOT
+          value: "0"
+        - name: SOFT_HSM_SIGNING_KEY_ID
+          value: DEF0
         - name: SOFT_HSM_SIGNING_KEY_SO_PIN
           value: CHANGE-ME-456
         - name: KEY_RETRIEVER_SERVICE_NAME
