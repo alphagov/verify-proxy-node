@@ -11,6 +11,9 @@ PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 (minikube status | grep -i running) || minikube start --memory 4096 "$MINIKUBE_ARGS"
 
 mkdir -p "${BUILD_DIR}"
+
+helm_tpl_args=""
+
 for component in $COMPONENTS; do
 	tag="local-$(tar c $component | md5sum | awk '{print $1}')"
 	image="govukverify/${component}:${tag}"
@@ -18,17 +21,16 @@ for component in $COMPONENTS; do
 	if (eval $(minikube docker-env --shell bash) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
 		echo "already built"
 	else
-  pushd "$component"
-		docker build --build-arg "component=${component}" -t "${image}" .
-		docker save "${image}" | (eval $(minikube docker-env --shell bash) && docker load)
-  popd
+  docker build --file "$component/Dockerfile" --build-arg "component=${component}" -t "${image}" .
+  docker save "${image}" | (eval $(minikube docker-env --shell bash) && docker load)
 	fi
 	echo "generating kubeyaml from chart for ${image}"
-	test -d "charts/$component" && helm template "charts/${component}" \
-		--name "${component}" \
-		--output-dir "${BUILD_DIR}" \
-		--set image.tag=${tag}
+  helm_tpl_args="global.${component}.tag=${tag},$helm_tpl_args"
 done
+
+helm template "proxy-node-chart" \
+  --output-dir "${BUILD_DIR}" \
+  --set "$helm_tpl_args"
 
 if [[ ! -e "${PKI_DIR}" ]]; then
 	pushd "${PN_PROJECT_DIR}/pki"
