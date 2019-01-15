@@ -7,6 +7,7 @@ PKI_DIR=".local_pki"
 COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector softhsm"
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
+MINIKUBE_IP="${PKI_OUTPUT_DIR}/minikube_ip"
 
 (minikube status | grep -i running) || minikube start --memory 4096 "$MINIKUBE_ARGS"
 
@@ -32,24 +33,38 @@ helm template "proxy-node-chart" \
   --output-dir "${BUILD_DIR}" \
   --set "$helm_tpl_args"
 
-if [[ ! -e "${PKI_DIR}" ]]; then
+function generate_pki {
 	pushd "${PN_PROJECT_DIR}/pki"
-	  rm -f "${PKI_OUTPUT_DIR}/*"
-	  bundle install --quiet
-	  bundle exec generate \
-	    --hub-entity-id "https://dev-hub.local" \
-	    --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
-	    --proxy-node-entity-id "http://proxy-node" \
-	    --connector-url "http://$(minikube ip):31100" \
-	    --proxy-url "http://$(minikube ip):31200" \
-	    --idp-url "http://$(minikube ip):31300" \
-	    --softhsm \
-	    --configmaps \
-	    "${PKI_OUTPUT_DIR}"
-	popd
-fi
+    rm -f "${PKI_OUTPUT_DIR}/*"
+    bundle install --quiet
+    bundle exec generate \
+      --hub-entity-id "https://dev-hub.local" \
+      --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
+      --proxy-node-entity-id "http://proxy-node" \
+      --connector-url "http://$(minikube ip):31100" \
+      --proxy-url "http://$(minikube ip):31200" \
+      --idp-url "http://$(minikube ip):31300" \
+      --softhsm \
+      --configmaps \
+      "${PKI_OUTPUT_DIR}"
 
-kubectl apply -R -f "${PKI_DIR}"
+    minikube ip > "$MINIKUBE_IP"
+  popd
+}
+
+# Generate PKI if directory is missing
+test -d "${PKI_OUTPUT_DIR}" || {
+  echo "Generating PKI: No PKI directory"
+  generate_pki
+}
+
+# Generate PKI if minikube IP has changed
+test "$(minikube ip)" == "$(cat "$MINIKUBE_IP")" || {
+  echo "Generating PKI: minikube IP has changed"
+  generate_pki
+}
+
+kubectl apply -R -f "${PKI_OUTPUT_DIR}"
 sleep 1
 kubectl apply -R -f "${BUILD_DIR}"
 
