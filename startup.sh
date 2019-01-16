@@ -16,16 +16,16 @@ mkdir -p "${BUILD_DIR}"
 helm_tpl_args=""
 
 for component in $COMPONENTS; do
-	tag="local-$(tar c $component | md5sum | awk '{print $1}')"
-	image="govukverify/${component}:${tag}"
-	echo "building $component as $image"
-	if (eval $(minikube docker-env --shell bash) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
-		echo "already built"
-	else
+  tag="local-$(tar c $component | md5sum | awk '{print $1}')"
+  image="govukverify/${component}:${tag}"
+  echo "building $component as $image"
+  if (eval $(minikube docker-env --shell bash) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
+    echo "already built"
+  else
   docker build --file "$component/Dockerfile" --build-arg "component=${component}" -t "${image}" .
   docker save "${image}" | (eval $(minikube docker-env --shell bash) && docker load)
-	fi
-	echo "generating kubeyaml from chart for ${image}"
+  fi
+  echo "generating kubeyaml from chart for ${image}"
   helm_tpl_args="global.${component}.tag=${tag},$helm_tpl_args"
 done
 
@@ -34,7 +34,7 @@ helm template "proxy-node-chart" \
   --set "$helm_tpl_args"
 
 function generate_pki {
-	pushd "${PN_PROJECT_DIR}/pki"
+  pushd "${PN_PROJECT_DIR}/pki"
     rm -f "${PKI_OUTPUT_DIR}/*"
     bundle install --quiet
     bundle exec generate \
@@ -69,21 +69,21 @@ sleep 1
 kubectl apply -R -f "${BUILD_DIR}"
 
 function not_ready_count() {
-	kubectl get po -o json | jq -r '.items[].status.conditions[].status' | grep False | wc -l | awk '{ print $1 }'
+  kubectl get po -o json | jq -r '.items[].status.conditions[].status' | grep False | wc -l | awk '{ print $1 }'
 }
 
 function not_running_count() {
-	kubectl get po -o json | jq -r '.items[].status.phase' | grep -v Running | wc -l | awk '{ print $1 }'
+  kubectl get po -o json | jq -r '.items[].status.phase' | grep -v Running | wc -l | awk '{ print $1 }'
 }
 
 sleep 2
 while [[ "$(not_running_count)" != "0" ]]; do
-	echo "waiting for $(not_running_count) pods to start"
-	sleep 3
+  echo "waiting for $(not_running_count) pods to start"
+  sleep 3
 done
 while [[ "$(not_ready_count)" != "0" ]]; do
-	echo "waiting for $(not_ready_count) status probes to pass"
-	sleep 3
+  echo "waiting for $(not_ready_count) status probes to pass"
+  sleep 3
 done
 
 echo ""
