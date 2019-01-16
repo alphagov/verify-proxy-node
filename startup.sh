@@ -9,7 +9,7 @@ PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 MINIKUBE_IP="${PKI_OUTPUT_DIR}/minikube_ip"
 
-(minikube status | grep -i running) || minikube start --memory 4096 "$MINIKUBE_ARGS"
+(minikube status | grep -i running) || minikube start --memory 4096 "${MINIKUBE_ARGS:-}"
 
 mkdir -p "${BUILD_DIR}"
 
