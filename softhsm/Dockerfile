@@ -1,5 +1,5 @@
 from openjdk:11-jre-slim as build
-workdir /work
+workdir /app
 
 # Build softHSM source
 arg version=2.5.0
@@ -23,7 +23,7 @@ run wget https://github.com/SUNET/pkcs11-proxy/archive/master.zip && \
 
 # Run image
 from openjdk:11-jre-slim
-workdir /work
+workdir /app
 volume /softhsm
 
 run apt-get update && \
@@ -42,4 +42,4 @@ run chmod +x init.sh
 expose 5656
 env PKCS11_DAEMON_SOCKET="tcp://0.0.0.0:5656"
 entrypoint ["dumb-init", "--"]
-cmd ["/work/init.sh"]
+cmd ["/app/init.sh"]
