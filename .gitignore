@@ -45,3 +45,5 @@ local_eidas_reference/translator
 proxy-node-translator/src/dist/proxy_node_signing.*
 .local_pki
 .local_yaml
+.components.yml
+.helm_values.yml

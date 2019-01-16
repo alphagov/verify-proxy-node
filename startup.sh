@@ -2,36 +2,56 @@
 
 set -euo pipefail
 
-BUILD_DIR=".local_yaml"
+HELM_OUTPUT_DIR=".local_yaml"
 PKI_DIR=".local_pki"
-COMPONENTS="proxy-node-gateway proxy-node-translator stub-connector softhsm"
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
 MINIKUBE_IP="${PKI_OUTPUT_DIR}/minikube_ip"
+TMP_COMPOSE=".components.yml"
+TMP_HELM=".helm_values.yml"
 
-(minikube status | grep -i running) || minikube start --memory 4096 "${MINIKUBE_ARGS:-}"
+mkdir -p "${HELM_OUTPUT_DIR}"
 
-mkdir -p "${BUILD_DIR}"
+# Install required software using Homebrew
+command -v yq >/dev/null || brew install yq
+command -v jq >/dev/null || brew install jq
 
-helm_tpl_args=""
+# Get components as defined by docker-compose.yml
+yq read docker-compose.yml > $TMP_COMPOSE
+components="$(yq read --tojson $TMP_COMPOSE | jq -r '.services | keys[]')"
 
-for component in $COMPONENTS; do
-  tag="local-$(tar c $component | md5sum | awk '{print $1}')"
+for component in $components; do
+  # Dereference symlinks when using tar so md5sum reflects Dockerfile changes
+  tag="local-$(tar -ch $component | md5sum | awk '{print $1}')"
   image="govukverify/${component}:${tag}"
-  echo "building $component as $image"
-  if (eval $(minikube docker-env --shell bash) && docker inspect --type=image "${image}" >/dev/null 2>&1); then
-    echo "already built"
-  else
-  docker build --file "$component/Dockerfile" --build-arg "component=${component}" -t "${image}" .
-  docker save "${image}" | (eval $(minikube docker-env --shell bash) && docker load)
-  fi
-  echo "generating kubeyaml from chart for ${image}"
-  helm_tpl_args="global.${component}.tag=${tag},$helm_tpl_args"
+  echo "tagging $component: $image"
+  yq write --inplace $TMP_COMPOSE "services.${component}.image" "$image"
 done
 
+echo "building images"
+docker-compose -f $TMP_COMPOSE build
+
+# Start minikube if not running
+(minikube status | grep -i running) || minikube start --memory 4096 "${MINIKUBE_ARGS:-}"
+
+# Push the locally-built images to minikube's docker
+for component in $components; do
+  image="$(yq read $TMP_COMPOSE "services.${component}.image")"
+  docker save "$image" | (eval $(minikube docker-env --shell bash) && docker load)
+done
+
+# Get the image definitions into a format suitable for Helm
+yq read --tojson $TMP_COMPOSE services \
+  | jq 'del(.[].build)' \
+  | yq prefix - global \
+  > $TMP_HELM
+
+echo "generating kubeyaml from chart"
 helm template "proxy-node-chart" \
-  --output-dir "${BUILD_DIR}" \
-  --set "$helm_tpl_args"
+  --output-dir "${HELM_OUTPUT_DIR}" \
+  --values $TMP_HELM
+
+rm -f $TMP_COMPOSE $TMP_HELM
 
 function generate_pki {
   pushd "${PN_PROJECT_DIR}/pki"
@@ -66,7 +86,7 @@ test "$(minikube ip)" == "$(cat "$MINIKUBE_IP")" || {
 
 kubectl apply -R -f "${PKI_OUTPUT_DIR}"
 sleep 1
-kubectl apply -R -f "${BUILD_DIR}"
+kubectl apply -R -f "${HELM_OUTPUT_DIR}"
 
 function not_ready_count() {
   kubectl get po -o json | jq -r '.items[].status.conditions[].status' | grep False | wc -l | awk '{ print $1 }'

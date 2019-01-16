@@ -1,13 +1,9 @@
 global:
   proxy-node-gateway:
-    repository: govukverify/proxy-node-gateway
-    tag: latest
+    image: govukverify/proxy-node-gateway:latest
   proxy-node-translator:
-    repository: govukverify/proxy-node-translator
-    tag: latest
+    image: govukverify/proxy-node-translator:latest
   stub-connector:
-    repository: govukverify/stub-connector
-    tag: latest
+    image: govukverify/stub-connector:latest
   softhsm:
-    repository: govukverify/softhsm
-    tag: latest
+    image: govukverify/softhsm:latest

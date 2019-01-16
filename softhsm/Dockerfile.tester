@@ -1,3 +1,0 @@
-from alpine
-run apk --update add opensc openssl
-cmd ash

@@ -7,12 +7,12 @@ arg version=2.5.0
 run apt-get update && \
     apt-get install -y \
     opensc build-essential wget libsqlite3-dev libssl-dev \
-    cmake libseccomp-dev libengine-gost-openssl1.1
+    cmake libseccomp-dev
 
 run wget https://dist.opendnssec.org/source/softhsm-${version}.tar.gz && \
     tar xvf softhsm-${version}.tar.gz && \
     cd softhsm-${version} && \
-    ./configure && \
+    ./configure --disable-gost && \
     make && make install
 
 # Build pkcs11-proxy
@@ -36,7 +36,7 @@ copy --from=build /usr/local/bin/softhsm* /usr/local/bin/
 copy --from=build /usr/local/lib/libpkcs11-proxy* /usr/local/lib/
 copy --from=build /usr/local/bin/pkcs11-daemon /usr/local/bin/
 
-copy ./softhsm/init.sh init.sh
+copy init.sh .
 run chmod +x init.sh
 
 expose 5656
