@@ -37,6 +37,7 @@ docker-compose -f $TMP_COMPOSE build
 # Push the locally-built images to minikube's docker
 for component in $components; do
   image="$(yq read $TMP_COMPOSE "services.${component}.image")"
+  docker tag "$image" "$(echo $image | sed 's/\(.\+\):.*/\1:latest/')"
   docker save "$image" | (eval $(minikube docker-env --shell bash) && docker load)
 done
 
