@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-./docker-gradle clean test
+./gradlew clean test
 
 ./startup.sh --build
 

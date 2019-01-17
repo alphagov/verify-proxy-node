@@ -1,0 +1,9 @@
+global:
+  proxy-node-gateway:
+    image: govukverify/proxy-node-gateway:latest
+  proxy-node-translator:
+    image: govukverify/proxy-node-translator:latest
+  stub-connector:
+    image: govukverify/stub-connector:latest
+  softhsm:
+    image: govukverify/softhsm:latest

@@ -14,8 +14,8 @@ spec:
       restartPolicy: Always
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: {{ include "docker_image" (tuple .Chart.Name .) }}
+        imagePullPolicy: IfNotPresent
         ports:
         - name: http
           containerPort: 80

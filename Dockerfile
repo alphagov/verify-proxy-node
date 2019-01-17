@@ -23,6 +23,9 @@ USER root
 ARG component
 COPY --from=build /app/${component}/build/install/${component} /app
 
+RUN apt-get update && apt-get install -y dumb-init
+
 ENV CONFIG_FILE config.yml
 ENV COMPONENT $component
-CMD "bin/$COMPONENT"
+ENTRYPOINT ["dumb-init", "--"]
+CMD "/app/bin/$COMPONENT"
