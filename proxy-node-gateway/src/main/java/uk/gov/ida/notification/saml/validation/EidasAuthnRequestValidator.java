@@ -1,4 +1,9 @@
 package uk.gov.ida.notification.saml.validation;
+import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
+import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
+import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
+
+import javax.xml.namespace.QName;
 
 import com.google.common.base.Strings;
 import org.opensaml.core.xml.XMLObject;
@@ -14,11 +19,6 @@ import uk.gov.ida.notification.saml.deprecate.SamlValidationException;
 import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
 import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
-import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
-
-import javax.xml.namespace.QName;
 
 public class EidasAuthnRequestValidator {
 

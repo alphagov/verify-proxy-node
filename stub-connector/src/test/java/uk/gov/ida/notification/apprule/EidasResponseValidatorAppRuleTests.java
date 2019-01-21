@@ -66,7 +66,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
     private String getAuthnRequestIdFromSession() throws URISyntaxException, IOException, ParserConfigurationException {
         String html = getEidasRequest();
-        String decodedSaml = HtmlHelpers.getValueFromForm(html, "saml-form", "SAMLRequest");
+        String decodedSaml = HtmlHelpers.getValueFromForm(html, "SAMLRequest");
         AuthnRequest request = new SamlParser().parseSamlString(decodedSaml);
         return request.getID();
     }
