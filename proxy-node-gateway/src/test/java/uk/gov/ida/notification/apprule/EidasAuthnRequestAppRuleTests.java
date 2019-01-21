@@ -137,7 +137,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     private AuthnRequest getHubAuthnRequestFromHtml(String html) throws IOException {
-        String decodedHubAuthnRequest = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_REQUEST);
+        String decodedHubAuthnRequest = HtmlHelpers.getValueFromForm(html, SamlFormMessageType.SAML_REQUEST);
         return parser.parseSamlString(decodedHubAuthnRequest);
     }
 

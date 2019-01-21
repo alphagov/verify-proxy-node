@@ -24,12 +24,6 @@ import uk.gov.ida.notification.saml.SamlObjectSigner;
 import java.util.List;
 
 public class EidasAuthnRequestGenerator {
-    private final SamlObjectSigner signer;
-
-    public EidasAuthnRequestGenerator(SamlObjectSigner signer) {
-        this.signer = signer;
-    }
-
     public AuthnRequest generate(
             String requestID,
             String destination,
@@ -97,8 +91,6 @@ public class EidasAuthnRequestGenerator {
         authnContextClassRef.setAuthnContextClassRef(loa.getUri());
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);
         request.setRequestedAuthnContext(requestedAuthnContext);
-
-        signer.sign(request);
 
         return request;
     }
