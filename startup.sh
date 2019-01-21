@@ -6,15 +6,16 @@ HELM_OUTPUT_DIR=".local_yaml"
 PKI_DIR=".local_pki"
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_OUTPUT_DIR="${PN_PROJECT_DIR}/${PKI_DIR}"
-MINIKUBE_IP="${PKI_OUTPUT_DIR}/minikube_ip"
 TMP_COMPOSE=".components.yml"
 TMP_HELM=".helm_values.yml"
 
 mkdir -p "${HELM_OUTPUT_DIR}"
 
-# Install required software using Homebrew
-command -v yq >/dev/null || brew install yq
-command -v jq >/dev/null || brew install jq
+# Generate PKI if directory is missing
+test -d "${PKI_OUTPUT_DIR}" || {
+  echo "Generating PKI: No PKI directory"
+  generate_pki
+}
 
 # Get components as defined by docker-compose.yml
 yq read docker-compose.yml > $TMP_COMPOSE
@@ -29,17 +30,15 @@ for component in $components; do
 done
 
 echo "building images"
-docker-compose -f $TMP_COMPOSE build
+docker-compose -f $TMP_COMPOSE build --parallel
 
-# Start minikube if not running
-(minikube status | grep -i running) || minikube start --memory 4096 "${MINIKUBE_ARGS:-}"
-
-# Push the locally-built images to minikube's docker
+# Push the locally-built images to docker
 for component in $components; do
   image="$(yq read $TMP_COMPOSE "services.${component}.image")"
   docker tag "$image" "$(echo $image | sed 's/\(.\+\):.*/\1:latest/')"
-  docker save "$image" | (eval $(minikube docker-env --shell bash) && docker load)
+  docker save "$image" | eval $(docker-machine env default) && docker load
 done
+
 
 # Get the image definitions into a format suitable for Helm
 yq read --tojson $TMP_COMPOSE services \
@@ -62,27 +61,13 @@ function generate_pki {
       --hub-entity-id "https://dev-hub.local" \
       --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
       --proxy-node-entity-id "http://proxy-node" \
-      --connector-url "http://$(minikube ip):31100" \
-      --proxy-url "http://$(minikube ip):31200" \
-      --idp-url "http://$(minikube ip):31300" \
+      --connector-url "http://127.0.0.1:31100" \
+      --proxy-url "http://127.0.0.1:31200" \
+      --idp-url "http://127.0.0.1:31300" \
       --softhsm \
       --configmaps \
       "${PKI_OUTPUT_DIR}"
-
-    minikube ip > "$MINIKUBE_IP"
   popd
-}
-
-# Generate PKI if directory is missing
-test -d "${PKI_OUTPUT_DIR}" || {
-  echo "Generating PKI: No PKI directory"
-  generate_pki
-}
-
-# Generate PKI if minikube IP has changed
-test "$(minikube ip)" == "$(cat "$MINIKUBE_IP")" || {
-  echo "Generating PKI: minikube IP has changed"
-  generate_pki
 }
 
 kubectl apply -R -f "${PKI_OUTPUT_DIR}"
@@ -108,4 +93,4 @@ while [[ "$(not_ready_count)" != "0" ]]; do
 done
 
 echo ""
-echo "http://$(minikube ip):31100/Request"
+echo "http://127.0.0.1:31100/Request"
