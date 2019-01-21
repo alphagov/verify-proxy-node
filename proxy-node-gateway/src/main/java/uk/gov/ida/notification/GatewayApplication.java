@@ -12,15 +12,16 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.credential.BasicCredential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
-import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
-import uk.gov.ida.notification.saml.ResponseAssertionFactory;
+import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
+import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
@@ -144,8 +145,9 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void registerExceptionMappers(Environment environment) {
-        environment.jersey().register(new HubResponseExceptionMapper());
+        environment.jersey().register(new GenericExceptionMapper());
         environment.jersey().register(new AuthnRequestExceptionMapper());
+        environment.jersey().register(new HubResponseExceptionMapper());
     }
 
     private void registerResources(GatewayConfiguration configuration, Environment environment) throws Exception {
