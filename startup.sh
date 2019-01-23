@@ -29,7 +29,7 @@ for component in $components; do
 done
 
 echo "building images"
-docker-compose -f $TMP_COMPOSE build
+docker-compose -f $TMP_COMPOSE build --parallel
 
 # Start minikube if not running
 (minikube status | grep -i running) || minikube start --memory 4096 "${MINIKUBE_ARGS:-}"

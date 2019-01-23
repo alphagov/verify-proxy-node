@@ -48,6 +48,9 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opensaml.saml.saml2.core.StatusCode.AUTHN_FAILED;
+import static org.opensaml.saml.saml2.core.StatusCode.NO_AUTHN_CONTEXT;
+import static org.opensaml.saml.saml2.core.StatusCode.REQUESTER;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
@@ -135,11 +138,11 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         javax.ws.rs.core.Response response = postHubResponseToProxyNode(buildUnsignedHubResponse());
         String message = response.readEntity(String.class);
         assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
-        assertThat(message).contains("Error handling hub response");
+        assertThat(message).contains("Sorry, something went wrong");
     }
 
     @Test
-    public void shouldValidateHubResponseMessage() throws Exception {
+    public void shouldInvalidateHubResponseMessage() throws Exception {
         Response invalidResponse = getHubResponseBuilder()
             .withIssuer(null)
             .buildSigned(hubSigningCredential);
@@ -148,7 +151,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         String message = response.readEntity(String.class);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(message).contains("Error handling hub response");
+        assertThat(message).contains("Sorry, something went wrong");
     }
 
     @Test
@@ -161,8 +164,60 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         String responseMessage = response.readEntity(String.class);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(responseMessage).contains("Error handling hub response");
+        assertThat(responseMessage).contains("Sorry, something went wrong");
     }
+
+    @Test
+    public void shouldShowErrorPageForNoAuthenticationContext() throws Exception {
+        String requestId = UUID.randomUUID().toString();
+
+        postEidasAuthnRequest(eidasAuthnRequest);
+        Response hubResponse = getHubResponseBuilder()
+                .withInResponseTo(requestId)
+                .withStatus(NO_AUTHN_CONTEXT)
+                .buildSigned(hubSigningCredential);
+
+        javax.ws.rs.core.Response response = postHubResponse(hubResponse);
+        String responseMessage = response.readEntity(String.class);
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(responseMessage).contains("Sorry, something went wrong");
+    }
+
+    @Test
+    public void shouldShowErrorPageForAuthenticationFailed() throws Exception {
+        String requestId = UUID.randomUUID().toString();
+
+        postEidasAuthnRequest(eidasAuthnRequest);
+        Response hubResponse = getHubResponseBuilder()
+                .withInResponseTo(requestId)
+                .withStatus(AUTHN_FAILED)
+                .buildSigned(hubSigningCredential);
+
+        javax.ws.rs.core.Response response = postHubResponse(hubResponse);
+        String responseMessage = response.readEntity(String.class);
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(responseMessage).contains("Sorry, something went wrong");
+    }
+
+    @Test
+    public void shouldShowErrorPageForRequesterError() throws Exception {
+        String requestId = UUID.randomUUID().toString();
+
+        postEidasAuthnRequest(eidasAuthnRequest);
+        Response hubResponse = getHubResponseBuilder()
+                .withInResponseTo(requestId)
+                .withStatus(REQUESTER)
+                .buildSigned(hubSigningCredential);
+
+        javax.ws.rs.core.Response response = postHubResponse(hubResponse);
+        String responseMessage = response.readEntity(String.class);
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertThat(responseMessage).contains("Sorry, something went wrong");
+    }
+
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {
         String html = postHubResponseToProxyNode(hubResponse).readEntity(String.class);

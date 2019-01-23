@@ -170,6 +170,6 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     private void assertErrorResponse(Response response) {
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
-        assertThat(response.readEntity(String.class), containsString("Error handling authn request."));
+        assertThat(response.readEntity(String.class), containsString("Sorry, something went wrong"));
     }
 }
