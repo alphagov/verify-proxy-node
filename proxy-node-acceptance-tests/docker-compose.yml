@@ -3,8 +3,16 @@ version: '3.4'
 services:
   selenium-hub:
     image: selenium/standalone-firefox
+    container_name: selenium-hub
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  acceptane-tests:
+  acceptance-tests:
     build: .
     depends_on:
       - selenium-hub
+    environment:
+      - STUB_CONNECTOR_URL=${STUB_CONNECTOR_URL}

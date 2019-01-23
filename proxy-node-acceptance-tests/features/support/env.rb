@@ -9,18 +9,24 @@ end
 show_browser = ENV['SHOW_BROWSER'] == 'true'
 
 ### Driver config ###
+if ENV['TEST_ENV'] == 'local' || show_browser
 
-if ENV['TEST_ENV'] == 'local' || ENV['SHOW_BROWSER']
-  Capybara.register_driver :firefox_driver do |app|
-    options = ::Selenium::WebDriver::Firefox::Options.new
-    options.args << '--headless' unless show_browser
+  if ENV['BROWSER'] == 'chrome'
+    Capybara.register_driver :selenium do |app|
+      Capybara::Selenium::Driver.new(app, :browser => :chrome)
+    end
+  else
+    Capybara.register_driver :firefox_driver do |app|
+      options = ::Selenium::WebDriver::Firefox::Options.new
+      options.args << '--headless' unless show_browser
 
-    Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+      Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+    end
+
+    Capybara.javascript_driver = :firefox_driver
   end
-
-  Capybara.javascript_driver = :firefox_driver
 else
-  selenium_hub_url = 'http://selenium-hub:4444/wd/hub'
+  selenium_hub_url = ENV['HUB'] || 'http://selenium-hub:4444/wd/hub'
   Capybara.register_driver :selenium_remote_firefox do |app|
     Capybara::Selenium::Driver.new(app, browser: :remote, url: selenium_hub_url, desired_capabilities: :firefox)
   end
@@ -30,7 +36,7 @@ end
 
 Capybara.default_driver = Capybara.javascript_driver
 
-### Screenshot config ###
+## Screenshot config ###
 
 ## screenshots saved under test name + date
 Capybara::Screenshot.register_filename_prefix_formatter(:cucumber) do |failing_test|
