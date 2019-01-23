@@ -53,5 +53,14 @@ def sign_certificate(cert, key)
   cert.sign(key, OpenSSL::Digest::SHA256.new)
 end
 
+#   Read cert from file, DER- or PEM-encoded
+def read_cert(certPath)
+    return OpenSSL::X509::Certificate.new File.read certPath
+end
+
+def strip_pem(pem)
+  pem.gsub(/-----(BEGIN|END) CERTIFICATE-----/, '').gsub("\n", '')
+end
+
 USAGE_SIGNING = 'digitalSignature'
 USAGE_ENCRYPTION = 'keyEncipherment'
