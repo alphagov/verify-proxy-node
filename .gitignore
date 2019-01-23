@@ -47,3 +47,4 @@ proxy-node-translator/src/dist/proxy_node_signing.*
 .local_yaml
 .components.yml
 .helm_values.yml
+pki/test/.test-metadata

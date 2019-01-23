@@ -6,6 +6,7 @@ require 'yaml'
 
 require_relative 'certs'
 require_relative 'metadata'
+require_relative 'proxy-node-metadata'
 require_relative 'truststores'
 require_relative 'utils'
 require_relative 'options'
@@ -52,10 +53,6 @@ def sub_keypair(issuer_keypair, cn, key_usage)
     sign_certificate(cert, issuer_keypair.key)
   end
   KeyPair.new(sub_key, sub_cert)
-end
-
-def strip_pem(pem)
-  pem.gsub(/-----(BEGIN|END) CERTIFICATE-----/, '').gsub("\n", '')
 end
 
 def der2pk8(der)
@@ -134,7 +131,7 @@ proxy_node_config = {
   ],
   'enabled' => true
 }
-proxy_node_metadata_xml = generate_proxy_node_metadata(proxy_node_config, root_keypair.cert)
+proxy_node_metadata_xml = generate_proxy_node_metadata('dev', proxy_node_config, root_keypair.cert)
 proxy_node_metadata_xml_signed = sign_metadata(proxy_node_metadata_xml, proxy_node_meta_keypair, options.xmlsectool_path)
 
 # Output
