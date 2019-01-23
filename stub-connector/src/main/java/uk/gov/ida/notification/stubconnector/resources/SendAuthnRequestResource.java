@@ -7,6 +7,7 @@ import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
+import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler;
 import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
@@ -20,9 +21,9 @@ import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
-import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.stubconnector.EidasAuthnRequestGenerator;
+import uk.gov.ida.notification.stubconnector.RequestUtils;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,9 +32,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 @Path("/Request")
 public class SendAuthnRequestResource {
@@ -57,15 +56,8 @@ public class SendAuthnRequestResource {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
         String connectorEntityId = configuration.getConnectorNodeBaseUrl() + "/Metadata";
         Endpoint proxyNodeEndpoint = proxyNodeMetadata.getEndpoint(proxyNodeEntityId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
-        List<String> requestedAttributes = Arrays.asList(
-                AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
-                AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME,
-                AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME,
-                AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME
-        );
-
-        String authnRequestId = UUID.randomUUID().toString();
+        List<String> requestedAttributes = RequestUtils.getMinimumEidasRequestedAttributes();
+        String authnRequestId = RequestUtils.generateId();
 
         session.setAttribute("authn_id", authnRequestId);
 
@@ -83,7 +75,7 @@ public class SendAuthnRequestResource {
         signatureSigningParameters.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
         signatureSigningParameters.setSigningCredential(signingCredential);
 
-        MessageContext context = new MessageContext() {{
+        MessageContext<SAMLObject> context = new MessageContext<>() {{
             setMessage(authnRequest);
 
             getSubcontext(SAMLPeerEntityContext.class, true)

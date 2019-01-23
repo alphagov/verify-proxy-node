@@ -13,16 +13,16 @@ import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.credential.CredentialSupport;
 import org.opensaml.security.x509.X509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import se.litsec.opensaml.utils.X509CertificateUtils;
+import se.litsec.opensaml.xmlsec.SAMLObjectDecrypter;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
@@ -136,7 +136,13 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         PrivateKey signingKey = configuration.getSigningKeyPair().getPrivateKey().getPrivateKey();
         String signingCertString = configuration.getSigningKeyPair().getPublicKey().getCert();
         X509Certificate signingCert = X509CertificateUtils.decodeCertificate(new ByteArrayInputStream(signingCertString.getBytes(StandardCharsets.UTF_8)));
-        X509Credential signingCredential = new BasicX509Credential(signingCert, signingKey);
+        X509Credential signingCredential = CredentialSupport.getSimpleCredential(signingCert, signingKey);
+        KeyPairConfiguration configuration1 = configuration.getEncryptionKeyPair();
+        BasicCredential decryptionCredential = new BasicCredential(
+            configuration1.getPublicKey().getPublicKey(),
+            configuration1.getPrivateKey().getPrivateKey()
+        );
+        SAMLObjectDecrypter decrypter = new SAMLObjectDecrypter(decryptionCredential);
 
         environment.jersey().register(new SendAuthnRequestResource(
             configuration,
@@ -147,11 +153,7 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         environment.jersey().register(new MetadataResource(configuration, signingCredential));
 
         environment.jersey().register(
-                new ReceiveResponseResource(
-                        configuration,
-                        createDecrypter(configuration.getEncryptionKeyPair()),
-                        proxyNodeMetadataResolverBundle
-                )
+                new ReceiveResponseResource(configuration, proxyNodeMetadataResolverBundle, decrypter)
         );
     }
 
@@ -165,11 +167,4 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
-    private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
-        BasicCredential decryptionCredential = new BasicCredential(
-            configuration.getPublicKey().getPublicKey(),
-            configuration.getPrivateKey().getPrivateKey()
-        );
-        return new ResponseAssertionDecrypter(decryptionCredential);
-    }
 }

@@ -50,4 +50,8 @@ public class Metadata {
             .findFirst()
             .orElseThrow();
     }
+
+    public RoleDescriptorResolver getRoleDescriptorResolver() {
+        return metadataCredentialResolver.getRoleDescriptorResolver();
+    }
 }
