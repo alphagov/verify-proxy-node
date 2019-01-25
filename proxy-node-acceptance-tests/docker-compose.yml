@@ -15,4 +15,4 @@ services:
     depends_on:
       - selenium-hub
     environment:
-      - STUB_CONNECTOR_URL=${STUB_CONNECTOR_URL}
+      - PROXY_NODE_URL=${PROXY_NODE_URL}
