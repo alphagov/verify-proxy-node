@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-stub-connector
+  labels:
+    app.kubernetes.io/name: stub-connector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+    - hosts:
+      - country.{{ .Values.cluster.domain }}
+      secretName: {{ .Release.Name }}-stub-connector
+  rules:
+    - host: country.{{ .Values.cluster.domain }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ .Release.Name }}-stub-connector
+              servicePort: 80
