@@ -11,6 +11,11 @@ import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
+import org.opensaml.xmlsec.SignatureValidationConfiguration;
+import org.opensaml.xmlsec.config.impl.DefaultSecurityConfigurationBootstrap;
+import org.opensaml.xmlsec.impl.BasicSignatureValidationConfiguration;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
+import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
 import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 
@@ -18,9 +23,16 @@ import javax.xml.namespace.QName;
 
 public class Metadata {
     private final MetadataCredentialResolver metadataCredentialResolver;
+    private final SignatureTrustEngine signatureTrustEngine;
+    private final BasicSignatureValidationConfiguration signatureValidationConfiguration;
 
     public Metadata(MetadataCredentialResolver metadataCredentialResolver) {
         this.metadataCredentialResolver = metadataCredentialResolver;
+        this.signatureTrustEngine = new ExplicitKeySignatureTrustEngine(
+            metadataCredentialResolver, DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver()
+        );
+        this.signatureValidationConfiguration = new BasicSignatureValidationConfiguration();
+        this.signatureValidationConfiguration.setSignatureTrustEngine(signatureTrustEngine);
     }
 
     public Credential getCredential(UsageType usageType, String entityId, QName descriptorQname) throws MissingMetadataException {
@@ -51,7 +63,11 @@ public class Metadata {
             .orElseThrow();
     }
 
-    public RoleDescriptorResolver getRoleDescriptorResolver() {
-        return metadataCredentialResolver.getRoleDescriptorResolver();
+    public MetadataCredentialResolver getMetadataCredentialResolver() {
+        return metadataCredentialResolver;
+    }
+
+    public SignatureValidationConfiguration getSignatureValidationConfiguration() {
+        return signatureValidationConfiguration;
     }
 }

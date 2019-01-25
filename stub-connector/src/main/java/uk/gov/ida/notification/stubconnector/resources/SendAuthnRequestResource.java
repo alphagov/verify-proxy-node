@@ -59,8 +59,6 @@ public class SendAuthnRequestResource {
         List<String> requestedAttributes = RequestUtils.getMinimumEidasRequestedAttributes();
         String authnRequestId = RequestUtils.generateId();
 
-        session.setAttribute("authn_id", authnRequestId);
-
         AuthnRequest authnRequest = authnRequestGenerator.generate(
                 authnRequestId,
                 proxyNodeEndpoint.getLocation(),
@@ -69,6 +67,8 @@ public class SendAuthnRequestResource {
                 requestedAttributes,
                 EidasLoaEnum.LOA_SUBSTANTIAL
         );
+
+        session.setAttribute("authn_request", authnRequest);
 
         SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
         signatureSigningParameters.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);

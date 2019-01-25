@@ -1,16 +1,20 @@
 package uk.gov.ida.notification.stubconnector.resources;
 
-import com.google.common.base.Function;
 import io.dropwizard.jersey.sessions.Session;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
-import org.opensaml.core.config.ConfigurationService;
+import org.ldaptive.Message;
 import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.messaging.context.InOutOperationContext;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.binding.impl.SAMLMetadataLookupHandler;
+import org.opensaml.saml.common.binding.security.impl.InResponseToSecurityHandler;
+import org.opensaml.saml.common.binding.security.impl.MessageLifetimeSecurityHandler;
+import org.opensaml.saml.common.binding.security.impl.MessageReplaySecurityHandler;
+import org.opensaml.saml.common.binding.security.impl.ReceivedEndpointSecurityHandler;
 import org.opensaml.saml.common.binding.security.impl.SAMLProtocolMessageXMLSignatureSecurityHandler;
 import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
 import org.opensaml.saml.common.xml.SAMLConstants;
@@ -18,25 +22,27 @@ import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.criterion.ProtocolCriterion;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder;
 import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
-import org.opensaml.xmlsec.SignatureValidationConfiguration;
+import org.opensaml.xmlsec.SecurityConfigurationSupport;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
-import org.opensaml.xmlsec.impl.BasicSignatureValidationConfiguration;
 import org.opensaml.xmlsec.impl.BasicSignatureValidationParametersResolver;
 import org.opensaml.xmlsec.messaging.impl.PopulateSignatureValidationParametersHandler;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import se.litsec.opensaml.common.validation.CoreValidatorParameters;
 import se.litsec.opensaml.xmlsec.SAMLObjectDecrypter;
+import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.stubconnector.BasicMessageHandlerChain;
-import uk.gov.ida.notification.stubconnector.SAMLMetadataSignatureValidationConfigurationLookupStrategy;
+import uk.gov.ida.notification.stubconnector.EncryptedAssertionCountValidationHandler;
+import uk.gov.ida.notification.stubconnector.StripAssertionsHandler;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 import uk.gov.ida.notification.stubconnector.views.ResponseView;
-import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -46,6 +52,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,13 +61,13 @@ import java.util.stream.Collectors;
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
     private final StubConnectorConfiguration configuration;
-    private final MetadataResolverBundle<StubConnectorConfiguration> proxyNodeMetadataResolverBundle;
+    private final Metadata proxyNodeMetadata;
     private final SAMLObjectDecrypter decrypter;
 
     public ReceiveResponseResource(
-        StubConnectorConfiguration configuration, MetadataResolverBundle<StubConnectorConfiguration> proxyNodeMetadataResolverBundle, SAMLObjectDecrypter decrypter) {
+        StubConnectorConfiguration configuration, Metadata proxyNodeMetadata, SAMLObjectDecrypter decrypter) {
         this.configuration = configuration;
-        this.proxyNodeMetadataResolverBundle = proxyNodeMetadataResolverBundle;
+        this.proxyNodeMetadata = proxyNodeMetadata;
         this.decrypter = decrypter;
     }
 
@@ -94,27 +101,56 @@ public class ReceiveResponseResource {
         decoder.initialize();
         decoder.decode();
 
-        MessageContext<SAMLObject> messageContext = decoder.getMessageContext();
+        MessageContext messageContext = decoder.getMessageContext();
+
+        AuthnRequest sessionAuthnRequest = (AuthnRequest) session.getAttribute("authn_request");
+        MessageContext sessionRequestContext = new MessageContext();
+        sessionRequestContext.setMessage(sessionAuthnRequest);
+
+        InOutOperationContext inOutOperationContext = messageContext.getSubcontext(InOutOperationContext.class);
+        inOutOperationContext.setInboundMessageContext(messageContext);
+        inOutOperationContext.setOutboundMessageContext(sessionRequestContext);
+
         SAMLPeerEntityContext senderEntityContext = messageContext.getSubcontext(SAMLPeerEntityContext.class, true);
         senderEntityContext.setRole(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
         SAMLMetadataLookupHandler metadataLookupHandler = new SAMLMetadataLookupHandler();
         metadataLookupHandler.setRoleDescriptorResolver(
-            proxyNodeMetadataResolverBundle.getMetadataCredentialResolver().getRoleDescriptorResolver()
+            proxyNodeMetadata.getMetadataCredentialResolver().getRoleDescriptorResolver()
         );
 
         PopulateSignatureValidationParametersHandler signatureValidationParametersHandler = new PopulateSignatureValidationParametersHandler();
-        signatureValidationParametersHandler.setConfigurationLookupStrategy(new SAMLMetadataSignatureValidationConfigurationLookupStrategy());
+        signatureValidationParametersHandler.setConfigurationLookupStrategy(msgCtx -> List.of(
+            proxyNodeMetadata.getSignatureValidationConfiguration(),
+            SecurityConfigurationSupport.getGlobalSignatureValidationConfiguration()
+        ));
         signatureValidationParametersHandler.setSignatureValidationParametersResolver(new BasicSignatureValidationParametersResolver());
 
         SAMLProtocolMessageXMLSignatureSecurityHandler signatureSecurityHandler = new SAMLProtocolMessageXMLSignatureSecurityHandler();
+        InResponseToSecurityHandler inResponseToSecurityHandler = new InResponseToSecurityHandler();
+        MessageLifetimeSecurityHandler lifetimeSecurityHandler = new MessageLifetimeSecurityHandler();
+        lifetimeSecurityHandler.setRequiredRule(true);
+        ReceivedEndpointSecurityHandler receivedEndpointSecurityHandler = new ReceivedEndpointSecurityHandler();
+        receivedEndpointSecurityHandler.setHttpServletRequest(httpServletRequest);
+        StripAssertionsHandler stripAssertionsHandler = new StripAssertionsHandler();
+        EncryptedAssertionCountValidationHandler assertionCountValidationHandler = new EncryptedAssertionCountValidationHandler();
+        assertionCountValidationHandler.setEncryptedAssertionCount(1);
 
-        BasicMessageHandlerChain<SAMLObject> handlerChain = new BasicMessageHandlerChain<>(List.of(
+        BasicMessageHandlerChain handlerChain = new BasicMessageHandlerChain(List.of(
+            inResponseToSecurityHandler,
+            lifetimeSecurityHandler,
+            receivedEndpointSecurityHandler,
+            stripAssertionsHandler,
+            assertionCountValidationHandler,
             signatureValidationParametersHandler,
             signatureSecurityHandler
         ));
 
-        handlerChain.invoke(messageContext);
+        try {
+            handlerChain.invoke(messageContext);
+        } catch(MessageHandlerException e) {
+            return new ResponseView(Collections.emptyList(), "Message handling failed: " + e.getMessage());
+        }
 
         Response response = (Response) messageContext.getMessage();
         List<Assertion> assertions = new ArrayList<>();
@@ -127,14 +163,16 @@ public class ReceiveResponseResource {
             Assertion assertion = assertions.get(0);
             AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
 
-            attributes = attributeStatement
+            List<String> attributes = attributeStatement
                     .getAttributes()
                     .stream()
                     .map(attr -> ((EidasAttributeValueType) attr.getAttributeValues().get(0)).toStringValue())
                     .collect(Collectors.toList());
+
+            return new ResponseView(attributes, "valid");
         }
 
-        return new ResponseView(attributes, validate.toString());
+        return new ResponseView(Collections.emptyList(), "");
     }
 
     private Map<String,Object> buildStaticParemeters(String authnRequestId) {
