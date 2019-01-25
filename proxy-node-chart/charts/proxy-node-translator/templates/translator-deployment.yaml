@@ -114,7 +114,7 @@ spec:
               name: proxy-node-pki 
               key: HUB_METADATA_TRUSTSTORE_PASSWORD
         - name: HUB_METADATA_URL
-          value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_hub.xml
+          value: http://proxy-node-metadata.default.svc.cluster.local/hub_metadata_for_proxy_node.xml
         - name: HUB_URL
           value: http://localhost:6200/stub-idp-demo/SAML2/SSO
         - name: PORT
