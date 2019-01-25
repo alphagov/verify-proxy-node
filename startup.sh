@@ -49,6 +49,7 @@ yq read --tojson $TMP_COMPOSE services \
 
 echo "generating kubeyaml from chart"
 helm template "proxy-node-chart" \
+  --name "local" \
   --output-dir "${HELM_OUTPUT_DIR}" \
   --values $TMP_HELM
 

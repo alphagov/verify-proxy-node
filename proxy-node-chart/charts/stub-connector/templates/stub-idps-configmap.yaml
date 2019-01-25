@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: stub-idps
+  name: {{ .Release.Name }}-stub-idps
 data:
   stub-idps.yml: |
     stubIdps:

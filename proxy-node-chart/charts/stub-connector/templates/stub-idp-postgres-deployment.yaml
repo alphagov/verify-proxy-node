@@ -1,15 +1,28 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: stub-idp-postgres
+  name: {{ .Release.Name }}-stub-idp-postgres
+  labels:
+    app.kubernetes.io/name: stub-idp-postgres
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stub-idp-postgres
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        service: stub-idp-postgres
+        app.kubernetes.io/name: stub-idp-postgres
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - image: postgres
-        name: stub-idp-postgres
+      - name: postgres
+        image: "postgres:10"
+        env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: password
       restartPolicy: Always
