@@ -1,25 +1,33 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: proxy-node-metadata
+  name: {{ .Release.Name }}-stub-metadata
+  labels:
+    app.kubernetes.io/name: stub-metadata
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
   strategy:
     type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stub-metadata
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        service: proxy-node-metadata
+        app.kubernetes.io/name: stub-metadata
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - args:
+      - name: http
+        args:
         - ruby
         - -run
         - -ehttpd
         - /srv
         - -p80
         image: ruby:2.4.4
-        name: proxy-node-metadata
         ports:
         - containerPort: 80
         volumeMounts:

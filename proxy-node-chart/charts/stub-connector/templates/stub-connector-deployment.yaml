@@ -1,15 +1,23 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: stub-connector
+  name: {{ .Release.Name }}-stub-connector
+  labels:
+    app.kubernetes.io/name: stub-connector
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: 1
   strategy:
     type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stub-connector
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        service: stub-connector
+        app.kubernetes.io/name: stub-connector
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: Always
       containers:
@@ -56,7 +64,7 @@ spec:
               name: stub-connector-pki
               key: PROXY_NODE_ENTITY_ID
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
-          value: http://proxy-node-metadata/metadata_for_connector_node.xml
+          value: http://{{ .Release.Name }}-stub-metadata/metadata_for_connector_node.xml
         - name: PROXY_NODE_METADATA_TRUSTSTORE
           valueFrom:
             configMapKeyRef:
