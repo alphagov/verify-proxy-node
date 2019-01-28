@@ -3,6 +3,7 @@ package uk.gov.ida.notification.saml.deprecate;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import uk.gov.ida.saml.security.AssertionDecrypter;
 import uk.gov.ida.saml.security.SamlAssertionsSignatureValidator;
 import uk.gov.ida.saml.security.validators.ValidatedAssertions;
@@ -47,7 +48,7 @@ public class IdpResponseValidator {
         responseFromIdpValidator.validate(response);
         responseDestinationValidator.validate(response.getDestination());
 
-        validatedResponse = samlResponseSignatureValidator.validate(response, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+        validatedResponse = samlResponseSignatureValidator.validate(response, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
         List<Assertion> decryptedAssertions = assertionDecrypter.decryptAssertions(validatedResponse);
         validatedAssertions = samlAssertionsSignatureValidator.validate(decryptedAssertions, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);

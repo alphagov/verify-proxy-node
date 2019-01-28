@@ -69,7 +69,7 @@ spec:
               name: stub-idp-pki 
               key: METADATA_TRUSTSTORE_PASSWORD
         - name: METADATA_URL
-          value: http://{{ .Release.Name }}-stub-metadata/metadata_for_hub.xml
+          value: http://{{ .Release.Name }}-stub-metadata/hub_metadata_for_idp.xml
         - name: PORT
           value: "80"
         - name: STUB_COUNTRY_SIGNING_CERT
