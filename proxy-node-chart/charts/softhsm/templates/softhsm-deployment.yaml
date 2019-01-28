@@ -68,5 +68,5 @@ spec:
               key: signingKeySOPIN
       volumes:
         - name: proxy-node-pki
-          configMap:
-            name: proxy-node-pki
+          secret:
+            secretName: proxy-node-pki

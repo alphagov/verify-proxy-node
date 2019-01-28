@@ -43,45 +43,45 @@ spec:
         env:
         - name: CONNECTOR_NODE_BASE_URL
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: CONNECTOR_NODE_BASE_URL
         - name: ENCRYPTION_CERT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: ENCRYPTION_CERT
         - name: ENCRYPTION_KEY
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: ENCRYPTION_KEY
         - name: PORT
           value: "80"
         - name: PROXY_NODE_ENTITY_ID
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: PROXY_NODE_ENTITY_ID
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           value: http://{{ .Release.Name }}-stub-metadata/metadata_for_connector_node.xml
         - name: PROXY_NODE_METADATA_TRUSTSTORE
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: PROXY_NODE_METADATA_TRUSTSTORE
         - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
         - name: SIGNING_CERT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: SIGNING_CERT
         - name: SIGNING_KEY
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: stub-connector-pki
               key: SIGNING_KEY
