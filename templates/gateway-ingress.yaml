@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - gateway.{{ .Values.cluster.domain }}
+      - {{ .Release.Name }}-gateway.{{ .Values.cluster.domain }}
       secretName: {{ .Release.Name }}-gateway
   rules:
-    - host: gateway.{{ .Values.cluster.domain }}
+    - host: {{ .Release.Name }}-gateway.{{ .Values.cluster.domain }}
       http:
         paths:
           - path: /

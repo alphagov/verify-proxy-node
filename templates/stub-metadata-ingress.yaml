@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - stub-metadata.{{ .Values.cluster.domain }}
+      - {{ .Release.Name }}-stub-metadata.{{ .Values.cluster.domain }}
       secretName: {{ .Release.Name }}-stub-metadata
   rules:
-    - host: stub-metadata.{{ .Values.cluster.domain }}
+    - host: {{ .Release.Name }}-stub-metadata.{{ .Values.cluster.domain }}
       http:
         paths:
           - path: /

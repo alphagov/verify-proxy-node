@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - country.{{ .Values.cluster.domain }}
+      - {{ .Release.Name }}-country.{{ .Values.cluster.domain }}
       secretName: {{ .Release.Name }}-stub-connector
   rules:
-    - host: country.{{ .Values.cluster.domain }}
+    - host: {{ .Release.Name }}-country.{{ .Values.cluster.domain }}
       http:
         paths:
           - path: /
