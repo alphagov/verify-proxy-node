@@ -12,7 +12,7 @@ Options =
     :connector_url,
     :do_files,
     :do_manifests,
-    :do_configmaps,
+    :do_secrets,
     :do_env,
     :xmlsectool_path,
     :truststore_pass,
@@ -46,7 +46,7 @@ class Parser
       opts.on('--connector-url URL', 'Stub connector base URL') { |s| options.connector_url = s }
       opts.on('--files', 'Set to output keys, certs and truststores') { |_| options.do_files = true }
       opts.on('--manifests', 'Set to output CF manifests with PKI inlined') { |_| options.do_manifests = true }
-      opts.on('--configmaps', 'Set to output Kubernetes ConfigMaps with PKI inlined') { |_| options.do_configmaps = true }
+      opts.on('--secrets', 'Set to output Kubernetes Secrets with PKI inlined') { |_| options.do_secrets = true }
       opts.on('--env', 'Output environment files for Docker Compose') { |_| options.do_env = true }
       opts.on('--xmlsectool PATH', 'Path to xmlsectool (default: xmlsectool)') { |s| options.xmlsectool_path = s }
       opts.on('--truststore-pass PASSWORD', 'Password for generated truststores (default: marshmallow)') { |s| options.truststore_pass = s }
