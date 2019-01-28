@@ -13,5 +13,5 @@ echo ===========================================================
 export STUB_CONNECTOR_URL="http://$(minikube ip):31100/Request"
 
 pushd proxy-node-acceptance-tests > /dev/null
-  $(pwd)/pre-commit.sh
+  $(pwd)/run-tests-with-docker.sh
 popd > /dev/null
