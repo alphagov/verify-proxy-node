@@ -15,7 +15,11 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
-import uk.gov.ida.notification.helpers.*;
+import uk.gov.ida.notification.helpers.BasicCredentialBuilder;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
+import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.helpers.HubAssertionBuilder;
+import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -32,9 +36,18 @@ import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.*;
-import static org.opensaml.saml.saml2.core.StatusCode.*;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.opensaml.saml.saml2.core.StatusCode.AUTHN_FAILED;
+import static org.opensaml.saml.saml2.core.StatusCode.NO_AUTHN_CONTEXT;
+import static org.opensaml.saml.saml2.core.StatusCode.REQUESTER;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_SIGNING_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";

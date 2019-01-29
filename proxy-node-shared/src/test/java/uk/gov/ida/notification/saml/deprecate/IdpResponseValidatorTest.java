@@ -49,5 +49,4 @@ public class IdpResponseValidatorTest {
         responseValidator.validate(response);
         verify(samlResponseSignatureValidator).validate(response, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
     }
-
 }

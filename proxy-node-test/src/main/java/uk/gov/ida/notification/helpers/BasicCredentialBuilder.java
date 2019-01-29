@@ -28,9 +28,7 @@ public class BasicCredentialBuilder {
         return new BasicCredentialBuilder();
     }
 
-    // String publicSigningCert, String privateSigningKey
     public BasicCredentialBuilder withPublicSigningCert(String publicSigningCert) {
-
         this.publicSigningCert = publicSigningCert;
         return this;
     }
@@ -44,10 +42,8 @@ public class BasicCredentialBuilder {
         String publicCert = BEGIN_CERT + publicSigningCert + END_CERT;
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(publicCert.getBytes(StandardCharsets.UTF_8));
         X509Certificate x509certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(byteArrayInputStream);
-
         PublicKey publicKey = x509certificate.getPublicKey();
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(privateSigningKey))));
-
         return new BasicCredential(publicKey, privateKey);
     }
 
