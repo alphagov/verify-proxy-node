@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-hsm
+  labels:
+    app.kubernetes.io/name: hsm
+    helm.sh/chart: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hsm
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hsm
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: softhsm
+        image: {{ include "docker_image" (tuple "softhsm" .) }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: pkcs11
+          containerPort: 5656
+        readinessProbe:
+          tcpSocket:
+            port: pkcs11
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+          - mountPath: /app/keys/
+            name: proxy-node-pki
+            readOnly: true
+        env:
+        - name: SOFT_HSM_SIGNING_KEY_PIN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyPIN
+        - name: SOFT_HSM_SIGNING_KEY_LABEL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyLabel
+        - name: SOFT_HSM_SIGNING_KEY_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyToken
+        - name: SOFT_HSM_SIGNING_KEY_SLOT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeySlot
+        - name: SOFT_HSM_SIGNING_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyID
+        - name: SOFT_HSM_SIGNING_KEY_SO_PIN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeySOPIN
+      volumes:
+        - name: proxy-node-pki
+          configMap:
+            name: proxy-node-pki

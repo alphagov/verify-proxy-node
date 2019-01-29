@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "proxy-node-translator.fullname" . }}
+  name: {{ .Release.Name }}-translator
   labels:
-    app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+    app.kubernetes.io/name: translator
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -11,12 +11,12 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+      app.kubernetes.io/name: translator
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "proxy-node-translator.name" . }}
+        app.kubernetes.io/name: translator
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: Always
@@ -75,7 +75,7 @@ spec:
               name: proxy-node-pki 
               key: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
         - name: CONNECTOR_NODE_METADATA_URL
-          value: http://stub-connector.default.svc.cluster.local/Metadata
+          value: http://{{ .Release.Name }}-stub-connector/Metadata
         - name: CONNECTOR_NODE_URL
           valueFrom:
             configMapKeyRef:
@@ -114,7 +114,7 @@ spec:
               name: proxy-node-pki 
               key: HUB_METADATA_TRUSTSTORE_PASSWORD
         - name: HUB_METADATA_URL
-          value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_hub.xml
+          value: http://{{ .Release.Name }}-stub-metadata/metadata_for_hub.xml
         - name: HUB_URL
           value: http://localhost:6200/stub-idp-demo/SAML2/SSO
         - name: PORT
@@ -122,14 +122,14 @@ spec:
         - name: PROXY_NODE_ENTITY_ID
           value: https://dev-hub.local
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
-          value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_connector_node.xml
+          value: http://{{ .Release.Name }}-stub-metadata/metadata_for_connector_node.xml
         - name: PROXY_NODE_RESPONSE_ENDPOINT
           valueFrom:
             configMapKeyRef:
               name: proxy-node-pki
               key: PROXY_NODE_RESPONSE_ENDPOINT
         - name: REDIS_SERVER_URI
-          value: redis://gateway-redis.default.svc.cluster.local:6379/
+          value: redis://{{ .Release.Name }}-gateway-redis:6379/
         - name: SIGNING_CERT
           valueFrom:
             configMapKeyRef:
@@ -141,23 +141,41 @@ spec:
               name: proxy-node-pki 
               key: SIGNING_KEY
         - name: PKCS11_PROXY_SOCKET
-          value: tcp://localhost:5656
+          value: tcp://{{ .Release.Name }}-hsm:5656
         - name: SOFT_HSM_LIB_PATH
           value: /softhsm/libpkcs11-proxy.so
-        - name: SOFT_HSM_SIGNING_KEY_PIN
-          value: CHANGE-ME-123
-        - name: SOFT_HSM_SIGNING_KEY_LABEL
-          value: vfpn-uk-signing
-        - name: SOFT_HSM_SIGNING_KEY_TOKEN
-          value: vfpn-uk-signing
-        - name: SOFT_HSM_SIGNING_KEY_SLOT
-          value: "0"
-        - name: SOFT_HSM_SIGNING_KEY_ID
-          value: DEF0
-        - name: SOFT_HSM_SIGNING_KEY_SO_PIN
-          value: CHANGE-ME-456
         - name: KEY_RETRIEVER_SERVICE_NAME
           value: softHSM
+        - name: SOFT_HSM_SIGNING_KEY_PIN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyPIN
+        - name: SOFT_HSM_SIGNING_KEY_LABEL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyLabel
+        - name: SOFT_HSM_SIGNING_KEY_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyToken
+        - name: SOFT_HSM_SIGNING_KEY_SLOT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeySlot
+        - name: SOFT_HSM_SIGNING_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeyID
+        - name: SOFT_HSM_SIGNING_KEY_SO_PIN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-hsm
+              key: signingKeySOPIN
       - name: softhsm
         image: {{ include "docker_image" (tuple "softhsm" .) }}
         imagePullPolicy: IfNotPresent
@@ -170,7 +188,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
         volumeMounts:
-          - mountPath: /keys/
+          - mountPath: /app/keys/
             name: proxy-node-pki
             readOnly: true
           - mountPath: /softhsm

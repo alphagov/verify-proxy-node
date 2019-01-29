@@ -5,8 +5,8 @@ set -eu
 soft_hsm_lib="/usr/local/lib/softhsm/libsofthsm2.so"
 p11tool="pkcs11-tool --module $soft_hsm_lib"
 
-base64 -d < /keys/SIGNING_PRIVATE_KEY_SOFTHSM > signing_private_key.p8
-base64 -d < /keys/SIGNING_CERT | openssl x509 -text | tee signing_cert.crt
+base64 -d < /app/keys/SIGNING_PRIVATE_KEY_SOFTHSM > signing_private_key.p8
+base64 -d < /app/keys/SIGNING_CERT | openssl x509 -text | tee signing_cert.crt
 
 openssl x509 -outform DER < signing_cert.crt > signing_cert.der
 

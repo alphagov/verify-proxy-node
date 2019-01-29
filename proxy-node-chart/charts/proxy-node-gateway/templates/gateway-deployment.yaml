@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "proxy-node-gateway.fullname" . }}
+  name: {{ .Release.Name }}-gateway
   labels:
-    app.kubernetes.io/name: {{ include "proxy-node-gateway.name" . }}
+    app.kubernetes.io/name: gateway
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -11,12 +11,12 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "proxy-node-gateway.name" . }}
+      app.kubernetes.io/name: gateway
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "proxy-node-gateway.name" . }}
+        app.kubernetes.io/name: gateway
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: Always
@@ -62,7 +62,7 @@ spec:
               name: proxy-node-pki
               key: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
         - name: CONNECTOR_NODE_METADATA_URL
-          value: http://stub-connector.default.svc.cluster.local/Metadata
+          value: http://{{ .Release.Name }}-stub-connector/Metadata
         - name: CONNECTOR_NODE_URL
           valueFrom:
             configMapKeyRef:
@@ -101,7 +101,7 @@ spec:
               name: proxy-node-pki
               key: HUB_METADATA_TRUSTSTORE_PASSWORD
         - name: HUB_METADATA_URL
-          value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_hub.xml
+          value: http://{{ .Release.Name }}-stub-metadata/metadata_for_hub.xml
         - name: HUB_URL
           valueFrom:
             configMapKeyRef:
@@ -119,14 +119,14 @@ spec:
         - name: PROXY_NODE_ENTITY_ID
           value: https://dev-hub.local
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
-          value: http://proxy-node-metadata.default.svc.cluster.local/metadata_for_connector_node.xml
+          value: http://{{ .Release.Name }}-stub-metadata/metadata_for_connector_node.xml
         - name: PROXY_NODE_RESPONSE_ENDPOINT
           valueFrom:
             configMapKeyRef:
               name: proxy-node-pki
               key: PROXY_NODE_RESPONSE_ENDPOINT
         - name: REDIS_SERVER_URI
-          value: redis://gateway-redis.default.svc.cluster.local:6379/
+          value: redis://{{ .Release.Name }}-gateway-redis:6379/
         - name: SIGNING_CERT
           valueFrom:
             configMapKeyRef:
@@ -138,4 +138,4 @@ spec:
               name: proxy-node-pki
               key: SIGNING_KEY
         - name: TRANSLATOR_URL
-          value: http://proxy-node-translator.default.svc.cluster.local:6300/SAML2/SSO/Response/POST
+          value: http://{{ .Release.Name }}-translator:6300/SAML2/SSO/Response/POST

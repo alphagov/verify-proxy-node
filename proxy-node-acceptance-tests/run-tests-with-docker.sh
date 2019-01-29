@@ -4,10 +4,7 @@ set -u
 echo "Before Docker compose build"
 docker-compose build
 echo "Docker compose build"
-docker-compose run \
-               -e TEST_ENV=${TEST_ENV:-"local"} \
-               acceptance-tests -f pretty -f junit -o testreport/ "$@"
-exit_status=$?
+export PROXY_NODE_URL="http://$(minikube ip)"
+docker-compose up --abort-on-container-exit | grep acceptance-tests_1 --colour=never
 docker cp $(docker ps -a -q -f name="acceptance-tests"):/testreport .
 docker-compose down
-exit $exit_status

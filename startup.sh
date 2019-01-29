@@ -29,7 +29,7 @@ for component in $components; do
 done
 
 echo "building images"
-docker-compose -f $TMP_COMPOSE build
+docker-compose -f $TMP_COMPOSE build --parallel
 
 # Start minikube if not running
 (minikube status | grep -i running) || minikube start --memory 4096 "${MINIKUBE_ARGS:-}"
@@ -49,6 +49,7 @@ yq read --tojson $TMP_COMPOSE services \
 
 echo "generating kubeyaml from chart"
 helm template "proxy-node-chart" \
+  --name "local" \
   --output-dir "${HELM_OUTPUT_DIR}" \
   --values $TMP_HELM
 
