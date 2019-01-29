@@ -100,7 +100,6 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
                     final Environment environment) throws Exception {
 
         proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
-        proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
