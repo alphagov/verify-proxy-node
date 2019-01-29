@@ -221,7 +221,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     private Response extractEidasResponse(Response hubResponse) throws Exception {
         String html = postHubResponseToProxyNode(hubResponse).readEntity(String.class);
-        String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, "saml-form", SamlFormMessageType.SAML_RESPONSE);
+        String decodedEidasResponse = HtmlHelpers.getValueFromForm(html, SamlFormMessageType.SAML_RESPONSE);
         return new SamlParser().parseSamlString(decodedEidasResponse);
     }
 

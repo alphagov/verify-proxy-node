@@ -6,10 +6,7 @@ import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.metadata.resolver.RoleDescriptorResolver;
-import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml.saml2.metadata.SingleSignOnService;
+import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
@@ -33,26 +30,24 @@ public class Metadata {
         criteria.add(new UsageCriterion(usageType));
 
         try {
-            Credential encryptionCredential = metadataCredentialResolver.resolveSingle(criteria);
-            if (encryptionCredential == null) throw new MissingMetadataException(String.format("Missing %s certificate", usageType));
-            return encryptionCredential;
+            Credential credential = metadataCredentialResolver.resolveSingle(criteria);
+            if (credential == null) throw new MissingMetadataException(String.format("Missing %s certificate", usageType));
+            return credential;
         } catch(ResolverException ex) {
             throw new InvalidMetadataException("Unable to resolve metadata credentials", ex);
         }
     }
 
-    public String getSsoUrl(String entityId) throws ResolverException {
+    public Endpoint getEndpoint(String entityId, QName role) throws ResolverException {
         CriteriaSet criteria = new CriteriaSet();
         criteria.add(new EntityIdCriterion(entityId));
-        criteria.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
+        criteria.add(new EntityRoleCriterion(role));
 
         RoleDescriptorResolver roleDescriptorResolver = metadataCredentialResolver.getRoleDescriptorResolver();
-        IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) roleDescriptorResolver.resolveSingle(criteria);
 
-        return idpssoDescriptor.getSingleSignOnServices().stream()
-                .filter(sso -> sso.getBinding().equals(SAMLConstants.SAML2_POST_BINDING_URI))
-                .findFirst()
-                .map(SingleSignOnService::getLocation)
-                .orElse("");
+        return roleDescriptorResolver.resolveSingle(criteria).getEndpoints().stream()
+            .filter(sso -> sso.getBinding().equals(SAMLConstants.SAML2_POST_BINDING_URI))
+            .findFirst()
+            .orElseThrow();
     }
 }

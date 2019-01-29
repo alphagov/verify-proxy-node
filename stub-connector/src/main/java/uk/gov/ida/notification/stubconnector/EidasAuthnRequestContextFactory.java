@@ -1,7 +1,16 @@
 package uk.gov.ida.notification.stubconnector;
 
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.Namespace;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.handler.MessageHandlerException;
+import org.opensaml.saml.common.binding.impl.SAMLOutboundDestinationHandler;
+import org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler;
+import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
+import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
+import org.opensaml.saml.common.messaging.context.SAMLSelfEntityContext;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
@@ -12,6 +21,11 @@ import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.SignatureSigningParameters;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.eidas.opensaml.ext.RequestedAttribute;
@@ -19,24 +33,20 @@ import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 
 import java.util.List;
 
-public class EidasAuthnRequestGenerator {
-    private final SamlObjectSigner signer;
+public class EidasAuthnRequestContextFactory {
+    private final
+    SecureRandomIdentifierGenerationStrategy identifierGenerationStrategy = new SecureRandomIdentifierGenerationStrategy();
 
-    public EidasAuthnRequestGenerator(SamlObjectSigner signer) {
-        this.signer = signer;
-    }
-
-    public AuthnRequest generate(
-            String requestID,
-            String destination,
-            String spEntityID,
-            SPTypeEnumeration spType,
-            List<String> requestedAttributes,
-            EidasLoaEnum loa) {
+    public MessageContext generate(
+        Endpoint destinationEndpoint,
+        String connectorEntityId,
+        SPTypeEnumeration spType,
+        List<String> requestedAttributes,
+        EidasLoaEnum loa,
+        Credential signingCredential) throws ComponentInitializationException, MessageHandlerException {
 
         AuthnRequest request = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         request.getNamespaceManager().registerNamespaceDeclaration(new Namespace(EidasConstants.EIDAS_NS, EidasConstants.EIDAS_PREFIX));
@@ -44,15 +54,14 @@ public class EidasAuthnRequestGenerator {
         // Add the request attributes.
         //
         request.setForceAuthn(true);
-        request.setID(requestID);
-        request.setDestination(destination);
+        request.setID(identifierGenerationStrategy.generateIdentifier(true));
         request.setIssueInstant(new DateTime());
 
         // Add the issuer element (the entity that issues this request).
         //
         Issuer issuer = SamlBuilder.build(Issuer.DEFAULT_ELEMENT_NAME);
         issuer.setFormat(NameIDType.ENTITY);
-        issuer.setValue(spEntityID);
+        issuer.setValue(connectorEntityId);
         request.setIssuer(issuer);
 
         Extensions extensions = SamlBuilder.build(Extensions.DEFAULT_ELEMENT_NAME);
@@ -98,8 +107,33 @@ public class EidasAuthnRequestGenerator {
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);
         request.setRequestedAuthnContext(requestedAuthnContext);
 
-        signer.sign(request);
+        SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
+        signatureSigningParameters.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
+        signatureSigningParameters.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+        signatureSigningParameters.setSigningCredential(signingCredential);
 
-        return request;
+        MessageContext context = new MessageContext() {{
+            setMessage(request);
+
+            getSubcontext(SAMLPeerEntityContext.class, true)
+                .getSubcontext(SAMLEndpointContext.class, true)
+                .setEndpoint(destinationEndpoint);
+
+            getSubcontext(SAMLSelfEntityContext.class, true)
+                .setEntityId(connectorEntityId);
+
+            getSubcontext(SecurityParametersContext.class, true)
+                .setSignatureSigningParameters(signatureSigningParameters);
+        }};
+
+        SAMLOutboundProtocolMessageSigningHandler signingHandler = new SAMLOutboundProtocolMessageSigningHandler();
+        signingHandler.initialize();
+        signingHandler.invoke(context);
+
+        SAMLOutboundDestinationHandler destinationHandler = new SAMLOutboundDestinationHandler();
+        destinationHandler.initialize();
+        signingHandler.invoke(context);
+
+        return context;
     }
 }

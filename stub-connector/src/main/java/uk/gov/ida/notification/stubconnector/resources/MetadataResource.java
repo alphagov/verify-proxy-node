@@ -11,16 +11,18 @@ import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Credential;
 import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.opensaml.xmlsec.signature.KeyInfo;
 import org.opensaml.xmlsec.signature.KeyValue;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Document;
+import se.litsec.opensaml.utils.SignatureUtils;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 
 import javax.ws.rs.GET;
@@ -34,10 +36,10 @@ import java.security.interfaces.RSAPublicKey;
 public class MetadataResource {
     private final Document metadata;
     private final X509CertificateFactory x509CertificateFactory;
-    private final SamlObjectSigner signer;
+    private final X509Credential signingCredential;
 
-    public MetadataResource(StubConnectorConfiguration connectorConfiguration, SamlObjectSigner signer) throws MarshallingException, SecurityException {
-        this.signer = signer;
+    public MetadataResource(StubConnectorConfiguration connectorConfiguration, X509Credential signingCredential) throws MarshallingException, SecurityException, SignatureException {
+        this.signingCredential = signingCredential;
         this.x509CertificateFactory = new X509CertificateFactory();
         this.metadata = new SamlObjectMarshaller().marshallToElement(buildEntityDescriptor(connectorConfiguration)).getOwnerDocument();
     }
@@ -47,7 +49,7 @@ public class MetadataResource {
         return metadata;
     }
 
-    private EntityDescriptor buildEntityDescriptor(StubConnectorConfiguration connectorConfiguration) throws SecurityException {
+    private EntityDescriptor buildEntityDescriptor(StubConnectorConfiguration connectorConfiguration) throws SecurityException, SignatureException {
         AssertionConsumerService assertionConsumerService = SamlBuilder.build(AssertionConsumerService.DEFAULT_ELEMENT_NAME);
         assertionConsumerService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
         assertionConsumerService.setLocation(connectorConfiguration.getConnectorNodeBaseUrl() + "/SAML2/Response/POST");
@@ -65,7 +67,7 @@ public class MetadataResource {
         entityDescriptor.setValidUntil(DateTime.now().plusDays(1));
         entityDescriptor.getRoleDescriptors().add(spSsoDescriptor);
 
-        signer.sign(entityDescriptor);
+        SignatureUtils.sign(entityDescriptor, signingCredential);
 
         return entityDescriptor;
     }

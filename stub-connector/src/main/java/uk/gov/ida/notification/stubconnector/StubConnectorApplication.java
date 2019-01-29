@@ -6,7 +6,6 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -14,14 +13,16 @@ import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.SecurityException;
 import org.opensaml.security.credential.BasicCredential;
-import uk.gov.ida.notification.SamlFormViewBuilder;
+import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Credential;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import se.litsec.opensaml.utils.X509CertificateUtils;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
@@ -31,6 +32,12 @@ import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
@@ -90,8 +97,7 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
 
     @Override
     public void run(final StubConnectorConfiguration configuration,
-                    final Environment environment) throws
-            ComponentInitializationException {
+                    final Environment environment) throws Exception {
 
         proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
 
@@ -123,28 +129,18 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         environment.jersey().register(new AuthnRequestExceptionMapper());
     }
 
-    private void registerResources(StubConnectorConfiguration configuration, Environment environment) {
-        SamlObjectSigner signer = new SamlObjectSigner(
-                configuration.getSigningKeyPair().getPublicKey().getPublicKey(),
-                configuration.getSigningKeyPair().getPrivateKey().getPrivateKey(),
-                configuration.getSigningKeyPair().getPublicKey().getCert()
-        );
-        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
-        EidasAuthnRequestGenerator authnRequestGenerator = createEidasAuthnRequestGenerator(signer);
+    private void registerResources(StubConnectorConfiguration configuration, Environment environment) throws CertificateException, MarshallingException, SecurityException, SignatureException {
+        PrivateKey signingKey = configuration.getSigningKeyPair().getPrivateKey().getPrivateKey();
+        String signingCertString = configuration.getSigningKeyPair().getPublicKey().getCert();
+        X509Certificate signingCert = X509CertificateUtils.decodeCertificate(new ByteArrayInputStream(signingCertString.getBytes(StandardCharsets.UTF_8)));
+        X509Credential signingCredential = new BasicX509Credential(signingCert, signingKey);
 
         environment.jersey().register(new SendAuthnRequestResource(
-                configuration,
-                proxyNodeMetadata,
-                authnRequestGenerator,
-                samlFormViewBuilder));
+            configuration,
+            proxyNodeMetadata,
+            signingCredential));
 
-        try {
-            environment.jersey().register(new MetadataResource(
-                    configuration,
-                    signer));
-        } catch (MarshallingException | SecurityException e) {
-            e.printStackTrace();
-        }
+        environment.jersey().register(new MetadataResource(configuration, signingCredential));
 
         environment.jersey().register(
                 new ReceiveResponseResource(
@@ -171,9 +167,5 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
             configuration.getPrivateKey().getPrivateKey()
         );
         return new ResponseAssertionDecrypter(decryptionCredential);
-    }
-
-    private EidasAuthnRequestGenerator createEidasAuthnRequestGenerator(SamlObjectSigner signer) {
-        return new EidasAuthnRequestGenerator(signer);
     }
 }
