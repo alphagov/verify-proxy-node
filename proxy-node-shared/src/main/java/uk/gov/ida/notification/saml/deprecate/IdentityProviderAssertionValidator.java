@@ -70,17 +70,16 @@ public class IdentityProviderAssertionValidator extends AssertionValidator {
 
         ensurePresenceOfBearerSubjectConfirmation(assertion);
 
-        validateAllBearerSubjectConfirmations(assertion, requestId, expectedRecipientId);
+        validateAllBearerSubjectConfirmations(assertion, requestId);
     }
 
     private void validateAllBearerSubjectConfirmations(
             Assertion assertion,
-            String requestId,
-            String expectedRecipientId) {
+            String requestId) {
 
         for (SubjectConfirmation subjectConfirmation : assertion.getSubject().getSubjectConfirmations()) {
             if (SubjectConfirmation.METHOD_BEARER.equals(subjectConfirmation.getMethod())) {
-                subjectConfirmationValidator.validate(subjectConfirmation, requestId, expectedRecipientId);
+                subjectConfirmationValidator.validate(subjectConfirmation, requestId);
             }
         }
     }

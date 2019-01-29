@@ -5,6 +5,7 @@ import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 import uk.gov.ida.saml.core.validation.SamlValidationSpecificationFailure;
+
 public class BasicAssertionSubjectConfirmationValidator {
 
     public void validate(SubjectConfirmation subjectConfirmation) {
