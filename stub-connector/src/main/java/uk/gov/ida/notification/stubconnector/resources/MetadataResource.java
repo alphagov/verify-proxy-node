@@ -64,7 +64,7 @@ public class MetadataResource {
 
         EntityDescriptor entityDescriptor = SamlBuilder.build(EntityDescriptor.DEFAULT_ELEMENT_NAME);
         entityDescriptor.setEntityID(connectorConfiguration.getConnectorNodeBaseUrl() + "/Metadata");
-        entityDescriptor.setValidUntil(DateTime.now().plusDays(1));
+        entityDescriptor.setValidUntil(DateTime.now().plusDays(365));
         entityDescriptor.getRoleDescriptors().add(spSsoDescriptor);
 
         SignatureUtils.sign(entityDescriptor, signingCredential);
