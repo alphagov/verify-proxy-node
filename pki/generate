@@ -99,18 +99,18 @@ stub_connector_signing_keypair = sub_keypair(root_keypair, 'Stub Connector Signi
 # Stub Connector Encryption
 stub_connector_encryption_keypair = sub_keypair(root_keypair, 'Stub Connector Encryption', USAGE_ENCRYPTION)
 
-# Generate Hub Metadata
-hub_config = {
+# Generate Hub Metadata for Proxy Node
+hub_config_for_proxy_node = {
   'id' => 'VERIFY-HUB',
-  'entity_id' => options.hub_entity_id,
+  'entity_id' => options.idp_entity_id,
   'assertion_consumer_service_uri' => "#{options.proxy_url}/SAML2/SSO/Response/POST",
   'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://dev-hub.local' },
   'signing_certificates' => [
-    { 'name' => 'hub_signing', 'x509' => strip_pem(hub_signing_keypair.cert.to_pem) }
+    { 'name' => 'hub_signing', 'x509' => strip_pem(idp_signing_keypair.cert.to_pem) }
   ],
   'encryption_certificate' => { 'name' => 'hub_encryption', 'x509' => strip_pem(hub_encryption_keypair.cert.to_pem) }
 }
-stub_idp_config = {
+stub_idp_config_for_proxy_node = {
   'id' => 'stub-idp-demo',
   'entity_id' => options.idp_entity_id,
   'sso_uri' => "#{options.idp_url}/SAML2/SSO",
@@ -120,8 +120,33 @@ stub_idp_config = {
   ],
   'enabled' => true
 }
-hub_metadata_xml = generate_hub_metadata(hub_config, [stub_idp_config], root_keypair.cert)
-hub_metadata_xml_signed = sign_metadata(hub_metadata_xml, hub_meta_keypair, options.xmlsectool_path)
+hub_metadata_for_proxy_node_xml = generate_hub_metadata(hub_config_for_proxy_node, [stub_idp_config_for_proxy_node], root_keypair.cert)
+hub_metadata_for_proxy_node_xml_signed = sign_metadata(hub_metadata_for_proxy_node_xml, hub_meta_keypair, options.xmlsectool_path)
+
+# Generate Hub Metadata for Stub IDP
+hub_config_for_idp = {
+    'id' => 'VERIFY-HUB',
+    'entity_id' => options.hub_entity_id,
+    'assertion_consumer_service_uri' => "#{options.proxy_url}/SAML2/SSO/Response/POST",
+    'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://dev-hub.local' },
+    'signing_certificates' => [
+        { 'name' => 'hub_signing', 'x509' => strip_pem(hub_signing_keypair.cert.to_pem) }
+    ],
+    'encryption_certificate' => { 'name' => 'hub_encryption', 'x509' => strip_pem(hub_encryption_keypair.cert.to_pem) }
+}
+
+stub_idp_config = {
+    'id' => 'stub-idp-demo',
+    'entity_id' => options.hub_entity_id,
+    'sso_uri' => "#{options.idp_url}/SAML2/SSO",
+    'organization' => { 'name' => 'stub-idp-demo', 'display_name' => 'Stub IDP', 'url' => options.idp_url },
+    'signing_certificates' => [
+        { 'x509' => strip_pem(hub_signing_keypair.cert.to_pem) }
+    ],
+    'enabled' => true
+}
+hub_metadata_for_stub_idp_xml = generate_hub_metadata(hub_config_for_idp, [stub_idp_config], root_keypair.cert)
+hub_metadata_for_stub_idp_xml_signed = sign_metadata(hub_metadata_for_stub_idp_xml, hub_meta_keypair, options.xmlsectool_path)
 
 # Generate Proxy Node Metadata
 proxy_node_config = {
@@ -142,7 +167,8 @@ Dir.mkdir(output_dir) unless Dir.exist?(output_dir)
 Dir.chdir(output_dir) do
   create_truststore('ida_metadata_truststore.ts', options.truststore_pass, {'root_ca' => root_keypair.cert})
 
-  create_file('metadata_for_hub.xml', hub_metadata_xml_signed)
+  create_file('hub_metadata_for_proxy_node.xml', hub_metadata_for_proxy_node_xml_signed)
+  create_file('hub_metadata_for_idp.xml', hub_metadata_for_stub_idp_xml_signed)
   create_file('metadata_for_connector_node.xml', proxy_node_metadata_xml_signed)
 
   metadata_truststore = File.open('ida_metadata_truststore.ts', 'rb').read
@@ -258,7 +284,8 @@ Dir.chdir(output_dir) do
     configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
       cfg['metadata']['name'] = 'saml-metadata'
       cfg['data'] = {}
-      cfg['data']['metadata_for_hub.xml'] = hub_metadata_xml_signed
+      cfg['data']['hub_metadata_for_proxy_node.xml'] = hub_metadata_for_proxy_node_xml_signed
+      cfg['data']['hub_metadata_for_idp.xml'] = hub_metadata_for_stub_idp_xml_signed
       cfg['data']['metadata_for_connector_node.xml'] = proxy_node_metadata_xml_signed
     end
     create_file('metadata-configmap.yaml', YAML.dump(configmap))
