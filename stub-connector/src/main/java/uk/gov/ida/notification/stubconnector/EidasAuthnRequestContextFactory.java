@@ -63,6 +63,7 @@ public class EidasAuthnRequestContextFactory {
         issuer.setFormat(NameIDType.ENTITY);
         issuer.setValue(connectorEntityId);
         request.setIssuer(issuer);
+        request.setDestination(destinationEndpoint.getLocation());
 
         Extensions extensions = SamlBuilder.build(Extensions.DEFAULT_ELEMENT_NAME);
 
