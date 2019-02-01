@@ -11,8 +11,7 @@ services:
     image: govukverify/proxy-node-translator:latest
     build:
       context: .
-      args:
-        component: proxy-node-translator
+      dockerfile: proxy-node-translator/Dockerfile
   stub-connector:
     image: govukverify/stub-connector:latest
     build:
