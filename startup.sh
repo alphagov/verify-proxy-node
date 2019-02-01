@@ -67,7 +67,7 @@ function generate_pki {
       --proxy-url "http://$(minikube ip):31200" \
       --idp-url "http://$(minikube ip):31300" \
       --softhsm \
-      --configmaps \
+      --secrets \
       "${PKI_OUTPUT_DIR}"
 
     minikube ip > "$MINIKUBE_IP"
