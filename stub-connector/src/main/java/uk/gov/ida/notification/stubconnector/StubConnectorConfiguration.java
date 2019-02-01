@@ -2,6 +2,7 @@ package uk.gov.ida.notification.stubconnector;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import uk.gov.ida.configuration.ServiceNameConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
@@ -9,7 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class StubConnectorConfiguration extends Configuration {
+public class StubConnectorConfiguration extends Configuration implements ServiceNameConfiguration {
     @JsonProperty
     @Valid
     @NotNull
@@ -53,5 +54,10 @@ public class StubConnectorConfiguration extends Configuration {
 
     public KeyPairConfiguration getSigningKeyPair() {
         return signingKeyPair;
+    }
+
+    @Override
+    public String getServiceName() {
+        return "stub-connector";
     }
 }

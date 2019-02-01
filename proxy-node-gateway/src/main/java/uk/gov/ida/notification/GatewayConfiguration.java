@@ -2,6 +2,7 @@ package uk.gov.ida.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import uk.gov.ida.configuration.ServiceNameConfiguration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
@@ -10,7 +11,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class GatewayConfiguration extends Configuration {
+public class GatewayConfiguration extends Configuration implements ServiceNameConfiguration {
 
     @JsonProperty
     @Valid
@@ -133,5 +134,10 @@ public class GatewayConfiguration extends Configuration {
 
     public ReplayCheckerConfiguration getReplayChecker() {
         return replayChecker;
+    }
+
+    @Override
+    public String getServiceName() {
+        return "gateway";
     }
 }

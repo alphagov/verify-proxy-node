@@ -17,6 +17,7 @@ import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import se.litsec.opensaml.utils.X509CertificateUtils;
+import uk.gov.ida.bundles.LoggingBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
@@ -84,11 +85,11 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
             throw new RuntimeException(e);
         }
 
-        // Verify SAML
         VerifySamlInitializer.init();
 
-        // Views
         bootstrap.addBundle(new ViewBundle<>());
+        bootstrap.addBundle(new LoggingBundle());
+
 
         // Metadata
         proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(StubConnectorConfiguration::getProxyNodeMetadataConfiguration);

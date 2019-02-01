@@ -2,6 +2,7 @@ package uk.gov.ida.notification;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.ida.configuration.ServiceNameConfiguration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
@@ -10,7 +11,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.net.URI;
 
-public class TranslatorConfiguration extends Configuration {
+public class TranslatorConfiguration extends Configuration implements ServiceNameConfiguration {
 
     @JsonProperty
     @Valid
@@ -138,4 +139,9 @@ public class TranslatorConfiguration extends Configuration {
     public String getSoftHSMSigningKeyPin() { return softHSMSigningKeyPin; }
 
     public String getSoftHSMSigningKeyLabel() { return softHSMSigningKeyLabel; }
+
+    @Override
+    public String getServiceName() {
+        return "translator";
+    }
 }

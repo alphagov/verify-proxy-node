@@ -8,13 +8,19 @@ server:
 
 logging:
   level: INFO
-  loggers:
-    uk.gov.ida: DEBUG
   appenders:
     - type: console
+      layout:
+        type: json
     - type: file
-      currentLogFilename: logs/proxy-node.log
+      currentLogFilename: logs/debug/gateway.log
       archive: false
+    - type: logstash-file
+      currentLogFilename: logs/gateway.log
+      archive: false
+    - type: logstash-syslog
+      facility: local2
+      tag: gateway
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 proxyNodeAuthnRequestUrl: ${PROXY_NODE_AUTHN_REQUEST_ENDPOINT}

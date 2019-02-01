@@ -8,13 +8,19 @@ server:
 
 logging:
   level: INFO
-  loggers:
-    uk.gov.ida: DEBUG
   appenders:
     - type: console
+      layout:
+        type: json
     - type: file
+      currentLogFilename: logs/debug/translator.log
+      archive: false
+    - type: logstash-file
       currentLogFilename: logs/translator.log
       archive: false
+    - type: logstash-syslog
+      facility: local2
+      tag: translator
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 proxyNodeResponseUrl: ${PROXY_NODE_RESPONSE_ENDPOINT}

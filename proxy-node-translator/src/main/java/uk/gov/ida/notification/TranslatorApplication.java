@@ -9,24 +9,21 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
-import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
+import uk.gov.ida.bundles.LoggingBundle;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.resources.HubResponseFromGatewayResource;
 import uk.gov.ida.notification.saml.HubResponseTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionFactory;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.deprecate.EncryptedResponseFromIdpValidator;
-import uk.gov.ida.notification.saml.deprecate.IdpIdaStatus;
 import uk.gov.ida.notification.saml.deprecate.IdpResponseValidator;
-import uk.gov.ida.notification.saml.deprecate.SamlStatusToAuthenticationStatusCodeMapper;
 import uk.gov.ida.notification.saml.deprecate.SamlStatusToIdaStatusCodeMapper;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
@@ -44,7 +41,6 @@ import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValida
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
 
@@ -93,11 +89,11 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
             throw new RuntimeException(e);
         }
 
-        // Verify SAML
         VerifySamlInitializer.init();
 
-        // Views
         bootstrap.addBundle(new ViewBundle<>());
+        bootstrap.addBundle(new LoggingBundle());
+
 
         // Metadata
         hubMetadataResolverBundle = new MetadataResolverBundle<>(TranslatorConfiguration::getHubMetadataConfiguration);

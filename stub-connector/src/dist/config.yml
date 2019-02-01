@@ -8,13 +8,19 @@ server:
 
 logging:
   level: INFO
-  loggers:
-    uk.gov.ida: DEBUG
   appenders:
     - type: console
+      layout:
+        type: json
     - type: file
+      currentLogFilename: logs/debug/stub-connector.log
+      archive: false
+    - type: logstash-file
       currentLogFilename: logs/stub-connector.log
       archive: false
+    - type: logstash-syslog
+      facility: local2
+      tag: stub-connector
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
