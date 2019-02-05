@@ -1,7 +1,9 @@
 dependencies {
-    compile configurations.saml,
-            configurations.saml_test,
+    compile configurations.opensaml,
+            configurations.verify_saml,
+            configurations.verify_saml_test,
             configurations.common,
+            configurations.proxy_node_test,
             project(':proxy-node-shared')
 }
 
