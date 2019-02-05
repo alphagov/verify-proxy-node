@@ -1,0 +1,17 @@
+dependencies {
+    compile configurations.dropwizard,
+            configurations.opensaml,
+            configurations.common,
+            configurations.eidas_saml,
+            project(':proxy-node-shared')
+}
+
+group = 'uk.gov.ida.notification.gateway'
+version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
+
+apply plugin: 'application'
+mainClassName = 'uk.gov.ida.notification.GatewayApplication'
+
+run {
+    args 'server', './src/dist/config.yml'
+}
