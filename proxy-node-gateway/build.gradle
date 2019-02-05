@@ -1,6 +1,6 @@
 dependencies {
     compile configurations.dropwizard,
-            configurations.saml,
+            configurations.opensaml,
             configurations.common,
             project(':proxy-node-shared')
 }

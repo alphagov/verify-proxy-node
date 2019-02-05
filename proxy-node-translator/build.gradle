@@ -1,9 +1,12 @@
 dependencies {
     compile configurations.dropwizard,
-            configurations.saml,
+            configurations.opensaml,
+            configurations.verify_saml,
             configurations.common,
             configurations.soft_hsm,
             project(':proxy-node-shared')
+
+    testCompile configurations.verify_saml_test
 }
 
 sourceSets {
