@@ -9,18 +9,7 @@ server:
 logging:
   level: INFO
   appenders:
-    - type: console
-      layout:
-        type: json
-    - type: file
-      currentLogFilename: logs/debug/gateway.log
-      archive: false
-    - type: logstash-file
-      currentLogFilename: logs/gateway.log
-      archive: false
-    - type: logstash-syslog
-      facility: local2
-      tag: gateway
+    - type: logstash-console
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 proxyNodeAuthnRequestUrl: ${PROXY_NODE_AUTHN_REQUEST_ENDPOINT}

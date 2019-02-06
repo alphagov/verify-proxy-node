@@ -54,5 +54,4 @@ public class StubConnectorConfiguration extends Configuration {
     public KeyPairConfiguration getSigningKeyPair() {
         return signingKeyPair;
     }
-
 }

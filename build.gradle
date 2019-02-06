@@ -17,8 +17,7 @@ apply plugin: 'com.github.ben-manes.versions'
 ext {
     opensaml_version = '3.4.0'
     dropwizard_version = '1.2.0'
-    test_utils_version = '2.0.0-346'
-    utils_version = '2.0.0-336'
+    utils_version = '2.0.0-346'
     saml_libs_version = "${opensaml_version}-163"
     soft_hsm_version = '1.1.1'
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
@@ -74,7 +73,6 @@ subprojects {
                 "io.dropwizard:dropwizard-core:${dropwizard_version}",
                 "io.dropwizard:dropwizard-client:${dropwizard_version}",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
-                "io.dropwizard:dropwizard-json-logging:1.3.8",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
                 "uk.gov.ida:dropwizard-logstash:1.3.5-68"
         )
@@ -100,8 +98,6 @@ subprojects {
 
         verify_saml_test (
                 "uk.gov.ida:common-test-utils:${utils_version}",
-                "net.sourceforge.htmlunit:htmlunit:2.28",
-                "uk.gov.ida:common-test-utils:${test_utils_version}",
                 "uk.gov.ida:saml-metadata-bindings-test:${saml_libs_version}",
         )
 

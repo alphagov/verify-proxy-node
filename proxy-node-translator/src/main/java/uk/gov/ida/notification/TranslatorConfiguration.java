@@ -138,5 +138,4 @@ public class TranslatorConfiguration extends Configuration {
     public String getSoftHSMSigningKeyPin() { return softHSMSigningKeyPin; }
 
     public String getSoftHSMSigningKeyLabel() { return softHSMSigningKeyLabel; }
-
 }

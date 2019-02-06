@@ -134,5 +134,4 @@ public class GatewayConfiguration extends Configuration {
     public ReplayCheckerConfiguration getReplayChecker() {
         return replayChecker;
     }
-
 }

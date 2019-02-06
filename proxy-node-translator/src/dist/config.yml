@@ -9,18 +9,7 @@ server:
 logging:
   level: INFO
   appenders:
-    - type: console
-      layout:
-        type: json
-    - type: file
-      currentLogFilename: logs/debug/translator.log
-      archive: false
-    - type: logstash-file
-      currentLogFilename: logs/translator.log
-      archive: false
-    - type: logstash-syslog
-      facility: local2
-      tag: translator
+    - type: logstash-console
 
 proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 proxyNodeResponseUrl: ${PROXY_NODE_RESPONSE_ENDPOINT}
