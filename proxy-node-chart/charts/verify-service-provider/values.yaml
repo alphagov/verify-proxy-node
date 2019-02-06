@@ -1,0 +1,75 @@
+# Default values for verify-service-provider.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: govukverify/verify-service-provider
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+keySecretName: verify-service-provider
+
+configFile:
+  server:
+    type: simple
+    applicationContextPath: /
+    adminContextPath: /admin
+    connector:
+      type: http
+      port: ${PORT:-50400}
+  logging:
+    level: ${LOG_LEVEL:-INFO}
+    appenders:
+      - type: console
+  clockSkew: ${CLOCK_SKEW:-PT30s}
+  serviceEntityIds: ${SERVICE_ENTITY_IDS:-[]}
+  verifyHubConfiguration:
+    environment: ${VERIFY_ENVIRONMENT:-}
+    ssoLocation: ${SSO_LOCATION:-}
+    metadata:
+      uri: ${HUB_METADATA_URI:-}
+      expectedEntityId: ${HUB_METADATA_ENTITY_ID:-}
+      hubFederationId: VERIFY-FEDERATION
+      trustStore:
+        type: encoded
+        store: ${TRUST_STORE:-}
+        password: ${TRUST_STORE_PASSWORD:-marshmallow}
+      hubTrustStore:
+        type: encoded
+        store: ${HUB_TRUST_STORE:-}
+        password: ${HUB_TRUST_STORE_PASSWORD:-marshmallow}
+      idpTrustStore:
+        type: encoded
+        store: ${IDP_TRUST_STORE:-}
+        password: ${IDP_TRUST_STORE_PASSWORD:-marshmallow}
+  samlSigningKey: ${SAML_SIGNING_KEY:-}
+  samlPrimaryEncryptionKey: ${SAML_PRIMARY_ENCRYPTION_KEY:-}
+  samlSecondaryEncryptionKey: ${SAML_SECONDARY_ENCRYPTION_KEY:-}
+
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

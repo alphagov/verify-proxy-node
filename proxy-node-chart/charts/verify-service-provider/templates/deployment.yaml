@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "verify-service-provider.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "verify-service-provider.name" . }}
+    helm.sh/chart: {{ include "verify-service-provider.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "verify-service-provider.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "verify-service-provider.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - bin/verify-service-provider
+          args:
+            - server
+            - /etc/vsp/verify-service-provider.yaml
+          env:
+            - name: LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: LOG_LEVEL
+            - name: CLOCK_SKEW
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: CLOCK_SKEW
+            - name: SERVICE_ENTITY_IDS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: SERVICE_ENTITY_IDS
+            - name: VERIFY_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: VERIFY_ENVIRONMENT
+            - name: SSO_LOCATION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: SSO_LOCATION
+            - name: HUB_METADATA_URI
+              value: http://{{ .Release.Name }}-stub-metadata/hub_metadata_for_proxy_node.xml
+            - name: HUB_METADATA_ENTITY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: HUB_METADATA_ENTITY_ID
+            - name: TRUST_STORE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: TRUST_STORE
+            - name: TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: TRUST_STORE_PASSWORD
+            - name: HUB_TRUST_STORE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: HUB_TRUST_STORE
+            - name: HUB_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: HUB_TRUST_STORE_PASSWORD
+            - name: IDP_TRUST_STORE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: IDP_TRUST_STORE
+            - name: IDP_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: IDP_TRUST_STORE_PASSWORD
+            - name: SAML_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: SAML_SIGNING_KEY
+            - name: SAML_PRIMARY_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: SAML_PRIMARY_ENCRYPTION_KEY
+            - name: SAML_SECONDARY_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keySecretName }}
+                  key: SAML_SECONDARY_ENCRYPTION_KEY
+          ports:
+            - name: http
+              containerPort: 50400
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /admin/healthcheck
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /admin/healthcheck
+              port: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/vsp/verify-service-provider.yaml
+              subPath: verify-service-provider.yaml
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "verify-service-provider.fullname" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
