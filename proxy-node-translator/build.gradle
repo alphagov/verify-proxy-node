@@ -4,7 +4,6 @@ dependencies {
             configurations.verify_saml,
             configurations.common,
             configurations.soft_hsm,
-            configurations.ida_utils,
             project(':proxy-node-shared')
 
     testCompile configurations.verify_saml_test

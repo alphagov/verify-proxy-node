@@ -3,7 +3,6 @@ dependencies {
             configurations.opensaml,
             configurations.eidas_saml,
             configurations.common,
-            configurations.ida_utils,
             project(':proxy-node-shared')
 }
 

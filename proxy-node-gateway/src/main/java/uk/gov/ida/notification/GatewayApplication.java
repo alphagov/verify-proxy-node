@@ -12,7 +12,7 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.credential.BasicCredential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
-import uk.gov.ida.bundles.LoggingBundle;
+import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
@@ -102,7 +102,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         VerifySamlInitializer.init();
 
         bootstrap.addBundle(new ViewBundle<>());
-        bootstrap.addBundle(new LoggingBundle());
+        bootstrap.addBundle(new LogstashBundle());
 
         // Metadata
         hubMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getHubMetadataConfiguration);

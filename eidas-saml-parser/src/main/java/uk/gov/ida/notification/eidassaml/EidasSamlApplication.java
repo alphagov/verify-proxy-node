@@ -3,6 +3,7 @@ package uk.gov.ida.notification.eidassaml;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import org.opensaml.core.config.InitializationService;
+import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 
 public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
     @Override

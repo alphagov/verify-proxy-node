@@ -17,7 +17,7 @@ import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import se.litsec.opensaml.utils.X509CertificateUtils;
-import uk.gov.ida.bundles.LoggingBundle;
+import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
@@ -40,7 +40,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-public class StubConnectorApplication extends Application<uk.gov.ida.notification.stubconnector.StubConnectorConfiguration> {
+public class StubConnectorApplication extends Application<StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
     private MetadataResolverBundle<StubConnectorConfiguration> proxyNodeMetadataResolverBundle;
 
@@ -88,7 +88,7 @@ public class StubConnectorApplication extends Application<uk.gov.ida.notificatio
         VerifySamlInitializer.init();
 
         bootstrap.addBundle(new ViewBundle<>());
-        bootstrap.addBundle(new LoggingBundle());
+        bootstrap.addBundle(new LogstashBundle());
 
 
         // Metadata
