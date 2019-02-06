@@ -101,7 +101,7 @@ hub_config_for_proxy_node = {
   'id' => 'VERIFY-HUB',
   'entity_id' => options.idp_entity_id,
   'assertion_consumer_service_uri' => "#{options.proxy_url}/SAML2/SSO/Response/POST",
-  'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://dev-hub.local' },
+  'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'https://dev-hub.local' },
   'signing_certificates' => [
     { 'name' => 'hub_signing', 'x509' => strip_pem(idp_signing_keypair.cert.to_pem) }
   ],
@@ -125,7 +125,7 @@ hub_config_for_idp = {
     'id' => 'VERIFY-HUB',
     'entity_id' => options.hub_entity_id,
     'assertion_consumer_service_uri' => "#{options.proxy_url}/SAML2/SSO/Response/POST",
-    'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'http://dev-hub.local' },
+    'organization' => { 'name' => 'Hub', 'display_name' => 'Hub', 'url' => 'https://dev-hub.local' },
     'signing_certificates' => [
         { 'name' => 'hub_signing', 'x509' => strip_pem(hub_signing_keypair.cert.to_pem) }
     ],
@@ -172,7 +172,7 @@ Dir.chdir(output_dir) do
 
   proxy_node_vars = {
     'HUB_ENTITY_ID' => options.hub_entity_id,
-    'HUB_URL' => "#{options.idp_url}/stub-idp-demo/SAML2/SSO",
+    'HUB_URL' => "#{options.idp_url}/SAML2/SSO",
     'SIGNING_CERT' => b64(proxy_signing_keypair.cert.to_pem),
     'SIGNING_KEY' => b64(der2pk8(proxy_signing_keypair.key.to_der)),
     'SIGNING_PRIVATE_KEY_SOFTHSM' => b64(der2p8(proxy_signing_keypair.key.to_der)),
@@ -211,6 +211,24 @@ Dir.chdir(output_dir) do
     'STUB_COUNTRY_SIGNING_CERT' => b64(idp_signing_keypair.cert.to_pem),
     'METADATA_TRUSTSTORE' => b64(metadata_truststore),
     'METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
+  }
+
+  vsp_vars = {
+    'LOG_LEVEL' => 'INFO',
+    'CLOCK_SKEW' => 'PT30s',
+    'SERVICE_ENTITY_IDS' => "[\"#{options.proxy_entity_id}\"]",
+    'VERIFY_ENVIRONMENT' => 'COMPLIANCE_TOOL',
+    'SSO_LOCATION' => "#{options.idp_url}/SAML2/SSO/",
+    'HUB_METADATA_ENTITY_ID' => options.idp_entity_id,
+    'TRUST_STORE' => b64(metadata_truststore),
+    'TRUST_STORE_PASSWORD' => options.truststore_pass,
+    'HUB_TRUST_STORE' => b64(metadata_truststore),
+    'HUB_TRUST_STORE_PASSWORD' => options.truststore_pass,
+    'IDP_TRUST_STORE' => b64(metadata_truststore),
+    'IDP_TRUST_STORE_PASSWORD' => options.truststore_pass,
+    'SAML_SIGNING_KEY' => b64(der2pk8(hub_signing_keypair.key.to_der)),
+    'SAML_PRIMARY_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
+    'SAML_SECONDARY_ENCRYPTION_KEY' => b64(der2pk8(hub_encryption_keypair.key.to_der)),
   }
 
   if options.do_files
@@ -286,6 +304,12 @@ Dir.chdir(output_dir) do
       cfg['data']['metadata_for_connector_node.xml'] = b64(proxy_node_metadata_xml_signed)
     end
     create_file('metadata-secret.yaml', YAML.dump(secret))
+
+    secret = YAML.load_file(SECRET).tap do |cfg|
+      cfg['metadata']['name'] = 'verify-service-provider'
+      cfg['data'] = vsp_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
+    end
+    create_file('verify-service-provider-secret.yaml', YAML.dump(secret))
   end
 
   if options.do_env
