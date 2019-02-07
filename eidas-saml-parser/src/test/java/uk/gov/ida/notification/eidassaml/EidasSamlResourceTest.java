@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import static org.junit.Assert.assertEquals;
 
 public class EidasSamlResourceTest {
+
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
         .addResource(new EidasSamlResource())

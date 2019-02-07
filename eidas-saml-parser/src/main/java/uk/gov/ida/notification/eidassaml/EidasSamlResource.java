@@ -15,6 +15,10 @@ import java.util.Base64;
 @Path("/eidasAuthnRequest")
 @Produces(MediaType.APPLICATION_JSON)
 public class EidasSamlResource {
+
+    public EidasSamlResource() {
+    }
+
     @POST
     public ResponseDto post(RequestDto request) throws UnmarshallingException, XMLParserException {
         AuthnRequest authnRequest = ObjectUtils.unmarshall(

@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.signing;
 
-
 import org.opensaml.security.credential.Credential;
 import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
 import se.swedenconnect.opensaml.pkcs11.configuration.PKCS11ProviderConfiguration;
