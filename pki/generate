@@ -17,7 +17,7 @@ output_dir = ARGV.pop || abort(USAGE)
 SCRIPT_DIR = File.expand_path(File.dirname(__FILE__))
 PROXY_NODE_MANIFEST = File.join(SCRIPT_DIR, 'proxy_node_manifest.yml')
 STUB_IDP_MANIFEST = File.join(SCRIPT_DIR, 'stub_idp_manifest.yml')
-CONFIGMAP = File.join(SCRIPT_DIR, 'configmap.yaml')
+SECRET = File.join(SCRIPT_DIR, 'secret.yaml')
 
 puts <<-EOS
 🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  🇪🇺🇪🇺    🇪🇺🇪🇺 🇪🇺🇪🇺🇪🇺🇪🇺     🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺    🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺🇪🇺  
@@ -259,33 +259,33 @@ Dir.chdir(output_dir) do
     create_file('stub_idp.manifest.yml', YAML.dump(stub_idp_manifest))
   end
 
-  if options.do_configmaps
-    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+  if options.do_secrets
+    secret = YAML.load_file(SECRET).tap do |cfg|
       cfg['metadata']['name'] = 'proxy-node-pki'
-      cfg['data'] = proxy_node_vars
+      cfg['data'] = proxy_node_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
-    create_file('proxy-node-configmap.yaml', YAML.dump(configmap))
+    create_file('proxy-node-secret.yaml', YAML.dump(secret))
 
-    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+    secret = YAML.load_file(SECRET).tap do |cfg|
       cfg['metadata']['name'] = 'stub-connector-pki'
-      cfg['data'] = stub_connector_vars
+      cfg['data'] = stub_connector_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
-    create_file('stub-connector-configmap.yaml', YAML.dump(configmap))
+    create_file('stub-connector-secret.yaml', YAML.dump(secret))
 
-    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+    secret = YAML.load_file(SECRET).tap do |cfg|
       cfg['metadata']['name'] = 'stub-idp-pki'
-      cfg['data'] = stub_idp_vars
+      cfg['data'] = stub_idp_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
-    create_file('stub-idp-configmap.yaml', YAML.dump(configmap))
+    create_file('stub-idp-secret.yaml', YAML.dump(secret))
 
-    configmap = YAML.load_file(CONFIGMAP).tap do |cfg|
+    secret = YAML.load_file(SECRET).tap do |cfg|
       cfg['metadata']['name'] = 'saml-metadata'
       cfg['data'] = {}
-      cfg['data']['hub_metadata_for_proxy_node.xml'] = hub_metadata_for_proxy_node_xml_signed
-      cfg['data']['hub_metadata_for_idp.xml'] = hub_metadata_for_stub_idp_xml_signed
-      cfg['data']['metadata_for_connector_node.xml'] = proxy_node_metadata_xml_signed
+      cfg['data']['hub_metadata_for_proxy_node.xml'] = b64(hub_metadata_for_proxy_node_xml_signed)
+      cfg['data']['hub_metadata_for_idp.xml'] = b64(hub_metadata_for_stub_idp_xml_signed)
+      cfg['data']['metadata_for_connector_node.xml'] = b64(proxy_node_metadata_xml_signed)
     end
-    create_file('metadata-configmap.yaml', YAML.dump(configmap))
+    create_file('metadata-secret.yaml', YAML.dump(secret))
   end
 
   if options.do_env

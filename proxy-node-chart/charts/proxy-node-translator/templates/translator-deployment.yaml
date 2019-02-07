@@ -22,8 +22,8 @@ spec:
       restartPolicy: Always
       volumes:
         - name: proxy-node-pki
-          configMap:
-            name: proxy-node-pki
+          secret:
+            secretName: proxy-node-pki
       containers:
       - name: {{ .Chart.Name }}
         image: {{ include "docker_image" (tuple .Chart.Name .) }}
@@ -51,61 +51,61 @@ spec:
         env:
         - name: CONNECTOR_NODE_ENTITY_ID
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki
               key: CONNECTOR_NODE_ENTITY_ID
         - name: CONNECTOR_NODE_ISSUER_ID
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki
               key: CONNECTOR_NODE_ISSUER_ID
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: CONNECTOR_NODE_METADATA_TRUSTSTORE
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
         - name: CONNECTOR_NODE_METADATA_URL
           value: http://{{ .Release.Name }}-stub-connector/Metadata
         - name: CONNECTOR_NODE_URL
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki
               key: CONNECTOR_NODE_URL
         - name: HUB_ENTITY_ID
           value: http://stub_idp.acme.org/stub-idp-demo/SSO/POST
         - name: HUB_FACING_ENCRYPTION_CERT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: HUB_FACING_ENCRYPTION_CERT
         - name: HUB_FACING_ENCRYPTION_KEY
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: HUB_FACING_ENCRYPTION_KEY
         - name: HUB_FACING_SIGNING_CERT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: HUB_FACING_SIGNING_CERT
         - name: HUB_FACING_SIGNING_KEY
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: HUB_FACING_SIGNING_KEY
         - name: HUB_METADATA_TRUSTSTORE
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: HUB_METADATA_TRUSTSTORE
         - name: HUB_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: HUB_METADATA_TRUSTSTORE_PASSWORD
         - name: HUB_METADATA_URL
@@ -120,19 +120,19 @@ spec:
           value: http://{{ .Release.Name }}-stub-metadata/metadata_for_connector_node.xml
         - name: PROXY_NODE_RESPONSE_ENDPOINT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki
               key: PROXY_NODE_RESPONSE_ENDPOINT
         - name: REDIS_SERVER_URI
           value: redis://{{ .Release.Name }}-gateway-redis:6379/
         - name: SIGNING_CERT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: SIGNING_CERT
         - name: SIGNING_KEY
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: proxy-node-pki 
               key: SIGNING_KEY
         - name: PKCS11_PROXY_SOCKET
