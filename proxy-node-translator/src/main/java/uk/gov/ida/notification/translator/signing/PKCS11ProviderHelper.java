@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.signing;
+package uk.gov.ida.notification.translator.signing;
 
 import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
 import se.swedenconnect.opensaml.pkcs11.PKCS11ProviderFactory;

@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.saml;
+package uk.gov.ida.notification.translator.saml;
 
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.Response;
@@ -9,6 +9,10 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
+import uk.gov.ida.notification.saml.EidasAssertionBuilder;
+import uk.gov.ida.notification.saml.EidasAttributeBuilder;
+import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.saml.HubResponseContainer;
 import uk.gov.ida.saml.core.IdaConstants;
 import uk.gov.ida.saml.core.extensions.Date;
 import uk.gov.ida.saml.core.extensions.IdaAuthnContext;

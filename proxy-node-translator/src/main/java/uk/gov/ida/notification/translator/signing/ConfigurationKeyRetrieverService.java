@@ -1,7 +1,7 @@
-package uk.gov.ida.notification.signing;
+package uk.gov.ida.notification.translator.signing;
 
-import uk.gov.ida.notification.TranslatorConfiguration;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.translator.TranslatorConfiguration;
 
 /**
  * Retrieves ConnectorFacingSigningKeyPair from Dropwizard Configuration

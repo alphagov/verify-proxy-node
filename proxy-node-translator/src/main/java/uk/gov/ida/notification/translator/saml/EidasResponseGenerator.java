@@ -1,4 +1,4 @@
-package uk.gov.ida.notification;
+package uk.gov.ida.notification.translator.saml;
 
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;

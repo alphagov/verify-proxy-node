@@ -4,8 +4,8 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
-import uk.gov.ida.notification.TranslatorApplication;
-import uk.gov.ida.notification.TranslatorConfiguration;
+import uk.gov.ida.notification.translator.TranslatorApplication;
+import uk.gov.ida.notification.translator.TranslatorConfiguration;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;

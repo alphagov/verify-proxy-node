@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.softhsm;
+package uk.gov.ida.notification.translator.softhsm;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,16 +9,8 @@ import se.swedenconnect.opensaml.pkcs11.configuration.PKCS11SoftHsmProviderConfi
 import se.swedenconnect.opensaml.pkcs11.configuration.SoftHsmCredentialConfiguration;
 import se.swedenconnect.opensaml.pkcs11.credential.PKCS11Credential;
 import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.signing.PKCS11ProviderHelper;
+import uk.gov.ida.notification.translator.signing.PKCS11ProviderHelper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package uk.gov.ida.notification;
+package uk.gov.ida.notification.translator;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;

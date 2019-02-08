@@ -1,4 +1,4 @@
-package uk.gov.ida.notification;
+package uk.gov.ida.notification.translator;
 
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.Application;
@@ -29,8 +29,12 @@ import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.notification.signing.KeyRetrieverService;
-import uk.gov.ida.notification.signing.KeyRetrieverServiceFactory;
+import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
+import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
+import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
+import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
+import uk.gov.ida.notification.translator.signing.KeyRetrieverService;
+import uk.gov.ida.notification.translator.signing.KeyRetrieverServiceFactory;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.saml.security.AssertionDecrypter;
 import uk.gov.ida.saml.security.DecrypterFactory;
@@ -85,7 +89,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         // by the InitializationService
         try {
             InitializationService.initialize();
-        } catch(InitializationException e) {
+        } catch (InitializationException e) {
             throw new RuntimeException(e);
         }
 
@@ -101,7 +105,6 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
         connectorMetadataResolverBundle = new MetadataResolverBundle<>(TranslatorConfiguration::getConnectorMetadataConfiguration);
         bootstrap.addBundle(connectorMetadataResolverBundle);
-
     }
 
     @Override
@@ -112,7 +115,6 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
-
 
         registerProviders(environment);
         registerExceptionMappers(environment);
