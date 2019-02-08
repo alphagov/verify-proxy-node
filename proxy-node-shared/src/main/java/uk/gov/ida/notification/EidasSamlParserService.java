@@ -1,14 +1,11 @@
 package uk.gov.ida.notification;
 
-import uk.gov.ida.notification.eidassaml.RequestDto;
-import uk.gov.ida.notification.eidassaml.ResponseDto;
+import uk.gov.ida.notification.dto.EidasSamlParserRequest;
+import uk.gov.ida.notification.dto.EidasSamlParserResponse;
 
 public class EidasSamlParserService {
 
-    public ResponseDto validate(RequestDto eidasSamlParserRequest) {
-        ResponseDto responseDto = new ResponseDto();
-        responseDto.issuer = "issuer";
-        responseDto.requestId = "request id";
-        return responseDto;
+    public EidasSamlParserResponse parse(EidasSamlParserRequest eidasSamlParserRequest) {
+        return new EidasSamlParserResponse("request id", "issuer", "pub enc key", "destination");
     }
 }
