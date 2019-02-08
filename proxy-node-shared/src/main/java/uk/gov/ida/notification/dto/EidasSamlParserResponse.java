@@ -1,25 +1,24 @@
 package uk.gov.ida.notification.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.NotBlank;
 
 public class EidasSamlParserResponse {
 
     @JsonProperty
-    @NotNull
+    @NotBlank
     private String requestId;
 
     @JsonProperty
-    @NotNull
+    @NotBlank
     private String issuer;
 
     @JsonProperty
-    @NotNull
+    @NotBlank
     private String connectorPublicEncryptionKey;
 
     @JsonProperty
-    @NotNull
+    @NotBlank
     private String destination;
 
     public EidasSamlParserResponse() {
