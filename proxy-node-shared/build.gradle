@@ -2,6 +2,7 @@ dependencies {
     compile configurations.dropwizard,
             configurations.opensaml,
             configurations.eidas_saml,
+            configurations.ida_utils,
             configurations.verify_saml,
             configurations.common
 }
