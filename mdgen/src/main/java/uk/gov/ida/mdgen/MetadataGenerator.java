@@ -25,14 +25,14 @@ import org.opensaml.security.crypto.KeySupport;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Support;
 import org.opensaml.xmlsec.SignatureSigningParameters;
-import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.opensaml.xmlsec.signature.KeyInfo;
-import org.opensaml.xmlsec.signature.KeyValue;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
 import se.swedenconnect.opensaml.pkcs11.PKCS11ProviderFactory;
@@ -45,16 +45,13 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 public class MetadataGenerator implements Callable<Void> {
-    private final Logger log = Logger.getLogger(this.getClass().getName());
+    private final Logger LOG = LoggerFactory.getLogger(MetadataGenerator.class);
     private BasicX509Credential signingCredential;
     private X509KeyInfoGeneratorFactory keyInfoGeneratorFactory;
 
@@ -115,13 +112,16 @@ public class MetadataGenerator implements Callable<Void> {
     @CommandLine.Option(names = "--key-pass", description = "Passphrase for encrypted private key")
     private String keyPass = "";
 
-    @CommandLine.Option(names = "--hsm-alias", description = "HSM credential alias")
-    private String hsmAlias = "vfpn-uk";
+    @CommandLine.Option(names = "--hsm-token-label", description = "HSM name")
+    private String hsmTokenLabel = "softhsm";
 
-    @CommandLine.Option(names = "--hsm-slot", description = "HSM credential slot")
-    private String hsmSlot;
+    @CommandLine.Option(names = "--hsm-key-label", description = "HSM key label")
+    private String hsmKeyLabel = "private_key";
 
-    @CommandLine.Option(names = "--hsm-pin", description = "HSM credential PIN")
+    @CommandLine.Option(names = "--hsm-slot-index", description = "HSM slot index")
+    private Integer hsmSlotIndex = 0;
+
+    @CommandLine.Option(names = "--hsm-pin", description = "HSM token PIN")
     private String hsmPin = "1234";
 
     @CommandLine.Option(names = "--hsm-module", description = "HSM shared object module")
@@ -149,7 +149,7 @@ public class MetadataGenerator implements Callable<Void> {
         }
 
         if (signingCredential.getPublicKey() instanceof ECPublicKey) {
-            log.warning("Credential public key is of EC type, using ECDSA signing algorithm");
+            LOG.warn("Credential public key is of EC type, using ECDSA signing algorithm");
             signingAlgo = SigningAlgoType.ecdsa;
         }
 
@@ -175,35 +175,35 @@ public class MetadataGenerator implements Callable<Void> {
 
     private BasicX509Credential getSigningCredentialFromFile(X509Certificate cert, File keyFile, String keyPass) {
         if (keyFile == null) {
-            log.severe("Need to specify keyFile when credential type is file");
+            LOG.error("Need to specify keyFile when credential type is file");
             System.exit(1);
         }
-        log.info(String.format("Using credential from file: keyFile=%s keyPass=%s", keyFile, keyPass));
+        LOG.info("Using credential from file: keyFile={} keyPass={}", keyFile, keyPass);
         try {
             PrivateKey key = KeySupport.decodePrivateKey(keyFile, keyPass.toCharArray());
             return new BasicX509Credential(cert, key);
         } catch(Exception e) {
-            log.severe("Could not read from private key file, is there a passphrase?\nException: "+e.getMessage());
+            LOG.error("Could not read from private key file, is there a passphrase?\nException: {}", e.getMessage());
             System.exit(1);
         }
         return null;
     }
 
     private BasicX509Credential getSigningCredentialFromPKCS11(X509Certificate cert) throws Exception {
-        log.info(String.format("Using credential from PKCS11: module=%s alias=%s slot=%s pin=%s", hsmModule, hsmAlias, hsmSlot, hsmPin));
+        LOG.info("Using credential from PKCS11: module={} token={} key={} slot={} pin={}", hsmModule, hsmTokenLabel, hsmKeyLabel, hsmSlotIndex, hsmPin);
         PKCS11ProviderConfiguration config = new PKCS11ProviderConfiguration();
         config.setLibrary(hsmModule);
-        config.setName(hsmAlias);
-        config.setSlot(hsmSlot);
+        config.setName(hsmTokenLabel);
+        config.setSlotListIndex(hsmSlotIndex);
         PKCS11ProviderFactory providerFactory = new PKCS11ProviderFactory(
             config,
             configData -> Security.getProvider("SunPKCS11").configure("--"+configData)
         );
         PKCS11Provider provider = providerFactory.createInstance();
         for (String name : provider.getProviderNameList()) {
-            log.info("Provider: " + name);
+            LOG.info("Provider: " + name);
         }
-        return new PKCS11Credential(cert, provider.getProviderNameList(), hsmAlias, hsmPin);
+        return new PKCS11Credential(cert, provider.getProviderNameList(), hsmKeyLabel, hsmPin);
     }
 
     private EntityDescriptor buildEntityDescriptor() throws SecurityException, SignatureException, MarshallingException {
@@ -219,10 +219,10 @@ public class MetadataGenerator implements Callable<Void> {
     }
 
     private void sign(EntityDescriptor entityDescriptor) throws SecurityException, MarshallingException, SignatureException {
-        log.info("Attempting to sign metadata");
-        log.info(String.format("\n  Algorithm: %s\n  Credential: %s\n",
+        LOG.info("Attempting to sign metadata");
+        LOG.info("\n  Algorithm: {}\n  Credential: {}\n",
             signingAlgo.uri,
-            signingCredential.getEntityCertificate().getSubjectDN().getName()));
+            signingCredential.getEntityCertificate().getSubjectDN().getName());
 
         SignatureSigningParameters signingParams = new SignatureSigningParameters();
         signingParams.setSignatureAlgorithm(signingAlgo.uri);
@@ -238,7 +238,7 @@ public class MetadataGenerator implements Callable<Void> {
     }
 
     private SSODescriptor getSsoDescriptor() throws SecurityException {
-        log.info(String.format("Generating metadata for %s node", nodeType));
+        LOG.info("Generating metadata for {} node", nodeType);
 
         XMLObject endpointObject = XMLObjectSupport.buildXMLObject(nodeType.endpointQname);
         Endpoint endpoint = (Endpoint) endpointObject;

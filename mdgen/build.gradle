@@ -17,5 +17,6 @@ dependencies {
     'org.opensaml:opensaml-xmlsec-api:3.4.0',
     'org.opensaml:opensaml-xmlsec-impl:3.4.0',
     'org.bouncycastle:bcprov-jdk15on:1.60',
+    'org.slf4j:slf4j-simple:1.7.25',
     'se.swedenconnect.opensaml:opensaml-pkcs11-support:1.1.1'
 }
