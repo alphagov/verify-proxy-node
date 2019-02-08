@@ -45,8 +45,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -54,6 +56,7 @@ import java.util.logging.Logger;
 public class MetadataGenerator implements Callable<Void> {
     private final Logger log = Logger.getLogger(this.getClass().getName());
     private BasicX509Credential signingCredential;
+    private X509KeyInfoGeneratorFactory keyInfoGeneratorFactory;
 
     private enum NodeType {
         connector(SPSSODescriptor.DEFAULT_ELEMENT_NAME, AssertionConsumerService.DEFAULT_ELEMENT_NAME),
@@ -145,6 +148,11 @@ public class MetadataGenerator implements Callable<Void> {
                 break;
         }
 
+        if (signingCredential.getPublicKey() instanceof ECPublicKey) {
+            log.warning("Credential public key is of EC type, using ECDSA signing algorithm");
+            signingAlgo = SigningAlgoType.ecdsa;
+        }
+
         OutputStream outputStream;
 
         if (outputFile == null) {
@@ -152,6 +160,9 @@ public class MetadataGenerator implements Callable<Void> {
         } else {
             outputStream = new FileOutputStream(outputFile);
         }
+
+        keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
+        keyInfoGeneratorFactory.setEmitEntityCertificate(true);
 
         XMLObjectSupport.marshallToOutputStream(buildEntityDescriptor(), outputStream);
         return null;
@@ -217,6 +228,7 @@ public class MetadataGenerator implements Callable<Void> {
         signingParams.setSignatureAlgorithm(signingAlgo.uri);
         signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_OMIT_COMMENTS);
         signingParams.setSigningCredential(signingCredential);
+        signingParams.setKeyInfoGenerator(keyInfoGeneratorFactory.newInstance());
 
         SignatureSupport.signObject(entityDescriptor, signingParams);
 
@@ -264,20 +276,11 @@ public class MetadataGenerator implements Callable<Void> {
         KeyDescriptor keyDescriptor = (KeyDescriptor) XMLObjectSupport.buildXMLObject(KeyDescriptor.DEFAULT_ELEMENT_NAME);
         keyDescriptor.setUse(usageType);
         keyDescriptor.setKeyInfo(buildKeyInfo(credential));
-
         return keyDescriptor;
     }
 
     private KeyInfo buildKeyInfo(Credential credential) throws SecurityException {
-        X509KeyInfoGeneratorFactory x509KeyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
-        x509KeyInfoGeneratorFactory.setEmitEntityCertificate(true);
-        KeyInfo keyInfo = x509KeyInfoGeneratorFactory.newInstance().generate(credential);
-
-        KeyValue keyValue = (KeyValue) XMLObjectSupport.buildXMLObject(KeyValue.DEFAULT_ELEMENT_NAME);
-        RSAPublicKey publicKey = (RSAPublicKey) credential.getPublicKey();
-        keyValue.setRSAKeyValue(KeyInfoSupport.buildRSAKeyValue(publicKey));
-        keyInfo.getKeyValues().add(keyValue);
-
+        KeyInfo keyInfo = keyInfoGeneratorFactory.newInstance().generate(credential);
         return keyInfo;
     }
 }
