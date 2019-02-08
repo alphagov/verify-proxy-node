@@ -36,7 +36,7 @@ import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
-import uk.gov.ida.notification.translator.configuration.VerifyServiceProviderConfiguration;
+import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
@@ -116,8 +116,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     @Override
-    public void run(final TranslatorConfiguration configuration,
-                    final Environment environment) throws Exception {
+    public void run(final TranslatorConfiguration configuration, final Environment environment) {
 
         connectorMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
 

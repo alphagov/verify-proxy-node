@@ -1,8 +1,9 @@
 package uk.gov.ida.notification.translator.resources;
 
 import org.opensaml.security.x509.X509Credential;
-import uk.gov.ida.notification.contracts.HubResponseTranslatorDto;
+import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.TranslatedHubResponse;
+import uk.gov.ida.notification.contracts.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.translator.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class HubResponseTranslatorResource {
     private static final Logger LOG = Logger.getLogger(HubResponseTranslatorResource.class.getName());
-    private static final SamlObjectMarshaller MARSHALLER = new /**/SamlObjectMarshaller();
+    private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
@@ -33,11 +34,16 @@ public class HubResponseTranslatorResource {
 
     @POST
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
-    public Response hubResponse(HubResponseTranslatorDto hubResponseTranslatorDto) {
+    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
 
-        final TranslatedHubResponse translatedHubResponse = verifyServiceProviderProxy.getTranslatedHubResponse(hubResponseTranslatorDto);
+        final VerifyServiceProviderTranslationRequest vspRequest = new VerifyServiceProviderTranslationRequest(
+                hubResponseTranslatorRequest.getSamlResponse(),
+                hubResponseTranslatorRequest.getRequestId(),
+                hubResponseTranslatorRequest.getLevelOfAssurance());
 
-        final X509Credential connectorEncryptionCert = hubResponseTranslatorDto.getConnectorEncryptionCredential();
+        final TranslatedHubResponse translatedHubResponse = verifyServiceProviderProxy.getTranslatedHubResponse(vspRequest);
+
+        final X509Credential connectorEncryptionCert = hubResponseTranslatorRequest.getConnectorEncryptionCredential();
         final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(null, connectorEncryptionCert);
         logEidasResponse(eidasResponse);
 

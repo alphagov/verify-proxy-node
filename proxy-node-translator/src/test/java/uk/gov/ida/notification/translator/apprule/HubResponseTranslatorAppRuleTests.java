@@ -3,6 +3,7 @@ package uk.gov.ida.notification.translator.apprule;
 import org.apache.http.HttpStatus;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -78,6 +79,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
+    @Ignore
     public void shouldReturnASignedEidasResponse() throws Exception {
         KeyPairConfiguration signingKeyPair = translatorAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
         SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
@@ -92,6 +94,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
+    @Ignore
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
         Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
         assertEquals(1, eidasResponse.getEncryptedAssertions().size());
@@ -99,6 +102,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
+    @Ignore
     public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
         Response hubResponse = buildSignedHubResponse();
         Credential decryptingCredential = new TestCredentialFactory(TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_RP_PRIVATE_ENCRYPTION_KEY).getDecryptingCredential();
@@ -115,6 +119,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
+    @Ignore
     public void shouldNotAcceptUnsignedHubResponse() throws Exception {
         javax.ws.rs.core.Response response = postHubResponseToTranslator(buildUnsignedHubResponse());
         String message = response.readEntity(String.class);
@@ -123,6 +128,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
+    @Ignore
     public void shouldValidateHubResponseMessage() throws Exception {
         Response invalidResponse = getHubResponseBuilder()
             .withIssuer(null)

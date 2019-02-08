@@ -21,4 +21,11 @@ public class TranslatedHubResponse {
     @NotNull
     @JsonProperty
     private String attributes;
+
+    public TranslatedHubResponse(String scenario, String pid, String levelOfAssurance, String attributes) {
+        this.scenario = scenario;
+        this.pid = pid;
+        this.levelOfAssurance = levelOfAssurance;
+        this.attributes = attributes;
+    }
 }

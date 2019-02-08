@@ -5,7 +5,7 @@ import org.opensaml.security.x509.X509Credential;
 
 import javax.validation.constraints.NotNull;
 
-public class HubResponseTranslatorDto {
+public class HubResponseTranslatorRequest {
 
     @NotNull
     @JsonProperty
@@ -15,24 +15,26 @@ public class HubResponseTranslatorDto {
     @JsonProperty
     private String requestId;
 
-    @JsonProperty
-    private String eidasRequestId;
-
-    @JsonProperty
-    private X509Credential connectorEncryptionCredential;
-
     @NotNull
     @JsonProperty
     private String levelOfAssurance;
 
-    public HubResponseTranslatorDto(String samlResponse, String requestId, String levelOfAssurance, String eidasRequestId, X509Credential connectorEncryptionCredential) {
+    @NotNull
+    @JsonProperty
+    private String eidasRequestId;
+
+    @NotNull
+    @JsonProperty
+    private X509Credential connectorEncryptionCredential;
+
+    public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance, String eidasRequestId, X509Credential connectorEncryptionCredential) {
         this(samlResponse, requestId, levelOfAssurance);
 
         this.eidasRequestId = eidasRequestId;
         this.connectorEncryptionCredential = connectorEncryptionCredential;
     }
 
-    public HubResponseTranslatorDto(String samlResponse, String requestId, String levelOfAssurance) {
+    public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance) {
         this.samlResponse = samlResponse;
         this.requestId = requestId;
         this.levelOfAssurance = levelOfAssurance;

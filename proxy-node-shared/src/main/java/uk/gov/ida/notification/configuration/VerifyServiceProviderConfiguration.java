@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator.configuration;
+package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
@@ -13,14 +13,14 @@ public class VerifyServiceProviderConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI Url;
+    private URI url;
 
     @JsonProperty
     @Valid
     private JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
 
     public URI getUrl() {
-        return Url;
+        return url;
     }
 
     public JerseyClientConfiguration getJerseyClientConfiguration() {
