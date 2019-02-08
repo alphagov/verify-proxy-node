@@ -23,6 +23,13 @@ connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 replayChecker:
   redisUrl: ${REDIS_SERVER_URI}
 
+eidasSamlParserService:
+  url: ${EIDAS_SAML_PARSER_URL}
+  client:
+    timeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
+    connectionTimeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
+    connectionRequestTimeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
+
 translatorService:
   url: ${TRANSLATOR_URL}
   client:

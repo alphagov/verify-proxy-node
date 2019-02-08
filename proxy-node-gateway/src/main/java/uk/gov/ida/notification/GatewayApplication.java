@@ -40,6 +40,7 @@ import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
+import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
@@ -159,6 +160,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
+
+        EidasSamlParserService eidasSamlParserService = configuration
+            .getEidasSamlParserServiceConfiguration()
+            .buildEidasSamlParserService(environment);
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,

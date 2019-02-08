@@ -79,6 +79,7 @@ public class GatewayAppRuleTestBase {
             ConfigOverride.config("hubUrl", "http://hub"),
             ConfigOverride.config("connectorNodeUrl", "http://connector-node:8080"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
+            ConfigOverride.config("eidasSamlParserService.url", "http://eidas-saml-parser/eidasAuthnRequest"),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
             ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
             ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),

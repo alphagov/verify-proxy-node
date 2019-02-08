@@ -4,7 +4,7 @@ import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
-import uk.gov.ida.notification.EidasSamlParserService;
+import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.VSPService;
 import uk.gov.ida.notification.dto.EidasSamlParserRequest;
