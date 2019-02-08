@@ -5,7 +5,7 @@ import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
 import se.swedenconnect.opensaml.pkcs11.configuration.PKCS11ProviderConfiguration;
 import se.swedenconnect.opensaml.pkcs11.credential.PKCS11Credential;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
-import uk.gov.ida.notification.translator.TranslatorConfiguration;
+import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateException;

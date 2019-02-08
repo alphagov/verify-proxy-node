@@ -1,13 +1,13 @@
-package uk.gov.ida.notification.translator;
+package uk.gov.ida.notification.translator.configuration;
 
-import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 
 public class TranslatorConfiguration extends Configuration {
@@ -36,6 +36,11 @@ public class TranslatorConfiguration extends Configuration {
     @Valid
     @NotNull
     private URI proxyNodeMetadataForConnectorNodeUrl;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private VerifyServiceProviderConfiguration vspConfiguration;
 
     @JsonProperty
     @Valid
@@ -109,6 +114,10 @@ public class TranslatorConfiguration extends Configuration {
 
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
         return proxyNodeMetadataForConnectorNodeUrl;
+    }
+
+    public VerifyServiceProviderConfiguration getVspConfiguration() {
+        return vspConfiguration;
     }
 
     public String getConnectorNodeIssuerId() {

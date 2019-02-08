@@ -39,7 +39,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.*;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.*;
 
-public class HubResponseFromGatewayAppRuleTests extends TranslatorAppRuleTestBase {
+public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
     private SamlObjectMarshaller marshaller;
     private BasicCredential hubSigningCredential;

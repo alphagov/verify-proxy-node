@@ -2,6 +2,8 @@ package uk.gov.ida.notification.translator;
 
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -13,12 +15,15 @@ import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
+import uk.gov.ida.jerseyclient.ErrorHandlingClient;
+import uk.gov.ida.jerseyclient.JsonClient;
+import uk.gov.ida.jerseyclient.JsonResponseProcessor;
+import uk.gov.ida.notification.VerifySamlInitializer;
+import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.resources.HubResponseFromGatewayResource;
-import uk.gov.ida.notification.saml.HubResponseTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionFactory;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
@@ -29,7 +34,9 @@ import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
+import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
+import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
+import uk.gov.ida.notification.translator.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
@@ -43,6 +50,7 @@ import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
 import uk.gov.ida.saml.security.validators.encryptedelementtype.EncryptionAlgorithmValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
+import javax.ws.rs.client.Client;
 import java.net.URI;
 import java.util.List;
 
@@ -128,20 +136,14 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new HubResponseExceptionMapper());
+        environment.jersey().register(new ApplicationExceptionMapper());
     }
 
-    private void registerResources(TranslatorConfiguration configuration, Environment environment) throws Exception {
-        EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
+    private void registerResources(TranslatorConfiguration configuration, Environment environment) {
+        final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
+        final VerifyServiceProviderProxy vspProxy = createVerifyServiceProviderProxy(environment, configuration.getVspConfiguration());
 
-        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
-
-
-        environment.jersey().register(new HubResponseFromGatewayResource(
-                eidasResponseGenerator,
-                configuration.getConnectorNodeUrl().toString(),
-                configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
-                connectorMetadata,
-                hubResponseValidator));
+        environment.jersey().register(new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy));
     }
 
     private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration) {
@@ -152,7 +154,18 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
         KeyRetrieverService keyRetrieverService = KeyRetrieverServiceFactory.createKeyRetrieverService(configuration);
         return new EidasResponseGenerator(hubResponseTranslator, keyRetrieverService.createSamlObjectSigner());
+    }
 
+    private JsonClient createJsonClient(Environment environment, JerseyClientConfiguration jerseyClientConfiguration, String clientName) {
+        final JsonResponseProcessor jsonResponseProcessor = new JsonResponseProcessor(environment.getObjectMapper());
+        final Client client = new JerseyClientBuilder(environment).using(jerseyClientConfiguration).build(clientName);
+        final ErrorHandlingClient errorHandlingClient = new ErrorHandlingClient(client);
+        return new JsonClient(errorHandlingClient, jsonResponseProcessor);
+    }
+
+    private VerifyServiceProviderProxy createVerifyServiceProviderProxy(Environment environment, VerifyServiceProviderConfiguration vspConfiguration) {
+        final JsonClient jsonClient = createJsonClient(environment, vspConfiguration.getJerseyClientConfiguration(), "vsp-client");
+        return new VerifyServiceProviderProxy(jsonClient, vspConfiguration.getUrl());
     }
 
     private HubResponseValidator createHubResponseValidator(TranslatorConfiguration configuration) throws Exception {
@@ -162,8 +175,8 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataResolverBundle);
 
         MessageReplayChecker messageReplayChecker = configuration
-            .getReplayChecker()
-            .createMessageReplayChecker("translator-hub");
+                .getReplayChecker()
+                .createMessageReplayChecker("translator-hub");
 
         IdpResponseValidator idpResponseValidator = new IdpResponseValidator(
                 new SamlResponseSignatureValidator(hubResponseMessageSignatureValidator),
