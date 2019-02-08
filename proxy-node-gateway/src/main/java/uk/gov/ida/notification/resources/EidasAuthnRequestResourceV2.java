@@ -53,7 +53,7 @@ public class EidasAuthnRequestResourceV2 {
             @QueryParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
             @Session HttpSession session) {
-        return handlePostBinding(encodedEidasAuthnRequest, relayState, session);
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
     }
 
     @POST
@@ -95,12 +95,12 @@ public class EidasAuthnRequestResourceV2 {
         return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, SUBMIT_BUTTON_TEXT, relayState);
     }
 
-    private void logAuthnRequestInformation(HttpSession session, EidasSamlParserResponse eidasSamlResponse, VSPAuthnRequestResponse vspResponse) {
+    private void logAuthnRequestInformation(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, VSPAuthnRequestResponse vspResponse) {
         log.info(String.format("[eIDAS AuthnRequest] Session ID: '%s'", session.getId()));
-        log.info(String.format("[eIDAS AuthnRequest] eIDAS Request ID: '%s'", eidasSamlResponse.getRequestId()));
-        log.info(String.format("[eIDAS AuthnRequest] eIDAS Issuer: '%s'", eidasSamlResponse.getIssuer()));
-        log.info(String.format("[eIDAS AuthnRequest] eIDAS Destination: '%s'", eidasSamlResponse.getDestination()));
-        log.info(String.format("[eIDAS AuthnRequest] eIDAS Connector Public Key suffix: '%s'", StringUtils.right(eidasSamlResponse.getConnectorPublicEncryptionKey(), 10)));
+        log.info(String.format("[eIDAS AuthnRequest] eIDAS Request ID: '%s'", eidasSamlParserResponse.getRequestId()));
+        log.info(String.format("[eIDAS AuthnRequest] eIDAS Issuer: '%s'", eidasSamlParserResponse.getIssuer()));
+        log.info(String.format("[eIDAS AuthnRequest] eIDAS Destination: '%s'", eidasSamlParserResponse.getDestination()));
+        log.info(String.format("[eIDAS AuthnRequest] eIDAS Connector Public Key suffix: '%s'", StringUtils.right(eidasSamlParserResponse.getConnectorPublicEncryptionKey(), 10)));
         log.info(String.format("[Hub AuthnRequest] Hub Request ID: '%s'", vspResponse.getRequestId()));
         log.info(String.format("[Hub AuthnRequest] Hub URL: '%s'", vspResponse.getSsoLocation()));
     }

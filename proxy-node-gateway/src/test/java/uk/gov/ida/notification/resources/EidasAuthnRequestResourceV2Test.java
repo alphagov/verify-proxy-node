@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.resources;
 
 import com.google.common.collect.Lists;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +74,12 @@ public class EidasAuthnRequestResourceV2Test {
     public void setup() {
         Logger logger = Logger.getLogger(EidasAuthnRequestResourceV2.class.getName());
         logger.addHandler(logHandler);
+    }
+
+    @After
+    public void teardown() {
+        Logger logger = Logger.getLogger(EidasAuthnRequestResourceV2.class.getName());
+        logger.removeHandler(logHandler);
     }
 
     @Test
