@@ -8,10 +8,5 @@ server:
 
 logging:
   level: INFO
-  loggers:
-    uk.gov.ida: DEBUG
   appenders:
-    - type: console
-    - type: file
-      currentLogFilename: logs/proxy-node.log
-      archive: false
+    - type: logstash-console

@@ -40,6 +40,7 @@ subprojects {
 
     repositories {
         maven { url 'https://dl.bintray.com/alphagov/maven-test' }
+        maven { url 'https://dl.bintray.com/alphagov/maven' }
         maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases' }
         jcenter()
     }
@@ -72,6 +73,8 @@ subprojects {
                 "io.dropwizard:dropwizard-core:${dropwizard_version}",
                 "io.dropwizard:dropwizard-client:${dropwizard_version}",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
+                "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
+                "uk.gov.ida:dropwizard-logstash:1.3.5-68"
         )
 
         opensaml (
