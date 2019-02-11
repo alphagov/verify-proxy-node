@@ -4,6 +4,8 @@ import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.opensaml.utils.ObjectUtils;
+import uk.gov.ida.notification.dto.EidasSamlParserRequest;
+import uk.gov.ida.notification.dto.EidasSamlParserResponse;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -20,13 +22,15 @@ public class EidasSamlResource {
     }
 
     @POST
-    public ResponseDto post(RequestDto request) throws UnmarshallingException, XMLParserException {
+    public EidasSamlParserResponse post(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {
         AuthnRequest authnRequest = ObjectUtils.unmarshall(
-            new ByteArrayInputStream(Base64.getDecoder().decode(request.authnRequest.getBytes())),
-            AuthnRequest.class);
+                new ByteArrayInputStream(Base64.getDecoder().decode(request.getAuthnRequest().getBytes())),
+                AuthnRequest.class);
 
-        return new ResponseDto(
-            authnRequest.getID(),
-            authnRequest.getIssuer().getValue());
+        return new EidasSamlParserResponse(
+                authnRequest.getID(),
+                authnRequest.getIssuer().getValue(),
+                "connectorPublicEncryptionKey",
+                authnRequest.getDestination());
     }
 }

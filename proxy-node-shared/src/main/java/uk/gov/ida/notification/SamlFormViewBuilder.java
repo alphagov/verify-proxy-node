@@ -13,13 +13,17 @@ public class SamlFormViewBuilder {
     public SamlFormView buildRequest(String url, AuthnRequest authnRequest, String submitText, String relayState) {
         String samlMessage = marshaller.transformToString(authnRequest);
         String encodedSamlMessage = Base64.encodeAsString(samlMessage);
+        return buildRequest(url, encodedSamlMessage, submitText, relayState);
+    }
+
+    public SamlFormView buildRequest(String url, String encodedSamlMessage, String submitText, String relayState) {
         return new SamlFormView(url, SamlFormMessageType.SAML_REQUEST, encodedSamlMessage, submitText, relayState);
     }
 
     public SamlFormView buildResponse(String url, Response response, String submitText, String relayState) {
         String samlMessage = marshaller.transformToString(response);
         String encodedSamlMessage = Base64.encodeAsString(samlMessage);
-        return new SamlFormView(url, SamlFormMessageType.SAML_RESPONSE, encodedSamlMessage, submitText, relayState);
+        return buildResponse(url, encodedSamlMessage, submitText, relayState);
     }
 
     public SamlFormView buildResponse(String url, String encodedSamlMessage, String submitText, String relayState) {

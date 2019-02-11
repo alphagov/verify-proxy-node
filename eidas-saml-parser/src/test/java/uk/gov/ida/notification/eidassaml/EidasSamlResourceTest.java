@@ -9,6 +9,8 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Issuer;
 import se.litsec.opensaml.utils.ObjectUtils;
+import uk.gov.ida.notification.dto.EidasSamlParserRequest;
+import uk.gov.ida.notification.dto.EidasSamlParserResponse;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -35,15 +37,14 @@ public class EidasSamlResourceTest {
         authnRequest.setID("request_id");
         authnRequest.setIssuer(issuer);
 
-        RequestDto request = new RequestDto();
-        request.authnRequest = Base64.encodeAsString(ObjectUtils.toString(authnRequest));
+        EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(ObjectUtils.toString(authnRequest)));
 
-        ResponseDto response = resources.target("/eidasAuthnRequest")
-            .request(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE))
-            .readEntity(ResponseDto.class);
+        EidasSamlParserResponse response = resources.target("/eidasAuthnRequest")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE))
+                .readEntity(EidasSamlParserResponse.class);
 
-        assertEquals(response.requestId, "request_id");
-        assertEquals(response.issuer, "issuer");
+        assertEquals(response.getRequestId(), "request_id");
+        assertEquals(response.getIssuer(), "issuer");
     }
 }
