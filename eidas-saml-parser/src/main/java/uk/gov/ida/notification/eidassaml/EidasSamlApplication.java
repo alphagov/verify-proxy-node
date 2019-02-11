@@ -63,7 +63,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
     @Override
     public void run(EidasSamlConfiguration configuration, Environment environment) throws Exception {
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
-        environment.jersey().register(new EidasSamlResource());
+        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator));
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
