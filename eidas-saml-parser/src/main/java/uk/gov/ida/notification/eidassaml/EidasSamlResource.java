@@ -6,6 +6,7 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 
+import javax.validation.Valid;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -25,6 +26,7 @@ public class EidasSamlResource {
     }
 
     @POST
+    @Valid
     public ResponseDto post(RequestDto request) throws UnmarshallingException, XMLParserException {
 
         authnRequest = ObjectUtils.unmarshall(
