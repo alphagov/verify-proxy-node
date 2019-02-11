@@ -23,12 +23,4 @@ public class EidasSamlParserResponseException extends WebApplicationException {
             );
         }
     }
-
-    public EidasSamlParserResponseException(String reason) {
-        super(reason);
-    }
-
-    public EidasSamlParserResponseException(Throwable e) {
-        super(e.getMessage());
-    }
 }

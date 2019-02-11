@@ -25,7 +25,7 @@ replayChecker:
 
 eidasSamlParserService:
   url: ${EIDAS_SAML_PARSER_URL}
-  client:
+  clientConfig:
     timeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
     connectionTimeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
     connectionRequestTimeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}

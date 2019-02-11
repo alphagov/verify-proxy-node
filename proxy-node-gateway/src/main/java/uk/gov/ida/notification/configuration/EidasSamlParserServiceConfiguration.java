@@ -5,10 +5,16 @@ import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.setup.Environment;
+import uk.gov.ida.jerseyclient.ErrorHandlingClient;
+import uk.gov.ida.jerseyclient.JsonClient;
+import uk.gov.ida.jerseyclient.JsonResponseProcessor;
+import uk.gov.ida.notification.Urls;
 import uk.gov.ida.notification.services.EidasSamlParserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 public class EidasSamlParserServiceConfiguration extends Configuration {
@@ -19,20 +25,26 @@ public class EidasSamlParserServiceConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    private JerseyClientConfiguration client = new JerseyClientConfiguration();
+    private JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
 
-    public URI getUrl() {
+    public URI getURL() {
         return url;
     }
 
-    public JerseyClientConfiguration getClient() {
-        return client;
+    public JerseyClientConfiguration getClientConfig() {
+        return clientConfig;
     }
 
     public EidasSamlParserService buildEidasSamlParserService(Environment environment) {
+        Client client = new JerseyClientBuilder(environment).using(clientConfig).build("eidas-saml-parser");
+        JsonClient jsonClient = new JsonClient(
+            new ErrorHandlingClient(client),
+            new JsonResponseProcessor(environment.getObjectMapper())
+        );
+
         return new EidasSamlParserService(
-            new JerseyClientBuilder(environment).using(client).build("eidasSamlParser"),
-            url.toString()
+            jsonClient,
+            UriBuilder.fromUri(url).path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH).build()
         );
     }
 }

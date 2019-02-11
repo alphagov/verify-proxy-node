@@ -1,10 +1,15 @@
 package uk.gov.ida.notification.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import uk.gov.ida.exceptions.ApplicationException;
+import uk.gov.ida.jerseyclient.ErrorHandlingClient;
+import uk.gov.ida.jerseyclient.JsonClient;
+import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.dto.EidasSamlParserRequest;
 import uk.gov.ida.notification.dto.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
@@ -12,11 +17,10 @@ import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.URL;
+import javax.ws.rs.core.UriBuilder;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
@@ -66,12 +70,6 @@ public class EidasSamlParserServiceTest {
         public Response testClientError(EidasSamlParserRequest eidasSamlParserRequest) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-
-        @POST
-        @Path("/incorrect-entity")
-        public EidasSamlParserRequest testIncorrectEntity(EidasSamlParserRequest eidasSamlParserRequest) {
-            return eidasSamlParserRequest;
-        }
     }
 
     private final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest("authn_request");
@@ -120,26 +118,23 @@ public class EidasSamlParserServiceTest {
     @Test
     public void shouldThrowEidasSamlParserResponseExceptionIfResponseIs500() throws Exception {
         EidasSamlParserService eidasSamlParserService = setUpEidasSamlParserService("/parse/server-error");
-        assertExceptionAndMessage(eidasSamlParserService, "Received a '500' status code response: Internal Server Error");
+        assertExceptionAndMessage(eidasSamlParserService, "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri");
     }
 
     @Test
-    public void shouldThrowEidasSamlParserResponseExceptionIfResponseIs400() throws Exception {
+    public void shouldThrowClientErrorExceptionIfResponseIs400() throws Exception {
         EidasSamlParserService eidasSamlParserService = setUpEidasSamlParserService("/parse/client-error");
-        assertExceptionAndMessage(eidasSamlParserService, "Received a '400' status code response: Bad Request");
-    }
-
-    @Test
-    public void shouldThrowEidasSamlParserResponseExceptionIfIncorrectEntityReturned() throws Exception {
-        EidasSamlParserService eidasSamlParserService = setUpEidasSamlParserService("/parse/incorrect-entity");
-        assertExceptionAndMessage(eidasSamlParserService, "Error reading entity from input stream.");
+        assertExceptionAndMessage(eidasSamlParserService, "Exception of type [CLIENT_ERROR] whilst contacting uri:");
     }
 
     private EidasSamlParserService setUpEidasSamlParserService(String url) throws Exception {
-        Client client = ClientBuilder.newClient();
+        JsonClient jsonClient = new JsonClient(
+            new ErrorHandlingClient(ClientBuilder.newClient()),
+            new JsonResponseProcessor(new ObjectMapper())
+        );
         return new EidasSamlParserService(
-            client,
-            new URL(clientRule.baseUri() + url).toString()
+            jsonClient,
+            UriBuilder.fromUri(clientRule.baseUri()).path(url).build()
         );
     }
 
@@ -147,8 +142,8 @@ public class EidasSamlParserServiceTest {
         try {
             EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest);
             fail("Expected exception not thrown");
-        } catch (EidasSamlParserResponseException e) {
-            assertEquals(expectedMessage, e.getMessage());
+        } catch (ApplicationException | EidasSamlParserResponseException e) {
+            assert(e.getMessage()).contains(expectedMessage);
         }
     }
 }
