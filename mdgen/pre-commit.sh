@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 HSM_MODULE=${HSM_MODULE:-/usr/lib/softhsm/libsofthsm2.so}
+XMLSECTOOL=${XMLSECTOOL:-xmlsectool}
 
 output=$(mktemp 2>/dev/null || mktemp -t 'mdgen')
 log=$(mktemp 2>/dev/null || mktemp -t 'mdgen')
@@ -19,7 +20,7 @@ function test_with_file {
   local key_pass="1234"
   echo -n "test_with_file $node $cert $key $algo: "
   ./gradlew run -q --args "$node test/${node}.yml $cert --algorithm $algo --credential file --key-file $key --key-pass $key_pass --output $output" >"$log" 2>&1 \
-    && xmlsectool --verifySignature --inFile "$output" --certificate "$cert" >"$log" 2>&1
+    && $XMLSECTOOL --verifySignature --inFile "$output" --certificate "$cert" >"$log" 2>&1
   test 0 -eq "$?" && echo OK || {
     echo FAIL
     cat "$log"
@@ -35,7 +36,7 @@ function test_with_hsm {
   echo -n "test_with_hsm  $node $cert $key $algo: "
   ./init_softhsm.sh "$algo" >"$log" 2>&1 \
     && ./gradlew run -q --args "$node test/${node}.yml $cert --algorithm $algo --credential hsm --hsm-module $HSM_MODULE --hsm-key-label $algo --hsm-pin 1234 --output $output" >"$log" 2>&1 \
-    && xmlsectool --verifySignature --inFile "$output" --certificate "$cert" >"$log" 2>&1
+    && $XMLSECTOOL --verifySignature --inFile "$output" --certificate "$cert" >"$log" 2>&1
   test 0 -eq "$?" && echo OK || {
     echo FAIL
     cat "$log"
