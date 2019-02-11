@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.eidassaml;
+package uk.gov.ida.notification.eidassaml.saml;
 
 import org.junit.Before;
 import org.junit.BeforeClass;

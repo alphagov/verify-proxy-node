@@ -3,8 +3,10 @@ package uk.gov.ida.notification.eidassaml;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
+import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -18,18 +20,21 @@ import java.util.Base64;
 public class EidasSamlResource {
 
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
-    private AuthnRequest authnRequest;
+    private SamlRequestSignatureValidator samlRequestSignatureValidator;
 
-    public EidasSamlResource(EidasAuthnRequestValidator eidasAuthnRequestValidator) {
+    public EidasSamlResource(EidasAuthnRequestValidator eidasAuthnRequestValidator, SamlRequestSignatureValidator samlRequestSignatureValidator) {
         this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
+        this.samlRequestSignatureValidator = samlRequestSignatureValidator;
     }
 
     @POST
     public ResponseDto post(RequestDto request) throws UnmarshallingException, XMLParserException {
 
-        authnRequest = ObjectUtils.unmarshall(
+        AuthnRequest authnRequest = ObjectUtils.unmarshall(
                 new ByteArrayInputStream(Base64.getDecoder().decode(request.authnRequest.getBytes())),
                 AuthnRequest.class);
+
+        samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         eidasAuthnRequestValidator.validate(authnRequest);
 
         return new ResponseDto(

@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.eidassaml.apprule;
+package uk.gov.ida.notification.eidassaml.apprule.rules;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;

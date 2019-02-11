@@ -15,10 +15,14 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.ComparisonVa
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValidator;
+import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
+import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
+
+import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
 public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
@@ -63,7 +67,9 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
     @Override
     public void run(EidasSamlConfiguration configuration, Environment environment) throws Exception {
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
-        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator));
+        SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
+
+        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator));
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {

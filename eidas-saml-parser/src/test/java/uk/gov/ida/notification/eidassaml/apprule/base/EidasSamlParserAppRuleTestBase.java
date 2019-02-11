@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.eidassaml.apprule;
+package uk.gov.ida.notification.eidassaml.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
 import keystore.KeyStoreResource;
@@ -8,11 +8,15 @@ import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.security.credential.Credential;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
 import uk.gov.ida.notification.eidassaml.RequestDto;
+import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.saml.core.test.TestCredentialFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -21,17 +25,16 @@ import java.net.URISyntaxException;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
 import static org.junit.jupiter.api.Assertions.fail;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.*;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public class EidasSamlParserAppRuleTestBase {
 
-    @ClassRule
-    public static final MetadataClientRule metadataClientRule;
-
     protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
 
-    private final SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
+    @ClassRule
+    public static final MetadataClientRule metadataClientRule;
 
     private static final KeyStoreResource truststore = aKeyStoreResource()
             .withCertificate("VERIFY-FEDERATION", aCertificate().withCertificate(METADATA_SIGNING_A_PUBLIC_CERT).build().getCertificate())
@@ -48,9 +51,13 @@ public class EidasSamlParserAppRuleTestBase {
         truststore.create();
     }
 
+    private final SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
+    protected final Credential countrySigningCredential = new TestCredentialFactory(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY).getSigningCredential();
+    protected final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(countrySigningCredential.getPublicKey(), countrySigningCredential.getPrivateKey(), TEST_RP_PUBLIC_SIGNING_CERT);
+
     @Rule
     public EidasSamlParserAppRule eidasSamlParserAppRule = new EidasSamlParserAppRule(
-            ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/SAML2/SSO/POST"),
+            ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
             ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
             ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),
