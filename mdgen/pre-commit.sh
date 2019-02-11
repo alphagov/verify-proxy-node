@@ -2,8 +2,8 @@
 
 HSM_MODULE=${HSM_MODULE:-/usr/lib/softhsm/libsofthsm2.so}
 
-output=$(mktemp)
-log=$(mktemp)
+output=$(mktemp 2>/dev/null || mktemp -t 'mdgen')
+log=$(mktemp 2>/dev/null || mktemp -t 'mdgen')
 
 function cleanup {
   rm "$output" "$log"
