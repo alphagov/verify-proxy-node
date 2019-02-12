@@ -140,7 +140,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
         final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
-        final VerifyServiceProviderProxy vspProxy = createVerifyServiceProviderProxy(environment, configuration.getVspConfiguration());
+        final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
 
         environment.jersey().register(new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy));
     }
@@ -153,18 +153,6 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
         KeyRetrieverService keyRetrieverService = KeyRetrieverServiceFactory.createKeyRetrieverService(configuration);
         return new EidasResponseGenerator(hubResponseTranslator, keyRetrieverService.createSamlObjectSigner());
-    }
-
-    private JsonClient createJsonClient(Environment environment, JerseyClientConfiguration jerseyClientConfiguration, String clientName) {
-        final JsonResponseProcessor jsonResponseProcessor = new JsonResponseProcessor(environment.getObjectMapper());
-        final Client client = new JerseyClientBuilder(environment).using(jerseyClientConfiguration).build(clientName);
-        final ErrorHandlingClient errorHandlingClient = new ErrorHandlingClient(client);
-        return new JsonClient(errorHandlingClient, jsonResponseProcessor);
-    }
-
-    private VerifyServiceProviderProxy createVerifyServiceProviderProxy(Environment environment, VerifyServiceProviderConfiguration vspConfiguration) {
-        final JsonClient jsonClient = createJsonClient(environment, vspConfiguration.getJerseyClientConfiguration(), "vsp-client");
-        return new VerifyServiceProviderProxy(jsonClient, vspConfiguration.getUrl());
     }
 
     private HubResponseValidator createHubResponseValidator(TranslatorConfiguration configuration) throws Exception {
