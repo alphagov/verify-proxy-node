@@ -2,6 +2,7 @@ package uk.gov.ida.notification.apprule;
 
 import org.apache.http.HttpStatus;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -90,6 +91,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .buildEncrypted(hubAssertionsEncryptionCredential);
     }
 
+    @Ignore
     @Test
     public void shouldReturnASignedEidasResponse() throws Exception {
         KeyPairConfiguration signingKeyPair = proxyNodeAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
@@ -104,6 +106,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         assertEquals(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, signature.getSignatureAlgorithm());
     }
 
+    @Ignore
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
         Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
@@ -111,6 +114,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         assert(eidasResponse.getAssertions().isEmpty());
     }
 
+    @Ignore
     @Test
     public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
         Response hubResponse = buildSignedHubResponse();

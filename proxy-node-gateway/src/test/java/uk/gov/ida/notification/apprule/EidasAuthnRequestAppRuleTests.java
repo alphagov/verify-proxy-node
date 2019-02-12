@@ -2,6 +2,7 @@ package uk.gov.ida.notification.apprule;
 
 import org.apache.http.HttpStatus;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
@@ -31,11 +32,13 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         request = new EidasAuthnRequestBuilder().withIssuer(CONNECTOR_NODE_ENTITY_ID);
     }
 
+    @Ignore
     @Test
     public void bindingsReturnHubAuthnRequestForm() throws Throwable {
         assertGoodRequest(request);
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasRequestId() throws Throwable {
         AuthnRequest requestWithoutId = request.withoutRequestId().build();
@@ -45,6 +48,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         assertErrorResponse(redirectEidasAuthnRequest(requestWithoutId));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasSignature() throws Throwable {
         AuthnRequest postedRequest = request.withRandomRequestId().build();
@@ -54,41 +58,49 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         assertErrorResponse(redirectEidasAuthnRequest(redirectedRequest));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasForceAuthn() throws Throwable {
         assertBadRequest(request.withForceAuthn(false));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestIsPassiveIsNotTrue() throws Throwable {
         assertBadRequest(request.withIsPassive(true));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestWhenIsPassiveIsMissing() throws Throwable {
         assertGoodRequest(request.withoutIsPassive());
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasCorrectDestination() throws Throwable {
         assertBadRequest(request.withDestination("https://bogus.eu/"));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasCorrectComparison() throws Throwable {
         assertBadRequest(request.withComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasExtensions() throws Throwable {
         assertBadRequest(request.withoutExtensions());
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasNoProtocolBinding() throws Throwable {
         assertBadRequest(request.withProtocolBinding("protocol-binding-attribute"));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasCorrectSamlVersion() throws Throwable {
         assertBadRequest(request.withSamlVersion(SAMLVersion.VERSION_10));
@@ -96,11 +108,13 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         assertGoodRequest(request.withSamlVersion(SAMLVersion.VERSION_20));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasIssuer() throws Throwable {
         assertBadRequest(request.withIssuer(""));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasSPTypePublicOrMissing() throws Throwable {
         assertBadRequest(request.withSpType("private"));
@@ -108,6 +122,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         assertGoodRequest(request.withoutSpType());
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasSupportedLOA() throws Throwable {
         assertGoodRequest(request.withLoa(EidasConstants.EIDAS_LOA_SUBSTANTIAL));
@@ -117,16 +132,19 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         assertBadRequest(request.withoutLoa());
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasRequestedAttributes() throws Throwable {
         assertBadRequest(request.withoutRequestedAttributes());
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestHasCorrectAssertionConsumerServiceUrl() throws Throwable {
         assertBadRequest(request.withAssertionConsumerServiceURL("invalid-assertion-consumer-service-url"));
     }
 
+    @Ignore
     @Test
     public void bindingsValidateAuthnRequestIsNotDuplicated() throws Throwable {
         AuthnRequest duplicatedRequest = request.build();
