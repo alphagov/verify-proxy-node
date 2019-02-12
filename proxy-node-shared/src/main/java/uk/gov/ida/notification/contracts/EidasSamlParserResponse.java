@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.dto;
+package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;

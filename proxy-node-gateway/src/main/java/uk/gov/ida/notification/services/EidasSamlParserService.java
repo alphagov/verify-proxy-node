@@ -1,8 +1,8 @@
 package uk.gov.ida.notification.services;
 
 import uk.gov.ida.jerseyclient.JsonClient;
-import uk.gov.ida.notification.dto.EidasSamlParserRequest;
-import uk.gov.ida.notification.dto.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import java.net.URI;
 
 public class EidasSamlParserService {

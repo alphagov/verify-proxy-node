@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.dto;
+package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,6 +11,9 @@ public class VSPAuthnRequestGenerationBody {
     @Valid
     @NotNull
     private String levelOfAssurance;
+
+    public VSPAuthnRequestGenerationBody() {
+    }
 
     public VSPAuthnRequestGenerationBody(String levelOfAssurance) {
         this.levelOfAssurance = levelOfAssurance;

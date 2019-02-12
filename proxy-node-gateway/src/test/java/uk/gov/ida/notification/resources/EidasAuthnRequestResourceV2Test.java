@@ -12,10 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.notification.SamlFormViewBuilder;
-import uk.gov.ida.notification.VSPService;
-import uk.gov.ida.notification.dto.EidasSamlParserRequest;
-import uk.gov.ida.notification.dto.EidasSamlParserResponse;
-import uk.gov.ida.notification.dto.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;
 import java.net.URI;

@@ -6,11 +6,11 @@ import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
 import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.notification.SamlFormViewBuilder;
-import uk.gov.ida.notification.VSPService;
-import uk.gov.ida.notification.dto.EidasSamlParserRequest;
-import uk.gov.ida.notification.dto.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.dto.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
