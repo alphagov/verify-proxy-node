@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" ID="_9ebc8854ec7f701da9749e87a801e5f2" entityID="{{entity_id}}" validUntil="2015-05-24T19:30:26.624Z">
+  <md:Extensions>
+    <mdattr:EntityAttributes>
+      <saml2:Attribute Name="urn:oasis:names:tc:SAML:attribute:assurance-certification " NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri">
+        <saml2:AttributeValue>http://eidas.europa.eu/LoA/substantial</saml2:AttributeValue>
+      </saml2:Attribute>
+    </mdattr:EntityAttributes>
+    <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+    <alg:SigningMethod MinKeySize="256" Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsasha256"/>
+    <alg:SigningMethod MinKeySize="3072" MaxKeySize="4096" Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+    <alg:SigningMethod MinKeySize="3072" MaxKeySize="4096" Algorithm="http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1"/>
+  </md:Extensions>
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="{{post_url}}"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="{{redirect_url}}"/>
+    <saml2:Attribute FriendlyName="PersonIdentifier" Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"></saml2:Attribute>
+    <saml2:Attribute FriendlyName="FamilyName" Name=" http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"></saml2:Attribute>
+    <saml2:Attribute FriendlyName="FirstName" Name=" http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"></saml2:Attribute>
+    <saml2:Attribute FriendlyName="DateOfBirth" Name=" http://eidas.europa.eu/attributes/naturalperson/DateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"></saml2:Attribute>
+  </md:IDPSSODescriptor>
+  <md:Organization>
+    <md:OrganizationName xml:lang="en">{{org_name}}</md:OrganizationName>
+    <md:OrganizationDisplayName xml:lang="en">{{org_display_name}}</md:OrganizationDisplayName>
+    <md:OrganizationURL xml:lang="en">{{org_url}}</md:OrganizationURL>
+  </md:Organization>
+  <md:ContactPerson contactType="technical">
+    <md:Company>{{contact_company}}</md:Company>
+    <md:GivenName>{{contact_given_name}}</md:GivenName>
+    <md:SurName>{{contact_surname}}</md:SurName>
+    <md:EmailAddress>{{contact_email}}</md:EmailAddress>
+  </md:ContactPerson>
+</md:EntityDescriptor>

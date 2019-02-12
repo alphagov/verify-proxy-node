@@ -1,0 +1,10 @@
+entity_id: https://proxy-node.uk
+post_url: https://proxy-node.uk/SAML2/POST
+redirect_url: https://proxy-node.uk/SAML2/Redirect
+org_name: GOV.UK
+org_display_name: GOV.UK Verify
+org_url: https://www.verify.service.gov.uk
+contact_company: GOV.UK Verify
+contact_given_name: Jane
+contact_surname: Bloggs
+contact_email: jane.bloggs@gov.uk
