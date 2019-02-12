@@ -2,8 +2,10 @@ package uk.gov.ida.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import uk.gov.ida.notification.configuration.EidasSamlParserServiceConfiguration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
+import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
@@ -26,6 +28,11 @@ public class GatewayConfiguration extends Configuration {
     @Valid
     @NotNull
     private TranslatorServiceConfiguration translatorService;
+
+    @JsonProperty
+    @Valid
+    @NotNull
+    private EidasSamlParserServiceConfiguration eidasSamlParserService;
 
     @JsonProperty
     @Valid
@@ -90,6 +97,8 @@ public class GatewayConfiguration extends Configuration {
     }
 
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }
+
+    public EidasSamlParserServiceConfiguration getEidasSamlParserServiceConfiguration() { return eidasSamlParserService; }
 
     public String getProxyNodeEntityId() {
         return proxyNodeEntityId;

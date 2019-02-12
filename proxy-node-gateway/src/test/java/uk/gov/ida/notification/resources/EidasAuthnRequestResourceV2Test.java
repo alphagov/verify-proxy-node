@@ -10,7 +10,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ida.notification.EidasSamlParserService;
+import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.VSPService;
 import uk.gov.ida.notification.dto.EidasSamlParserRequest;
