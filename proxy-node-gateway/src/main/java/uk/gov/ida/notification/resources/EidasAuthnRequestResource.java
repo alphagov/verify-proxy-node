@@ -25,7 +25,7 @@ import java.net.URI;
 import java.util.logging.Logger;
 
 @Path("/SAML2/SSO")
-public class EidasAuthnRequestResourceV2 {
+public class EidasAuthnRequestResource {
 
     private final Logger log = Logger.getLogger(getClass().getName());
     public static final String SESSION_KEY_EIDAS_REQUEST_ID = "eidas_request_id";
@@ -38,7 +38,7 @@ public class EidasAuthnRequestResourceV2 {
     private final VSPService vspService;
     private final SamlFormViewBuilder samlFormViewBuilder;
 
-    public EidasAuthnRequestResourceV2(
+    public EidasAuthnRequestResource(
             EidasSamlParserService eidasSamlParserService,
             VSPService vspService,
             SamlFormViewBuilder samlFormViewBuilder) {

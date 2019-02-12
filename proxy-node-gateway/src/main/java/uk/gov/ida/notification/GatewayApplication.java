@@ -18,7 +18,7 @@ import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2;
+import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionFactory;
@@ -150,7 +150,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             .getEidasSamlParserServiceConfiguration()
             .buildEidasSamlParserService(environment);
 
-        environment.jersey().register(new EidasAuthnRequestResourceV2(
+        environment.jersey().register(new EidasAuthnRequestResource(
                 eidasSamlParserService,
                 new VSPService(),
                 samlFormViewBuilder));
