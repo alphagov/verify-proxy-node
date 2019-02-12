@@ -117,7 +117,7 @@ public class EidasAuthnRequestResourceV2Test {
         verify(session).setAttribute(SESSION_KEY_EIDAS_RELAY_STATE, "eidas relay state");
         verify(session).setAttribute(SESSION_KEY_HUB_REQUEST_ID, "hub request id");
         verify(session).getId();
-        verify(logHandler, times(7)).publish(captorLoggingEvent.capture());
+        verify(logHandler, times(8)).publish(captorLoggingEvent.capture());
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture());
         verify(vspService).generateAuthnRequest();
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
@@ -127,6 +127,7 @@ public class EidasAuthnRequestResourceV2Test {
         List<LogRecord> allLogRecords = captorLoggingEvent.getAllValues();
 
         List<String> expectedLogOutput = Lists.newArrayList(
+                "eidas relay state",
                 "some session id",
                 "eidas request id",
                 "issuer",
