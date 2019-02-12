@@ -24,18 +24,18 @@ public class VerifyServiceProviderConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    private JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
+    private JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
 
     public URI getUrl() {
         return url;
     }
 
-    public JerseyClientConfiguration getJerseyClientConfiguration() {
-        return jerseyClientConfiguration;
+    public JerseyClientConfiguration getClientConfiguration() {
+        return clientConfig;
     }
 
     public VerifyServiceProviderProxy buildVerifyServiceProviderProxy(Environment environment) {
-        Client client = new JerseyClientBuilder(environment).using(jerseyClientConfiguration).build("vsp-client");
+        Client client = new JerseyClientBuilder(environment).using(clientConfig).build("vsp-client");
         JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(client),
             new JsonResponseProcessor(environment.getObjectMapper())

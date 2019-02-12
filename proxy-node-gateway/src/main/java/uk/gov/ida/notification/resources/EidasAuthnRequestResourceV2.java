@@ -35,15 +35,15 @@ public class EidasAuthnRequestResourceV2 {
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
 
     private final EidasSamlParserService eidasSamlParserService;
-    private final VSPService vspService;
+    private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;
 
     public EidasAuthnRequestResourceV2(
             EidasSamlParserService eidasSamlParserService,
-            VSPService vspService,
+            VerifyServiceProviderProxy vspProxy,
             SamlFormViewBuilder samlFormViewBuilder) {
         this.eidasSamlParserService = eidasSamlParserService;
-        this.vspService = vspService;
+        this.vspProxy = vspProxy;
         this.samlFormViewBuilder = samlFormViewBuilder;
     }
 
@@ -85,9 +85,7 @@ public class EidasAuthnRequestResourceV2 {
         return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest));
     }
 
-    private VSPAuthnRequestResponse generateHubRequestWithVSP() {
-        return vspService.generateAuthnRequest();
-    }
+    private VSPAuthnRequestResponse generateHubRequestWithVSP() { return vspProxy.generateAuthnRequest(); }
 
     private SamlFormView buildSamlFormView(VSPAuthnRequestResponse vspResponse, String relayState) {
         URI hubUrl = vspResponse.getSsoLocation();

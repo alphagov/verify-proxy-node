@@ -47,7 +47,7 @@ public class EidasAuthnRequestResourceV2Test {
     private EidasSamlParserService eidasSamlParserService;
 
     @Mock
-    private VSPService vspService;
+    private VerifyServiceProviderProxy vspProxy;
 
     @Mock
     private SamlFormViewBuilder samlFormViewBuilder;
@@ -98,7 +98,7 @@ public class EidasAuthnRequestResourceV2Test {
 
     private void setupHappyPath() throws URISyntaxException {
         when(eidasSamlParserService.parse(any(EidasSamlParserRequest.class))).thenReturn(eidasSamlParserResponse);
-        when(vspService.generateAuthnRequest()).thenReturn(vspResponse);
+        when(vspProxy.generateAuthnRequest()).thenReturn(vspResponse);
         when(eidasSamlParserResponse.getConnectorPublicEncryptionKey()).thenReturn("abcdefghijk");
         when(eidasSamlParserResponse.getDestination()).thenReturn("destination");
         when(eidasSamlParserResponse.getIssuer()).thenReturn("issuer");
@@ -117,9 +117,9 @@ public class EidasAuthnRequestResourceV2Test {
         verify(session).getId();
         verify(logHandler, times(7)).publish(captorLoggingEvent.capture());
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture());
-        verify(vspService).generateAuthnRequest();
+        verify(vspProxy).generateAuthnRequest();
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
-        verifyNoMoreInteractions(vspService, eidasSamlParserService, logHandler, samlFormViewBuilder, session);
+        verifyNoMoreInteractions(vspProxy, eidasSamlParserService, logHandler, samlFormViewBuilder, session);
 
         assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo("eidas blob");
         List<LogRecord> allLogRecords = captorLoggingEvent.getAllValues();

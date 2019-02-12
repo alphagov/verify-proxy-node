@@ -41,6 +41,7 @@ import uk.gov.ida.notification.saml.validation.components.RequestedAttributesVal
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
 import uk.gov.ida.notification.services.EidasSamlParserService;
+import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
@@ -164,6 +165,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         EidasSamlParserService eidasSamlParserService = configuration
             .getEidasSamlParserServiceConfiguration()
             .buildEidasSamlParserService(environment);
+
+        VerifyServiceProviderProxy vspProxy = configuration
+            .getVerifyServiceProviderConfiguration()
+            .buildVerifyServiceProviderProxy(environment);
 
         environment.jersey().register(new EidasAuthnRequestResource(
                 configuration,
