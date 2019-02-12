@@ -9,7 +9,7 @@ import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.Urls;
-import uk.gov.ida.notification.services.EidasSamlParserService;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -35,14 +35,14 @@ public class EidasSamlParserServiceConfiguration extends Configuration {
         return clientConfig;
     }
 
-    public EidasSamlParserService buildEidasSamlParserService(Environment environment) {
+    public EidasSamlParserProxy buildEidasSamlParserService(Environment environment) {
         Client client = new JerseyClientBuilder(environment).using(clientConfig).build("eidas-saml-parser");
         JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(client),
             new JsonResponseProcessor(environment.getObjectMapper())
         );
 
-        return new EidasSamlParserService(
+        return new EidasSamlParserProxy(
             jsonClient,
             UriBuilder.fromUri(url).path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH).build()
         );

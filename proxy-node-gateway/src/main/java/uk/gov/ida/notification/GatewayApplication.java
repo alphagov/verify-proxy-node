@@ -40,7 +40,7 @@ import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator
 import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
-import uk.gov.ida.notification.services.EidasSamlParserService;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
@@ -162,7 +162,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
 
-        EidasSamlParserService eidasSamlParserService = configuration
+        EidasSamlParserProxy espProxy = configuration
             .getEidasSamlParserServiceConfiguration()
             .buildEidasSamlParserService(environment);
 

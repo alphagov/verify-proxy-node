@@ -4,7 +4,7 @@ import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
-import uk.gov.ida.notification.services.EidasSamlParserService;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -34,12 +34,12 @@ public class EidasAuthnRequestResourceV2 {
     public static final String SESSION_KEY_HUB_REQUEST_ID = "hub_request_id";
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
 
-    private final EidasSamlParserService eidasSamlParserService;
+    private final EidasSamlParserProxy eidasSamlParserService;
     private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;
 
     public EidasAuthnRequestResourceV2(
-            EidasSamlParserService eidasSamlParserService,
+            EidasSamlParserProxy eidasSamlParserService,
             VerifyServiceProviderProxy vspProxy,
             SamlFormViewBuilder samlFormViewBuilder) {
         this.eidasSamlParserService = eidasSamlParserService;

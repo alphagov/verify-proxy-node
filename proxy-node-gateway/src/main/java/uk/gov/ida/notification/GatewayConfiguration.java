@@ -6,7 +6,6 @@ import uk.gov.ida.notification.configuration.EidasSamlParserServiceConfiguration
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.services.EidasSamlParserService;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;

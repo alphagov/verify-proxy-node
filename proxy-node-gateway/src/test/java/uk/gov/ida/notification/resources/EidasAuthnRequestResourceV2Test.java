@@ -10,7 +10,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ida.notification.services.EidasSamlParserService;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -44,7 +44,7 @@ public class EidasAuthnRequestResourceV2Test {
     private EidasAuthnRequestResourceV2 resource;
 
     @Mock
-    private EidasSamlParserService eidasSamlParserService;
+    private EidasSamlParserProxy eidasSamlParserService;
 
     @Mock
     private VerifyServiceProviderProxy vspProxy;
