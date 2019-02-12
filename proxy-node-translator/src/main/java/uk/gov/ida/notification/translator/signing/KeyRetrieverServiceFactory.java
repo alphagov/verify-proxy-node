@@ -1,6 +1,6 @@
-package uk.gov.ida.notification.signing;
+package uk.gov.ida.notification.translator.signing;
 
-import uk.gov.ida.notification.TranslatorConfiguration;
+import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 
 import java.util.logging.Logger;
 

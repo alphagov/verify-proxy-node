@@ -8,6 +8,7 @@ import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
 import uk.gov.ida.notification.translator.apprule.rules.TranslatorAppRule;
+import uk.gov.ida.notification.translator.apprule.rules.VspClientRule;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
@@ -17,8 +18,12 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public class TranslatorAppRuleTestBase {
+
     @ClassRule
     public static final MetadataClientRule metadataClientRule;
+
+    @ClassRule
+    public static final VspClientRule vspClientRule;
 
     private static final KeyStoreResource truststore = aKeyStoreResource()
             .withCertificate("VERIFY-FEDERATION", aCertificate().withCertificate(METADATA_SIGNING_A_PUBLIC_CERT).build().getCertificate())
@@ -29,6 +34,7 @@ public class TranslatorAppRuleTestBase {
             InitializationService.initialize();
             VerifySamlInitializer.init();
             metadataClientRule = new MetadataClientRule();
+            vspClientRule = new VspClientRule();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -44,6 +50,7 @@ public class TranslatorAppRuleTestBase {
             ConfigOverride.config("connectorNodeUrl", "http://connector-node:8080"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
             ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
+            ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri() + "/vsp"),
             ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.store", truststore.getAbsolutePath()),
