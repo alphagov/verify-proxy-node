@@ -1,7 +1,12 @@
 package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.validator.constraints.NotBlank;
+
+import javax.validation.constraints.NotNull;
+import java.security.cert.X509Certificate;
 
 public class EidasSamlParserResponse {
 
@@ -13,21 +18,23 @@ public class EidasSamlParserResponse {
     @NotBlank
     private String issuer;
 
+    @NotNull
     @JsonProperty
-    @NotBlank
-    private String connectorPublicEncryptionKey;
+    @JsonSerialize(using = X509CertificateSerializer.class)
+    @JsonDeserialize(using = X509CertificateDeserializer.class)
+    private X509Certificate connectorEncryptionPublicCertificate;
 
     @JsonProperty
     @NotBlank
     private String destination;
 
-    public EidasSamlParserResponse() {
+    private EidasSamlParserResponse() {
     }
 
-    public EidasSamlParserResponse(String requestId, String issuer, String connectorPublicEncryptionKey, String destination) {
+    public EidasSamlParserResponse(String requestId, String issuer, X509Certificate connectorEncryptionPublicCertificate, String destination) {
         this.requestId = requestId;
         this.issuer = issuer;
-        this.connectorPublicEncryptionKey = connectorPublicEncryptionKey;
+        this.connectorEncryptionPublicCertificate = connectorEncryptionPublicCertificate;
         this.destination = destination;
     }
 
@@ -39,8 +46,8 @@ public class EidasSamlParserResponse {
         return issuer;
     }
 
-    public String getConnectorPublicEncryptionKey() {
-        return connectorPublicEncryptionKey;
+    public X509Certificate getConnectorEncryptionPublicCertificate() {
+        return connectorEncryptionPublicCertificate;
     }
 
     public String getDestination() {

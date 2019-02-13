@@ -9,7 +9,7 @@ import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -22,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
+import java.util.Base64;
 import java.util.logging.Logger;
 
 @Path("/SAML2/SSO")
@@ -29,7 +30,7 @@ public class EidasAuthnRequestResourceV2 {
 
     private final Logger log = Logger.getLogger(getClass().getName());
     public static final String SESSION_KEY_EIDAS_REQUEST_ID = "eidas_request_id";
-    public static final String SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_KEY = "eidas_connector_public_key";
+    public static final String SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT = "eidas_connector_public_key";
     public static final String SESSION_KEY_EIDAS_DESTINATION = "eidas_destination";
     public static final String SESSION_KEY_HUB_REQUEST_ID = "hub_request_id";
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
@@ -68,15 +69,15 @@ public class EidasAuthnRequestResourceV2 {
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest);
-        VSPAuthnRequestResponse vspResponse = generateHubRequestWithVSP();
+        AuthnRequestResponse vspResponse = generateHubRequestWithVSP();
         logAuthnRequestInformation(session, eidasSamlParserResponse, vspResponse);
         setResponseDataInSession(session, eidasSamlParserResponse, vspResponse);
         return buildSamlFormView(vspResponse, eidasRelayState);
     }
 
-    private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, VSPAuthnRequestResponse vspResponse) {
+    private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse) {
         session.setAttribute(SESSION_KEY_EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
-        session.setAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_KEY, eidasSamlParserResponse.getConnectorPublicEncryptionKey());
+        session.setAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT, eidasSamlParserResponse.getConnectorEncryptionPublicCertificate());
         session.setAttribute(SESSION_KEY_EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
         session.setAttribute(SESSION_KEY_HUB_REQUEST_ID, vspResponse.getRequestId());
     }
@@ -85,20 +86,21 @@ public class EidasAuthnRequestResourceV2 {
         return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest));
     }
 
-    private VSPAuthnRequestResponse generateHubRequestWithVSP() { return vspProxy.generateAuthnRequest(); }
+    private AuthnRequestResponse generateHubRequestWithVSP() { return vspProxy.generateAuthnRequest(); }
 
-    private SamlFormView buildSamlFormView(VSPAuthnRequestResponse vspResponse, String relayState) {
+    private SamlFormView buildSamlFormView(AuthnRequestResponse vspResponse, String relayState) {
         URI hubUrl = vspResponse.getSsoLocation();
         String samlRequest = vspResponse.getSamlRequest();
         return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, SUBMIT_BUTTON_TEXT, relayState);
     }
 
-    private void logAuthnRequestInformation(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, VSPAuthnRequestResponse vspResponse) {
+    private void logAuthnRequestInformation(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse) {
         log.info(String.format("[eIDAS AuthnRequest] Session ID: '%s'", session.getId()));
         log.info(String.format("[eIDAS AuthnRequest] eIDAS Request ID: '%s'", eidasSamlParserResponse.getRequestId()));
         log.info(String.format("[eIDAS AuthnRequest] eIDAS Issuer: '%s'", eidasSamlParserResponse.getIssuer()));
         log.info(String.format("[eIDAS AuthnRequest] eIDAS Destination: '%s'", eidasSamlParserResponse.getDestination()));
-        log.info(String.format("[eIDAS AuthnRequest] eIDAS Connector Public Key suffix: '%s'", StringUtils.right(eidasSamlParserResponse.getConnectorPublicEncryptionKey(), 10)));
+        String base64OfCert = Base64.getEncoder().encodeToString(eidasSamlParserResponse.getConnectorEncryptionPublicCertificate().getSignature());
+        log.info(String.format("[eIDAS AuthnRequest] eIDAS Connector Public Key suffix: '%s'", StringUtils.right(base64OfCert, 10)));
         log.info(String.format("[Hub AuthnRequest] Hub Request ID: '%s'", vspResponse.getRequestId()));
         log.info(String.format("[Hub AuthnRequest] Hub URL: '%s'", vspResponse.getSsoLocation()));
     }

@@ -11,9 +11,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.contracts.VSPAuthnRequestGenerationBody;
-import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,12 +29,13 @@ import static org.mockito.ArgumentMatchers.eq;
 public class VerifyServiceProviderProxyTest {
 
     @Path("/generate-request")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public static class TestVSPResource {
 
         @POST
-        public VSPAuthnRequestResponse testGenerate(VSPAuthnRequestGenerationBody authnRequestGenerationBody) {
-            return new VSPAuthnRequestResponse("saml_request", "request_id", UriBuilder.fromUri("http://sso-location.com").build());
+        public AuthnRequestResponse testGenerate(AuthnRequestGenerationBody authnRequestGenerationBody) {
+            return new AuthnRequestResponse("saml_request", "request_id", UriBuilder.fromUri("http://sso-location.com").build());
         }
     }
 
@@ -47,19 +49,19 @@ public class VerifyServiceProviderProxyTest {
     );
 
     @Test
-    public void generateAuthnRequestShouldReturnVSPAuthnRequestResponse() throws Exception {
+    public void generateAuthnRequestShouldReturnVSPAuthnRequestResponse() {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, clientRule.baseUri());
 
-        VSPAuthnRequestResponse response = vspProxy.generateAuthnRequest();
+        AuthnRequestResponse response = vspProxy.generateAuthnRequest();
 
         assertEquals("saml_request", response.getSamlRequest());
         assertEquals("request_id", response.getRequestId());
         assertEquals(UriBuilder.fromUri("http://sso-location.com").build(), response.getSsoLocation());
 
         Mockito.verify(jsonClient).post(
-            Mockito.argThat((VSPAuthnRequestGenerationBody request) -> request.getLevelOfAssurance() == "LEVEL_2"),
+            Mockito.argThat((AuthnRequestGenerationBody request) -> request.getLevelOfAssurance() == "LEVEL_2"),
             eq(UriBuilder.fromUri(String.format("%s/generate-request", clientRule.baseUri())).build()),
-            eq(VSPAuthnRequestResponse.class)
+            eq(AuthnRequestResponse.class)
         );
     }
 }

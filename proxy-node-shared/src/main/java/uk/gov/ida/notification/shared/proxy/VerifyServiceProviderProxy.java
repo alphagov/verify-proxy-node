@@ -1,10 +1,10 @@
 package uk.gov.ida.notification.shared.proxy;
 
 import uk.gov.ida.jerseyclient.JsonClient;
-import uk.gov.ida.notification.contracts.TranslatedHubResponse;
-import uk.gov.ida.notification.contracts.VerifyServiceProviderTranslationRequest;
-import uk.gov.ida.notification.contracts.VSPAuthnRequestGenerationBody;
-import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -12,6 +12,7 @@ import java.net.URI;
 import static uk.gov.ida.notification.shared.Urls.VerifyServiceProviderUrls;
 
 public class VerifyServiceProviderProxy {
+
     private final JsonClient jsonClient;
     private final URI translateHubResponseEndpoint;
     private final URI generateHubAuthnRequestEndpoint;
@@ -26,9 +27,9 @@ public class VerifyServiceProviderProxy {
         return jsonClient.post(request, translateHubResponseEndpoint, TranslatedHubResponse.class);
     }
 
-    public VSPAuthnRequestResponse generateAuthnRequest() {
-        VSPAuthnRequestGenerationBody request = new VSPAuthnRequestGenerationBody("LEVEL_2");
-        return jsonClient.post(request, generateHubAuthnRequestEndpoint, VSPAuthnRequestResponse.class);
+    public AuthnRequestResponse generateAuthnRequest() {
+        AuthnRequestGenerationBody request = new AuthnRequestGenerationBody("LEVEL_2");
+        return jsonClient.post(request, generateHubAuthnRequestEndpoint, AuthnRequestResponse.class);
     }
 
     private URI buildURI(URI host, String path) {

@@ -1,12 +1,14 @@
-package uk.gov.ida.notification.contracts;
+package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class VSPAuthnRequestResponse {
+public class AuthnRequestResponse {
+
     @JsonProperty
     @Valid
     @NotNull
@@ -22,10 +24,11 @@ public class VSPAuthnRequestResponse {
     @NotNull
     private URI ssoLocation;
 
-    public VSPAuthnRequestResponse() {
-    }
-
-    public VSPAuthnRequestResponse(String samlRequest, String requestId, URI ssoLocation) {
+    @JsonCreator
+    public AuthnRequestResponse(
+            @JsonProperty("samlRequest") String samlRequest,
+            @JsonProperty("requestId") String requestId,
+            @JsonProperty("ssoLocation") URI ssoLocation) {
         this.samlRequest = samlRequest;
         this.requestId = requestId;
         this.ssoLocation = ssoLocation;

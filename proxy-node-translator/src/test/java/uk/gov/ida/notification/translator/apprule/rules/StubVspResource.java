@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.translator.apprule.rules;
 
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
-import uk.gov.ida.notification.contracts.TranslatedHubResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.ws.rs.Consumes;

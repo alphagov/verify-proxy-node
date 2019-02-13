@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.contracts;
+package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
