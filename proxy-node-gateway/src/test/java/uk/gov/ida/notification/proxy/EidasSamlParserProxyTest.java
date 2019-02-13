@@ -1,8 +1,6 @@
 package uk.gov.ida.notification.proxy;
 
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -12,8 +10,6 @@ import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
-import uk.gov.ida.notification.contracts.X509CertificateDeserializer;
-import uk.gov.ida.notification.contracts.X509CertificateSerializer;
 
 import javax.validation.Valid;
 import javax.ws.rs.POST;
@@ -46,7 +42,7 @@ public class EidasSamlParserProxyTest {
     public static final DropwizardClientRule clientRule = new DropwizardClientRule(new TestESPResource());
 
     @Test
-    public void shouldReturnEidasSamlParserResponse() throws Exception {
+    public void shouldReturnEidasSamlParserResponse() {
         EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse");
 
         EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest);
@@ -56,18 +52,17 @@ public class EidasSamlParserProxyTest {
         assertEquals(new X509CertificateFactory().createCertificate(UNCHAINED_PUBLIC_CERT), response.getConnectorEncryptionPublicCertificate());
         assertEquals("destination", response.getDestination());
     }
-    private EidasSamlParserProxy setUpEidasSamlParserService(String url) throws Exception {
+
+    private EidasSamlParserProxy setUpEidasSamlParserService(String url) {
         ObjectMapper objectMapper = new ObjectMapper();
-        SimpleModule testModule = new SimpleModule("TestModule", Version.unknownVersion());
-        testModule.addSerializer(new X509CertificateSerializer());
-        testModule.addDeserializer(X509Certificate.class, new X509CertificateDeserializer());
         JsonClient jsonClient = new JsonClient(
-            new ErrorHandlingClient(ClientBuilder.newClient()),
-            new JsonResponseProcessor(objectMapper)
+                new ErrorHandlingClient(ClientBuilder.newClient()),
+                new JsonResponseProcessor(objectMapper)
         );
+
         return new EidasSamlParserProxy(
-            jsonClient,
-            UriBuilder.fromUri(clientRule.baseUri()).path(url).build()
+                jsonClient,
+                UriBuilder.fromUri(clientRule.baseUri()).path(url).build()
         );
     }
 }

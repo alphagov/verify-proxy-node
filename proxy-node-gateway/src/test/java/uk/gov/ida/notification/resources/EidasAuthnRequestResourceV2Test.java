@@ -16,7 +16,7 @@ import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
-import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;
@@ -63,7 +63,7 @@ public class EidasAuthnRequestResourceV2Test {
     private EidasSamlParserResponse eidasSamlParserResponse;
 
     @Mock
-    private VSPAuthnRequestResponse vspResponse;
+    private AuthnRequestResponse vspResponse;
 
     @Mock
     private Handler logHandler;

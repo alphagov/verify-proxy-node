@@ -2,8 +2,8 @@ package uk.gov.ida.notification.translator.resources;
 
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
-import uk.gov.ida.notification.contracts.TranslatedHubResponse;
-import uk.gov.ida.notification.contracts.VerifyServiceProviderTranslationRequest;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.translator.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
