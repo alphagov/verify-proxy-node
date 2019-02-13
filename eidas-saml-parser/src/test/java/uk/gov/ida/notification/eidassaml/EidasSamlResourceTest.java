@@ -46,10 +46,10 @@ public class EidasSamlResourceTest {
         authnRequest.setIssuer(issuer);
 
         EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(ObjectUtils.toString(authnRequest)));
-        EidasSamlParserResponse response = resources.target("/eidasAuthnRequest")
+        ResponseDto response = resources.target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE))
-                .readEntity(EidasSamlParserResponse.class);
+                .readEntity(ResponseDto.class);
 
         assertEquals(response.getRequestId(), "request_id");
         assertEquals(response.getIssuer(), "issuer");

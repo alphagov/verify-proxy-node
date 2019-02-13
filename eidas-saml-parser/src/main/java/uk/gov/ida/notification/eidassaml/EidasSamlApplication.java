@@ -7,6 +7,9 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
@@ -15,17 +18,19 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.ComparisonVa
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValidator;
-import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
+import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
+
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
 public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
+    private Metadata espMetadata;
     private MetadataResolverBundle<EidasSamlConfiguration> connectorMetadataResolverBundle;
 
     public static void main(final String[] args) throws Exception {
@@ -59,16 +64,16 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
 
         connectorMetadataResolverBundle = new MetadataResolverBundle<>(EidasSamlConfiguration::getConnectorMetadataConfiguration);
-        
+
         bootstrap.addBundle(connectorMetadataResolverBundle);
         bootstrap.addBundle(new LogstashBundle());
     }
 
     @Override
     public void run(EidasSamlConfiguration configuration, Environment environment) throws Exception {
+        espMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
-
         environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator));
     }
 
@@ -87,5 +92,14 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
                 destinationValidator,
                 new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())
         );
+    }
+
+    public String getX509EncryptionCert(EidasSamlConfiguration eidasSamlConfiguration) {
+
+        Credential credential = espMetadata.getCredential(UsageType.ENCRYPTION,
+                eidasSamlConfiguration.getConnectorMetadataConfiguration().getExpectedEntityId(),
+                SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+
+        return credential.getPublicKey().toString();
     }
 }
