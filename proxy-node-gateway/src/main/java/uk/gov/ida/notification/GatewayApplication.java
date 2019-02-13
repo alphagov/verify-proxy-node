@@ -162,15 +162,14 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 vspProxy,
                 samlFormViewBuilder));
 
-        TranslatorProxy translatorService = configuration
+        TranslatorProxy translatorProxy = configuration
             .getTranslatorServiceConfiguration()
             .buildTranslatorService(environment, new SamlParser());
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
                 configuration.getConnectorNodeUrl().toString(),
-                translatorService,
-                hubResponseValidator
+                translatorProxy
         ));
     }
 

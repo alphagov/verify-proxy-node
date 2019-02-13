@@ -50,8 +50,9 @@ public class TranslatorProxyTest {
         HubResponseTranslatorRequest request = new HubResponseTranslatorRequest(
             "hub_response",
             "requestid",
-            "level_of_assurance",
             "eidas_request_id",
+            "level_of_assurance",
+            UriBuilder.fromUri("http://connector.node").build(),
             "connector_encryption_certificate"
         );
         TranslatorProxy translatorProxy = new TranslatorProxy(
