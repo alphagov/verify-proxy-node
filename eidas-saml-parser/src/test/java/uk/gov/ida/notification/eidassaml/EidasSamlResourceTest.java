@@ -10,8 +10,8 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Issuer;
 import se.litsec.opensaml.utils.ObjectUtils;
-import uk.gov.ida.notification.dto.EidasSamlParserRequest;
-import uk.gov.ida.notification.dto.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
