@@ -7,6 +7,7 @@ public class EidasSamlParserRequest {
     @JsonProperty
     private String authnRequest;
 
+    @SuppressWarnings("Needed for serialisation")
     public EidasSamlParserRequest() {
     }
 

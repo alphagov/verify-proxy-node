@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.opensaml.security.x509.X509Credential;
 
 import javax.validation.constraints.NotNull;
 
@@ -25,13 +24,13 @@ public class HubResponseTranslatorRequest {
 
     @NotNull
     @JsonProperty
-    private X509Credential connectorEncryptionCredential;
+    private String connectorEncryptionCertificate;
 
-    public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance, String eidasRequestId, X509Credential connectorEncryptionCredential) {
+    public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance, String eidasRequestId, String connectorEncryptionCertificate) {
         this(samlResponse, requestId, levelOfAssurance);
 
         this.eidasRequestId = eidasRequestId;
-        this.connectorEncryptionCredential = connectorEncryptionCredential;
+        this.connectorEncryptionCertificate = connectorEncryptionCertificate;
     }
 
     public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance) {
@@ -52,8 +51,8 @@ public class HubResponseTranslatorRequest {
         return eidasRequestId;
     }
 
-    public X509Credential getConnectorEncryptionCredential() {
-        return connectorEncryptionCredential;
+    public String getConnectorEncryptionCertificate() {
+        return connectorEncryptionCertificate;
     }
 
     public String getLevelOfAssurance() {
