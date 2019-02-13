@@ -74,7 +74,9 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         espMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
-        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator));
+        String x509EncryptionCert = getX509EncryptionCert(configuration);
+
+        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, x509EncryptionCert));
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
@@ -94,10 +96,10 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         );
     }
 
-    public String getX509EncryptionCert(EidasSamlConfiguration eidasSamlConfiguration) {
+    public String getX509EncryptionCert(EidasSamlConfiguration configuration) {
 
         Credential credential = espMetadata.getCredential(UsageType.ENCRYPTION,
-                eidasSamlConfiguration.getConnectorMetadataConfiguration().getExpectedEntityId(),
+                configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 SPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
         return credential.getPublicKey().toString();

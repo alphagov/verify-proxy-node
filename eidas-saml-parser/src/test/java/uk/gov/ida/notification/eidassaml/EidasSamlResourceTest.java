@@ -11,7 +11,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Issuer;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
-import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
@@ -19,7 +18,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
 public class EidasSamlResourceTest {
 
@@ -29,7 +28,7 @@ public class EidasSamlResourceTest {
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-            .addResource(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator))
+            .addResource(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, TEST_RP_PUBLIC_ENCRYPTION_CERT))
             .build();
 
     @Before
