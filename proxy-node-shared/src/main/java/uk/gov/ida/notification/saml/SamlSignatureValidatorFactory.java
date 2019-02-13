@@ -14,16 +14,16 @@ import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidat
 public class SamlSignatureValidatorFactory {
 
 
-    public static SamlMessageSignatureValidator createSamlMessageSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
-        MetadataCredentialResolver hubMetadataCredentialResolver = hubMetadataResolverBundle.getMetadataCredentialResolver();
+    public static SamlMessageSignatureValidator createSamlMessageSignatureValidator(MetadataResolverBundle metadataResolverBundle) {
+        MetadataCredentialResolver metadataCredentialResolver = metadataResolverBundle.getMetadataCredentialResolver();
         KeyInfoCredentialResolver keyInfoCredentialResolver = DefaultSecurityConfigurationBootstrap.buildBasicInlineKeyInfoCredentialResolver();
-        ExplicitKeySignatureTrustEngine explicitKeySignatureTrustEngine = new ExplicitKeySignatureTrustEngine(hubMetadataCredentialResolver, keyInfoCredentialResolver);
+        ExplicitKeySignatureTrustEngine explicitKeySignatureTrustEngine = new ExplicitKeySignatureTrustEngine(metadataCredentialResolver, keyInfoCredentialResolver);
         MetadataBackedSignatureValidator metadataBackedSignatureValidator = MetadataBackedSignatureValidator.withoutCertificateChainValidation(explicitKeySignatureTrustEngine);
         return new SamlMessageSignatureValidator(metadataBackedSignatureValidator);
     }
 
-    public static SamlRequestSignatureValidator createSamlRequestSignatureValidator(MetadataResolverBundle hubMetadataResolverBundle) throws ComponentInitializationException {
-        SamlMessageSignatureValidator samlMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataResolverBundle);
+    public static SamlRequestSignatureValidator createSamlRequestSignatureValidator(MetadataResolverBundle metadataResolverBundle) {
+        SamlMessageSignatureValidator samlMessageSignatureValidator = createSamlMessageSignatureValidator(metadataResolverBundle);
         return new SamlRequestSignatureValidator(samlMessageSignatureValidator);
     }
 }
