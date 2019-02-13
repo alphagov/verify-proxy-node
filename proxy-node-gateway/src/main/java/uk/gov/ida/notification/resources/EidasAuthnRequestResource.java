@@ -25,14 +25,15 @@ import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.util.logging.Logger;
 
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_DESTINATION;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
+
 @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_PATH)
 public class EidasAuthnRequestResource {
 
     private final Logger log = Logger.getLogger(getClass().getName());
-    public static final String SESSION_KEY_EIDAS_REQUEST_ID = "eidas_request_id";
-    public static final String SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT = "eidas_connector_public_key";
-    public static final String SESSION_KEY_EIDAS_DESTINATION = "eidas_destination";
-    public static final String SESSION_KEY_HUB_REQUEST_ID = "hub_request_id";
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
     public static final String SESSION_KEY_EIDAS_RELAY_STATE = "eidas_relay_state";
 
