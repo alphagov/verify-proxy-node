@@ -18,7 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import java.security.cert.X509Certificate;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
@@ -31,8 +30,7 @@ public class EidasSamlParserProxyTest {
         @POST
         @Valid
         public EidasSamlParserResponse testValidParse(EidasSamlParserRequest eidasSamlParserRequest) {
-            X509Certificate certificate = new X509CertificateFactory().createCertificate(UNCHAINED_PUBLIC_CERT);
-            return new EidasSamlParserResponse("request_id", "issuer", certificate, "destination");
+            return new EidasSamlParserResponse("request_id", "issuer", UNCHAINED_PUBLIC_CERT, "destination");
         }
     }
 
@@ -49,7 +47,7 @@ public class EidasSamlParserProxyTest {
 
         assertEquals("request_id", response.getRequestId());
         assertEquals("issuer", response.getIssuer());
-        assertEquals(new X509CertificateFactory().createCertificate(UNCHAINED_PUBLIC_CERT), response.getConnectorEncryptionPublicCertificate());
+        assertEquals(UNCHAINED_PUBLIC_CERT, response.getConnectorEncryptionPublicCertificate());
         assertEquals("destination", response.getDestination());
     }
 

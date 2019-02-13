@@ -1,12 +1,12 @@
 package uk.gov.ida.notification.translator.resources;
 
-import org.opensaml.security.x509.X509Credential;
+import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
-import uk.gov.ida.notification.translator.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
+import uk.gov.ida.notification.translator.Urls;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 
 import javax.ws.rs.Consumes;
@@ -15,6 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
 
 @Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
@@ -23,6 +24,7 @@ import java.util.logging.Logger;
 public class HubResponseTranslatorResource {
     private static final Logger LOG = Logger.getLogger(HubResponseTranslatorResource.class.getName());
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
+    private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
@@ -43,8 +45,8 @@ public class HubResponseTranslatorResource {
 
         final TranslatedHubResponse translatedHubResponse = verifyServiceProviderProxy.getTranslatedHubResponse(vspRequest);
 
-        final X509Credential connectorEncryptionCert = hubResponseTranslatorRequest.getConnectorEncryptionCredential();
-        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(null, connectorEncryptionCert);
+        final X509Certificate encryptionCertificate = X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate());
+        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(null, encryptionCertificate);
         logEidasResponse(eidasResponse);
 
         final String samlMessage = MARSHALLER.transformToString(eidasResponse);
