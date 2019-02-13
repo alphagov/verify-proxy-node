@@ -8,8 +8,8 @@ import io.dropwizard.setup.Environment;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.x509.X509Credential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
@@ -25,6 +25,9 @@ import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
+
+import java.security.cert.CertificateEncodingException;
+import java.util.Base64;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
@@ -74,7 +77,9 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         espMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
-        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator));
+        String x509EncryptionCert = getX509EncryptionCert(configuration);
+
+        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, x509EncryptionCert));
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
@@ -94,12 +99,15 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         );
     }
 
-    public String getX509EncryptionCert(EidasSamlConfiguration eidasSamlConfiguration) {
+    private String getX509EncryptionCert(EidasSamlConfiguration configuration) throws CertificateEncodingException {
 
-        Credential credential = espMetadata.getCredential(UsageType.ENCRYPTION,
-                eidasSamlConfiguration.getConnectorMetadataConfiguration().getExpectedEntityId(),
+        X509Credential credential = (X509Credential) espMetadata.getCredential(UsageType.ENCRYPTION,
+                configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 SPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
-        return credential.getPublicKey().toString();
+        String x509EncryptionCert = Base64.getEncoder().encodeToString(
+                credential.getEntityCertificate().getEncoded());
+
+        return x509EncryptionCert;
     }
 }
