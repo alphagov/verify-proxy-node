@@ -8,8 +8,8 @@ import io.dropwizard.setup.Environment;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.Urls;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
+import uk.gov.ida.notification.shared.Urls;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

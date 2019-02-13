@@ -11,6 +11,7 @@ import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
@@ -22,10 +23,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
-import java.util.Base64;
 import java.util.logging.Logger;
 
-@Path("/SAML2/SSO")
+@Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_PATH)
 public class EidasAuthnRequestResource {
 
     private final Logger log = Logger.getLogger(getClass().getName());
