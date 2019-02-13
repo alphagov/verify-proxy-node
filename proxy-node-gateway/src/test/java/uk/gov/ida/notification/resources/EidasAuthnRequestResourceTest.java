@@ -32,18 +32,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
-import static uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2.SESSION_KEY_EIDAS_DESTINATION;
-import static uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2.SESSION_KEY_EIDAS_REQUEST_ID;
-import static uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2.SESSION_KEY_HUB_REQUEST_ID;
-import static uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2.SUBMIT_BUTTON_TEXT;
+import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
+import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_DESTINATION;
+import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_REQUEST_ID;
+import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_HUB_REQUEST_ID;
+import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EidasAuthnRequestResourceV2Test {
+public class EidasAuthnRequestResourceTest {
 
     @InjectMocks
-    private EidasAuthnRequestResourceV2 resource;
+    private EidasAuthnRequestResource resource;
 
     @Mock
     private EidasSamlParserProxy eidasSamlParserService;
@@ -74,13 +74,13 @@ public class EidasAuthnRequestResourceV2Test {
 
     @Before
     public void setup() {
-        Logger logger = Logger.getLogger(EidasAuthnRequestResourceV2.class.getName());
+        Logger logger = Logger.getLogger(EidasAuthnRequestResource.class.getName());
         logger.addHandler(logHandler);
     }
 
     @After
     public void teardown() {
-        Logger logger = Logger.getLogger(EidasAuthnRequestResourceV2.class.getName());
+        Logger logger = Logger.getLogger(EidasAuthnRequestResource.class.getName());
         logger.removeHandler(logHandler);
     }
 
