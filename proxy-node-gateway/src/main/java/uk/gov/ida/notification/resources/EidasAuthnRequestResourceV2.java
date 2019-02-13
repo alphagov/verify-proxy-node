@@ -4,13 +4,13 @@ import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
-import uk.gov.ida.notification.services.EidasSamlParserService;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.SamlFormViewBuilder;
-import uk.gov.ida.notification.VSPService;
-import uk.gov.ida.notification.dto.EidasSamlParserRequest;
-import uk.gov.ida.notification.dto.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.dto.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.contracts.VSPAuthnRequestResponse;
+import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
@@ -34,16 +34,16 @@ public class EidasAuthnRequestResourceV2 {
     public static final String SESSION_KEY_HUB_REQUEST_ID = "hub_request_id";
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
 
-    private final EidasSamlParserService eidasSamlParserService;
-    private final VSPService vspService;
+    private final EidasSamlParserProxy eidasSamlParserService;
+    private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;
 
     public EidasAuthnRequestResourceV2(
-            EidasSamlParserService eidasSamlParserService,
-            VSPService vspService,
+            EidasSamlParserProxy eidasSamlParserService,
+            VerifyServiceProviderProxy vspProxy,
             SamlFormViewBuilder samlFormViewBuilder) {
         this.eidasSamlParserService = eidasSamlParserService;
-        this.vspService = vspService;
+        this.vspProxy = vspProxy;
         this.samlFormViewBuilder = samlFormViewBuilder;
     }
 
@@ -85,9 +85,7 @@ public class EidasAuthnRequestResourceV2 {
         return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest));
     }
 
-    private VSPAuthnRequestResponse generateHubRequestWithVSP() {
-        return vspService.generateAuthnRequest();
-    }
+    private VSPAuthnRequestResponse generateHubRequestWithVSP() { return vspProxy.generateAuthnRequest(); }
 
     private SamlFormView buildSamlFormView(VSPAuthnRequestResponse vspResponse, String relayState) {
         URI hubUrl = vspResponse.getSsoLocation();

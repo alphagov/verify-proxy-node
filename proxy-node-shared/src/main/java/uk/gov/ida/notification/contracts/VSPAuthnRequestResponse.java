@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.dto;
+package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,6 +21,15 @@ public class VSPAuthnRequestResponse {
     @Valid
     @NotNull
     private URI ssoLocation;
+
+    public VSPAuthnRequestResponse() {
+    }
+
+    public VSPAuthnRequestResponse(String samlRequest, String requestId, URI ssoLocation) {
+        this.samlRequest = samlRequest;
+        this.requestId = requestId;
+        this.ssoLocation = ssoLocation;
+    }
 
     public String getSamlRequest() {
         return samlRequest;

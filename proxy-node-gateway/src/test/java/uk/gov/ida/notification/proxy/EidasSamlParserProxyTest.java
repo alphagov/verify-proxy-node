@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.services;
+package uk.gov.ida.notification.proxy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.junit.DropwizardClientRule;
@@ -7,8 +7,8 @@ import org.junit.Test;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.dto.EidasSamlParserRequest;
-import uk.gov.ida.notification.dto.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -19,7 +19,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import static org.junit.Assert.assertEquals;
 
-public class EidasSamlParserServiceTest {
+public class EidasSamlParserProxyTest {
     @Path("/parse")
     @Produces(MediaType.APPLICATION_JSON)
     public static class TestESPResource {
@@ -41,7 +41,7 @@ public class EidasSamlParserServiceTest {
 
     @Test
     public void shouldReturnEidasSamlParserResponse() throws Exception {
-        EidasSamlParserService eidasSamlParserService = setUpEidasSamlParserService("/parse");
+        EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse");
 
         EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest);
 
@@ -51,12 +51,12 @@ public class EidasSamlParserServiceTest {
         assertEquals("destination", response.getDestination());
     }
 
-    private EidasSamlParserService setUpEidasSamlParserService(String url) throws Exception {
+    private EidasSamlParserProxy setUpEidasSamlParserService(String url) throws Exception {
         JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(ClientBuilder.newClient()),
             new JsonResponseProcessor(new ObjectMapper())
         );
-        return new EidasSamlParserService(
+        return new EidasSamlParserProxy(
             jsonClient,
             UriBuilder.fromUri(clientRule.baseUri()).path(url).build()
         );

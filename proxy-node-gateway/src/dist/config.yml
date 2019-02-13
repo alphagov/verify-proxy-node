@@ -30,6 +30,13 @@ eidasSamlParserService:
     connectionTimeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
     connectionRequestTimeout: ${EIDAS_SAML_PARSER_CONNECTION_TIMEOUT:-5s}
 
+verifyServiceProviderService:
+  url: ${VERIFY_SERVICE_PROVIDER_URL}
+  clientConfig:
+    timeout: ${VERIFY_SERVICE_PROVIDER_TIMEOUT:-5s}
+    connectionTimeout: ${VERIFY_SERVICE_PROVIDER_TIMEOUT:-5s}
+    connectionRequestTimeout: ${VERIFY_SERVICE_PROVIDER_TIMEOUT:-5s}
+
 translatorService:
   url: ${TRANSLATOR_URL}
   client:
