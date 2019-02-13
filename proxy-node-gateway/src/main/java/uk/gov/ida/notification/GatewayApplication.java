@@ -13,17 +13,16 @@ import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.security.credential.BasicCredential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
-import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
+import uk.gov.ida.notification.resources.EidasAuthnRequestResourceV2;
 import uk.gov.ida.notification.resources.HubResponseResource;
-import uk.gov.ida.notification.saml.EidasAuthnRequestTranslator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.ResponseAssertionFactory;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
@@ -31,29 +30,20 @@ import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.deprecate.EncryptedResponseFromIdpValidator;
 import uk.gov.ida.notification.saml.deprecate.IdpResponseValidator;
 import uk.gov.ida.notification.saml.deprecate.SamlStatusToIdaStatusCodeMapper;
-import uk.gov.ida.notification.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.validation.HubResponseValidator;
-import uk.gov.ida.notification.saml.validation.components.AssertionConsumerServiceValidator;
-import uk.gov.ida.notification.saml.validation.components.ComparisonValidator;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestIssuerValidator;
-import uk.gov.ida.notification.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
-import uk.gov.ida.notification.saml.validation.components.SpTypeValidator;
-import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.saml.security.SamlAssertionsSignatureValidator;
 import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
-import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
 import java.net.URI;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
-import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
 
@@ -155,12 +145,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     private void registerResources(GatewayConfiguration configuration, Environment environment) throws Exception {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
 
-        HubAuthnRequestGenerator hubAuthnRequestGenerator = createHubAuthnRequestGenerator(configuration);
-
-        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
 
-        SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
 
         EidasSamlParserProxy espProxy = configuration
             .getEidasSamlParserServiceConfiguration()
@@ -170,12 +156,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             .getVerifyServiceProviderConfiguration()
             .buildVerifyServiceProviderProxy(environment);
 
-        environment.jersey().register(new EidasAuthnRequestResource(
-                configuration,
-                hubAuthnRequestGenerator,
-                samlFormViewBuilder,
-                eidasAuthnRequestValidator,
-                samlRequestSignatureValidator));
+        environment.jersey().register(new EidasAuthnRequestResourceV2(
+                espProxy,
+                vspProxy,
+                samlFormViewBuilder));
 
         TranslatorService translatorService = configuration
             .getTranslatorServiceConfiguration()
@@ -229,36 +213,5 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 configuration.getPrivateKey().getPrivateKey()
         );
         return new ResponseAssertionDecrypter(decryptionCredential);
-    }
-
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(GatewayConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
-        MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("gateway-hub");
-
-        return new EidasAuthnRequestValidator(
-            new RequestIssuerValidator(),
-            new SpTypeValidator(),
-            new LoaValidator(),
-            new RequestedAttributesValidator(),
-            replayChecker,
-            new ComparisonValidator(),
-            createDestinationValidator(configuration),
-            new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())
-        );
-    }
-
-    private DestinationValidator createDestinationValidator(GatewayConfiguration configuration) {
-        return new DestinationValidator(configuration.getProxyNodeAuthnRequestUrl(), configuration.getProxyNodeAuthnRequestUrl().getPath());
-    }
-
-    private HubAuthnRequestGenerator createHubAuthnRequestGenerator(GatewayConfiguration configuration) {
-        EidasAuthnRequestTranslator eidasAuthnRequestTranslator = new EidasAuthnRequestTranslator(
-                configuration.getProxyNodeEntityId(),
-                configuration.getHubUrl().toString());
-        SamlObjectSigner signer = new SamlObjectSigner(
-                configuration.getHubFacingSigningKeyPair().getPublicKey().getPublicKey(),
-                configuration.getHubFacingSigningKeyPair().getPrivateKey().getPrivateKey(),
-                configuration.getHubFacingSigningKeyPair().getPublicKey().getCert()
-        );
-        return new HubAuthnRequestGenerator(eidasAuthnRequestTranslator, signer);
     }
 }
