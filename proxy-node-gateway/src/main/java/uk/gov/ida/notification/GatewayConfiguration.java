@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.EidasSamlParserServiceConfiguration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
+import uk.gov.ida.notification.configuration.TranslatorServiceConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
