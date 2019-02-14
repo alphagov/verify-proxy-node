@@ -29,6 +29,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_DESTINATION;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELAY_STATE;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
 
@@ -65,12 +67,14 @@ public class HubResponseResourceTest {
     public void testsHappyPath() {
         when(session.getAttribute(SESSION_KEY_HUB_REQUEST_ID)).thenReturn("hub_request_id_in_session");
         when(session.getAttribute(SESSION_KEY_EIDAS_REQUEST_ID)).thenReturn("eidas_request_id_in_session");
+        when(session.getAttribute(SESSION_KEY_EIDAS_DESTINATION)).thenReturn("http://conector.node");
         when(session.getAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT)).thenReturn("connector_public_cert_in_session");
+        when(session.getAttribute(SESSION_KEY_EIDAS_RELAY_STATE)).thenReturn("eidas_relay_state_in_session");
+
         when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class))).thenReturn("translated_eidas_response");
 
         HubResponseResource resource =  new HubResponseResource(
             new SamlFormViewBuilder(),
-            "http://conector.node",
             translatorProxy
         );
 
@@ -90,7 +94,7 @@ public class HubResponseResourceTest {
         assertEquals("SAMLResponse", response.getSamlMessageType());
         assertEquals("translated_eidas_response", response.getEncodedSamlMessage());
         assertEquals(HubResponseResource.SUBMIT_TEXT, response.getSubmitText());
-        assertEquals("relay_state", response.getRelayState());
+        assertEquals("eidas_relay_state_in_session", response.getRelayState());
 
         verify(logHandler, times(2)).publish(captorLoggingEvent.capture());
         List<String> allLogRecords = captorLoggingEvent

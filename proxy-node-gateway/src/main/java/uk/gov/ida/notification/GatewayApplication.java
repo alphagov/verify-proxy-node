@@ -168,7 +168,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
-                configuration.getConnectorNodeUrl().toString(),
                 translatorProxy
         ));
     }

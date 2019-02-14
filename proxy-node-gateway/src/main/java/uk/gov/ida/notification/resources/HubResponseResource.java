@@ -18,6 +18,8 @@ import javax.ws.rs.core.UriBuilder;
 import java.util.logging.Logger;
 
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_DESTINATION;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELAY_STATE;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
 
@@ -28,15 +30,12 @@ public class HubResponseResource {
     public static final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
 
     private final SamlFormViewBuilder samlFormViewBuilder;
-    private final String connectorNodeUrl;
     private final TranslatorProxy translatorProxy;
 
     public HubResponseResource(
             SamlFormViewBuilder samlFormViewBuilder,
-            String connectorNodeUrl,
             TranslatorProxy translatorProxy) {
         this.samlFormViewBuilder = samlFormViewBuilder;
-        this.connectorNodeUrl = connectorNodeUrl;
         this.translatorProxy = translatorProxy;
     }
 
@@ -51,6 +50,8 @@ public class HubResponseResource {
         String hubRequestId = session.getAttribute(SESSION_KEY_HUB_REQUEST_ID).toString();
         String eidasRequestId = session.getAttribute(SESSION_KEY_EIDAS_REQUEST_ID).toString();
         String connectorEncrpytionCredential = session.getAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT).toString();
+        String connectorNodeUrl = session.getAttribute(SESSION_KEY_EIDAS_DESTINATION).toString();
+        String eidasRelayState = session.getAttribute(SESSION_KEY_EIDAS_RELAY_STATE).toString();
 
         LOG.info(String.format("[HUB Response] received for hub authn request ID '%s', eIDAS authn request ID '%s'", hubRequestId, eidasRequestId));
 
@@ -71,7 +72,7 @@ public class HubResponseResource {
             connectorNodeUrl,
             eidasResponse,
             SUBMIT_TEXT,
-            relayState
+            eidasRelayState
         );
     }
 }

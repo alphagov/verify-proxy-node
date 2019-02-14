@@ -23,11 +23,6 @@ public class GatewayConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI connectorNodeUrl;
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private TranslatorServiceConfiguration translatorService;
 
     @JsonProperty
@@ -96,10 +91,6 @@ public class GatewayConfiguration extends Configuration {
 
     public URI getHubUrl() {
         return hubUrl;
-    }
-
-    public URI getConnectorNodeUrl() {
-        return connectorNodeUrl;
     }
 
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }

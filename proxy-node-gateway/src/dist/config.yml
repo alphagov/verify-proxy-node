@@ -17,7 +17,6 @@ proxyNodeResponseUrl: ${PROXY_NODE_RESPONSE_ENDPOINT}
 proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
 
 hubUrl: ${HUB_URL}
-connectorNodeUrl: ${CONNECTOR_NODE_URL}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 
 replayChecker:
