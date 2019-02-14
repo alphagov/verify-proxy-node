@@ -22,10 +22,14 @@ public class EidasSamlResource {
 
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
     private SamlRequestSignatureValidator samlRequestSignatureValidator;
+    private String x509EncryptionCert;
 
-    public EidasSamlResource(EidasAuthnRequestValidator eidasAuthnRequestValidator, SamlRequestSignatureValidator samlRequestSignatureValidator) {
+    public EidasSamlResource(EidasAuthnRequestValidator eidasAuthnRequestValidator,
+                             SamlRequestSignatureValidator samlRequestSignatureValidator,
+                             String x509EncryptionCert) {
         this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
         this.samlRequestSignatureValidator = samlRequestSignatureValidator;
+        this.x509EncryptionCert = x509EncryptionCert;
     }
 
     @POST
@@ -41,6 +45,7 @@ public class EidasSamlResource {
 
         return new ResponseDto(
                 authnRequest.getID(),
-                authnRequest.getIssuer().getValue());
+                authnRequest.getIssuer().getValue(),
+                x509EncryptionCert);
     }
 }
