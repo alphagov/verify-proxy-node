@@ -7,6 +7,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
@@ -21,6 +22,8 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValida
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.saml.metadata.MetadataConfiguration;
+import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 
@@ -33,7 +36,7 @@ import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createS
 
 public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
-    private Metadata espMetadata;
+    private Metadata connectorMetadata;
     private MetadataResolverBundle<EidasSamlConfiguration> connectorMetadataResolverBundle;
 
     public static void main(final String[] args) throws Exception {
@@ -74,12 +77,28 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
     @Override
     public void run(EidasSamlConfiguration configuration, Environment environment) throws Exception {
-        espMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
+        connectorMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
         String x509EncryptionCert = getX509EncryptionCert(configuration);
 
         environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, x509EncryptionCert));
+
+        registerMetadataHealthCheck(
+                connectorMetadataResolverBundle.getMetadataResolver(),
+                configuration.getConnectorMetadataConfiguration(),
+                environment,
+                "connector-metadata");
+    }
+
+    private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
+        MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
+                metadataResolver,
+                name,
+                connectorMetadataConfiguration.getExpectedEntityId()
+        );
+
+        environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
@@ -101,10 +120,9 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
     private String getX509EncryptionCert(EidasSamlConfiguration configuration) throws CertificateEncodingException {
 
-        X509Credential credential = (X509Credential) espMetadata.getCredential(UsageType.ENCRYPTION,
+        X509Credential credential = (X509Credential) connectorMetadata.getCredential(UsageType.ENCRYPTION,
                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-
         String x509EncryptionCert = Base64.getEncoder().encodeToString(
                 credential.getEntityCertificate().getEncoded());
 

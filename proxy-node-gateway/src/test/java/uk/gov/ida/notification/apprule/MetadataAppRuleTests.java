@@ -16,7 +16,6 @@ public class MetadataAppRuleTests extends GatewayAppRuleTestBase {
 
         String healthcheck = response.readEntity(String.class);
 
-        assertThat(healthcheck).contains("\"connector-metadata\":{\"healthy\":true}");
         assertThat(healthcheck).contains("\"hub-metadata\":{\"healthy\":true}");
     }
 }
