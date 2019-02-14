@@ -8,6 +8,7 @@ import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.UsageType;
+import uk.gov.ida.notification.exceptions.metadata.ConnectorMetadataException;
 import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
 import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 import uk.gov.ida.notification.helpers.TestKeyPair;
@@ -94,5 +95,19 @@ public class MetadataTest {
 
         Metadata metadata = new Metadata(metadataCredentialResolver);
         metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+    }
+
+    @Test
+    public void shouldReturnConnectorDestinationURLFromMetadata() throws Exception {
+        MetadataResolver metadataResolver = new TestMetadataBuilder("local-connector-metadata.xml").buildResolver("connector");
+        String location = Metadata.getAssertionConsumerServiceLocation("http://localhost:55000/local-connector/metadata.xml", metadataResolver);
+
+        assertEquals("http://localhost:50300/SAML2/SSO/EidasResponse/POST", location);
+    }
+
+    @Test(expected = ConnectorMetadataException.class)
+    public void shouldThrowExceptionWhenConnectorDestinationURLEntityIdNotFound() throws Exception {
+        MetadataResolver metadataResolver = new TestMetadataBuilder("local-connector-metadata.xml").buildResolver("connector");
+        String location = Metadata.getAssertionConsumerServiceLocation("http://unknown-entity", metadataResolver);
     }
 }

@@ -12,6 +12,7 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
+import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.AssertionConsumerServiceValidator;
@@ -25,8 +26,6 @@ import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
-import uk.gov.ida.dropwizard.logstash.LogstashBundle;
-
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 import java.security.cert.CertificateEncodingException;
@@ -68,7 +67,6 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
         VerifySamlInitializer.init();
 
-
         connectorMetadataResolverBundle = new MetadataResolverBundle<>(EidasSamlConfiguration::getConnectorMetadataConfiguration);
 
         bootstrap.addBundle(connectorMetadataResolverBundle);
@@ -82,8 +80,17 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
         String x509EncryptionCert = getX509EncryptionCert(configuration);
 
-        environment.jersey().register(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, x509EncryptionCert));
-
+        environment.jersey().register(
+                new EidasSamlResource(
+                        eidasAuthnRequestValidator,
+                        samlRequestSignatureValidator,
+                        x509EncryptionCert,
+                        Metadata.getAssertionConsumerServiceLocation(
+                                configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
+                                connectorMetadataResolverBundle.getMetadataResolver()
+                        )
+                )
+        );
         registerMetadataHealthCheck(
                 connectorMetadataResolverBundle.getMetadataResolver(),
                 configuration.getConnectorMetadataConfiguration(),

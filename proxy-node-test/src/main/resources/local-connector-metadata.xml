@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="VERIFY-HUB"
+                     entityID="http://localhost:55000/local-connector/metadata.xml"
+                     validUntil="2118-11-18T22:50:54.000Z" xsi:type="md:EntityDescriptorType">
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:SignedInfo>
+            <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"/>
+            <ds:Reference URI="#VERIFY-HUB">
+                <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                </ds:Transforms>
+                <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                <ds:DigestValue>VTHWhosffq7pfIqJ3pDvb0ec48khuTXVI6/1eSG6ulY=</ds:DigestValue>
+            </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>
+            dek/kvr2QTcKJzSqsi3w3vNT2QtOwicOy6Wh8lgBw9l14k3tPCVjN1k3GlEVAZjl4gZh7NGW5Qpd
+            psPYc/qZd2lLgbztHhvrCo2RwC9dDeREoGoH1AfDSegK/LHXbp9x
+        </ds:SignatureValue>
+        <ds:KeyInfo>
+            <ds:X509Data>
+                <ds:X509Certificate>
+                    MIIDgzCCAmugAwIBAgIQFeNoQPyFN2qc4Hl70mnGNDANBgkqhkiG9w0BAQsFADBUMQswCQYDVQQGEwJHQjEXMBUGA1UEChMOQ2FiaW5ldCBPZmZpY2UxDDAKBgNVBAsTA0dEUzEeMBwGA1UEAxMVSURBUCBNZXRhZGF0YSBUZXN0IENBMB4XDTE4MDkxMDAwMDAwMFoXDTE5MDkxMDIzNTk1OVowVzELMAkGA1UEBhMCR0IxFzAVBgNVBAoUDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLFANHRFMxITAfBgNVBAMTGFRlc3QgTWV0YWRhdGEgU2lnbmluZyBFQzB2MBAGByqGSM49AgEGBSuBBAAiA2IABO+JyU8jpJEO6Si7LBIi1TLUR8wx0XypImjwDILmuZkY7+Z8s5NQVs+LuZBn1Wf+4ccJWoWfJeNBSmkMAsdGVg0r3YThRUUVpiwLbvf8FbKU7MHPsVID+VksMyFIHO4H3KOB+zCB+DAMBgNVHRMBAf8EAjAAMF0GA1UdHwRWMFQwUqBQoE6GTGh0dHA6Ly9vbnNpdGVjcmwudHJ1c3R3aXNlLmNvbS9DYWJpbmV0T2ZmaWNlSURBUE1ldGFkYXRhVGVzdENBL0xhdGVzdENSTC5jcmwwDgYDVR0PAQH/BAQDAgeAMB0GA1UdDgQWBBRL0s6FhcDOzDACp7roGlOT/wneeTAfBgNVHSMEGDAWgBTCH2ALNLb3XDXY2aBBEiEr2YRr3zA5BggrBgEFBQcBAQQtMCswKQYIKwYBBQUHMAGGHWh0dHA6Ly9zdGQtb2NzcC50cnVzdHdpc2UuY29tMA0GCSqGSIb3DQEBCwUAA4IBAQACvqY8qloK7rjcxI34d2PlaSrgD8D6ZPjSm4Fm+O+XaAPFrf4TuJluDzotGUqDtzkH3H7IkQqVfHH5ytkRloGC+EQXtPCGnS3a76vlzFaTAU9ZTjSDT9Rzqxwar9pd7dXt1qHYftRV8c+P9F6P04CKeScap+LgYrCy2LQ2Ztdd5dWGxr02lzMf1v2vOcI2KBIbNJLfwxHp4XOY9QEy3Ywc6nxjjITICoK0wnpNQAkkgL9UBrxKbCy8m1JDEtNaZzZCoqwLH78aonv3RJoycBWgao88uKAE8/R0tjQazHiPg/1C0L2oz7jWISrVpkBhyAIXrHnumpCBYwWA/fimRnYk
+                </ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </ds:Signature>
+    <md:SPSSODescriptor WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
+                        xsi:type="md:SPSSODescriptorType">
+        <md:KeyDescriptor use="encryption" xsi:type="md:KeyDescriptorType">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
+                <ds:KeyName>http://localhost:55000/local-connector/metadata.xml</ds:KeyName>
+                <ds:X509Data xsi:type="ds:X509DataType">
+                    <ds:X509Certificate>MIIESjCCAzKgAwIBAgIQAOtkO3/R7EaBglYQKl+WyjANBgkqhkiG9w0BAQsFADBL
+                        MQswCQYDVQQGEwJHQjEXMBUGA1UEChMOQ2FiaW5ldCBPZmZpY2UxDDAKBgNVBAsT
+                        A0dEUzEVMBMGA1UEAxMMSURBUCBUZXN0IENBMB4XDTE4MDgwODAwMDAwMFoXDTE5
+                        MDgwODIzNTk1OVowgYAxCzAJBgNVBAYTAkdCMQ8wDQYDVQQIEwZMb25kb24xDzAN
+                        BgNVBAcTBkxvbmRvbjEXMBUGA1UEChQOQ2FiaW5ldCBPZmZpY2UxDDAKBgNVBAsU
+                        A0dEUzEoMCYGA1UEAxMfSFVCIEVuY3J5cHRpb24gKDIwMTgwODA4MTExMTMwKTCC
+                        ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMMZzenLKDqaXZuNPnCJAzT7
+                        T3mrQT5ppmS8+Axg0HFs9ZGO+JSAXun/HB7RzHLgji1YL4EasEgDZrm5Cm7wtPs9
+                        10uR/+HAz86b94IAMEJOUWpKaxE0u1gOA48ld7LPg4M/nEdFGq/Jusv5v104+o8f
+                        7t/mQFZGGXxpkT7FWHeYU+9JfF2AYKmU51lMOrZqW+/uddO+tLGcFD3ee+YKbmM7
+                        2px+vhYCm3botyk3My2xeYc01vg627GYS8nwQN989ow67UgRFoNQVDmMdiH4QL88
+                        ZkU/5J7zgEWd43JdkfwGL3aM99Kte9dXvDNc/ycB0K463qEi0/bw1nq8WOZYt30C
+                        AwEAAaOB8zCB8DAMBgNVHRMBAf8EAjAAMFUGA1UdHwROMEwwSqBIoEaGRGh0dHA6
+                        Ly9vbnNpdGVjcmwudHJ1c3R3aXNlLmNvbS9DYWJpbmV0T2ZmaWNlSURBUFRlc3RD
+                        QS9MYXRlc3RDUkwuY3JsMA4GA1UdDwEB/wQEAwIFIDAdBgNVHQ4EFgQU3MMvIh9w
+                        ktELZ0na+jSfTJeCB34wHwYDVR0jBBgwFoAUahFNZFDf3mNvV6GIH/gDlQ4iBLQw
+                        OQYIKwYBBQUHAQEELTArMCkGCCsGAQUFBzABhh1odHRwOi8vc3RkLW9jc3AudHJ1
+                        c3R3aXNlLmNvbTANBgkqhkiG9w0BAQsFAAOCAQEAXzIb86zaV0s7lK4fiLm2Nnt+
+                        vL8g5H1sMLOMe4saHfZlWh8fKnWiOZ+QVsJXejpyFnYtQKrk2d1TIEr+YTEo3/Fp
+                        e9UZGFMUFsVD9O1tqYnT+fUpU9RTL9s5dtxvc6bqEFGT75FS2k1Xr02RVIs9moHl
+                        jydCLWwMdbIJSbNbFCApPoNmIkmzSZfGZhHjyFSA/ummzcRWxssJsP+/8h5sx9hx
+                        NTKZhQZh36uaE/CBBhhHwIOlPHr2iUFnxpARWu753tKbNTEHNLCQbIr8PZ8NmGOy
+                        5qnGUXs8h/F/nUIkKBUpvpNci+1e/oV5d4YLnGfbH+SSGmckdmu5E0QuuS7vMg==
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:KeyDescriptor use="signing" xsi:type="md:KeyDescriptorType">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
+                <ds:KeyName>http://localhost:55000/local-connector/metadata.xml</ds:KeyName>
+                <ds:X509Data xsi:type="ds:X509DataType">
+                    <ds:X509Certificate>MIIERjCCAy6gAwIBAgIQXN9DE6Bj6PbtlE6NaFDPnzANBgkqhkiG9w0BAQsFADBL
+                        MQswCQYDVQQGEwJHQjEXMBUGA1UEChMOQ2FiaW5ldCBPZmZpY2UxDDAKBgNVBAsT
+                        A0dEUzEVMBMGA1UEAxMMSURBUCBUZXN0IENBMB4XDTE4MDgwODAwMDAwMFoXDTE5
+                        MDgwODIzNTk1OVowfTELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0G
+                        A1UEBxMGTG9uZG9uMRcwFQYDVQQKFA5DYWJpbmV0IE9mZmljZTEMMAoGA1UECxQD
+                        R0RTMSUwIwYDVQQDExxIVUIgU2lnbmluZyAoMjAxODA4MDgxMTExMzMpMIIBIjAN
+                        BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxw89JXCP/XFCSr49/beo3ZdtqL15
+                        wvpQllmuohaqH9BwVeJmpFAY7EFE+VEmRcAwOjUgq34Lqw29rR3hRQxwvwlqhN+7
+                        3De6dkjU2hxgmthxI+EFs0rtMw+jC0jyLxK2RVpO76L4h5TlC8cZzsw9X6WI6axt
+                        YiRqeKJh7jAB7uIdKaJ5MFw1+7XM5Xjf+yPvU3eyh+XFjR7XPdKzHHmLrsTYie+S
+                        kt9yW3K0ojbTNPe6wrSrSjLM5c6/Gm3rFogEjUH8R2b1MK9Re5jBywVtBOMGXEcU
+                        YV413q2zM1C4A4YB10/54fMNYi9fjQS41RJUvmuzpod7H77A6VTEJsoxpQIDAQAB
+                        o4HzMIHwMAwGA1UdEwEB/wQCMAAwVQYDVR0fBE4wTDBKoEigRoZEaHR0cDovL29u
+                        c2l0ZWNybC50cnVzdHdpc2UuY29tL0NhYmluZXRPZmZpY2VJREFQVGVzdENBL0xh
+                        dGVzdENSTC5jcmwwDgYDVR0PAQH/BAQDAgeAMB0GA1UdDgQWBBRt2VURdpUNzhrc
+                        uYpbg/FXkJReNTAfBgNVHSMEGDAWgBRqEU1kUN/eY29XoYgf+AOVDiIEtDA5Bggr
+                        BgEFBQcBAQQtMCswKQYIKwYBBQUHMAGGHWh0dHA6Ly9zdGQtb2NzcC50cnVzdHdp
+                        c2UuY29tMA0GCSqGSIb3DQEBCwUAA4IBAQCPsAPUA5SyzA77e1YNlBAgu4miJV9P
+                        9lmSgaUPI7SjusV1YWDXRKYZ+93/qWSeKsginr4t8v9KYYA4zACCDtdXXUIt408S
+                        NyZKy4Hlf21Joiw+WIGO+Ql9AvRMQ4Su6qlmekrA+WQcYb3XnnFOORjqYSKkpMfl
+                        uBs/yHWPetn0GcmWyTuUgSYugH3az2BBDGdm0pDt0refFG06Iz6ivhXgxeRRlQ7M
+                        QwYKtSBCGNJJJkIjy85SOyjT/AoQ6YZUV4B3nO6xXct2Un7YGorHucoZ764s3slV
+                        AqkqIUfx792O7DRCVOrnRFzw/8hYjXEt9uUavLhyBby4H3RnqPfzulmJ
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                     Location="http://localhost:50300/SAML2/SSO/EidasResponse/POST" index="1"
+                                     isDefault="true" xsi:type="md:IndexedEndpointType"/>
+    </md:SPSSODescriptor>
+    <md:Organization xsi:type="md:OrganizationType">
+        <md:OrganizationName xml:lang="en-GB" xsi:type="md:localizedNameType">GOV.UK</md:OrganizationName>
+        <md:OrganizationDisplayName xml:lang="en-GB" xsi:type="md:localizedNameType">GOV.UK</md:OrganizationDisplayName>
+        <md:OrganizationURL xml:lang="en-GB" xsi:type="md:localizedURIType">https://www.gov.uk</md:OrganizationURL>
+    </md:Organization>
+</md:EntityDescriptor>
