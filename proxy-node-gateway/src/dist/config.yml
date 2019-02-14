@@ -17,7 +17,6 @@ proxyNodeResponseUrl: ${PROXY_NODE_RESPONSE_ENDPOINT}
 proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
 
 hubUrl: ${HUB_URL}
-connectorNodeUrl: ${CONNECTOR_NODE_URL}
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 
 replayChecker:
@@ -39,7 +38,7 @@ verifyServiceProviderService:
 
 translatorService:
   url: ${TRANSLATOR_URL}
-  client:
+  clientConfig:
     timeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
     connectionTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
     connectionRequestTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}

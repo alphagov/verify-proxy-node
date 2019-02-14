@@ -77,7 +77,6 @@ public class GatewayAppRuleTestBase {
             ConfigOverride.config("proxyNodeResponseUrl", "http://proxy-node/SAML2/SSO/Response"),
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("hubUrl", "http://hub"),
-            ConfigOverride.config("connectorNodeUrl", "http://connector-node:8080"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
             ConfigOverride.config("eidasSamlParserService.url", "http://eidas-saml-parser/eidasAuthnRequest"),
             ConfigOverride.config("verifyServiceProviderService.url", "http://verify-service-provider/"),

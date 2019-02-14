@@ -19,6 +19,7 @@ import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
+import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
@@ -161,15 +162,13 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 vspProxy,
                 samlFormViewBuilder));
 
-        TranslatorService translatorService = configuration
+        TranslatorProxy translatorProxy = configuration
             .getTranslatorServiceConfiguration()
             .buildTranslatorService(environment, new SamlParser());
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
-                configuration.getConnectorNodeUrl().toString(),
-                translatorService,
-                hubResponseValidator
+                translatorProxy
         ));
     }
 

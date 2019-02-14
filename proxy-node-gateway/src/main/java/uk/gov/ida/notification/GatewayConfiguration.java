@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.EidasSamlParserServiceConfiguration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
+import uk.gov.ida.notification.configuration.TranslatorServiceConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
@@ -18,11 +19,6 @@ public class GatewayConfiguration extends Configuration {
     @Valid
     @NotNull
     private URI hubUrl;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private URI connectorNodeUrl;
 
     @JsonProperty
     @Valid
@@ -95,10 +91,6 @@ public class GatewayConfiguration extends Configuration {
 
     public URI getHubUrl() {
         return hubUrl;
-    }
-
-    public URI getConnectorNodeUrl() {
-        return connectorNodeUrl;
     }
 
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }

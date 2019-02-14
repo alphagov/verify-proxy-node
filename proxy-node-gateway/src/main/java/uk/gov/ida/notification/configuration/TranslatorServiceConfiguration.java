@@ -8,7 +8,8 @@ import io.dropwizard.setup.Environment;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
+import uk.gov.ida.notification.proxy.TranslatorProxy;
+import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.validation.Valid;
@@ -17,7 +18,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
-public class EidasSamlParserServiceConfiguration extends Configuration {
+public class TranslatorServiceConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
@@ -27,24 +28,23 @@ public class EidasSamlParserServiceConfiguration extends Configuration {
     @Valid
     private JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
 
-    public URI getURL() {
+    public URI getUrl() {
         return url;
     }
 
-    public JerseyClientConfiguration getClientConfig() {
+    public JerseyClientConfiguration getClient() {
         return clientConfig;
     }
 
-    public EidasSamlParserProxy buildEidasSamlParserService(Environment environment) {
-        Client client = new JerseyClientBuilder(environment).using(clientConfig).build("eidas-saml-parser");
+    public TranslatorProxy buildTranslatorService(Environment environment, SamlParser samlParser) {
+        Client client = new JerseyClientBuilder(environment).using(clientConfig).build("translator");
         JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(client),
             new JsonResponseProcessor(environment.getObjectMapper())
         );
-
-        return new EidasSamlParserProxy(
+        return new TranslatorProxy(
             jsonClient,
-            UriBuilder.fromUri(url).path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH).build()
+            UriBuilder.fromUri(url).path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH).build()
         );
     }
 }

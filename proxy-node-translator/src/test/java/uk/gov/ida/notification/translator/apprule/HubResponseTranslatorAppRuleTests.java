@@ -23,7 +23,7 @@ import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.notification.translator.Urls;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
