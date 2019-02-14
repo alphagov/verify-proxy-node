@@ -1,10 +1,10 @@
 server:
   applicationConnectors:
     - type: http
-      port: ${PORT:-6600}
+      port: ${PORT:-6000}
   adminConnectors:
     - type: http
-      port: ${ADMIN_PORT:-6601}
+      port: ${ADMIN_PORT:-6001}
 
 logging:
   level: INFO
