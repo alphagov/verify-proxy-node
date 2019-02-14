@@ -16,7 +16,7 @@ import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.HubResponseTranslationExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionFactory;
@@ -127,8 +127,8 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     private void registerExceptionMappers(Environment environment) {
-        environment.jersey().register(new HubResponseExceptionMapper());
         environment.jersey().register(new ApplicationExceptionMapper());
+        environment.jersey().register(new HubResponseTranslationExceptionMapper());
     }
 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {

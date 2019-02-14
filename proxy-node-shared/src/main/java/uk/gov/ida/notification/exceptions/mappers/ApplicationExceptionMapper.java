@@ -9,7 +9,10 @@ import static java.text.MessageFormat.format;
 public class ApplicationExceptionMapper extends BaseExceptionMapper<ApplicationException> {
 
     @Override
-    protected Response handleException(ApplicationException exception) {
+    protected void handleException(ApplicationException exception) { }
+
+    @Override
+    protected Response getResponse(ApplicationException exception) {
         final String message = format("Exception with id {0} of type {1} whilst contacting uri [{2}]: {3}",
                 exception.getErrorId(), exception.getExceptionType(), exception.getUri(), exception.getMessage());
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(message).build();
