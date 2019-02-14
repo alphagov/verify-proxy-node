@@ -18,6 +18,12 @@ services:
       context: .
       args:
         component: stub-connector
+  eidas-saml-provider:
+    image: govukverify/eidas-saml-provider:latest
+    build:
+      context: .
+      args:
+        component: eidas-saml-provider
   softhsm:
     image: govukverify/softhsm:latest
     build:
