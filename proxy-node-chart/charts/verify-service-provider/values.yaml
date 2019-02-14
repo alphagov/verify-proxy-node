@@ -30,23 +30,6 @@ configFile:
   serviceEntityIds: ${SERVICE_ENTITY_IDS:-[]}
   verifyHubConfiguration:
     environment: ${VERIFY_ENVIRONMENT:-}
-    ssoLocation: ${SSO_LOCATION:-}
-    metadata:
-      uri: ${HUB_METADATA_URI:-}
-      expectedEntityId: ${HUB_METADATA_ENTITY_ID:-}
-      hubFederationId: VERIFY-FEDERATION
-      trustStore:
-        type: encoded
-        store: ${TRUST_STORE:-}
-        password: ${TRUST_STORE_PASSWORD:-marshmallow}
-      hubTrustStore:
-        type: encoded
-        store: ${HUB_TRUST_STORE:-}
-        password: ${HUB_TRUST_STORE_PASSWORD:-marshmallow}
-      idpTrustStore:
-        type: encoded
-        store: ${IDP_TRUST_STORE:-}
-        password: ${IDP_TRUST_STORE_PASSWORD:-marshmallow}
   samlSigningKey: ${SAML_SIGNING_KEY:-}
   samlPrimaryEncryptionKey: ${SAML_PRIMARY_ENCRYPTION_KEY:-}
   samlSecondaryEncryptionKey: ${SAML_SECONDARY_ENCRYPTION_KEY:-}

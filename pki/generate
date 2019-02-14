@@ -216,7 +216,7 @@ Dir.chdir(output_dir) do
   vsp_vars = {
     'LOG_LEVEL' => 'INFO',
     'CLOCK_SKEW' => 'PT30s',
-    'SERVICE_ENTITY_IDS' => "[\"#{options.proxy_entity_id}\"]",
+    'SERVICE_ENTITY_IDS' => "[\"http://verify-service-provider/\"]",
     'VERIFY_ENVIRONMENT' => 'COMPLIANCE_TOOL',
     'SSO_LOCATION' => "#{options.idp_url}/SAML2/SSO/",
     'HUB_METADATA_ENTITY_ID' => options.idp_entity_id,
