@@ -1,5 +1,7 @@
 package uk.gov.ida.mdgen;
 
+import com.cavium.key.CaviumRSAPrivateKey;
+import com.cavium.provider.CaviumProvider;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import org.apache.xml.security.signature.XMLSignature;
@@ -44,10 +46,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -59,7 +63,7 @@ public class MetadataGenerator implements Callable<Void> {
     private X509KeyInfoGeneratorFactory keyInfoGeneratorFactory;
 
     private enum NodeType { connector, proxy }
-    private enum CredentialType { file, hsm }
+    private enum CredentialType { file, pkcs11, cloudhsm }
 
     private enum SigningAlgoType {
         rsa(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256),
@@ -129,8 +133,11 @@ public class MetadataGenerator implements Callable<Void> {
             case file:
                 signingCredential = getSigningCredentialFromFile(signingCert, keyFile, keyPass);
                 break;
-            case hsm:
+            case pkcs11:
                 signingCredential = getSigningCredentialFromPKCS11(signingCert);
+                break;
+            case cloudhsm:
+                signingCredential = getSigningCredentialFromCloudHSM(signingCert);
                 break;
         }
 
@@ -152,6 +159,15 @@ public class MetadataGenerator implements Callable<Void> {
 
         XMLObjectSupport.marshallToOutputStream(buildEntityDescriptor(), outputStream);
         return null;
+    }
+
+    private BasicX509Credential getSigningCredentialFromCloudHSM(X509Certificate cert) throws Exception {
+        Security.addProvider(new CaviumProvider());
+        return new PKCS11Credential(cert, List.of("Cavium"), hsmKeyLabel, (providerName, alias) -> {
+            KeyStore cloudHsmStore = KeyStore.getInstance("Cavium");
+            cloudHsmStore.load(null, null);
+            return (CaviumRSAPrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null);
+        });
     }
 
     private BasicX509Credential getSigningCredentialFromFile(X509Certificate cert, File keyFile, String keyPass) {

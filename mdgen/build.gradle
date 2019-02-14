@@ -8,6 +8,11 @@ repositories {
   mavenCentral()
   maven { url 'http://oss.sonatype.org/content/groups/public/' }
   maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases' }
+
+  // cloudhsm libraries downloaded from AWS
+  flatDir {
+    dirs 'libs'
+  }
 }
 
 dependencies {
@@ -24,4 +29,10 @@ dependencies {
     'com.github.spullara.mustache.java:compiler:0.9.6',
     'org.yaml:snakeyaml:1.24-SNAPSHOT',
     'se.swedenconnect.opensaml:opensaml-pkcs11-support:1.1.1'
+
+  implementation name: 'cloudhsm-2.0.0'
+  implementation name: 'log4j-api-2.8'
+  implementation name: 'log4j-core-2.8'
+
+  testImplementation name: 'cloudhsm-test-2.0.0'
 }
