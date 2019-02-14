@@ -3,6 +3,7 @@ package uk.gov.ida.notification.contracts;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
+import java.net.URI;
 
 public class HubResponseTranslatorRequest {
 
@@ -16,27 +17,37 @@ public class HubResponseTranslatorRequest {
 
     @NotNull
     @JsonProperty
+    private String eidasRequestId;
+
+    @NotNull
+    @JsonProperty
     private String levelOfAssurance;
 
     @NotNull
     @JsonProperty
-    private String eidasRequestId;
+    private URI destinationUrl;
 
     @NotNull
     @JsonProperty
     private String connectorEncryptionCertificate;
 
-    public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance, String eidasRequestId, String connectorEncryptionCertificate) {
-        this(samlResponse, requestId, levelOfAssurance);
-
-        this.eidasRequestId = eidasRequestId;
-        this.connectorEncryptionCertificate = connectorEncryptionCertificate;
+    @SuppressWarnings("Needed for JSON serialisation")
+    public HubResponseTranslatorRequest() {
     }
 
-    public HubResponseTranslatorRequest(String samlResponse, String requestId, String levelOfAssurance) {
+    public HubResponseTranslatorRequest(
+            String samlResponse,
+            String requestId,
+            String eidasRequestId,
+            String levelOfAssurance,
+            URI destinationUrl,
+            String connectorEncryptionCertificate) {
         this.samlResponse = samlResponse;
         this.requestId = requestId;
+        this.eidasRequestId = eidasRequestId;
         this.levelOfAssurance = levelOfAssurance;
+        this.destinationUrl = destinationUrl;
+        this.connectorEncryptionCertificate = connectorEncryptionCertificate;
     }
 
     public String getSamlResponse() {
@@ -57,5 +68,9 @@ public class HubResponseTranslatorRequest {
 
     public String getLevelOfAssurance() {
         return levelOfAssurance;
+    }
+
+    public URI getDestinationUrl() {
+        return destinationUrl;
     }
 }

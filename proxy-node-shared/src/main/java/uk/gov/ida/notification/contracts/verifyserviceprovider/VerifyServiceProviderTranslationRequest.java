@@ -23,16 +23,4 @@ public class VerifyServiceProviderTranslationRequest {
         this.requestId = requestId;
         this.levelOfAssurance = levelOfAssurance;
     }
-
-    public String getSamlResponse() {
-        return samlResponse;
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public String getLevelOfAssurance() {
-        return levelOfAssurance;
-    }
 }

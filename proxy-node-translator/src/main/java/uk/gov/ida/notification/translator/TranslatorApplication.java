@@ -2,8 +2,6 @@ package uk.gov.ida.notification.translator;
 
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.Application;
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -15,12 +13,9 @@ import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
-import uk.gov.ida.jerseyclient.ErrorHandlingClient;
-import uk.gov.ida.jerseyclient.JsonClient;
-import uk.gov.ida.jerseyclient.JsonResponseProcessor;
+import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
-import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
@@ -36,7 +31,6 @@ import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
-import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
@@ -50,7 +44,6 @@ import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
 import uk.gov.ida.saml.security.validators.encryptedelementtype.EncryptionAlgorithmValidator;
 import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
 
-import javax.ws.rs.client.Client;
 import java.net.URI;
 import java.util.List;
 

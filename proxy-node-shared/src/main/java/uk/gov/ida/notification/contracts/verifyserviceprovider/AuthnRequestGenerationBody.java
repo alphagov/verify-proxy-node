@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
@@ -11,9 +10,12 @@ public class AuthnRequestGenerationBody {
     @JsonProperty
     private String levelOfAssurance;
 
-    @JsonCreator
+    @SuppressWarnings("Needed for JSON serialisation")
+    public AuthnRequestGenerationBody() {
+    }
+
     public AuthnRequestGenerationBody(
-            @JsonProperty("levelOfAssurance") String levelOfAssurance) {
+            String levelOfAssurance) {
 
         this.levelOfAssurance = levelOfAssurance;
     }

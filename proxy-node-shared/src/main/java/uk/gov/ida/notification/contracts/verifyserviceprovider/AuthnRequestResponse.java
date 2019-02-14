@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
@@ -24,11 +23,14 @@ public class AuthnRequestResponse {
     @NotNull
     private URI ssoLocation;
 
-    @JsonCreator
+    @SuppressWarnings("Needed for JSON serialisation")
+    public AuthnRequestResponse() {
+    }
+
     public AuthnRequestResponse(
-            @JsonProperty("samlRequest") String samlRequest,
-            @JsonProperty("requestId") String requestId,
-            @JsonProperty("ssoLocation") URI ssoLocation) {
+            String samlRequest,
+            String requestId,
+            URI ssoLocation) {
         this.samlRequest = samlRequest;
         this.requestId = requestId;
         this.ssoLocation = ssoLocation;
