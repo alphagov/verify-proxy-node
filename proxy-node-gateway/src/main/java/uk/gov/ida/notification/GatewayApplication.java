@@ -118,12 +118,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 environment,
                 "hub-metadata");
 
-        registerMetadataHealthCheck(
-                connectorMetadataResolverBundle.getMetadataResolver(),
-                configuration.getConnectorMetadataConfiguration(),
-                environment,
-                "connector-metadata");
-
         registerProviders(environment);
         registerExceptionMappers(environment);
         registerResources(configuration, environment);
