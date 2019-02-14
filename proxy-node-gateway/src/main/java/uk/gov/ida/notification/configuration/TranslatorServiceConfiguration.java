@@ -36,7 +36,7 @@ public class TranslatorServiceConfiguration extends Configuration {
         return clientConfig;
     }
 
-    public TranslatorProxy buildTranslatorService(Environment environment, SamlParser samlParser) {
+    public TranslatorProxy buildTranslatorProxy(Environment environment) {
         Client client = new JerseyClientBuilder(environment).using(clientConfig).build("translator");
         JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(client),

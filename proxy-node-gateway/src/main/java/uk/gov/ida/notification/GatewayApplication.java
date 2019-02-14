@@ -7,49 +7,18 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.server.session.SessionHandler;
-import org.opensaml.core.config.InitializationException;
-import org.opensaml.core.config.InitializationService;
-import org.opensaml.saml.metadata.resolver.MetadataResolver;
-import org.opensaml.security.credential.BasicCredential;
-import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
-import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
-import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
-import uk.gov.ida.notification.saml.ResponseAssertionFactory;
-import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
-import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
-import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
-import uk.gov.ida.notification.saml.deprecate.EncryptedResponseFromIdpValidator;
-import uk.gov.ida.notification.saml.deprecate.IdpResponseValidator;
-import uk.gov.ida.notification.saml.deprecate.SamlStatusToIdaStatusCodeMapper;
-import uk.gov.ida.notification.saml.validation.HubResponseValidator;
-import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.saml.validation.components.ResponseAttributesValidator;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
-import uk.gov.ida.saml.metadata.MetadataConfiguration;
-import uk.gov.ida.saml.metadata.MetadataHealthCheck;
-import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
-import uk.gov.ida.saml.security.SamlAssertionsSignatureValidator;
-import uk.gov.ida.saml.security.SamlMessageSignatureValidator;
-import uk.gov.ida.saml.security.validators.signature.SamlResponseSignatureValidator;
-
-import java.net.URI;
-
-import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlMessageSignatureValidator;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
-
-    private MetadataResolverBundle<GatewayConfiguration> hubMetadataResolverBundle;
-    private MetadataResolverBundle<GatewayConfiguration> connectorMetadataResolverBundle;
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
     public GatewayApplication() {
@@ -83,26 +52,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 )
         );
 
-        // Needed to initialise OpenSAML libraries
-        // The eidas-opensaml3 library provides its own initializer that will be executed
-        // by the InitializationService
-        try {
-            InitializationService.initialize();
-        } catch (InitializationException e) {
-            throw new RuntimeException(e);
-        }
-
-        VerifySamlInitializer.init();
-
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
-
-        // Metadata
-        hubMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getHubMetadataConfiguration);
-        bootstrap.addBundle(hubMetadataResolverBundle);
-
-        connectorMetadataResolverBundle = new MetadataResolverBundle<>(GatewayConfiguration::getConnectorMetadataConfiguration);
-        bootstrap.addBundle(connectorMetadataResolverBundle);
     }
 
     @Override
@@ -112,20 +63,12 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
-        registerMetadataHealthCheck(
-                hubMetadataResolverBundle.getMetadataResolver(),
-                configuration.getHubMetadataConfiguration(),
-                environment,
-                "hub-metadata");
-
         registerProviders(environment);
         registerExceptionMappers(environment);
         registerResources(configuration, environment);
     }
 
     private void registerProviders(Environment environment) {
-        environment.jersey().register(AuthnRequestParameterProvider.class);
-        environment.jersey().register(ResponseParameterProvider.class);
         SessionHandler sessionHandler = new SessionHandler();
         sessionHandler.setSessionCookie("gateway-session");
         environment.servlets().setSessionHandler(sessionHandler);
@@ -139,9 +82,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
     private void registerResources(GatewayConfiguration configuration, Environment environment) throws Exception {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
-
-        HubResponseValidator hubResponseValidator = createHubResponseValidator(configuration);
-
 
         EidasSamlParserProxy espProxy = configuration
             .getEidasSamlParserServiceConfiguration()
@@ -158,53 +98,11 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         TranslatorProxy translatorProxy = configuration
             .getTranslatorServiceConfiguration()
-            .buildTranslatorService(environment, new SamlParser());
+            .buildTranslatorProxy(environment);
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
                 translatorProxy
         ));
-    }
-
-    public void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
-        MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
-                metadataResolver,
-                name,
-                connectorMetadataConfiguration.getExpectedEntityId()
-        );
-
-        environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
-    }
-
-    private HubResponseValidator createHubResponseValidator(GatewayConfiguration configuration) throws Exception {
-        URI proxyNodeResponseUrl = configuration.getProxyNodeResponseUrl();
-        String proxyNodeEntityId = configuration.getProxyNodeEntityId();
-
-        SamlMessageSignatureValidator hubResponseMessageSignatureValidator = createSamlMessageSignatureValidator(hubMetadataResolverBundle);
-        ResponseAssertionDecrypter responseAssertionDecrypter = createDecrypter(configuration.getHubFacingEncryptionKeyPair());
-
-        MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("gateway-hub");
-
-        IdpResponseValidator idpResponseValidator = new IdpResponseValidator(
-                new SamlResponseSignatureValidator(hubResponseMessageSignatureValidator),
-                responseAssertionDecrypter.getAssertionDecrypter(),
-                new SamlAssertionsSignatureValidator(hubResponseMessageSignatureValidator),
-                new EncryptedResponseFromIdpValidator<>(new SamlStatusToIdaStatusCodeMapper()),
-                new DestinationValidator(proxyNodeResponseUrl, proxyNodeResponseUrl.getPath()),
-                ResponseAssertionFactory.createResponseAssertionsFromIdpValidator("Gateway", proxyNodeEntityId, replayChecker)
-        );
-        ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
-        return new HubResponseValidator(
-                idpResponseValidator,
-                responseAttributesValidator,
-                new LoaValidator());
-    }
-
-    private ResponseAssertionDecrypter createDecrypter(KeyPairConfiguration configuration) {
-        BasicCredential decryptionCredential = new BasicCredential(
-                configuration.getPublicKey().getPublicKey(),
-                configuration.getPrivateKey().getPrivateKey()
-        );
-        return new ResponseAssertionDecrypter(decryptionCredential);
     }
 }
