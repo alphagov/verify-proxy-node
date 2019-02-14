@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_DESTINATION;
+import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_RELAY_STATE;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SESSION_KEY_HUB_REQUEST_ID;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
@@ -115,6 +116,7 @@ public class EidasAuthnRequestResourceTest {
         verify(session).setAttribute(SESSION_KEY_EIDAS_REQUEST_ID, "eidas request id");
         verify(session).setAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT, UNCHAINED_PUBLIC_CERT);
         verify(session).setAttribute(SESSION_KEY_EIDAS_DESTINATION, "destination");
+        verify(session).setAttribute(SESSION_KEY_EIDAS_RELAY_STATE, "eidas relay state");
         verify(session).setAttribute(SESSION_KEY_HUB_REQUEST_ID, "hub request id");
         verify(session).getId();
         verify(logHandler, times(7)).publish(captorLoggingEvent.capture());

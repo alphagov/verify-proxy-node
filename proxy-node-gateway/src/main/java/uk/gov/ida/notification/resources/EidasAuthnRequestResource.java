@@ -34,6 +34,7 @@ public class EidasAuthnRequestResource {
     public static final String SESSION_KEY_EIDAS_DESTINATION = "eidas_destination";
     public static final String SESSION_KEY_HUB_REQUEST_ID = "hub_request_id";
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
+    public static final String SESSION_KEY_EIDAS_RELAY_STATE = "eidas_relay_state";
 
     private final EidasSamlParserProxy eidasSamlParserService;
     private final VerifyServiceProviderProxy vspProxy;
@@ -71,14 +72,15 @@ public class EidasAuthnRequestResource {
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest);
         AuthnRequestResponse vspResponse = generateHubRequestWithVSP();
         logAuthnRequestInformation(session, eidasSamlParserResponse, vspResponse);
-        setResponseDataInSession(session, eidasSamlParserResponse, vspResponse);
+        setResponseDataInSession(session, eidasSamlParserResponse, vspResponse, eidasRelayState);
         return buildSamlFormView(vspResponse, eidasRelayState);
     }
 
-    private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse) {
+    private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse, String eidasRelayState) {
         session.setAttribute(SESSION_KEY_EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
         session.setAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT, eidasSamlParserResponse.getConnectorEncryptionPublicCertificate());
         session.setAttribute(SESSION_KEY_EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
+        session.setAttribute(SESSION_KEY_EIDAS_RELAY_STATE, eidasRelayState);
         session.setAttribute(SESSION_KEY_HUB_REQUEST_ID, vspResponse.getRequestId());
     }
 
