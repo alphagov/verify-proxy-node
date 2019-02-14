@@ -49,48 +49,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.keySecretName }}
                   key: VERIFY_ENVIRONMENT
-            - name: SSO_LOCATION
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: SSO_LOCATION
-            - name: HUB_METADATA_URI
-              value: http://{{ .Release.Name }}-stub-metadata/hub_metadata_for_proxy_node.xml
-            - name: HUB_METADATA_ENTITY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: HUB_METADATA_ENTITY_ID
-            - name: TRUST_STORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: TRUST_STORE
-            - name: TRUST_STORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: TRUST_STORE_PASSWORD
-            - name: HUB_TRUST_STORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: HUB_TRUST_STORE
-            - name: HUB_TRUST_STORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: HUB_TRUST_STORE_PASSWORD
-            - name: IDP_TRUST_STORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: IDP_TRUST_STORE
-            - name: IDP_TRUST_STORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.keySecretName }}
-                  key: IDP_TRUST_STORE_PASSWORD
             - name: SAML_SIGNING_KEY
               valueFrom:
                 secretKeyRef:
