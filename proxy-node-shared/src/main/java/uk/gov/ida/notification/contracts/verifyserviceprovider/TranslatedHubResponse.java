@@ -20,12 +20,36 @@ public class TranslatedHubResponse {
 
     @NotNull
     @JsonProperty
-    private String attributes;
+    private Attributes attributes;
 
-    public TranslatedHubResponse(String scenario, String pid, String levelOfAssurance, String attributes) {
+    @SuppressWarnings("Needed for JSON serialisation")
+    public TranslatedHubResponse() {
+    }
+
+    public TranslatedHubResponse(
+            String scenario,
+            String pid,
+            String levelOfAssurance,
+            Attributes attributes) {
         this.scenario = scenario;
         this.pid = pid;
         this.levelOfAssurance = levelOfAssurance;
         this.attributes = attributes;
+    }
+
+    public String getScenario() {
+        return scenario;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public String getLevelOfAssurance() {
+        return levelOfAssurance;
+    }
+
+    public Attributes getAttributes() {
+        return attributes;
     }
 }

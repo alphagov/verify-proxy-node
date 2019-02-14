@@ -2,7 +2,6 @@ package uk.gov.ida.notification.translator.saml;
 
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.x509.BasicX509Credential;
-import uk.gov.ida.notification.saml.HubResponseContainer;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 

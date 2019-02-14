@@ -8,6 +8,7 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.Urls;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
+import uk.gov.ida.notification.translator.saml.HubResponseContainer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -45,8 +46,10 @@ public class HubResponseTranslatorResource {
 
         final TranslatedHubResponse translatedHubResponse = verifyServiceProviderProxy.getTranslatedHubResponse(vspRequest);
 
+        final HubResponseContainer hubResponseContainer = new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse);
         final X509Certificate encryptionCertificate = X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate());
-        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(null, encryptionCertificate);
+
+        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(hubResponseContainer, encryptionCertificate);
         logEidasResponse(eidasResponse);
 
         final String samlMessage = MARSHALLER.transformToString(eidasResponse);

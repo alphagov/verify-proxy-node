@@ -15,14 +15,15 @@ import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
+import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.helpers.BasicCredentialBuilder;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
-import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.translator.Urls;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
@@ -32,13 +33,21 @@ import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.*;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_SIGNING_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
 public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
@@ -52,7 +61,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     public void setup() throws Throwable {
         KeyPairConfiguration hubFacingEncryptionKeyPair = translatorAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
         Credential hubAssertionsEncryptionCredential = new BasicCredential(
-            hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
+                hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
         );
         marshaller = new SamlObjectMarshaller();
 
@@ -67,15 +76,15 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 .build();
 
         authnAssertion = HubAssertionBuilder.anAuthnStatementAssertion()
-            .withSignature(idpSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
-            .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
-            .buildEncrypted(hubAssertionsEncryptionCredential);
+                .withSignature(idpSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
+                .withIssuer(TestEntityIds.STUB_IDP_ONE)
+                .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
+                .buildEncrypted(hubAssertionsEncryptionCredential);
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion()
-            .withSignature(idpSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
-            .withIssuer(TestEntityIds.STUB_IDP_ONE)
-            .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
-            .buildEncrypted(hubAssertionsEncryptionCredential);
+                .withSignature(idpSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
+                .withIssuer(TestEntityIds.STUB_IDP_ONE)
+                .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
+                .buildEncrypted(hubAssertionsEncryptionCredential);
     }
 
     @Test
@@ -94,11 +103,10 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
-    @Ignore
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
         Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
         assertEquals(1, eidasResponse.getEncryptedAssertions().size());
-        assert(eidasResponse.getAssertions().isEmpty());
+        assertThat(eidasResponse.getAssertions()).isEmpty();
     }
 
     @Test
@@ -131,8 +139,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     @Ignore
     public void shouldValidateHubResponseMessage() throws Exception {
         Response invalidResponse = getHubResponseBuilder()
-            .withIssuer(null)
-            .buildSigned(hubSigningCredential);
+                .withIssuer(null)
+                .buildSigned(hubSigningCredential);
 
         javax.ws.rs.core.Response response = postHubResponseToTranslator(invalidResponse);
         String message = response.readEntity(String.class);
@@ -148,12 +156,14 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws URISyntaxException {
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_RESPONSE, encodedResponse);
+
+        HubResponseTranslatorRequest hubResponseTranslatorRequest =
+                new HubResponseTranslatorRequest(encodedResponse, "_1234", "LEVEL_2", "_5678", URI.create("http://localhost:8081/bob"), STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
 
         return translatorAppRule
-                .target("/SAML2/SSO/Response/POST")
+                .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
                 .request()
-                .post(Entity.form(postForm));
+                .post(Entity.json(hubResponseTranslatorRequest));
     }
 
     private static Response decryptResponse(Response response, Credential credential) {
