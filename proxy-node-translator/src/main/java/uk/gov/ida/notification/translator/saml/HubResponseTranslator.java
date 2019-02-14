@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.translator.saml;
 
+import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.StatusCode;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
@@ -8,21 +10,15 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasAssertionBuilder;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
-import uk.gov.ida.saml.core.IdaConstants;
-import uk.gov.ida.saml.core.extensions.Date;
-import uk.gov.ida.saml.core.extensions.IdaAuthnContext;
-import uk.gov.ida.saml.core.extensions.PersonName;
-import uk.gov.ida.saml.core.extensions.impl.PersonNameBuilder;
-
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,12 +26,10 @@ import java.util.stream.Collectors;
 public class HubResponseTranslator {
 
     private String connectorNodeIssuerId;
-    private String destinationUrl;
     private String proxyNodeMetadataForConnectorNodeUrl;
 
-    public HubResponseTranslator(String connectorNodeIssuerId, String destinationUrl, String proxyNodeMetadataForConnectorNodeUrl) {
+    public HubResponseTranslator(String connectorNodeIssuerId, String proxyNodeMetadataForConnectorNodeUrl) {
         this.connectorNodeIssuerId = connectorNodeIssuerId;
-        this.destinationUrl = destinationUrl;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
 
@@ -78,31 +72,43 @@ public class HubResponseTranslator {
                 .map(EidasAttributeBuilder::build)
                 .collect(Collectors.toList());
 
-        String eidasLoa = mapLoa(hubResponseContainer.getLevelOfAssurance());
-
-        // TODO: The missing attributes will be added in a separate PR
         return EidasResponseBuilder.createEidasResponse(
                 proxyNodeMetadataForConnectorNodeUrl,
-                "" /* hubResponseContainer.getHubResponse().getStatusCode() */,
+                getMappedStatusCode(hubResponseContainer.getVspScenario()),
                 hubResponseContainer.getPid(),
-                eidasLoa,
+                getMappedLoa(hubResponseContainer.getLevelOfAssurance()),
                 eidasAttributes,
                 hubResponseContainer.getEidasRequestId(),
-                null /* hubResponseContainer.getHubResponse().getIssueInstant() */,
-                null /* hubResponseContainer.getMdsAssertion().getIssueInstant() */,
-                null /* hubResponseContainer.getAuthnAssertion().getAuthnInstant()*/,
-                destinationUrl,
+                DateTime.now(),
+                DateTime.now(),
+                DateTime.now(),
+                hubResponseContainer.getDestinationURL(),
                 connectorNodeIssuerId
         );
     }
 
-    // TODO: The LOA translation will be handed in a separate PR
-    private String mapLoa(String hubLoa) {
-    //    switch(hubLoa) {
-    //        case IdaAuthnContext.LEVEL_2_AUTHN_CTX:
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
+    private String getMappedLoa(VspLevelOfAssurance vspLoa) {
+        switch (vspLoa) {
+            case LEVEL_2:
                 return EidasConstants.EIDAS_LOA_SUBSTANTIAL;
-    //        default:
-    //            throw new HubResponseTranslationException("Invalid level of assurance: " + hubLoa);
-    //    }
+            default:
+                throw new HubResponseTranslationException("Received unsupported LOA from VSP: " + vspLoa);
+        }
+    }
+
+    private String getMappedStatusCode(VspScenario vspScenario) {
+        switch (vspScenario) {
+            case IDENTITY_VERIFIED:
+                return StatusCode.SUCCESS;
+            case CANCELLATION:
+                return StatusCode.RESPONDER;
+            case AUTHENTICATION_FAILED:
+                return StatusCode.AUTHN_FAILED;
+            case REQUEST_ERROR:
+                throw new HubResponseTranslationException("Received error status from VSP: " + vspScenario);
+            default:
+                throw new HubResponseTranslationException("Received unknown status from VSP: " + vspScenario);
+        }
     }
 }

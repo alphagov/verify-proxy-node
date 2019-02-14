@@ -141,9 +141,9 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration) {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 configuration.getConnectorNodeIssuerId(),
-                configuration.getConnectorNodeUrl().toString(),
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
+
         KeyRetrieverService keyRetrieverService = KeyRetrieverServiceFactory.createKeyRetrieverService(configuration);
         return new EidasResponseGenerator(hubResponseTranslator, keyRetrieverService.createSamlObjectSigner());
     }
