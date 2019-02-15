@@ -20,13 +20,14 @@ import java.net.URISyntaxException;
 @Produces(MediaType.APPLICATION_JSON)
 public class TestVerifyServiceProviderResource {
 
+    public static final String REQUEST_ID_HUB = "a hub request id";
+
     @POST
     @Valid
     public AuthnRequestResponse post(@Valid AuthnRequestGenerationBody request) throws URISyntaxException {
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
-        String hubRequestId = "a hub request id";
-        authnRequest.setID(hubRequestId);
+        authnRequest.setID(REQUEST_ID_HUB);
         String encodedAuthnRequest = Base64.encodeAsString(new SamlObjectMarshaller().transformToString(authnRequest));
-        return new AuthnRequestResponse(encodedAuthnRequest, hubRequestId, new URI("http://www.hub.com"));
+        return new AuthnRequestResponse(encodedAuthnRequest, REQUEST_ID_HUB, new URI("http://www.hub.com"));
     }
 }

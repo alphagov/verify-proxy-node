@@ -35,11 +35,8 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Throwable {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest);
         assertGoodResponse(postEidasAuthnRequest(postedRequest));
-
         AuthnRequest redirectedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(redirectedRequest);
         assertGoodResponse(redirectEidasAuthnRequest(redirectedRequest));
     }
 
