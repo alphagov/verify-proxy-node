@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-parser
+spec:
+  ports:
+  - name: "6400"
+    port: 6400
+    targetPort: 80
+    nodePort: 31400
+  - name: "6601"
+    port: 6601
+    targetPort: 6601
+  selector:
+    app.kubernetes.io/name: parser
+    app.kubernetes.io/instance: {{ .Release.Name }}

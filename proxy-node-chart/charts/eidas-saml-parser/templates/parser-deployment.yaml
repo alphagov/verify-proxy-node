@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-parser
+  labels:
+    app.kubernetes.io/name: parser
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: parser
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: parser
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ include "docker_image" (tuple .Chart.Name .) }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6601
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        env:
+        - name: PORT
+          value: "80"
+        - name: METADATA_REFRESH_DELAY
+          value: "60000"
+        - name: CONNECTOR_NODE_ENTITY_ID
+          valueFrom:
+            secretKeyRef:
+              name: proxy-node-pki
+              key: CONNECTOR_NODE_ENTITY_ID
+        - name: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: proxy-node-pki
+              key: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
+        - name: CONNECTOR_NODE_METADATA_URL
+          value: http://{{ .Release.Name }}-stub-connector/Metadata
+        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
+          valueFrom:
+            secretKeyRef:
+              name: proxy-node-pki
+              key: CONNECTOR_NODE_METADATA_TRUSTSTORE
+        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: proxy-node-pki
+              key: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
+        - name: REDIS_SERVER_URI
+          value: redis://{{ .Release.Name }}-gateway-redis:6379/
+
