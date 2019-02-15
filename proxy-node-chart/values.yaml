@@ -1,4 +1,6 @@
 global:
+  peidas-saml-parser:
+    image: govukverify/eidas-saml-parser:latest
   proxy-node-gateway:
     image: govukverify/proxy-node-gateway:latest
   proxy-node-translator:

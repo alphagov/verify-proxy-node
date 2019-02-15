@@ -6,11 +6,11 @@ dependencies {
             project(':proxy-node-shared')
 }
 
-group = 'uk.gov.ida.notification.gateway'
+group = 'uk.gov.ida.notification.eidassaml'
 version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
 apply plugin: 'application'
-mainClassName = 'uk.gov.ida.notification.GatewayApplication'
+mainClassName = 'uk.gov.ida.notification.eidassaml.EidasSamlApplication'
 
 run {
     args 'server', './src/dist/config.yml'
