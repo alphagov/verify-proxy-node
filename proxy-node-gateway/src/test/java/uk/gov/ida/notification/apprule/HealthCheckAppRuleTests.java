@@ -7,15 +7,15 @@ import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MetadataAppRuleTests extends GatewayAppRuleTestBase {
+public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
     @Test
-    public void shouldConsumeMetadata() throws Exception {
+    public void shouldExposeHealthCheck() throws Exception {
         Response response = proxyNodeAppRule.target("healthcheck", proxyNodeAppRule.getAdminPort())
             .request()
             .get();
 
         String healthcheck = response.readEntity(String.class);
 
-        assertThat(healthcheck).contains("\"hub-metadata\":{\"healthy\":true}");
+        assertThat(healthcheck).contains("\"gateway\":{\"healthy\":true}");
     }
 }
