@@ -8,7 +8,7 @@ public class TranslatedHubResponse {
 
     @NotNull
     @JsonProperty
-    private String scenario;
+    private VspScenario scenario;
 
     @NotNull
     @JsonProperty
@@ -16,7 +16,7 @@ public class TranslatedHubResponse {
 
     @NotNull
     @JsonProperty
-    private String levelOfAssurance;
+    private VspLevelOfAssurance levelOfAssurance;
 
     @NotNull
     @JsonProperty
@@ -27,9 +27,9 @@ public class TranslatedHubResponse {
     }
 
     public TranslatedHubResponse(
-            String scenario,
+            VspScenario scenario,
             String pid,
-            String levelOfAssurance,
+            VspLevelOfAssurance levelOfAssurance,
             Attributes attributes) {
         this.scenario = scenario;
         this.pid = pid;
@@ -37,7 +37,7 @@ public class TranslatedHubResponse {
         this.attributes = attributes;
     }
 
-    public String getScenario() {
+    public VspScenario getScenario() {
         return scenario;
     }
 
@@ -45,7 +45,7 @@ public class TranslatedHubResponse {
         return pid;
     }
 
-    public String getLevelOfAssurance() {
+    public VspLevelOfAssurance getLevelOfAssurance() {
         return levelOfAssurance;
     }
 

@@ -5,34 +5,28 @@ import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import java.text.MessageFormat;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class HubResponseExceptionMapper implements ExceptionMapper<HubResponseException> {
-    private final Logger log = Logger.getLogger(getClass().getName());
+public class HubResponseExceptionMapper extends BaseExceptionMapper<HubResponseException> {
 
     @Override
-    public Response toResponse(HubResponseException exception) {
-        String logId = String.format("%016x", ThreadLocalRandom.current().nextLong());
-
-        log.log(Level.WARNING, String.format("logId=%s, requestId=%s, issuer=%s, issueInstant=%s, cause=%s",
-                logId,
+    protected void handleException(HubResponseException exception) {
+        setAuthnRequestValues(
                 exception.getSamlResponse().getID(),
                 exception.getSamlResponse().getIssuer().getValue(),
-                exception.getSamlResponse().getIssueInstant(),
-                exception.getCause())
-        );
+                exception.getSamlResponse().getIssueInstant());
+    }
 
-        String message = MessageFormat.format("Error handling hub response. logId: {0}", logId);
+    @Override
+    protected Response getResponse(HubResponseException exception) {
+        String message = MessageFormat.format("Error handling hub response. logId: {0}", getLogId());
+
         return Response.status(Response.Status.BAD_REQUEST)
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(
-                    new ErrorMessage(
-                        Response.Status.BAD_REQUEST.getStatusCode(),
-                        message
+                        new ErrorMessage(
+                                Response.Status.BAD_REQUEST.getStatusCode(),
+                                message
                         ))
                 .build();
     }

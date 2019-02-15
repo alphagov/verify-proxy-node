@@ -17,6 +17,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance.LEVEL_2;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario.IDENTITY_VERIFIED;
+
 public class VspClientRule extends DropwizardClientRule {
     public VspClientRule() {
         super(new StubVspResource());
@@ -30,7 +33,7 @@ public class VspClientRule extends DropwizardClientRule {
         @POST
         @Path(Urls.VerifyServiceProviderUrls.TRANSLATE_HUB_RESPONSE_ENDPOINT)
         public TranslatedHubResponse getTranslatedHubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
-            return new TranslatedHubResponse("IDENTITY_VERIFIED", "123456", "LEVEL_2", buildAttributes());
+            return new TranslatedHubResponse(IDENTITY_VERIFIED, "123456", LEVEL_2, buildAttributes());
         }
 
         private Attributes buildAttributes() {

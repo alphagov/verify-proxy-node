@@ -21,11 +21,6 @@ public class TranslatorConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private URI connectorNodeUrl;
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private String proxyNodeEntityId;
 
     @JsonProperty
@@ -95,10 +90,6 @@ public class TranslatorConfiguration extends Configuration {
 
     public URI getHubUrl() {
         return hubUrl;
-    }
-
-    public URI getConnectorNodeUrl() {
-        return connectorNodeUrl;
     }
 
     public String getProxyNodeEntityId() {
