@@ -57,7 +57,7 @@ public class MetadataResource {
         assertionConsumerService.setIsDefault(true);
 
         SPSSODescriptor spSsoDescriptor = SamlBuilder.build(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-        spSsoDescriptor.addSupportedProtocol(SAMLConstants.SAML20_NS);
+        spSsoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
         spSsoDescriptor.getAssertionConsumerServices().add(assertionConsumerService);
         spSsoDescriptor.getKeyDescriptors().add(buildKeyDescriptor(connectorConfiguration.getSigningKeyPair(), UsageType.SIGNING));
         spSsoDescriptor.getKeyDescriptors().add(buildKeyDescriptor(connectorConfiguration.getEncryptionKeyPair(), UsageType.ENCRYPTION));
