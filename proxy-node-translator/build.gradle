@@ -7,7 +7,8 @@ dependencies {
             configurations.soft_hsm,
             project(':proxy-node-shared')
 
-    testCompile configurations.verify_saml_test
+    testCompile configurations.verify_saml_test,
+            project(':proxy-node-shared').sourceSets.test.output
 }
 
 sourceSets {

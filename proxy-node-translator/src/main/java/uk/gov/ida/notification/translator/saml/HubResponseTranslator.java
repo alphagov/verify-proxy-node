@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.translator.saml;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
 import se.litsec.eidas.opensaml.common.EidasConstants;
@@ -17,7 +18,6 @@ import uk.gov.ida.notification.saml.EidasAssertionBuilder;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,26 +46,31 @@ public class HubResponseTranslator {
     }
 
     public Response translate(HubResponseContainer hubResponseContainer) {
+
+        validateHubResponseContainerAttributes(hubResponseContainer);
+
         List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
-        eidasAttributeBuilders.add(new EidasAttributeBuilder(
-                AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                combineFirstAndMiddleNames(hubResponseContainer.getAttributes().getFirstName(), hubResponseContainer.getAttributes().getMiddleNames())
-        ));
+        if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
+            eidasAttributeBuilders.add(new EidasAttributeBuilder(
+                    AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
+                    combineFirstAndMiddleNames(hubResponseContainer.getAttributes().getFirstName(), hubResponseContainer.getAttributes().getMiddleNames())
+            ));
 
-        eidasAttributeBuilders.add(new EidasAttributeBuilder(
-                AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
-                combineAttributeValues(hubResponseContainer.getAttributes().getSurnames())
-        ));
+            eidasAttributeBuilders.add(new EidasAttributeBuilder(
+                    AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
+                    combineAttributeValues(hubResponseContainer.getAttributes().getSurnames())
+            ));
 
-        eidasAttributeBuilders.add(new EidasAttributeBuilder(
-                AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                hubResponseContainer.getAttributes().getDateOfBirth().getValue().format(DateTimeFormatter.ofPattern("YYYY-MM-dd"))
-        ));
+            eidasAttributeBuilders.add(new EidasAttributeBuilder(
+                    AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
+                    hubResponseContainer.getAttributes().getDateOfBirth().getValue().toString(DateTimeFormat.forPattern("YYYY-MM-dd"))
+            ));
 
-        eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                EidasAssertionBuilder.TEMPORARY_PID_TRANSLATION + hubResponseContainer.getPid()
-        ));
+            eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
+                    EidasAssertionBuilder.TEMPORARY_PID_TRANSLATION + hubResponseContainer.getPid()
+            ));
+        }
 
         List<org.opensaml.saml.saml2.core.Attribute> eidasAttributes = eidasAttributeBuilders
                 .stream()
@@ -85,6 +90,30 @@ public class HubResponseTranslator {
                 hubResponseContainer.getDestinationURL(),
                 connectorNodeIssuerId
         );
+    }
+
+    private void validateHubResponseContainerAttributes(HubResponseContainer hubResponseContainer) {
+        if ( hubResponseContainer == null ) {
+            throw new HubResponseTranslationException("HubResponseContainer is null.");
+        }
+        if (hubResponseContainer.getVspScenario() != null && hubResponseContainer.getVspScenario() == VspScenario.IDENTITY_VERIFIED) {
+            if (hubResponseContainer.getAttributes() == null) {
+                throw new HubResponseTranslationException("HubResponseContainer Attributes null.");
+            }
+            if (hubResponseContainer.getAttributes().getFirstName() == null) {
+                throw new HubResponseTranslationException("HubResponseContainer Attribute FirstName null.");
+            }
+            if (hubResponseContainer.getAttributes().getSurnames() == null) {
+                throw new HubResponseTranslationException("HubResponseContainer Attribute Surnames null.");
+            }
+            if (hubResponseContainer.getAttributes().getDateOfBirth() == null
+                    && hubResponseContainer.getAttributes().getDateOfBirth().getValue() == null) {
+                throw new HubResponseTranslationException("HubResponseContainer Attribute DateOfBirth null or missing value.");
+            }
+            if (hubResponseContainer.getPid() == null) {
+                throw new HubResponseTranslationException("HubResponseContainer Attribute Pid null.");
+            }
+        }
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")

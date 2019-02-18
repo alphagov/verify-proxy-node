@@ -3,9 +3,10 @@ package uk.gov.ida.notification.contracts.verifyserviceprovider;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.joda.time.DateTime;
 
 public class Attributes {
 
@@ -22,7 +23,7 @@ public class Attributes {
 
     @NotNull
     @JsonProperty
-    private Attribute<LocalDate> dateOfBirth;
+    private Attribute<DateTime> dateOfBirth;
 
     @JsonProperty
     private Attribute<String> gender;
@@ -38,7 +39,7 @@ public class Attributes {
             Attribute<String> firstName,
             List<Attribute<String>> middleNames,
             List<Attribute<String>> surnames,
-            Attribute<LocalDate> dateOfBirth,
+            Attribute<DateTime> dateOfBirth,
             Attribute<String> gender,
             List<Attribute<Address>> addresses) {
         this.firstName = firstName;
@@ -61,7 +62,7 @@ public class Attributes {
         return surnames;
     }
 
-    public Attribute<LocalDate> getDateOfBirth() {
+    public Attribute<DateTime> getDateOfBirth() {
         return dateOfBirth;
     }
 

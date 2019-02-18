@@ -3,7 +3,8 @@ package uk.gov.ida.notification.contracts.verifyserviceprovider;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+
+import org.joda.time.DateTime;
 
 public class Attribute<T> {
 
@@ -16,10 +17,10 @@ public class Attribute<T> {
     private boolean verified;
 
     @JsonProperty
-    private LocalDateTime from;
+    private DateTime from;
 
     @JsonProperty
-    private LocalDateTime to;
+    private DateTime to;
 
     @SuppressWarnings("Needed for JSON serialisation")
     public Attribute() {
@@ -28,8 +29,8 @@ public class Attribute<T> {
     public Attribute(
             T value,
             boolean verified,
-            LocalDateTime from,
-            LocalDateTime to) {
+            DateTime from,
+            DateTime to) {
         this.value = value;
         this.verified = verified;
         this.from = from;
@@ -44,11 +45,11 @@ public class Attribute<T> {
         return verified;
     }
 
-    public LocalDateTime getFrom() {
+    public DateTime getFrom() {
         return from;
     }
 
-    public LocalDateTime getTo() {
+    public DateTime getTo() {
         return to;
     }
 }
