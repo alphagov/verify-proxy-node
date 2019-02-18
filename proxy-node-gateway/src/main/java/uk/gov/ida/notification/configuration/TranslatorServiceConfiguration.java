@@ -9,7 +9,6 @@ import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
-import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.validation.Valid;
@@ -19,32 +18,33 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 public class TranslatorServiceConfiguration extends Configuration {
-    @JsonProperty
-    @Valid
+
     @NotNull
+    @JsonProperty
     private URI url;
 
-    @JsonProperty
     @Valid
+    @NotNull
+    @JsonProperty
     private JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
 
     public URI getUrl() {
         return url;
     }
 
-    public JerseyClientConfiguration getClient() {
+    public JerseyClientConfiguration getClientConfig() {
         return clientConfig;
     }
 
     public TranslatorProxy buildTranslatorProxy(Environment environment) {
-        Client client = new JerseyClientBuilder(environment).using(clientConfig).build("translator");
+        Client client = new JerseyClientBuilder(environment).using(clientConfig).build("translator-client");
         JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(client),
             new JsonResponseProcessor(environment.getObjectMapper())
         );
         return new TranslatorProxy(
             jsonClient,
-            UriBuilder.fromUri(url).path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH).build()
+            UriBuilder.fromUri(url).path(Urls.TranslatorUrls.TRANSLATOR_ROOT).build()
         );
     }
 }

@@ -15,6 +15,7 @@ import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.w3c.dom.Element;
+import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.helpers.BasicCredentialBuilder;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
@@ -46,31 +47,32 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_S
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 
 public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
+
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
-    private SamlObjectMarshaller marshaller;
+    private static final SamlObjectMarshaller MARSHALLER =  new SamlObjectMarshaller();
+    private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
+
     private BasicCredential hubSigningCredential;
-    private BasicCredential idpSigningCredential;
     private EncryptedAssertion authnAssertion;
     private EncryptedAssertion matchingDatasetAssertion;
 
     @Before
     public void setup() throws Throwable {
-        KeyPairConfiguration hubFacingEncryptionKeyPair = translatorAppRule.getConfiguration().getHubFacingEncryptionKeyPair();
+
         Credential hubAssertionsEncryptionCredential = new BasicCredential(
-                hubFacingEncryptionKeyPair.getPublicKey().getPublicKey()
+                X_509_CERTIFICATE_FACTORY.createCertificate(TEST_PUBLIC_CERT).getPublicKey()
         );
-        marshaller = new SamlObjectMarshaller();
 
         hubSigningCredential = BasicCredentialBuilder.instance()
                 .withPublicSigningCert(HUB_TEST_PUBLIC_SIGNING_CERT)
                 .withPrivateSigningKey(HUB_TEST_PRIVATE_SIGNING_KEY)
                 .build();
 
-        idpSigningCredential = BasicCredentialBuilder.instance()
+        final BasicCredential idpSigningCredential = BasicCredentialBuilder.instance()
                 .withPublicSigningCert(STUB_IDP_PUBLIC_PRIMARY_CERT)
                 .withPrivateSigningKey(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY)
                 .build();
@@ -80,6 +82,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
                 .withSubject(PROXY_NODE_ENTITY_ID, ResponseBuilder.DEFAULT_REQUEST_ID)
                 .buildEncrypted(hubAssertionsEncryptionCredential);
+
         matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion()
                 .withSignature(idpSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
@@ -113,11 +116,12 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     @Ignore
     public void postingHubResponseShouldReturnEidasResponseForm() throws Exception {
         Response hubResponse = buildSignedHubResponse();
-        Credential decryptingCredential = new TestCredentialFactory(TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_RP_PRIVATE_ENCRYPTION_KEY).getDecryptingCredential();
+        Credential decryptingCredential = new TestCredentialFactory(TEST_PUBLIC_CERT, TEST_PRIVATE_KEY).getDecryptingCredential();
+
         Response eidasResponse = extractEidasResponse(hubResponse);
         Response decryptedEidasResponse = decryptResponse(eidasResponse, decryptingCredential);
         Assertion eidasAssertion = decryptedEidasResponse.getAssertions().get(0);
-        Element attributeStatement = marshaller.marshallToElement(eidasAssertion.getAttributeStatements().get(0));
+        Element attributeStatement = MARSHALLER.marshallToElement(eidasAssertion.getAttributeStatements().get(0));
 
         assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
         assertEquals(1, eidasAssertion.getAttributeStatements().size());
@@ -155,7 +159,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws URISyntaxException {
-        String encodedResponse = Base64.encodeAsString(marshaller.transformToString(hubResponse));
+        String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
                 new HubResponseTranslatorRequest(encodedResponse, "_1234", "LEVEL_2", "_5678", URI.create("http://localhost:8081/bob"), STUB_COUNTRY_PUBLIC_PRIMARY_CERT);

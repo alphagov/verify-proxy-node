@@ -2,10 +2,8 @@ package uk.gov.ida.notification.translator.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 import uk.gov.ida.notification.pki.KeyPairConfiguration;
-import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -13,92 +11,47 @@ import java.net.URI;
 
 public class TranslatorConfiguration extends Configuration {
 
-    @JsonProperty
     @Valid
     @NotNull
-    private URI hubUrl;
-
     @JsonProperty
-    @Valid
-    @NotNull
-    private String proxyNodeEntityId;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private URI proxyNodeResponseUrl;
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private URI proxyNodeMetadataForConnectorNodeUrl;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private VerifyServiceProviderConfiguration vspConfiguration;
 
-    @JsonProperty
+    // TODO: This should be retrieved from the HSM instead and removed from config in EID-1289
     @Valid
     @NotNull
-    private KeyPairConfiguration hubFacingEncryptionKeyPair;
-
     @JsonProperty
-    @Valid
-    @NotNull
     private KeyPairConfiguration connectorFacingSigningKeyPair;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private String connectorNodeIssuerId;
 
-    @JsonProperty
     @Valid
     @NotNull
-    private TrustStoreBackedMetadataConfiguration connectorMetadataConfiguration;
-
     @JsonProperty
-    @Valid
-    @NotNull
-    private TrustStoreBackedMetadataConfiguration hubMetadataConfiguration;
-
-    @JsonProperty
-    @Valid
-    private ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private String keyRetrieverServiceName = "";
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private String softHSMLibPath = "";
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private String softHSMSigningKeyPin = "";
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private String softHSMSigningKeyLabel = "";
 
-
-    public URI getHubUrl() {
-        return hubUrl;
-    }
-
-    public String getProxyNodeEntityId() {
-        return proxyNodeEntityId;
-    }
-
-    public KeyPairConfiguration getHubFacingEncryptionKeyPair() {
-        return hubFacingEncryptionKeyPair;
-    }
 
     public KeyPairConfiguration getConnectorFacingSigningKeyPair() {
         return connectorFacingSigningKeyPair;
@@ -114,22 +67,6 @@ public class TranslatorConfiguration extends Configuration {
 
     public String getConnectorNodeIssuerId() {
         return connectorNodeIssuerId;
-    }
-
-    public TrustStoreBackedMetadataConfiguration getConnectorMetadataConfiguration() {
-        return connectorMetadataConfiguration;
-    }
-
-    public TrustStoreBackedMetadataConfiguration getHubMetadataConfiguration() {
-        return hubMetadataConfiguration;
-    }
-
-    public URI getProxyNodeResponseUrl() {
-        return proxyNodeResponseUrl;
-    }
-
-    public ReplayCheckerConfiguration getReplayChecker() {
-        return replayChecker;
     }
 
     public String getKeyRetrieverServiceName() { return keyRetrieverServiceName; }
