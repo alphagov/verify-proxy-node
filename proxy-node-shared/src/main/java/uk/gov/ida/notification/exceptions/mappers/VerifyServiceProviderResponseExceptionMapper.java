@@ -13,7 +13,13 @@ public class VerifyServiceProviderResponseExceptionMapper implements ExceptionMa
 
     @Override
     public Response toResponse(VerifyServiceProviderResponseException exception) {
-        log.warning(String.format("Exception calling verify-service-provider: %s", exception.getCause().getMessage()));
+        log.warning(
+            String.format(
+                "Exception calling verify-service-provider for session '%s': %s",
+                exception.getSessionId(),
+                exception.getCause().getMessage()
+            )
+        );
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorPageView("Something went wrong with the VSP")).build();
     }

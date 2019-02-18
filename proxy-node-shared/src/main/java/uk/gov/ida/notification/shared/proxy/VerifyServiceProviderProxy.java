@@ -15,6 +15,8 @@ import static uk.gov.ida.notification.shared.Urls.VerifyServiceProviderUrls;
 
 public class VerifyServiceProviderProxy {
 
+    public static final String TRANSLATOR_SESSION_ID = "SESSION ID NOT AVAILABLE IN TRANSLATOR";
+    public static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
     private final JsonClient jsonClient;
     private final URI translateHubResponseEndpoint;
     private final URI generateHubAuthnRequestEndpoint;
@@ -26,12 +28,12 @@ public class VerifyServiceProviderProxy {
     }
 
     public TranslatedHubResponse getTranslatedHubResponse(VerifyServiceProviderTranslationRequest request) {
-        return postRequest(request, translateHubResponseEndpoint, TranslatedHubResponse.class);
+        return postRequest(request, translateHubResponseEndpoint, TranslatedHubResponse.class );
     }
 
-    public AuthnRequestResponse generateAuthnRequest() {
-        AuthnRequestGenerationBody request = new AuthnRequestGenerationBody("LEVEL_2");
-        return postRequest(request, generateHubAuthnRequestEndpoint, AuthnRequestResponse.class);
+    public AuthnRequestResponse generateAuthnRequest(String sessionId) {
+        AuthnRequestGenerationBody request = new AuthnRequestGenerationBody(LEVEL_OF_ASSURANCE);
+        return postRequest(request, generateHubAuthnRequestEndpoint, AuthnRequestResponse.class, sessionId);
     }
 
     private URI buildURI(URI host, String path) {
@@ -39,10 +41,14 @@ public class VerifyServiceProviderProxy {
     }
 
     private <T> T postRequest(Object request, URI endpoint, Class<T> returnType) {
+        return postRequest(request, endpoint, returnType, TRANSLATOR_SESSION_ID);
+    }
+
+    private <T> T postRequest(Object request, URI endpoint, Class<T> returnType, String sessionId) {
         try {
             return jsonClient.post(request, endpoint, returnType);
         } catch (ApplicationException e) {
-            throw new VerifyServiceProviderResponseException(e);
+            throw new VerifyServiceProviderResponseException(e, sessionId);
         }
     }
 }

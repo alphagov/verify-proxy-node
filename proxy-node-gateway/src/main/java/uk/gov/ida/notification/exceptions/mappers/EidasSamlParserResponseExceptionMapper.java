@@ -14,7 +14,13 @@ public class EidasSamlParserResponseExceptionMapper implements ExceptionMapper<E
 
     @Override
     public Response toResponse(EidasSamlParserResponseException exception) {
-        log.warning(String.format("Exception calling eidas-saml-parser: %s", exception.getCause().getMessage()));
+        log.warning(
+            String.format(
+                "Exception calling eidas-saml-parser for session '%s': %s",
+                exception.getSessionId(),
+                exception.getCause().getMessage()
+            )
+        );
 
         ApplicationException cause = (ApplicationException) exception.getCause();
         Response.Status status = cause.getExceptionType() == ExceptionType.CLIENT_ERROR ?

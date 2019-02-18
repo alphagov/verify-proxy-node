@@ -122,7 +122,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
         assertThat(captorLoggingEvent.getValue().getMessage())
-            .contains("Exception calling eidas-saml-parser: Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri:");
+            .matches("Exception calling eidas-saml-parser for session '.*': Exception of type \\[REMOTE_SERVER_ERROR\\] whilst contacting uri: .*\n.*");
     }
 
     @Test
@@ -142,7 +142,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
         assertThat(captorLoggingEvent.getValue().getMessage())
-            .contains("Exception calling eidas-saml-parser: Exception of type [CLIENT_ERROR] whilst contacting uri:");
+            .matches("Exception calling eidas-saml-parser for session '.*': Exception of type \\[CLIENT_ERROR\\] whilst contacting uri: .*\n.*");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
         assertThat(captorLoggingEvent.getValue().getMessage())
-            .contains("Exception calling verify-service-provider: Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri:");
+            .matches("Exception calling verify-service-provider for session '.*': Exception of type \\[REMOTE_SERVER_ERROR\\] whilst contacting uri:.*\n.*");
     }
 
     private AuthnRequest getHubAuthnRequestFromHtml(String html) throws IOException {

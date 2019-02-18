@@ -85,7 +85,7 @@ public class VerifyServiceProviderProxyTest {
     public void generateAuthnRequestShouldReturnVSPAuthnRequestResponse() {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspClientRule.baseUri());
 
-        AuthnRequestResponse response = vspProxy.generateAuthnRequest();
+        AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
 
         assertEquals("saml_request", response.getSamlRequest());
         assertEquals("request_id", response.getRequestId());
@@ -103,7 +103,7 @@ public class VerifyServiceProviderProxyTest {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspServerErrorClientRule.baseUri());
 
         try {
-            AuthnRequestResponse response = vspProxy.generateAuthnRequest();
+            AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
             fail("Expected exception not thrown");
         } catch (VerifyServiceProviderResponseException e) {
             assertThat(e.getCause().getMessage())
@@ -113,6 +113,7 @@ public class VerifyServiceProviderProxyTest {
                         testVspServerErrorClientRule.baseUri().toString()
                     )
                 );
+            assertEquals("session-id", e.getSessionId());
         }
     }
 
@@ -121,7 +122,7 @@ public class VerifyServiceProviderProxyTest {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspClientErrorClientRule.baseUri());
 
         try {
-            AuthnRequestResponse response = vspProxy.generateAuthnRequest();
+            AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
             fail("Expected exception not thrown");
         } catch (VerifyServiceProviderResponseException e) {
             assertThat(e.getCause().getMessage())
@@ -131,6 +132,7 @@ public class VerifyServiceProviderProxyTest {
                         testVspClientErrorClientRule.baseUri().toString()
                     )
                 );
+            assertEquals("session-id", e.getSessionId());
         }
     }
 

@@ -19,11 +19,11 @@ public class EidasSamlParserProxy {
         this.eidasSamlParserURI = eidasSamlParserURI;
     }
 
-    public EidasSamlParserResponse parse(EidasSamlParserRequest eidasSamlParserRequest) {
+    public EidasSamlParserResponse parse(EidasSamlParserRequest eidasSamlParserRequest, String sessionId) {
         try {
             return eidasSamlParserClient.post(eidasSamlParserRequest, eidasSamlParserURI, EidasSamlParserResponse.class);
         } catch (ApplicationException e) {
-            throw new EidasSamlParserResponseException(e);
+            throw new EidasSamlParserResponseException(e, sessionId);
         }
     }
 }

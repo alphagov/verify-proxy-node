@@ -62,7 +62,7 @@ public class EidasSamlParserProxyTest {
     public void shouldReturnEidasSamlParserResponse() {
         EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse/valid");
 
-        EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest);
+        EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
 
         assertEquals("request_id", response.getRequestId());
         assertEquals("issuer", response.getIssuer());
@@ -75,7 +75,7 @@ public class EidasSamlParserProxyTest {
         EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse/server-error");
 
         try {
-            EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest);
+            EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
             fail("Expected exception not thrown");
         } catch (EidasSamlParserResponseException e) {
             assertThat(e.getCause().getMessage())
@@ -93,7 +93,7 @@ public class EidasSamlParserProxyTest {
         EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse/client-error");
 
         try {
-            EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest);
+            EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
             fail("Expected exception not thrown");
         } catch (EidasSamlParserResponseException e) {
             assertThat(e.getCause().getMessage())
