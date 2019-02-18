@@ -20,6 +20,7 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.ComparisonVa
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValidator;
+import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
@@ -75,6 +76,10 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
     @Override
     public void run(EidasSamlConfiguration configuration, Environment environment) throws Exception {
+
+        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("parser");
+        environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
+
         connectorMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
@@ -91,6 +96,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
                         )
                 )
         );
+
         registerMetadataHealthCheck(
                 connectorMetadataResolverBundle.getMetadataResolver(),
                 configuration.getConnectorMetadataConfiguration(),

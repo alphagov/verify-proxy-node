@@ -4,7 +4,7 @@ server:
       port: ${PORT:-6000}
   adminConnectors:
     - type: http
-      port: ${ADMIN_PORT:-6001}
+      port: ${ADMIN_PORT:-6008}
 
 logging:
   level: INFO
