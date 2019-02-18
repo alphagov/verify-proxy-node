@@ -2,8 +2,8 @@ package uk.gov.ida.notification.apprule.rules;
 
 import io.dropwizard.testing.junit.DropwizardClientRule;
 
-public class EidasSamlParserClientRule extends DropwizardClientRule {
-    public EidasSamlParserClientRule() {
-        super(new TestEidasSamlResource());
+public class EidasSamlParserClientRule<T> extends DropwizardClientRule {
+    public EidasSamlParserClientRule(T resource) {
+        super(resource);
     }
 }

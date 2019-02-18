@@ -3,7 +3,6 @@ package uk.gov.ida.notification.exceptions.mappers;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
 import uk.gov.ida.notification.views.ErrorPageView;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import java.text.MessageFormat;
