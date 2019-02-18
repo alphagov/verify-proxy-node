@@ -9,7 +9,6 @@ import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
 import uk.gov.ida.notification.translator.apprule.rules.TranslatorAppRule;
 import uk.gov.ida.notification.translator.apprule.rules.VspClientRule;
-import uk.gov.ida.saml.core.test.TestEntityIds;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
@@ -43,28 +42,12 @@ public class TranslatorAppRuleTestBase {
 
     @Rule
     public TranslatorAppRule translatorAppRule = new TranslatorAppRule(
-            ConfigOverride.config("proxyNodeEntityId", "http://proxy-node.uk"),
-            ConfigOverride.config("proxyNodeResponseUrl", "http://proxy-node/SAML2/SSO/Response"),
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
-            ConfigOverride.config("hubUrl", "http://hub"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
-            ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
             ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri() + "/vsp"),
-            ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
-            ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),
-            ConfigOverride.config("connectorMetadataConfiguration.trustStore.store", truststore.getAbsolutePath()),
-            ConfigOverride.config("connectorMetadataConfiguration.trustStore.password", truststore.getPassword()),
-            ConfigOverride.config("hubMetadataConfiguration.url", metadataClientRule.baseUri() + "/hub/metadata"),
-            ConfigOverride.config("hubMetadataConfiguration.expectedEntityId", TestEntityIds.HUB_ENTITY_ID),
-            ConfigOverride.config("hubMetadataConfiguration.trustStore.type", "file"),
-            ConfigOverride.config("hubMetadataConfiguration.trustStore.store", truststore.getAbsolutePath()),
-            ConfigOverride.config("hubMetadataConfiguration.trustStore.password", truststore.getPassword()),
             ConfigOverride.config("connectorFacingSigningKeyPair.publicKey.type", "x509"),
             ConfigOverride.config("connectorFacingSigningKeyPair.publicKey.cert", TEST_PUBLIC_CERT),
             ConfigOverride.config("connectorFacingSigningKeyPair.privateKey.key", TEST_PRIVATE_KEY),
-            ConfigOverride.config("hubFacingEncryptionKeyPair.publicKey.type", "x509"),
-            ConfigOverride.config("hubFacingEncryptionKeyPair.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("hubFacingEncryptionKeyPair.privateKey.key", TEST_PRIVATE_KEY),
             ConfigOverride.config("keyRetrieverServiceName", "config")
     );
 }
