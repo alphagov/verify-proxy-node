@@ -140,6 +140,6 @@ spec:
         - name: TRANSLATOR_URL
           value: http://{{ .Release.Name }}-translator:6300/SAML2/SSO/Response/POST
         - name: EIDAS_SAML_PARSER_URL
-          value: http://{{ .Release.Name }}-parser:6300/eidasAuthnRequest
+          value: http://{{ .Release.Name }}-parser:6300/
         - name: VERIFY_SERVICE_PROVIDER_URL
           value: http://127.0.0.1:8080/
