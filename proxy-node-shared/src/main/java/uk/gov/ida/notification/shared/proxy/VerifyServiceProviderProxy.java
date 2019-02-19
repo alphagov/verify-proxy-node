@@ -6,7 +6,8 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResp
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
-import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderGenerateAuthnRequestResponseException;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
+import uk.gov.ida.notification.exceptions.proxy.VspGenerateAuthnRequestResponseException;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -15,7 +16,6 @@ import static uk.gov.ida.notification.shared.Urls.VerifyServiceProviderUrls;
 
 public class VerifyServiceProviderProxy {
 
-    public static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
     private final JsonClient jsonClient;
     private final URI translateHubResponseEndpoint;
     private final URI generateHubAuthnRequestEndpoint;
@@ -31,11 +31,11 @@ public class VerifyServiceProviderProxy {
     }
 
     public AuthnRequestResponse generateAuthnRequest(String sessionId) {
-        AuthnRequestGenerationBody request = new AuthnRequestGenerationBody(LEVEL_OF_ASSURANCE);
+        AuthnRequestGenerationBody request = new AuthnRequestGenerationBody(VspLevelOfAssurance.LEVEL_2.toString());
         try {
             return jsonClient.post(request, generateHubAuthnRequestEndpoint, AuthnRequestResponse.class);
         } catch (ApplicationException e) {
-            throw new VerifyServiceProviderGenerateAuthnRequestResponseException(e, sessionId);
+            throw new VspGenerateAuthnRequestResponseException(e, sessionId);
         }
     }
 

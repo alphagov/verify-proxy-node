@@ -13,7 +13,7 @@ import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
-import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderGenerateAuthnRequestResponseException;
+import uk.gov.ida.notification.exceptions.proxy.VspGenerateAuthnRequestResponseException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -104,7 +104,7 @@ public class VerifyServiceProviderProxyTest {
         try {
             AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
             fail("Expected exception not thrown");
-        } catch (VerifyServiceProviderGenerateAuthnRequestResponseException e) {
+        } catch (VspGenerateAuthnRequestResponseException e) {
             assertThat(e.getCause().getMessage())
                 .startsWith(
                     String.format(
@@ -123,7 +123,7 @@ public class VerifyServiceProviderProxyTest {
         try {
             AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
             fail("Expected exception not thrown");
-        } catch (VerifyServiceProviderGenerateAuthnRequestResponseException e) {
+        } catch (VspGenerateAuthnRequestResponseException e) {
             assertThat(e.getCause().getMessage())
                 .startsWith(
                     String.format(

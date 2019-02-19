@@ -22,7 +22,7 @@ import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErro
 import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
 import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
 import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.VerifyServiceProviderGenerateAuthnRequestResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -147,7 +147,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void serverErrorResponseFromVspLogsAndReturns500() throws Exception {
-        Logger logger = Logger.getLogger(VerifyServiceProviderGenerateAuthnRequestResponseExceptionMapper.class.getName());
+        Logger logger = Logger.getLogger(VspGenerateAuthnRequestResponseExceptionMapper.class.getName());
         logger.addHandler(logHandler);
 
         Response response = postEidasAuthnRequest(
