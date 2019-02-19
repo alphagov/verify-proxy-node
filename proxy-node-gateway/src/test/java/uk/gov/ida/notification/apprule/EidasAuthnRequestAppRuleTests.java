@@ -1,9 +1,28 @@
 package uk.gov.ida.notification.apprule;
 
-import org.junit.Before;
+import io.dropwizard.testing.ConfigOverride;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
+import uk.gov.ida.notification.apprule.rules.EidasSamlParserClientRule;
+import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
+import uk.gov.ida.notification.apprule.rules.TestEidasSamlClientErrorResource;
+import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
+import uk.gov.ida.notification.apprule.rules.TestEidasSamlServerErrorResource;
+import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
+import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
+import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
+import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
+import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -11,21 +30,138 @@ import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
+import static java.util.logging.Level.WARNING;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
-    private SamlParser parser;
+    @ClassRule
+    public static final TranslatorClientRule translatorClientRule = new TranslatorClientRule();
 
-    @Before
-    public void setup() throws Throwable {
+    @ClassRule
+    public static final EidasSamlParserClientRule<TestEidasSamlResource> espClientRule = new EidasSamlParserClientRule<>(new TestEidasSamlResource());
+
+    @ClassRule
+    public static final EidasSamlParserClientRule<TestEidasSamlServerErrorResource> espClientServerErrorRule = new EidasSamlParserClientRule<>(new TestEidasSamlServerErrorResource());
+
+    @ClassRule
+    public static final EidasSamlParserClientRule<TestEidasSamlClientErrorResource> espClientClientErrorRule = new EidasSamlParserClientRule<>(new TestEidasSamlClientErrorResource());
+
+    @ClassRule
+    public static final VerifyServiceProviderClientRule vspClientRule = new VerifyServiceProviderClientRule(new TestVerifyServiceProviderResource());
+
+    @ClassRule
+    public static final VerifyServiceProviderClientRule vspClientServerErrorRule = new VerifyServiceProviderClientRule(new TestVerifyServiceProviderServerErrorResource());
+
+    @Rule
+    public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response")
+    );
+
+    @Rule
+    public GatewayAppRule proxyNodeEspServerErrorAppRule = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response")
+    );
+
+    @Rule
+    public GatewayAppRule proxyNodeEspClientErrorAppRule = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response")
+    );
+
+    @Rule
+    public GatewayAppRule proxyNodeVspServerErrorAppRule = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response")
+    );
+
+    @Mock
+    private Handler logHandler;
+
+    @Captor
+    private ArgumentCaptor<LogRecord> captorLoggingEvent;
+
+    private static SamlParser parser;
+
+    @BeforeClass
+    public static void setup() throws Throwable {
         parser = new SamlParser();
     }
 
     @Test
     public void bindingsReturnHubAuthnRequestForm() throws Throwable {
-        assertGoodRequest(new EidasAuthnRequestBuilder().withIssuer(CONNECTOR_NODE_ENTITY_ID));
+        assertGoodRequest(buildAuthnRequest());
+    }
+
+    @Test
+    public void serverErrorResponseFromEspLogsAndReturns500() throws Exception {
+        Logger logger = Logger.getLogger(EidasSamlParserResponseExceptionMapper.class.getName());
+        logger.addHandler(logHandler);
+
+        Response response = postEidasAuthnRequest(
+            buildAuthnRequest(),
+            proxyNodeEspServerErrorAppRule
+        );
+
+        assertEquals(500, response.getStatus());
+        assertThat(getHtmlStringFromResponse(response)).contains("Something went wrong with the ESP");
+
+        verify(logHandler).publish(captorLoggingEvent.capture());
+        assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
+        assertThat(captorLoggingEvent.getValue().getMessage())
+            .matches("Exception calling eidas-saml-parser for session '.*': Exception of type \\[REMOTE_SERVER_ERROR\\] whilst contacting uri: .*\n.*");
+    }
+
+    @Test
+    public void clientErrorResponseFromEspLogsAndReturns400() throws Exception {
+        Logger logger = Logger.getLogger(EidasSamlParserResponseExceptionMapper.class.getName());
+        logger.addHandler(logHandler);
+
+        AuthnRequest request = new EidasAuthnRequestBuilder()
+            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+            .withRandomRequestId()
+            .build();
+        Response response = postEidasAuthnRequest(request, proxyNodeEspClientErrorAppRule);
+
+        assertEquals(400, response.getStatus());
+        assertThat(getHtmlStringFromResponse(response)).contains("Something went wrong with the ESP");
+
+        verify(logHandler).publish(captorLoggingEvent.capture());
+        assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
+        assertThat(captorLoggingEvent.getValue().getMessage())
+            .matches("Exception calling eidas-saml-parser for session '.*': Exception of type \\[CLIENT_ERROR\\] whilst contacting uri: .*\n.*");
+    }
+
+    @Test
+    public void serverErrorResponseFromVspLogsAndReturns500() throws Exception {
+        Logger logger = Logger.getLogger(VspGenerateAuthnRequestResponseExceptionMapper.class.getName());
+        logger.addHandler(logHandler);
+
+        Response response = postEidasAuthnRequest(
+            buildAuthnRequest(),
+            proxyNodeVspServerErrorAppRule
+        );
+
+        assertEquals(500, response.getStatus());
+        assertThat(getHtmlStringFromResponse(response)).contains("Something went wrong with the VSP");
+
+        verify(logHandler).publish(captorLoggingEvent.capture());
+        assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
+        assertThat(captorLoggingEvent.getValue().getMessage())
+            .matches("Exception calling verify-service-provider for session '.*': Exception of type \\[REMOTE_SERVER_ERROR\\] whilst contacting uri:.*\n.*");
     }
 
     private AuthnRequest getHubAuthnRequestFromHtml(String html) throws IOException {
@@ -33,16 +169,24 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         return parser.parseSamlString(decodedHubAuthnRequest);
     }
 
-    private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Throwable {
-        AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        assertGoodResponse(postEidasAuthnRequest(postedRequest));
-        AuthnRequest redirectedRequest = builder.withRandomRequestId().build();
-        assertGoodResponse(redirectEidasAuthnRequest(redirectedRequest));
+    private void assertGoodRequest(AuthnRequest request) throws Throwable {
+        assertGoodResponse(postEidasAuthnRequest(request, proxyNodeAppRule));
+        assertGoodResponse(redirectEidasAuthnRequest(request, proxyNodeAppRule));
     }
 
     private void assertGoodResponse(Response response) throws IOException {
-        String html = response.readEntity(String.class);
-        AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(html);
+        AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(getHtmlStringFromResponse(response));
         assertEquals("a hub request id", hubAuthnRequest.getID());
+    }
+
+    private AuthnRequest buildAuthnRequest() throws Exception {
+        return new EidasAuthnRequestBuilder()
+            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+            .withRandomRequestId()
+            .build();
+    }
+
+    private String getHtmlStringFromResponse(Response response) {
+        return response.readEntity(String.class);
     }
 }

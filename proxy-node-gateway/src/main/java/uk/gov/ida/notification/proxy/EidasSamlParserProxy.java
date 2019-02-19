@@ -1,8 +1,11 @@
 package uk.gov.ida.notification.proxy;
 
+import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
+
 import java.net.URI;
 
 public class EidasSamlParserProxy {
@@ -16,7 +19,11 @@ public class EidasSamlParserProxy {
         this.eidasSamlParserURI = eidasSamlParserURI;
     }
 
-    public EidasSamlParserResponse parse(EidasSamlParserRequest eidasSamlParserRequest) {
-        return eidasSamlParserClient.post(eidasSamlParserRequest, eidasSamlParserURI, EidasSamlParserResponse.class);
+    public EidasSamlParserResponse parse(EidasSamlParserRequest eidasSamlParserRequest, String sessionId) {
+        try {
+            return eidasSamlParserClient.post(eidasSamlParserRequest, eidasSamlParserURI, EidasSamlParserResponse.class);
+        } catch (ApplicationException e) {
+            throw new EidasSamlParserResponseException(e, sessionId);
+        }
     }
 }

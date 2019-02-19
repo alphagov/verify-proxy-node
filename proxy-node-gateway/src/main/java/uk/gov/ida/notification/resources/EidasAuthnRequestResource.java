@@ -70,8 +70,8 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest);
-        AuthnRequestResponse vspResponse = generateHubRequestWithVSP();
+        final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, session.getId());
+        AuthnRequestResponse vspResponse = generateHubRequestWithVsp(session.getId());
         logAuthnRequestInformation(session, eidasSamlParserResponse, vspResponse);
         setResponseDataInSession(session, eidasSamlParserResponse, vspResponse, eidasRelayState);
         return buildSamlFormView(vspResponse, eidasRelayState);
@@ -85,11 +85,11 @@ public class EidasAuthnRequestResource {
         session.setAttribute(SESSION_KEY_HUB_REQUEST_ID, vspResponse.getRequestId());
     }
 
-    private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest) {
-        return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest));
+    private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {
+        return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest), sessionId);
     }
 
-    private AuthnRequestResponse generateHubRequestWithVSP() { return vspProxy.generateAuthnRequest(); }
+    private AuthnRequestResponse generateHubRequestWithVsp(String sessionId) { return vspProxy.generateAuthnRequest(sessionId); }
 
     private SamlFormView buildSamlFormView(AuthnRequestResponse vspResponse, String relayState) {
         URI hubUrl = vspResponse.getSsoLocation();

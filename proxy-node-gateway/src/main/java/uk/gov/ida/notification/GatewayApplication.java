@@ -8,9 +8,9 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.server.session.SessionHandler;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
-import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -58,7 +58,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
     @Override
     public void run(final GatewayConfiguration configuration,
-                    final Environment environment) throws Exception {
+                    final Environment environment) {
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
@@ -75,12 +75,12 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void registerExceptionMappers(Environment environment) {
+        environment.jersey().register(new EidasSamlParserResponseExceptionMapper());
+        environment.jersey().register(new VspGenerateAuthnRequestResponseExceptionMapper());
         environment.jersey().register(new GenericExceptionMapper());
-        environment.jersey().register(new AuthnRequestExceptionMapper());
-        environment.jersey().register(new HubResponseExceptionMapper());
     }
 
-    private void registerResources(GatewayConfiguration configuration, Environment environment) throws Exception {
+    private void registerResources(GatewayConfiguration configuration, Environment environment) {
         SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
 
         EidasSamlParserProxy espProxy = configuration

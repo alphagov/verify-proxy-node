@@ -102,8 +102,8 @@ public class EidasAuthnRequestResourceTest {
     }
 
     private void setupHappyPath() throws URISyntaxException {
-        when(eidasSamlParserService.parse(any(EidasSamlParserRequest.class))).thenReturn(eidasSamlParserResponse);
-        when(vspProxy.generateAuthnRequest()).thenReturn(vspResponse);
+        when(eidasSamlParserService.parse(any(EidasSamlParserRequest.class), any(String.class))).thenReturn(eidasSamlParserResponse);
+        when(vspProxy.generateAuthnRequest(any(String.class))).thenReturn(vspResponse);
         when(eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()).thenReturn(UNCHAINED_PUBLIC_CERT);
         when(eidasSamlParserResponse.getDestination()).thenReturn("destination");
         when(eidasSamlParserResponse.getIssuer()).thenReturn("issuer");
@@ -120,10 +120,10 @@ public class EidasAuthnRequestResourceTest {
         verify(session).setAttribute(SESSION_KEY_EIDAS_DESTINATION, "destination");
         verify(session).setAttribute(SESSION_KEY_EIDAS_RELAY_STATE, "eidas relay state");
         verify(session).setAttribute(SESSION_KEY_HUB_REQUEST_ID, "hub request id");
-        verify(session).getId();
+        verify(session, times(3)).getId();
         verify(logHandler, times(7)).publish(captorLoggingEvent.capture());
-        verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture());
-        verify(vspProxy).generateAuthnRequest();
+        verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
+        verify(vspProxy).generateAuthnRequest(any(String.class));
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, logHandler, samlFormViewBuilder, session);
 
