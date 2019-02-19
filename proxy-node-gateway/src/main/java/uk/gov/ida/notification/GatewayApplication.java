@@ -10,7 +10,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.VerifyServiceProviderResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.VerifyServiceProviderGenerateAuthnRequestResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -76,7 +76,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new EidasSamlParserResponseExceptionMapper());
-        environment.jersey().register(new VerifyServiceProviderResponseExceptionMapper());
+        environment.jersey().register(new VerifyServiceProviderGenerateAuthnRequestResponseExceptionMapper());
         environment.jersey().register(new GenericExceptionMapper());
     }
 

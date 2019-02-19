@@ -11,10 +11,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
-import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderResponseException;
+import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderGenerateAuthnRequestResponseException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -105,7 +104,7 @@ public class VerifyServiceProviderProxyTest {
         try {
             AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
             fail("Expected exception not thrown");
-        } catch (VerifyServiceProviderResponseException e) {
+        } catch (VerifyServiceProviderGenerateAuthnRequestResponseException e) {
             assertThat(e.getCause().getMessage())
                 .startsWith(
                     String.format(
@@ -124,7 +123,7 @@ public class VerifyServiceProviderProxyTest {
         try {
             AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
             fail("Expected exception not thrown");
-        } catch (VerifyServiceProviderResponseException e) {
+        } catch (VerifyServiceProviderGenerateAuthnRequestResponseException e) {
             assertThat(e.getCause().getMessage())
                 .startsWith(
                     String.format(

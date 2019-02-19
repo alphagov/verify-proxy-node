@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
-import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderResponseException;
+import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderGenerateAuthnRequestResponseException;
 import uk.gov.ida.notification.views.ErrorPageView;
 
 
@@ -8,11 +8,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import java.util.logging.Logger;
 
-public class VerifyServiceProviderResponseExceptionMapper implements ExceptionMapper<VerifyServiceProviderResponseException> {
+public class VerifyServiceProviderGenerateAuthnRequestResponseExceptionMapper implements ExceptionMapper<VerifyServiceProviderGenerateAuthnRequestResponseException> {
     private final Logger log = Logger.getLogger(getClass().getName());
 
     @Override
-    public Response toResponse(VerifyServiceProviderResponseException exception) {
+    public Response toResponse(VerifyServiceProviderGenerateAuthnRequestResponseException exception) {
         log.warning(
             String.format(
                 "Exception calling verify-service-provider for session '%s': %s",
