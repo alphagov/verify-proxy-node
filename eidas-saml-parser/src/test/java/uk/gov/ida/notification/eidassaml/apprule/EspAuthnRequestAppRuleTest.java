@@ -2,7 +2,7 @@ package uk.gov.ida.notification.eidassaml.apprule;
 
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import uk.gov.ida.notification.eidassaml.ResponseDto;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 
@@ -32,9 +32,9 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         if (response.getStatus() != 200) {
             fail("Unsuccessful Response");
         }
-        ResponseDto responseDto = response.readEntity(ResponseDto.class);
+        EidasSamlParserResponse responseDto = response.readEntity(EidasSamlParserResponse.class);
 
-        assertEquals(responseDto.requestId, "request_id");
-        assertEquals(responseDto.issuer, CONNECTOR_NODE_ENTITY_ID);
+        assertEquals(responseDto.getRequestId(), "request_id");
+        assertEquals(responseDto.getIssuer(), CONNECTOR_NODE_ENTITY_ID);
     }
 }
