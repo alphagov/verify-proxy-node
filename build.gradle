@@ -111,6 +111,7 @@ subprojects {
         )
 
         proxy_node_test (
+                "net.sourceforge.htmlcleaner:htmlcleaner:2.22",
                 "net.sourceforge.htmlunit:htmlunit:2.28",
         )
 

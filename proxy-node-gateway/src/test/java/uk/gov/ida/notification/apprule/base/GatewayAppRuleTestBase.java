@@ -5,6 +5,7 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 
@@ -30,7 +31,7 @@ public class GatewayAppRuleTestBase {
 
     protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule) throws URISyntaxException {
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
-        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest);
+        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest).param("RelayState", "relay-state");
         return proxyNodeAppRule.target("/SAML2/SSO/POST").request().post(Entity.form(postForm));
     }
 
@@ -38,7 +39,15 @@ public class GatewayAppRuleTestBase {
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
         return proxyNodeAppRule.target("/SAML2/SSO/Redirect")
                 .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
+                .queryParam("RelayState", "relay-state")
                 .request()
                 .get();
+    }
+
+    protected AuthnRequest buildAuthnRequest() throws Exception {
+        return new EidasAuthnRequestBuilder()
+            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+            .withRandomRequestId()
+            .build();
     }
 }

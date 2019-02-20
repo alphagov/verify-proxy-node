@@ -57,7 +57,8 @@ public class TranslatorProxyTest {
         );
         TranslatorProxy translatorProxy = new TranslatorProxy(
             jsonClient,
-            UriBuilder.fromUri(clientRule.baseUri()).path("/translate-hub-response").build());
+            clientRule.baseUri()
+        );
 
         String samlResponse = translatorProxy.getTranslatedResponse(request);
 

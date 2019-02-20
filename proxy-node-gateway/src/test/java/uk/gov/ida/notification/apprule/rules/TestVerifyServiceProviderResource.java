@@ -1,11 +1,8 @@
 package uk.gov.ida.notification.apprule.rules;
 
 import org.glassfish.jersey.internal.util.Base64;
-import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
-import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.validation.Valid;
@@ -21,13 +18,11 @@ import java.net.URISyntaxException;
 public class TestVerifyServiceProviderResource {
 
     public static final String REQUEST_ID_HUB = "a hub request id";
+    public static final String ENCODED_SAML_BLOB = Base64.encodeAsString("Encoded SAML blob!");
 
     @POST
     @Valid
     public AuthnRequestResponse post(@Valid AuthnRequestGenerationBody request) throws URISyntaxException {
-        AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
-        authnRequest.setID(REQUEST_ID_HUB);
-        String encodedAuthnRequest = Base64.encodeAsString(new SamlObjectMarshaller().transformToString(authnRequest));
-        return new AuthnRequestResponse(encodedAuthnRequest, REQUEST_ID_HUB, new URI("http://www.hub.com"));
+        return new AuthnRequestResponse(ENCODED_SAML_BLOB, REQUEST_ID_HUB, new URI("http://www.hub.com"));
     }
 }
