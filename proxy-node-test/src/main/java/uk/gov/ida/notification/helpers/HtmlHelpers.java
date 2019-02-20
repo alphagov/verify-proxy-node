@@ -6,9 +6,21 @@ import com.gargoylesoftware.htmlunit.html.HTMLParser;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.glassfish.jersey.internal.util.Base64;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.DomSerializer;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.TagNode;
+import org.w3c.dom.Document;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.net.URL;
+
+import static org.junit.Assert.assertTrue;
 
 public class HtmlHelpers {
     public static String getValueFromForm(String html, String inputName) throws IOException {
@@ -20,5 +32,13 @@ public class HtmlHelpers {
             String encodedEidasResponse = samlForm.getInputByName(inputName).getValueAttribute();
             return Base64.decodeAsString(encodedEidasResponse);
         }
+    }
+
+    public static void assertXPath(String htmlString, String xPathExpression) throws XPathExpressionException, ParserConfigurationException {
+        TagNode tagNode = new HtmlCleaner().clean(htmlString);
+        Document doc = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
+        XPath xpath = XPathFactory.newInstance().newXPath();
+
+        assertTrue((Boolean) xpath.evaluate(xPathExpression, doc, XPathConstants.BOOLEAN));
     }
 }
