@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.exceptions.SessionAttributeException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.views.SamlFormView;
 
@@ -22,6 +23,8 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -110,6 +113,22 @@ public class HubResponseResourceTest {
         );
 
         assertEquals(expectedLogOutput, allLogRecords);
+    }
 
+    @Test
+    public void shouldThrowSamlAttributeErrorIfMissingSessionAttributes() {
+        when(session.getAttribute(SESSION_KEY_HUB_REQUEST_ID)).thenReturn(null);
+
+        HubResponseResource resource =  new HubResponseResource(
+            new SamlFormViewBuilder(),
+            translatorProxy
+        );
+
+        try {
+            SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
+            fail("Expected exception not thrown");
+        } catch (SessionAttributeException e) {
+            assertThat(e).hasCause(new NullPointerException());
+        }
     }
 }

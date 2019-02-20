@@ -3,6 +3,7 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.exceptions.SessionAttributeException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -47,11 +48,21 @@ public class HubResponseResource {
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
 
-        String hubRequestId = session.getAttribute(SESSION_KEY_HUB_REQUEST_ID).toString();
-        String eidasRequestId = session.getAttribute(SESSION_KEY_EIDAS_REQUEST_ID).toString();
-        String connectorEncrpytionCredential = session.getAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT).toString();
-        String connectorNodeUrl = session.getAttribute(SESSION_KEY_EIDAS_DESTINATION).toString();
-        String eidasRelayState = session.getAttribute(SESSION_KEY_EIDAS_RELAY_STATE).toString();
+        String hubRequestId;
+        String eidasRequestId;
+        String connectorEncrpytionCredential;
+        String connectorNodeUrl;
+        String eidasRelayState;
+
+        try {
+            hubRequestId = session.getAttribute(SESSION_KEY_HUB_REQUEST_ID).toString();
+            eidasRequestId = session.getAttribute(SESSION_KEY_EIDAS_REQUEST_ID).toString();
+            connectorEncrpytionCredential = session.getAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT).toString();
+            connectorNodeUrl = session.getAttribute(SESSION_KEY_EIDAS_DESTINATION).toString();
+            eidasRelayState = session.getAttribute(SESSION_KEY_EIDAS_RELAY_STATE).toString();
+        } catch (NullPointerException e) {
+            throw new SessionAttributeException(e);
+        }
 
         LOG.info(String.format("[HUB Response] received for hub authn request ID '%s', eIDAS authn request ID '%s'", hubRequestId, eidasRequestId));
 
