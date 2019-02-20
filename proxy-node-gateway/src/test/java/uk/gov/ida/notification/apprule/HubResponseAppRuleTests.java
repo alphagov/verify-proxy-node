@@ -43,7 +43,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     );
 
     @Test
-    public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception{
+    public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception {
         Form postForm = new Form()
             .param(SamlFormMessageType.SAML_RESPONSE, Base64.encodeAsString("I'm going to be a SAML blob"))
             .param("RelayState", "relay-state");
@@ -67,6 +67,26 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         HtmlHelpers.assertXPath(
             htmlString,
             "//form[@action='http://connector-node.com']/input[@name='RelayState'][@value='relay-state']"
+        );
+    }
+
+    @Test
+    public void returnsErrorPageAndLogsIfNoSession() throws Exception {
+        Form postForm = new Form()
+            .param(SamlFormMessageType.SAML_RESPONSE, Base64.encodeAsString("I'm going to be a SAML blob"))
+            .param("RelayState", "relay-state");
+
+        Response response = proxyNodeAppRule
+            .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+            .request()
+            .post(Entity.form(postForm));
+
+        assertEquals(400, response.getStatus());
+
+        String htmlString = response.readEntity(String.class);
+        HtmlHelpers.assertXPath(
+            htmlString,
+            "//div[@class='issues'][text()='Something went wrong with the session attributes']"
         );
     }
 
