@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.ConfigOverride;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,12 +22,11 @@ import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
 import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
 import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
-import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
-import uk.gov.ida.notification.saml.SamlFormMessageType;
-import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
@@ -94,13 +92,6 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     @Captor
     private ArgumentCaptor<LogRecord> captorLoggingEvent;
 
-    private static SamlParser parser;
-
-    @BeforeClass
-    public static void setup() throws Throwable {
-        parser = new SamlParser();
-    }
-
     @Test
     public void bindingsReturnHubAuthnRequestForm() throws Throwable {
         assertGoodRequest(buildAuthnRequest());
@@ -117,7 +108,10 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         );
 
         assertEquals(500, response.getStatus());
-        assertThat(getHtmlStringFromResponse(response)).contains("Something went wrong with the ESP");
+        HtmlHelpers.assertXPath(
+            getHtmlStringFromResponse(response),
+            "//div[@class='issues'][text()='Something went wrong with the ESP']"
+        );
 
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
@@ -130,14 +124,14 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         Logger logger = Logger.getLogger(EidasSamlParserResponseExceptionMapper.class.getName());
         logger.addHandler(logHandler);
 
-        AuthnRequest request = new EidasAuthnRequestBuilder()
-            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
-            .withRandomRequestId()
-            .build();
+        AuthnRequest request = buildAuthnRequest();
         Response response = postEidasAuthnRequest(request, proxyNodeEspClientErrorAppRule);
 
         assertEquals(400, response.getStatus());
-        assertThat(getHtmlStringFromResponse(response)).contains("Something went wrong with the ESP");
+        HtmlHelpers.assertXPath(
+            getHtmlStringFromResponse(response),
+            "//div[@class='issues'][text()='Something went wrong with the ESP']"
+        );
 
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
@@ -156,7 +150,10 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         );
 
         assertEquals(500, response.getStatus());
-        assertThat(getHtmlStringFromResponse(response)).contains("Something went wrong with the VSP");
+        HtmlHelpers.assertXPath(
+            getHtmlStringFromResponse(response),
+            "//div[@class='issues'][text()='Something went wrong with the VSP']"
+        );
 
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
@@ -164,26 +161,22 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             .matches("Exception calling verify-service-provider for session '.*': Exception of type \\[REMOTE_SERVER_ERROR\\] whilst contacting uri:.*\n.*");
     }
 
-    private AuthnRequest getHubAuthnRequestFromHtml(String html) throws IOException {
-        String decodedHubAuthnRequest = HtmlHelpers.getValueFromForm(html, SamlFormMessageType.SAML_REQUEST);
-        return parser.parseSamlString(decodedHubAuthnRequest);
-    }
-
     private void assertGoodRequest(AuthnRequest request) throws Throwable {
         assertGoodResponse(postEidasAuthnRequest(request, proxyNodeAppRule));
         assertGoodResponse(redirectEidasAuthnRequest(request, proxyNodeAppRule));
     }
 
-    private void assertGoodResponse(Response response) throws IOException {
-        AuthnRequest hubAuthnRequest = getHubAuthnRequestFromHtml(getHtmlStringFromResponse(response));
-        assertEquals("a hub request id", hubAuthnRequest.getID());
-    }
+    private void assertGoodResponse(Response response) throws IOException, XPathExpressionException, ParserConfigurationException {
+        String htmlString = getHtmlStringFromResponse(response);
 
-    private AuthnRequest buildAuthnRequest() throws Exception {
-        return new EidasAuthnRequestBuilder()
-            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
-            .withRandomRequestId()
-            .build();
+        HtmlHelpers.assertXPath(
+            htmlString,
+            String.format("//form[@action='http://www.hub.com']/input[@name='SAMLRequest'][@value='%s']", TestVerifyServiceProviderResource.ENCODED_SAML_BLOB)
+        );
+        HtmlHelpers.assertXPath(
+            htmlString,
+            "//form[@action='http://www.hub.com']/input[@name='RelayState'][@value='relay-state']"
+        );
     }
 
     private String getHtmlStringFromResponse(Response response) {
