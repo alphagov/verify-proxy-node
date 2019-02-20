@@ -10,6 +10,7 @@ import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
+import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -25,11 +26,7 @@ import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.util.logging.Logger;
 
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_DESTINATION;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELAY_STATE;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DATA;
 
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
@@ -78,11 +75,14 @@ public class EidasAuthnRequestResource {
     }
 
     private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse, String eidasRelayState) {
-        session.setAttribute(SESSION_KEY_EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
-        session.setAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT, eidasSamlParserResponse.getConnectorEncryptionPublicCertificate());
-        session.setAttribute(SESSION_KEY_EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
-        session.setAttribute(SESSION_KEY_EIDAS_RELAY_STATE, eidasRelayState);
-        session.setAttribute(SESSION_KEY_HUB_REQUEST_ID, vspResponse.getRequestId());
+        GatewaySessionData gatewaySessionData = new GatewaySessionData(
+            vspResponse.getRequestId(),
+            eidasSamlParserResponse.getRequestId(),
+            eidasSamlParserResponse.getDestination(),
+            eidasRelayState,
+            eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()
+        );
+        session.setAttribute(SESSION_KEY_SESSION_DATA, gatewaySessionData);
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {

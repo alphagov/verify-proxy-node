@@ -13,6 +13,7 @@ import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.exceptions.SessionAttributeException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
+import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
@@ -31,11 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_DESTINATION;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELAY_STATE;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DATA;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HubResponseResourceTest {
@@ -68,12 +65,15 @@ public class HubResponseResourceTest {
 
     @Test
     public void testsHappyPath() {
-        when(session.getAttribute(SESSION_KEY_HUB_REQUEST_ID)).thenReturn("hub_request_id_in_session");
-        when(session.getAttribute(SESSION_KEY_EIDAS_REQUEST_ID)).thenReturn("eidas_request_id_in_session");
-        when(session.getAttribute(SESSION_KEY_EIDAS_DESTINATION)).thenReturn("http://conector.node");
-        when(session.getAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT)).thenReturn("connector_public_cert_in_session");
-        when(session.getAttribute(SESSION_KEY_EIDAS_RELAY_STATE)).thenReturn("eidas_relay_state_in_session");
-
+        GatewaySessionData sessionData = new GatewaySessionData(
+            "hub_request_id_in_session",
+            "eidas_request_id_in_session",
+            "http://conector.node",
+            "eidas_relay_state_in_session",
+            "connector_public_cert_in_session"
+        );
+        when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
+        when(session.getId()).thenReturn("session-id");
         when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class))).thenReturn("translated_eidas_response");
 
         HubResponseResource resource =  new HubResponseResource(
@@ -108,16 +108,16 @@ public class HubResponseResourceTest {
             .collect(Collectors.toList());
 
         List<String> expectedLogOutput = Lists.newArrayList(
-            "[HUB Response] received for hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'",
-            "[eIDAS Response] received for hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'"
+            "[HUB Response] received for session 'session-id', hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'",
+            "[eIDAS Response] received for session 'session-id', hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'"
         );
 
         assertEquals(expectedLogOutput, allLogRecords);
     }
 
     @Test
-    public void shouldThrowSamlAttributeErrorIfMissingSessionAttributes() {
-        when(session.getAttribute(SESSION_KEY_HUB_REQUEST_ID)).thenReturn(null);
+    public void shouldThrowSamlAttributeErrorIfMissingSessionIsNull() {
+        when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(null);
 
         HubResponseResource resource =  new HubResponseResource(
             new SamlFormViewBuilder(),
@@ -128,7 +128,31 @@ public class HubResponseResourceTest {
             SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
             fail("Expected exception not thrown");
         } catch (SessionAttributeException e) {
-            assertThat(e).hasCause(new NullPointerException());
+            assertThat(e).hasMessage("Session data can not be null");
+        }
+    }
+
+    @Test
+    public void shouldThrowSamlAttributeErrorIfMissingSessionAttribute() {
+        GatewaySessionData sessionData = new GatewaySessionData(
+            "hub_request_id_in_session",
+            "eidas_request_id_in_session",
+            "",
+            "eidas_relay_state_in_session",
+            null
+        );
+        when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
+
+        HubResponseResource resource =  new HubResponseResource(
+            new SamlFormViewBuilder(),
+            translatorProxy
+        );
+
+        try {
+            SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
+            fail("Expected exception not thrown");
+        } catch (SessionAttributeException e) {
+            assertThat(e).hasMessage("eidasConnectorPublicKey field may not be empty, eidasDestination field may not be empty");
         }
     }
 }

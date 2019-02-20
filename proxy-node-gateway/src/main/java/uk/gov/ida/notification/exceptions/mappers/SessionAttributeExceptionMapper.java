@@ -14,8 +14,9 @@ public class SessionAttributeExceptionMapper implements ExceptionMapper<SessionA
     public Response toResponse(SessionAttributeException exception) {
         log.warning(
             String.format(
-                "Exception reading session attributes: %s",
-                exception.getCause()
+                "Exception reading attributes for session '%s': %s",
+                exception.getSessionId(),
+                exception.getMessage()
             )
         );
 

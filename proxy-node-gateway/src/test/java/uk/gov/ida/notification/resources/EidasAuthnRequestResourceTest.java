@@ -16,6 +16,7 @@ import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
+import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;
@@ -28,18 +29,15 @@ import java.util.logging.Logger;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
+import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DATA;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_DESTINATION;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELAY_STATE;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -74,6 +72,9 @@ public class EidasAuthnRequestResourceTest {
 
     @Captor
     private ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
+
+    @Captor
+    private ArgumentCaptor<GatewaySessionData> captorGatewaySessionData;
 
     @Before
     public void setup() {
@@ -115,11 +116,14 @@ public class EidasAuthnRequestResourceTest {
     }
 
     private void verifyHappyPath() {
-        verify(session).setAttribute(SESSION_KEY_EIDAS_REQUEST_ID, "eidas request id");
-        verify(session).setAttribute(SESSION_KEY_EIDAS_CONNECTOR_PUBLIC_CERT, UNCHAINED_PUBLIC_CERT);
-        verify(session).setAttribute(SESSION_KEY_EIDAS_DESTINATION, "destination");
-        verify(session).setAttribute(SESSION_KEY_EIDAS_RELAY_STATE, "eidas relay state");
-        verify(session).setAttribute(SESSION_KEY_HUB_REQUEST_ID, "hub request id");
+        GatewaySessionData expectedSessionData = new GatewaySessionData(
+            "hub request id",
+            "eidas request id",
+            "destination",
+            "eidas relay state",
+            UNCHAINED_PUBLIC_CERT
+        );
+        verify(session).setAttribute(eq(SESSION_KEY_SESSION_DATA), captorGatewaySessionData.capture());
         verify(session, times(3)).getId();
         verify(logHandler, times(7)).publish(captorLoggingEvent.capture());
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
@@ -127,6 +131,7 @@ public class EidasAuthnRequestResourceTest {
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, logHandler, samlFormViewBuilder, session);
 
+        assertThat(captorGatewaySessionData.getValue()).isEqualToComparingFieldByField(expectedSessionData);
         assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo("eidas blob");
         List<LogRecord> allLogRecords = captorLoggingEvent.getAllValues();
 
