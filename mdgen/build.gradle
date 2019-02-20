@@ -11,7 +11,7 @@ repositories {
 
   // cloudhsm libraries downloaded from AWS
   flatDir {
-    dirs 'libs'
+    dirs '/opt/cloudhsm/java'
   }
 }
 
