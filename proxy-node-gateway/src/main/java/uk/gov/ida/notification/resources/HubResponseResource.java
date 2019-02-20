@@ -23,7 +23,7 @@ import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELA
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
 
-@Path(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_PATH)
+@Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class HubResponseResource {
     private static final Logger LOG = Logger.getLogger(HubResponseResource.class.getName());
     public static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
@@ -40,7 +40,7 @@ public class HubResponseResource {
     }
 
     @POST
-    @Path("/POST")
+    @Path(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
         @FormParam(SamlFormMessageType.SAML_RESPONSE) String hubResponse,

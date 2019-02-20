@@ -31,7 +31,7 @@ import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_REQU
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_EIDAS_RELAY_STATE;
 import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_HUB_REQUEST_ID;
 
-@Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_PATH)
+@Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
 
     private final Logger log = Logger.getLogger(getClass().getName());
@@ -51,7 +51,7 @@ public class EidasAuthnRequestResource {
     }
 
     @GET
-    @Path("/Redirect")
+    @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH)
     public View handleRedirectBinding(
             @QueryParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
@@ -60,7 +60,7 @@ public class EidasAuthnRequestResource {
     }
 
     @POST
-    @Path("/POST")
+    @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,

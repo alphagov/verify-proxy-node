@@ -11,14 +11,11 @@ import uk.gov.ida.saml.core.test.builders.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
-
-@Path("/translator")
+@Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
 public class TestTranslatorResource {
 
     @POST
-    @Path("/SAML2/SSO/Response")
+    @Path("Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_XML)
     public String hubResponse(@FormParam(SamlFormMessageType.SAML_RESPONSE) String encryptedHubResponse) throws Throwable {

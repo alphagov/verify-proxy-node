@@ -7,8 +7,11 @@ public interface Urls {
     }
 
     interface GatewayUrls {
-        String GATEWAY_EIDAS_AUTHN_REQUEST_PATH = "/SAML2/SSO";
-        String GATEWAY_HUB_RESPONSE_PATH = "/SAML2/SSO/Response";
+        String GATEWAY_ROOT = "/SAML2/SSO";
+        String GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH = "/POST";
+        String GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH = "/Redirect";
+        String GATEWAY_HUB_RESPONSE_PATH = "/Response/POST";
+        String GATEWAY_HUB_RESPONSE_RESOURCE = GATEWAY_ROOT + GATEWAY_HUB_RESPONSE_PATH;
     }
 
     interface TranslatorUrls {
