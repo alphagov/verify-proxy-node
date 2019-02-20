@@ -12,7 +12,7 @@ import org.opensaml.security.credential.Credential;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
-import uk.gov.ida.notification.eidassaml.RequestDto;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -65,11 +65,11 @@ public class EidasSamlParserAppRuleTestBase {
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.password", truststore.getPassword())
     );
 
-    protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest) throws MarshallingException {
-        System.out.println(marshaller.transformToString(eidasAuthnRequest));
+    protected Response postEidasAuthnRequest(AuthnRequest authnRequest) throws MarshallingException {
+        System.out.println(marshaller.transformToString(authnRequest));
 
-        RequestDto request = new RequestDto();
-        request.authnRequest = Base64.encodeAsString(ObjectUtils.toString(eidasAuthnRequest));
+        String eidasAuthnRequest = Base64.encodeAsString(ObjectUtils.toString(authnRequest));
+        EidasSamlParserRequest request = new EidasSamlParserRequest(eidasAuthnRequest);
 
         Response response = null;
         try {

@@ -5,6 +5,7 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import se.litsec.opensaml.utils.ObjectUtils;
+import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.shared.Urls;
@@ -39,10 +40,10 @@ public class EidasSamlResource {
 
     @POST
     @Valid
-    public EidasSamlParserResponse post(RequestDto request) throws UnmarshallingException, XMLParserException {
+    public EidasSamlParserResponse post(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {
 
         AuthnRequest authnRequest = ObjectUtils.unmarshall(
-                new ByteArrayInputStream(Base64.getDecoder().decode(request.authnRequest.getBytes())),
+                new ByteArrayInputStream(Base64.getDecoder().decode(request.getAuthnRequest().getBytes())),
                 AuthnRequest.class);
 
         samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
