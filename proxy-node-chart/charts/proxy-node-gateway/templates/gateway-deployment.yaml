@@ -48,6 +48,6 @@ spec:
         - name: TRANSLATOR_URL
           value: http://{{ .Release.Name }}-translator:6300/SAML2/SSO/Response/POST
         - name: EIDAS_SAML_PARSER_URL
-          value: http://{{ .Release.Name }}-parser:6300/
+          value: http://{{ .Release.Name }}-parser:6400/
         - name: VERIFY_SERVICE_PROVIDER_URL
           value: http://127.0.0.1:8080/ # this needs to be set to the actual vsp when we have it
