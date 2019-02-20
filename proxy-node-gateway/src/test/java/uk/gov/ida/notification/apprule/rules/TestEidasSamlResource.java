@@ -17,6 +17,6 @@ public class TestEidasSamlResource {
     @POST
     @Valid
     public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) {
-        return new EidasSamlParserResponse("eidas request id", "issuer", "cert", "destination");
+        return new EidasSamlParserResponse("eidas request id", "issuer", "cert", "http://connector-node.com");
     }
 }
