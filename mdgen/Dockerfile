@@ -1,13 +1,29 @@
-# Base builder image
+from amazonlinux:2.0.20190212
 
-from gradle:jdk11 AS build
+# Install AWS CloudHSM client and libs
+run yum install -y wget tar gzip \
+ && wget https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-latest.el7.x86_64.rpm \
+ && yum install -y ./cloudhsm-client-latest.*.rpm \
+ && rm ./cloudhsm-client-latest.*.rpm \
+ && wget https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-latest.el7.x86_64.rpm \
+ && yum install -y ./cloudhsm-client-jce-latest.*.rpm \
+ && rm ./cloudhsm-client-jce-latest.*.rpm \
+ && wget https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz \
+ && mkdir -p /usr/lib/jvm \
+ && tar -C /usr/lib/jvm -xf ./openjdk-11.0.2*.tar.gz \
+ && rm ./openjdk-11.0.2*.tar.gz \
+ && sed -i 's/UNIXSOCKET/TCPSOCKET/g' /opt/cloudhsm/data/application.cfg
+
 workdir /mdgen
-user root
-env GRADLE_user_HOME ~/.gradle
-copy build.gradle build.gradle
+env GRADLE_USER_HOME=/build/.gradle \
+    LD_LIBRARY_PATH=/opt/cloudhsm/lib \
+    HSM_PARTITION=PARTITION_1 \
+    HSM_USER=user \
+    HSM_PASSWORD=password \
+    JAVA_HOME=/usr/lib/jvm/jdk-11.0.2
+copy gradlew build.gradle settings.gradle ./
+copy gradle/ gradle/
 copy src/ src/
-run gradle --no-daemon --quiet --parallel install
+run ./gradlew --no-daemon installDist -x test
 
-from openjdk:11-jre-slim
-copy --from=build /mdgen/build/install/mdgen /
-entrypoint ["/bin/mdgen"]
+entrypoint ["/mdgen/build/install/mdgen/bin/mdgen"]

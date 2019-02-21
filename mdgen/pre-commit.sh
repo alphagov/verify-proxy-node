@@ -35,7 +35,7 @@ function test_with_hsm {
   local key_pass="1234"
   echo -n "test_with_hsm  $node $cert $key $algo: "
   ./init_softhsm.sh "$algo" >"$log" 2>&1 \
-    && ./gradlew run -q --args "$node test/${node}.yml $cert --algorithm $algo --credential hsm --hsm-module $HSM_MODULE --hsm-key-label $algo --hsm-pin 1234 --output $output" >"$log" 2>&1 \
+    && ./gradlew run -q --args "$node test/${node}.yml $cert --algorithm $algo --credential pkcs11 --hsm-module $HSM_MODULE --hsm-key-label $algo --hsm-pin 1234 --output $output" >"$log" 2>&1 \
     && $XMLSECTOOL --verifySignature --inFile "$output" --certificate "$cert" >"$log" 2>&1
   test 0 -eq "$?" && echo OK || {
     echo FAIL
