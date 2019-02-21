@@ -117,12 +117,11 @@ public class EidasAuthnRequestResourceTest {
 
     private void verifyHappyPath() {
         GatewaySessionData expectedSessionData = new GatewaySessionData(
-            "hub request id",
-            "eidas request id",
-            "destination",
-            "eidas relay state",
-            UNCHAINED_PUBLIC_CERT
+            eidasSamlParserResponse,
+            vspResponse,
+            "eidas relay state"
         );
+
         verify(session).setAttribute(eq(SESSION_KEY_SESSION_DATA), captorGatewaySessionData.capture());
         verify(session, times(3)).getId();
         verify(logHandler, times(7)).publish(captorLoggingEvent.capture());

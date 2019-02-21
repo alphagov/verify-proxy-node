@@ -1,9 +1,12 @@
 package uk.gov.ida.notification.session;
 
 import org.junit.Test;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.exceptions.SessionAttributeException;
 
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -14,15 +17,27 @@ import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DA
 
 public class TestGatewaySessionDataValidator {
 
+    private final AuthnRequestResponse vspResponse = new AuthnRequestResponse(
+        "saml-request",
+        "hub-request-id",
+        UriBuilder.fromUri("https://example.com").build()
+    );
+
     @Test
     public void getValidatedSessionDataShouldReturnSessionData() {
-        GatewaySessionData expectedSessionData = new GatewaySessionData(
+        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             "hub-request-id",
-            "eidas-request-id",
-            "eidas-destination",
-            "eidas-relay-state",
-            "eidas-connector-public-key"
+            "issuer",
+            "eidas-connector-public-key",
+            "eidas-destination"
         );
+
+        GatewaySessionData expectedSessionData = new GatewaySessionData(
+            eidasSamlParserResponse,
+            vspResponse,
+            "eidas-relay-state"
+        );
+
         HttpSession session = mock(HttpSession.class);
 
         when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(expectedSessionData);
@@ -46,12 +61,17 @@ public class TestGatewaySessionDataValidator {
 
     @Test
     public void getValidatedSessionDataShouldThrowSessionAttributeExceptionIfSAttributeIsNullOrEmpty() {
-        GatewaySessionData expectedSessionData = new GatewaySessionData(
-            "hub-request-id",
-            "",
+        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             null,
-            "eidas-relay-state",
-            "eidas-connector-public-key"
+            "issuer",
+            "eidas-connector-public-key",
+            ""
+        );
+
+        GatewaySessionData expectedSessionData = new GatewaySessionData(
+            eidasSamlParserResponse,
+            vspResponse,
+            "eidas-relay-state"
         );
 
         HttpSession session = mock(HttpSession.class);

@@ -76,11 +76,9 @@ public class EidasAuthnRequestResource {
 
     private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse, String eidasRelayState) {
         GatewaySessionData gatewaySessionData = new GatewaySessionData(
-            vspResponse.getRequestId(),
-            eidasSamlParserResponse.getRequestId(),
-            eidasSamlParserResponse.getDestination(),
-            eidasRelayState,
-            eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()
+            eidasSamlParserResponse,
+            vspResponse,
+            eidasRelayState
         );
         session.setAttribute(SESSION_KEY_SESSION_DATA, gatewaySessionData);
     }

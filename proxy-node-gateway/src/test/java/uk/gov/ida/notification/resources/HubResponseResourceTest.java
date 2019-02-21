@@ -10,13 +10,16 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.notification.SamlFormViewBuilder;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.exceptions.SessionAttributeException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.UriBuilder;
 
 import java.util.List;
 import java.util.logging.Handler;
@@ -66,13 +69,25 @@ public class HubResponseResourceTest {
 
     @Test
     public void testsHappyPath() {
-        GatewaySessionData sessionData = new GatewaySessionData(
-            "hub_request_id_in_session",
+        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             "eidas_request_id_in_session",
-            "http://conector.node",
-            "eidas_relay_state_in_session",
-            "connector_public_cert_in_session"
+            "issuer",
+            "connector_public_cert_in_session",
+            "http://conector.node"
         );
+
+        AuthnRequestResponse vspResponse = new AuthnRequestResponse(
+            "saml-request",
+            "hub_request_id_in_session",
+            UriBuilder.fromUri("http://conector.node").build()
+        );
+
+        GatewaySessionData sessionData = new GatewaySessionData(
+            eidasSamlParserResponse,
+            vspResponse,
+            "eidas_relay_state_in_session"
+        );
+
         when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
         when(session.getId()).thenReturn("session-id");
         when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
@@ -135,13 +150,25 @@ public class HubResponseResourceTest {
 
     @Test
     public void shouldThrowSamlAttributeErrorIfMissingSessionAttribute() {
-        GatewaySessionData sessionData = new GatewaySessionData(
-            "hub_request_id_in_session",
+        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             "eidas_request_id_in_session",
+            "issuer",
             "",
-            "eidas_relay_state_in_session",
             null
         );
+
+        AuthnRequestResponse vspResponse = new AuthnRequestResponse(
+            "saml-request",
+            "hub_request_id_in_session",
+            UriBuilder.fromUri("http://conector.node").build()
+        );
+
+        GatewaySessionData sessionData = new GatewaySessionData(
+            eidasSamlParserResponse,
+            vspResponse,
+            "eidas_relay_state_in_session"
+        );
+
         when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
 
         HubResponseResource resource =  new HubResponseResource(

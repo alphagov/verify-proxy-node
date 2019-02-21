@@ -2,6 +2,8 @@ package uk.gov.ida.notification.session;
 
 
 import org.hibernate.validator.constraints.NotEmpty;
+import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 
 public class GatewaySessionData {
     @NotEmpty
@@ -19,17 +21,15 @@ public class GatewaySessionData {
     private final String eidasConnectorPublicKey;
 
     public GatewaySessionData(
-        String hubRequestId,
-        String eidasRequestId,
-        String eidasDestination,
-        String eidasRelayState,
-        String eidasConnectorPublicKey
+        EidasSamlParserResponse eidasSamlParserResponse,
+        AuthnRequestResponse vspResponse,
+        String eidasRelayState
     ) {
-        this.hubRequestId = hubRequestId;
-        this.eidasRequestId = eidasRequestId;
-        this.eidasDestination = eidasDestination;
+        this.hubRequestId = vspResponse.getRequestId();
+        this.eidasRequestId = eidasSamlParserResponse.getRequestId();
+        this.eidasDestination = eidasSamlParserResponse.getDestination();
         this.eidasRelayState = eidasRelayState;
-        this.eidasConnectorPublicKey = eidasConnectorPublicKey;
+        this.eidasConnectorPublicKey = eidasSamlParserResponse.getConnectorEncryptionPublicCertificate();
     }
 
     public String getHubRequestId() { return this.hubRequestId; }
