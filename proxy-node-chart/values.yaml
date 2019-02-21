@@ -1,9 +1,60 @@
 global:
-  peidas-saml-parser:
-    image: govukverify/eidas-saml-parser:latest
-  proxy-node-gateway:
-    image: govukverify/proxy-node-gateway:latest
-  proxy-node-translator:
-    image: govukverify/proxy-node-translator:latest
-  stub-connector:
-    image: govukverify/stub-connector:latest
+  cluster:
+    name:
+    domain:
+
+connector:
+  host:
+  entityID:
+  metadataURL:
+
+esp:
+  replicaCount: 1
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/parser
+    tag: latest
+    pullPolicy: IfNotPresent
+
+vmc:
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/metadata-controller
+    tag: latest
+    pullPolicy: IfNotPresent
+  signingCert:
+
+gateway:
+  replicaCount: 1
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/gateway
+    tag: latest
+    pullPolicy: IfNotPresent
+    
+translator:
+  replicaCount: 1
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/translator
+    tag: latest
+    pullPolicy: IfNotPresent
+
+hsm:
+  IP:
+  customerCA:
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/cloudhsm
+    tag: latest
+    pullPolicy: IfNotPresent
+
+stubConnector:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/stub-connector
+    tag: latest
+    pullPolicy: IfNotPresent
+
+vsp:
+  replicaCount: 1
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/verify-service-provider
+    tag: latest
+    pullPolicy: IfNotPresent

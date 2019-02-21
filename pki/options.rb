@@ -4,6 +4,7 @@ USAGE = 'Usage: generate.rb [options] <output directory>'.freeze
 
 Options =
   Struct.new(
+    :release_name,
     :hub_entity_id,
     :idp_entity_id,
     :proxy_entity_id,
@@ -20,7 +21,8 @@ Options =
 
 class Parser
   def self.parse(args)
-    options = Options.new('http://dev-hub.local',
+    options = Options.new('test',
+			  'http://dev-hub.local',
                           'http://stub-idp-demo.local',
                           'http://proxy-node.local',
                           'http://localhost/idp',
@@ -37,6 +39,7 @@ class Parser
     parser = OptionParser.new do |opts|
       opts.banner = USAGE
 
+      opts.on('--release-name RELEASE', 'Name of proxy node release instance (ie france)') { |s| options.release_name = s }
       opts.on('--hub-entity-id ENTITY_ID', "Hub's entity ID in Hub metadata") { |s| options.hub_entity_id = s }
       opts.on('--idp-entity-id ENTITY_ID', "Stub IDP's entity ID in Hub metadata") { |s| options.idp_entity_id = s }
       opts.on('--proxy-node-entity-id ENTITY_ID', "Proxy Node's entity ID in Hub metadata") { |s| options.proxy_entity_id = s }

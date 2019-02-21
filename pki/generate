@@ -271,25 +271,25 @@ Dir.chdir(output_dir) do
 
   if options.do_secrets
     secret = YAML.load_file(SECRET).tap do |cfg|
-      cfg['metadata']['name'] = 'proxy-node-pki'
+      cfg['metadata']['name'] = options.release_name + '-proxy-node-pki'
       cfg['data'] = proxy_node_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
     create_file('proxy-node-secret.yaml', YAML.dump(secret))
 
     secret = YAML.load_file(SECRET).tap do |cfg|
-      cfg['metadata']['name'] = 'stub-connector-pki'
+      cfg['metadata']['name'] = options.release_name + '-stub-connector-pki'
       cfg['data'] = stub_connector_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
     create_file('stub-connector-secret.yaml', YAML.dump(secret))
 
     secret = YAML.load_file(SECRET).tap do |cfg|
-      cfg['metadata']['name'] = 'stub-idp-pki'
+      cfg['metadata']['name'] = options.release_name + '-stub-idp-pki'
       cfg['data'] = stub_idp_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
     create_file('stub-idp-secret.yaml', YAML.dump(secret))
 
     secret = YAML.load_file(SECRET).tap do |cfg|
-      cfg['metadata']['name'] = 'saml-metadata'
+      cfg['metadata']['name'] = options.release_name + '-saml-metadata'
       cfg['data'] = {}
       cfg['data']['hub_metadata_for_proxy_node.xml'] = b64(hub_metadata_for_proxy_node_xml_signed)
       cfg['data']['hub_metadata_for_idp.xml'] = b64(hub_metadata_for_stub_idp_xml_signed)
@@ -298,7 +298,7 @@ Dir.chdir(output_dir) do
     create_file('metadata-secret.yaml', YAML.dump(secret))
 
     secret = YAML.load_file(SECRET).tap do |cfg|
-      cfg['metadata']['name'] = 'verify-service-provider'
+      cfg['metadata']['name'] = options.release_name + '-verify-service-provider'
       cfg['data'] = vsp_vars.inject({}) { |vars, (key, value)| vars[key] = b64(value); vars }
     end
     create_file('verify-service-provider-secret.yaml', YAML.dump(secret))

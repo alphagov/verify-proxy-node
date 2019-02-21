@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-gateway
+  labels:
+    app.kubernetes.io/name: gateway
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  - name: mgmt
+    port: 6601
+    targetPort: mgmt
+  selector:
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/instance: {{ .Release.Name }}

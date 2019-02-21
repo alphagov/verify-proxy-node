@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-esp
+  labels:
+    app.kubernetes.io/name: esp
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
+  - name: mgmt
+    port: 6008
+    targetPort: mgmt
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: esp
+    app.kubernetes.io/instance: {{ .Release.Name }}

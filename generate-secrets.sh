@@ -4,6 +4,8 @@ set -euo pipefail
 
 : "${DOMAIN:?}"
 : "${RELEASE:?}"
+: "${HUB_ENTITY_ID:?}" # ie https://dev-hub.local
+: "${IDP_ENTITY_ID:?}" # ie http://stub_idp.acme.org/stub-idp-demo/SSO/POST
 
 PN_PROJECT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PKI_DIR=".${DOMAIN}_${RELEASE}_pki"
@@ -14,10 +16,10 @@ function generate_pki {
     rm -f "${PKI_OUTPUT_DIR}/*"
     bundle install --quiet
     bundle exec generate \
-      --hub-entity-id "https://dev-hub.local" \
-      --idp-entity-id "http://stub_idp.acme.org/stub-idp-demo/SSO/POST" \
-      --proxy-node-entity-id "http://proxy-node" \
-      --connector-url "https://${RELEASE}-stub-connector.${DOMAIN}" \
+      --hub-entity-id "${HUB_ENTITY_ID}" \
+      --idp-entity-id "${IDP_ENTITY_ID}" \
+      --proxy-node-entity-id "https://${RELEASE}-proxy-node.${DOMAIN}" \
+      --connector-url "https://${RELEASE}-connector.${DOMAIN}" \
       --proxy-url "https://${RELEASE}-gateway.${DOMAIN}" \
       --idp-url "https://${RELEASE}-stub-idp.${DOMAIN}" \
       --secrets \

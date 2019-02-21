@@ -1,0 +1,91 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-connector
+  labels:
+    app.kubernetes.io/name: connector
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.stubConnector.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: connector
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: connector
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: connector
+        image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
+        imagePullPolicy: {{ .Values.stubConnector.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6667
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        env:
+        - name: PORT
+          value: "80"
+        - name: CONNECTOR_NODE_BASE_URL
+          value: https://{{ include "connector.host" . }}
+        - name: ENCRYPTION_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-stub-connector-pki
+              key: ENCRYPTION_CERT
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-stub-connector-pki
+              key: ENCRYPTION_KEY
+        - name: SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-stub-connector-pki
+              key: SIGNING_CERT
+        - name: SIGNING_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-stub-connector-pki
+              key: SIGNING_KEY
+        - name: PROXY_NODE_ENTITY_ID
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-saml-metadata
+              key: entityID
+        - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-saml-metadata
+              key: metadataInternalURL
+        - name: PROXY_NODE_METADATA_TRUSTSTORE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-saml-metadata
+              key: metadataSigningTruststoreBase64
+        - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-saml-metadata
+              key: metadataSigningTruststorePassword
+{{- end -}}

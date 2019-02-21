@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gateway
+  labels:
+    app.kubernetes.io/name: gateway
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gateway
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gateway
+        image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+        imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6601
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        env:
+        - name: PORT
+          value: "80"
+        - name: REDIS_SERVER_URI
+          value: redis://{{ .Release.Name }}-gateway-redis:6379/
+        - name: TRANSLATOR_URL
+          value: http://{{ .Release.Name }}-translator/
+        - name: EIDAS_SAML_PARSER_URL
+          value: http://{{ .Release.Name }}-esp/
+        - name: VERIFY_SERVICE_PROVIDER_URL
+          value: http://{{ .Release.Name }}-vsp/
