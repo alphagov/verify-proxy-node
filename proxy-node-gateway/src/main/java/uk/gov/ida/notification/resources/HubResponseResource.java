@@ -65,7 +65,7 @@ public class HubResponseResource {
             sessionData.getEidasConnectorPublicKey()
         );
 
-        String eidasResponse = translatorProxy.getTranslatedResponse(translatorRequest);
+        String eidasResponse = translatorProxy.getTranslatedResponse(translatorRequest, session.getId());
 
         LOG.info(
             String.format(

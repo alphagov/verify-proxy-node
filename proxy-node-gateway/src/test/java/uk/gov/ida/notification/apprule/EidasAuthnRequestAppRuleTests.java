@@ -16,6 +16,7 @@ import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlClientErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlServerErrorResource;
+import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.verify;
 public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @ClassRule
-    public static final TranslatorClientRule translatorClientRule = new TranslatorClientRule();
+    public static final TranslatorClientRule<TestTranslatorResource> translatorClientRule = new TranslatorClientRule(new TestTranslatorResource());
 
     @ClassRule
     public static final EidasSamlParserClientRule<TestEidasSamlResource> espClientRule = new EidasSamlParserClientRule<>(new TestEidasSamlResource());

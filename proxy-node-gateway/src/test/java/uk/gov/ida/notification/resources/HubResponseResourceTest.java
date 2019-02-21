@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -74,7 +75,7 @@ public class HubResponseResourceTest {
         );
         when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
         when(session.getId()).thenReturn("session-id");
-        when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class))).thenReturn("translated_eidas_response");
+        when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
 
         HubResponseResource resource =  new HubResponseResource(
             new SamlFormViewBuilder(),
@@ -83,7 +84,7 @@ public class HubResponseResourceTest {
 
         SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
 
-        verify(translatorProxy).getTranslatedResponse(requestCaptor.capture());
+        verify(translatorProxy).getTranslatedResponse(requestCaptor.capture(), eq("session-id"));
         HubResponseTranslatorRequest request = requestCaptor.getValue();
 
         verifyNoMoreInteractions(translatorProxy);
