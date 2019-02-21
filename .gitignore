@@ -49,4 +49,7 @@ proxy-node-translator/src/dist/proxy_node_signing.*
 .helm_values.yml
 pki/test/.test-metadata
 testreport/
+.project
+.classpath
+.settings
 
