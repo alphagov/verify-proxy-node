@@ -230,7 +230,7 @@ public class MetadataGenerator implements Callable<Void> {
 
         SignatureSigningParameters signingParams = new SignatureSigningParameters();
         signingParams.setSignatureAlgorithm(signingAlgo.uri);
-        signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_OMIT_COMMENTS);
+        signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
         signingParams.setSigningCredential(signingCredential);
         signingParams.setKeyInfoGenerator(keyInfoGeneratorFactory.newInstance());
 

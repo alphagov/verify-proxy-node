@@ -6,14 +6,13 @@ import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
-import org.opensaml.security.credential.Credential;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.*;
-import uk.gov.ida.saml.core.test.TestCredentialFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -108,17 +107,11 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
         return response;
     }
 
-    private Response signResponse(Response response) {
-        Credential signingCredential = new TestCredentialFactory(
-                TEST_RP_PUBLIC_SIGNING_CERT,
-                TEST_RP_PRIVATE_SIGNING_KEY
-        ).getSigningCredential();
-
-        SamlObjectSigner signer = new SamlObjectSigner(
-                signingCredential.getPublicKey(),
-                signingCredential.getPrivateKey(),
-                TEST_RP_PUBLIC_SIGNING_CERT
-        );
+    private Response signResponse(Response response) throws Exception {
+        SamlObjectSigner signer = new SamlObjectSigner(X509CredentialFactory.build(
+            TEST_RP_PUBLIC_SIGNING_CERT,
+            TEST_RP_PRIVATE_SIGNING_KEY
+        ));
 
         signer.sign(response);
 

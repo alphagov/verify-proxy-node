@@ -45,9 +45,9 @@ public class TranslatorAppRuleTestBase {
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
             ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri() + "/vsp"),
-            ConfigOverride.config("connectorFacingSigningKeyPair.publicKey.type", "x509"),
-            ConfigOverride.config("connectorFacingSigningKeyPair.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("connectorFacingSigningKeyPair.privateKey.key", TEST_PRIVATE_KEY),
-            ConfigOverride.config("keyRetrieverServiceName", "config")
+            ConfigOverride.config("signerConfiguration.type", "file"),
+            ConfigOverride.config("signerConfiguration.publicKey.type", "x509"),
+            ConfigOverride.config("signerConfiguration.publicKey.cert", TEST_PUBLIC_CERT),
+            ConfigOverride.config("signerConfiguration.privateKey.key", TEST_PRIVATE_KEY)
     );
 }

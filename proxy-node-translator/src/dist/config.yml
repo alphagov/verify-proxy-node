@@ -16,11 +16,9 @@ proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_U
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 
 keyRetrieverServiceName: ${KEY_RETRIEVER_SERVICE_NAME:-softHSM}
-softHSMLibPath: ${SOFT_HSM_LIB_PATH}
-softHSMSigningKeyPin: ${SOFT_HSM_SIGNING_KEY_PIN}
-softHSMSigningKeyLabel: ${SOFT_HSM_SIGNING_KEY_LABEL}
 
-connectorFacingSigningKeyPair:
+signerConfiguration:
+  type: file
   publicKey:
     type: ${CERT_TYPES:-encoded}
     cert: ${SIGNING_CERT}
