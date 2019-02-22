@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.session.GatewaySessionDataValidator.NOT_NULL_MESSAGE;
@@ -51,12 +51,9 @@ public class TestGatewaySessionDataValidator {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(null);
 
-        try {
-            GatewaySessionDataValidator.getValidatedSessionData(session);
-            fail("Expected exception not thrown");
-        } catch (SessionAttributeException e) {
-            assertThat(e).hasMessage(NOT_NULL_MESSAGE);
-        }
+        assertThatThrownBy(() -> { GatewaySessionDataValidator.getValidatedSessionData(session); })
+            .isInstanceOf(SessionAttributeException.class)
+            .hasMessage(NOT_NULL_MESSAGE);
     }
 
     @Test
@@ -77,11 +74,8 @@ public class TestGatewaySessionDataValidator {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(expectedSessionData);
 
-        try {
-            GatewaySessionDataValidator.getValidatedSessionData(session);
-            fail("Expected exception not thrown");
-        } catch (SessionAttributeException e) {
-            assertThat(e).hasMessage("eidasDestination field may not be empty, eidasRequestId field may not be empty");
-        }
+        assertThatThrownBy(() -> { GatewaySessionDataValidator.getValidatedSessionData(session); })
+            .isInstanceOf(SessionAttributeException.class)
+            .hasMessage("eidasDestination field may not be empty, eidasRequestId field may not be empty");
     }
 }

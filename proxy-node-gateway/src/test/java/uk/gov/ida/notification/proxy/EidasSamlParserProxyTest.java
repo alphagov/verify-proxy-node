@@ -10,6 +10,7 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
+import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 
 import javax.validation.Valid;
 import javax.ws.rs.POST;
@@ -21,8 +22,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
 
 public class EidasSamlParserProxyTest {
@@ -73,36 +74,30 @@ public class EidasSamlParserProxyTest {
     public void shouldThrowEidasSamlParserResponseExceptionOnServerError() {
         EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse/server-error");
 
-        try {
-            EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
-            fail("Expected exception not thrown");
-        } catch (EidasSamlParserResponseException e) {
-            assertThat(e.getCause().getMessage())
-                .startsWith(
-                    String.format(
-                        "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/parse/server-error",
-                        clientRule.baseUri().toString()
-                    )
-                );
-        }
+        Throwable thrown = catchThrowable(() -> { eidasSamlParserService.parse(eidasSamlParserRequest, "session_id"); });
+        assertThat(thrown).isInstanceOf(EidasSamlParserResponseException.class);
+        assertThat(thrown.getCause().getMessage())
+            .startsWith(
+                String.format(
+                    "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/parse/server-error",
+                    clientRule.baseUri().toString()
+                )
+            );
     }
 
     @Test
     public void shouldThrowEidasSamlParserResponseExceptionOnClientError() {
         EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse/client-error");
 
-        try {
-            EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
-            fail("Expected exception not thrown");
-        } catch (EidasSamlParserResponseException e) {
-            assertThat(e.getCause().getMessage())
-                .startsWith(
-                    String.format(
-                        "Exception of type [CLIENT_ERROR] whilst contacting uri: %s/parse/client-error",
-                        clientRule.baseUri().toString()
-                    )
-                );
-        }
+        Throwable thrown = catchThrowable(() -> { eidasSamlParserService.parse(eidasSamlParserRequest, "session_id"); });
+        assertThat(thrown).isInstanceOf(EidasSamlParserResponseException.class);
+        assertThat(thrown.getCause().getMessage())
+            .startsWith(
+                String.format(
+                    "Exception of type [CLIENT_ERROR] whilst contacting uri: %s/parse/client-error",
+                    clientRule.baseUri().toString()
+                )
+            );
     }
 
     private EidasSamlParserProxy setUpEidasSamlParserService(String url) {

@@ -27,8 +27,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -140,12 +139,9 @@ public class HubResponseResourceTest {
             translatorProxy
         );
 
-        try {
-            SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
-            fail("Expected exception not thrown");
-        } catch (SessionAttributeException e) {
-            assertThat(e).hasMessage("Session data can not be null");
-        }
+        assertThatThrownBy(() -> { resource.hubResponse("hub_saml_response", "relay_state", session); })
+            .isInstanceOf(SessionAttributeException.class)
+            .hasMessage("Session data can not be null");
     }
 
     @Test
@@ -176,11 +172,8 @@ public class HubResponseResourceTest {
             translatorProxy
         );
 
-        try {
-            SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
-            fail("Expected exception not thrown");
-        } catch (SessionAttributeException e) {
-            assertThat(e).hasMessage("eidasConnectorPublicKey field may not be empty, eidasDestination field may not be empty");
-        }
+        assertThatThrownBy(() -> { resource.hubResponse("hub_saml_response", "relay_state", session); })
+            .isInstanceOf(SessionAttributeException.class)
+            .hasMessage("eidasConnectorPublicKey field may not be empty, eidasDestination field may not be empty");
     }
 }

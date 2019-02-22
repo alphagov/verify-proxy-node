@@ -23,8 +23,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TranslatorProxyTest {
@@ -95,17 +95,14 @@ public class TranslatorProxyTest {
             UriBuilder.fromUri(clientRule.baseUri()).path("/translate-hub-response/server-error").build()
         );
 
-        try {
-            translatorProxy.getTranslatedResponse(request, "session-id");
-            fail("Expected exception not thrown");
-        } catch (TranslatorResponseException e) {
-            assertThat(
-                e.getCause().getMessage()).startsWith(
-                    String.format(
-                        "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/translate-hub-response/server-error",
-                        clientRule.baseUri().toString()
-                    )
+        Throwable thrown = catchThrowable(() -> { translatorProxy.getTranslatedResponse(request, "session-id"); });
+        assertThat(thrown).isInstanceOf(TranslatorResponseException.class);
+        assertThat(thrown.getCause().getMessage())
+            .startsWith(
+                String.format(
+                    "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/translate-hub-response/server-error",
+                    clientRule.baseUri().toString()
+                )
             );
-        }
     }
 }
