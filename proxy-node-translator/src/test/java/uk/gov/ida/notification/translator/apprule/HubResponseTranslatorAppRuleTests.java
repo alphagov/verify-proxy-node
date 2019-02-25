@@ -30,12 +30,12 @@ import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
-import uk.gov.ida.saml.security.SignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
 import javax.ws.rs.client.Entity;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -93,8 +93,9 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     @Test
     @Ignore
     public void shouldReturnASignedEidasResponse() throws Exception {
-        KeyPairConfiguration signingKeyPair = translatorAppRule.getConfiguration().getConnectorFacingSigningKeyPair();
-        SignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(entityId -> singletonList(signingKeyPair.getPublicKey().getPublicKey())));
+        Credential signingCredential = translatorAppRule.getConfiguration().getSignerConfiguration().getSigner().getCredential();
+        CredentialFactorySignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(
+            entityId -> Collections.singletonList(signingCredential.getPublicKey())));
 
         Response eidasResponse = extractEidasResponse(buildSignedHubResponse());
 

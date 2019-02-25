@@ -1,5 +1,8 @@
 package uk.gov.ida.notification.translator.resources;
 
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.security.SecurityException;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -37,7 +40,7 @@ public class HubResponseTranslatorResource {
 
     @POST
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
-    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
+    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) throws MarshallingException, SecurityException, SignatureException {
 
         final VerifyServiceProviderTranslationRequest vspRequest = new VerifyServiceProviderTranslationRequest(
                 hubResponseTranslatorRequest.getSamlResponse(),

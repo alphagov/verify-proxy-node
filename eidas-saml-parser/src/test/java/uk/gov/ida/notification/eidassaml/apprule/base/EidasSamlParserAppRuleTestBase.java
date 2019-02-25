@@ -8,15 +8,12 @@ import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.security.credential.Credential;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
-import uk.gov.ida.saml.core.test.TestCredentialFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -25,8 +22,7 @@ import java.net.URISyntaxException;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
 import static org.junit.jupiter.api.Assertions.fail;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.*;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public class EidasSamlParserAppRuleTestBase {
@@ -52,8 +48,6 @@ public class EidasSamlParserAppRuleTestBase {
     }
 
     private final SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
-    protected final Credential countrySigningCredential = new TestCredentialFactory(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY).getSigningCredential();
-    protected final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(countrySigningCredential.getPublicKey(), countrySigningCredential.getPrivateKey(), TEST_RP_PUBLIC_SIGNING_CERT);
 
     @Rule
     public EidasSamlParserAppRule eidasSamlParserAppRule = new EidasSamlParserAppRule(

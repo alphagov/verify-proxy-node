@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.helpers;
 
 import io.dropwizard.testing.ResourceHelpers;
+import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Support;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,11 +55,13 @@ public class TestKeyPair {
         return Base64.getEncoder().encodeToString(certificate.getEncoded());
     }
 
+    public BasicX509Credential getX509Credential() {
+        return new BasicX509Credential(certificate, privateKey);
+    }
+
     private X509Certificate readX509Certificate(String certificateFile) throws CertificateException, IOException {
-        CertificateFactory certificateFactory = CertificateFactory.getInstance(X509);
         byte[] cert = FileHelpers.readFileAsBytes(certificateFile);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cert);
-        return (X509Certificate) certificateFactory.generateCertificate(byteArrayInputStream);
+        return X509Support.decodeCertificate(cert);
     }
 
     private PrivateKey readPrivateKey(String privateKeyFile) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {

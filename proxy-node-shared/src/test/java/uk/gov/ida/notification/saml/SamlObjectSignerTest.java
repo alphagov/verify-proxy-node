@@ -3,8 +3,7 @@ package uk.gov.ida.notification.saml;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.security.credential.BasicCredential;
-import org.opensaml.security.credential.Credential;
+import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
@@ -24,15 +23,15 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
 
     @Test
     public void shouldSignAuthRequest() throws Throwable {
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(testKeyPair.publicKey, testKeyPair.privateKey, testKeyPair.getEncodedCertificate());
+        BasicX509Credential signingCredential = testKeyPair.getX509Credential();
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential);
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         samlObjectSigner.sign(authnRequest);
         Signature signature = authnRequest.getSignature();
 
         String actualCertificate = signature.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0).getValue();
-        Credential signingCredential = new BasicCredential(testKeyPair.publicKey, testKeyPair.privateKey);
 
-        assertEquals(testKeyPair.getEncodedCertificate(), actualCertificate);
+        assertEquals(testKeyPair.getEncodedCertificate(), actualCertificate.replaceAll("\\s+", ""));
         assertNotNull(signature);
         String algoIdSignatureRsaSha256 = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
         assertEquals(signature.getSignatureAlgorithm(), algoIdSignatureRsaSha256);
