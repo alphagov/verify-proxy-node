@@ -18,7 +18,8 @@ connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 keyRetrieverServiceName: ${KEY_RETRIEVER_SERVICE_NAME:-softHSM}
 
 signerConfiguration:
-  type: file
+  type: ${SIGNER_CONFIG_TYPE:-file}
+  hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-signing_key}
   publicKey:
     type: ${CERT_TYPES:-encoded}
     cert: ${SIGNING_CERT}

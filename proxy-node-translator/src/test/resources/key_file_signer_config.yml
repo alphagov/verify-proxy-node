@@ -1,0 +1,12 @@
+{
+  "privateKey": {
+    "key": "%s",
+    "type": "file"
+  },
+  "publicKey": {
+    "cert": "%s",
+    "name": "test",
+    "type": "file"
+  },
+  "type": "file"
+}

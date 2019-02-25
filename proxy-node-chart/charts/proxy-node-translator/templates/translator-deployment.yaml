@@ -53,28 +53,17 @@ spec:
           value: "80"
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           value: http://{{ .Release.Name }}-stub-metadata/metadata_for_connector_node.xml
-        - name: SOFT_HSM_SIGNING_KEY_PIN
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-hsm
-              key: signingKeyPIN
-        - name: SOFT_HSM_SIGNING_KEY_LABEL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-hsm
-              key: signingKeyLabel
         - name: CONNECTOR_NODE_ISSUER_ID
           valueFrom:
             secretKeyRef:
               name: proxy-node-pki
               key: CONNECTOR_NODE_ISSUER_ID
+        - name: SIGNER_CONFIG_TYPE
+          value: cloudhsm
+        - name: HSM_SIGNING_KEY_LABEL
+          value: signing_key
         - name: SIGNING_CERT
           valueFrom:
             secretKeyRef:
               name: proxy-node-pki
               key: SIGNING_CERT
-        - name: SIGNING_KEY
-          valueFrom:
-            secretKeyRef:
-              name: proxy-node-pki
-              key: SIGNING_KEY
