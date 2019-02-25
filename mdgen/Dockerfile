@@ -24,6 +24,6 @@ env GRADLE_USER_HOME=/build/.gradle \
 copy gradlew build.gradle settings.gradle ./
 copy gradle/ gradle/
 copy src/ src/
-run ./gradlew --no-daemon installDist -x test
+run ./gradlew -Pcloudhsm --no-daemon installDist -x test
 
 entrypoint ["/mdgen/build/install/mdgen/bin/mdgen"]
