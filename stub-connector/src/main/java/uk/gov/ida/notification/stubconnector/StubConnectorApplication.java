@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 public class StubConnectorApplication extends Application<StubConnectorConfiguration> {
     private Metadata proxyNodeMetadata;
@@ -92,7 +93,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
 
         // Metadata
-        proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(StubConnectorConfiguration::getProxyNodeMetadataConfiguration);
+        proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getProxyNodeMetadataConfiguration()));
         bootstrap.addBundle(proxyNodeMetadataResolverBundle);
     }
 
