@@ -5,9 +5,9 @@ import io.dropwizard.views.View;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
-import uk.gov.ida.notification.session.GatewaySessionDataValidator;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.servlet.http.HttpSession;
@@ -29,12 +29,15 @@ public class HubResponseResource {
 
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final TranslatorProxy translatorProxy;
+    private final SessionStore sessionStorage;
 
     public HubResponseResource(
             SamlFormViewBuilder samlFormViewBuilder,
-            TranslatorProxy translatorProxy) {
+            TranslatorProxy translatorProxy,
+            SessionStore sessionStorage) {
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.translatorProxy = translatorProxy;
+        this.sessionStorage = sessionStorage;
     }
 
     @POST
@@ -45,7 +48,7 @@ public class HubResponseResource {
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
 
-        GatewaySessionData sessionData = GatewaySessionDataValidator.getValidatedSessionData(session);
+        GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
 
         LOG.info(
             String.format(

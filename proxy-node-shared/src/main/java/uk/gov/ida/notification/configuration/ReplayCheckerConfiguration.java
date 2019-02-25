@@ -9,7 +9,7 @@ import org.opensaml.storage.StorageService;
 import org.opensaml.storage.impl.MemoryStorageService;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayCheckerImpl;
-import uk.gov.ida.notification.redis.RedisStorageService;
+import uk.gov.ida.notification.session.storage.RedisStorageService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

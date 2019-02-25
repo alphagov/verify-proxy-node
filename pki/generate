@@ -199,7 +199,7 @@ Dir.chdir(output_dir) do
     'ENCRYPTION_KEY' => b64(der2pk8(stub_connector_encryption_keypair.key.to_der)),
     'PROXY_NODE_METADATA_TRUSTSTORE' => b64(metadata_truststore),
     'PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD' => options.truststore_pass,
-    'CONNECTOR_NODE_BASE_URL' => options.connector_url,
+    'CONNECTOR_NODE_BASE_URL' => options.proxy_url,
   }
 
   stub_idp_vars = {

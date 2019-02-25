@@ -33,6 +33,8 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("redisService.local", "true"));
+        configOverridesList.add(ConfigOverride.config("redisService.url", ""));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 

@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.EidasSamlParserClientRule;
@@ -17,7 +18,7 @@ import uk.gov.ida.notification.apprule.rules.TestTranslatorServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
 import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
-import uk.gov.ida.notification.exceptions.mappers.SessionAttributeExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.SessionMissingExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -27,7 +28,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -55,25 +55,30 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     @ClassRule
     public static final VerifyServiceProviderClientRule<TestVerifyServiceProviderResource> vspClientRule = new VerifyServiceProviderClientRule<>(new TestVerifyServiceProviderResource());
 
+    private String redisURI = this.setupTestRedis();
+
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString())
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
+        ConfigOverride.config("redisService.url", redisURI)
     );
 
     @Rule
     public GatewayAppRule proxyNodeServerErrorAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientServerErrorRule.baseUri().toString())
+        ConfigOverride.config("translatorService.url", translatorClientServerErrorRule.baseUri().toString()),
+        ConfigOverride.config("redisService.url", redisURI)
     );
 
     @Rule
     public GatewayAppRule proxyNodeClientErrorAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientClientErrorRule.baseUri().toString())
+        ConfigOverride.config("translatorService.url", translatorClientClientErrorRule.baseUri().toString()),
+        ConfigOverride.config("redisService.url", redisURI)
     );
 
     private final Form postForm = new Form()
@@ -114,8 +119,8 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void returnsErrorPageAndLogsIfSessionAttributeException() throws Exception {
-        Logger logger = Logger.getLogger(SessionAttributeExceptionMapper.class.getName());
+    public void returnsErrorPageAndLogsIfSessionMissingException() throws Exception {
+        Logger logger = Logger.getLogger(SessionMissingExceptionMapper.class.getName());
         logger.addHandler(logHandler);
 
         Response response = proxyNodeAppRule
@@ -128,13 +133,13 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
             htmlString,
-            "//div[@class='issues'][text()='Something went wrong with the session attributes']"
+            "//div[@class='issues'][text()='Something went wrong session should exist']"
         );
 
         verify(logHandler).publish(captorLoggingEvent.capture());
         assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
         assertThat(captorLoggingEvent.getValue().getMessage())
-            .matches("Exception reading attributes for session '.+': Session data can not be null");
+            .matches("Session should exist for session_id: .+");
     }
 
     @Test
@@ -189,6 +194,11 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     private NewCookie getSessionCookie(GatewayAppRule appRule) throws Exception {
         return postEidasAuthnRequest(buildAuthnRequest(), appRule).getCookies().get("gateway-session");
+    }
+
+    @AfterAll
+    public void tearDown() {
+        this.killTestRedis();
     }
 
 }

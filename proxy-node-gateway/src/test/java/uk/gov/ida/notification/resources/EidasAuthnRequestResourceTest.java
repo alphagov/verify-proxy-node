@@ -17,6 +17,7 @@ import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
+import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;
@@ -34,9 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DATA;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
 
 
@@ -45,6 +44,9 @@ public class EidasAuthnRequestResourceTest {
 
     @InjectMocks
     private EidasAuthnRequestResource resource;
+
+    @Mock
+    private SessionStore sessionStore;
 
     @Mock
     private EidasSamlParserProxy eidasSamlParserService;
@@ -116,21 +118,17 @@ public class EidasAuthnRequestResourceTest {
     }
 
     private void verifyHappyPath() {
-        GatewaySessionData expectedSessionData = new GatewaySessionData(
-            eidasSamlParserResponse,
-            vspResponse,
-            "eidas relay state"
-        );
+        final String sessionId = "some session id";
 
-        verify(session).setAttribute(eq(SESSION_KEY_SESSION_DATA), captorGatewaySessionData.capture());
-        verify(session, times(3)).getId();
+        verify(sessionStore).addSession(eq(sessionId), any(GatewaySessionData.class));
+        verify(session).getId();
         verify(logHandler, times(7)).publish(captorLoggingEvent.capture());
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, logHandler, samlFormViewBuilder, session);
+        verifyNoMoreInteractions(sessionStore);
 
-        assertThat(captorGatewaySessionData.getValue()).isEqualToComparingFieldByField(expectedSessionData);
         assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo("eidas blob");
         List<LogRecord> allLogRecords = captorLoggingEvent.getAllValues();
 

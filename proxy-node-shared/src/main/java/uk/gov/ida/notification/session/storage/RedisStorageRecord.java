@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.redis;
+package uk.gov.ida.notification.session.storage;
 
 import java.util.Map;
 

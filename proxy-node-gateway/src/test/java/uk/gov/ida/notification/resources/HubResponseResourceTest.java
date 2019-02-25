@@ -13,9 +13,10 @@ import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
-import uk.gov.ida.notification.exceptions.SessionAttributeException;
+import uk.gov.ida.notification.exceptions.SessionMissingException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
+import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
@@ -35,7 +36,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DATA;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HubResponseResourceTest {
@@ -44,6 +44,9 @@ public class HubResponseResourceTest {
 
     @Mock
     private HttpSession session;
+
+    @Mock
+    private SessionStore sessionStore;
 
     @Mock
     private Handler logHandler;
@@ -87,13 +90,14 @@ public class HubResponseResourceTest {
             "eidas_relay_state_in_session"
         );
 
-        when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
+        when(sessionStore.getSession(eq("session-id"))).thenReturn(sessionData);
         when(session.getId()).thenReturn("session-id");
         when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
 
-        HubResponseResource resource =  new HubResponseResource(
+        HubResponseResource resource = new HubResponseResource(
             new SamlFormViewBuilder(),
-            translatorProxy
+            translatorProxy,
+                sessionStore
         );
 
         SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
@@ -130,50 +134,16 @@ public class HubResponseResourceTest {
         assertEquals(expectedLogOutput, allLogRecords);
     }
 
-    @Test
+    @Test(expected = SessionMissingException.class)
     public void shouldThrowSamlAttributeErrorIfMissingSessionIsNull() {
-        when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(null);
+        when(sessionStore.getSession(eq(session.getId()))).thenThrow(SessionMissingException.class);
 
-        HubResponseResource resource =  new HubResponseResource(
+        HubResponseResource resource = new HubResponseResource(
             new SamlFormViewBuilder(),
-            translatorProxy
+            translatorProxy,
+                sessionStore
         );
 
-        assertThatThrownBy(() -> { resource.hubResponse("hub_saml_response", "relay_state", session); })
-            .isInstanceOf(SessionAttributeException.class)
-            .hasMessage("Session data can not be null");
-    }
-
-    @Test
-    public void shouldThrowSamlAttributeErrorIfMissingSessionAttribute() {
-        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
-            "eidas_request_id_in_session",
-            "issuer",
-            "",
-            null
-        );
-
-        AuthnRequestResponse vspResponse = new AuthnRequestResponse(
-            "saml-request",
-            "hub_request_id_in_session",
-            UriBuilder.fromUri("http://conector.node").build()
-        );
-
-        GatewaySessionData sessionData = new GatewaySessionData(
-            eidasSamlParserResponse,
-            vspResponse,
-            "eidas_relay_state_in_session"
-        );
-
-        when(session.getAttribute(SESSION_KEY_SESSION_DATA)).thenReturn(sessionData);
-
-        HubResponseResource resource =  new HubResponseResource(
-            new SamlFormViewBuilder(),
-            translatorProxy
-        );
-
-        assertThatThrownBy(() -> { resource.hubResponse("hub_saml_response", "relay_state", session); })
-            .isInstanceOf(SessionAttributeException.class)
-            .hasMessage("eidasConnectorPublicKey field may not be empty, eidasDestination field may not be empty");
+        resource.hubResponse("hub_saml_response", "relay_state", session);
     }
 }

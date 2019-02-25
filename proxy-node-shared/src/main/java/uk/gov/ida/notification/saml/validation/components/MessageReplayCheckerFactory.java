@@ -8,7 +8,7 @@ import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayCheckerImpl;
-import uk.gov.ida.notification.redis.RedisStorageService;
+import uk.gov.ida.notification.session.storage.RedisStorageService;
 
 public class MessageReplayCheckerFactory {
     private MessageReplayCheckerFactory() {
