@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
-public class VerifyServiceProviderProxyTest {
+public class VspProxyGenerateRequestTest {
 
     @Path("/generate-request")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -76,8 +76,8 @@ public class VerifyServiceProviderProxyTest {
 
     @Spy
     JsonClient jsonClient = new JsonClient(
-        new ErrorHandlingClient(ClientBuilder.newClient()),
-        new JsonResponseProcessor(new ObjectMapper())
+            new ErrorHandlingClient(ClientBuilder.newClient()),
+            new JsonResponseProcessor(new ObjectMapper())
     );
 
     @Test
@@ -91,9 +91,9 @@ public class VerifyServiceProviderProxyTest {
         assertEquals(UriBuilder.fromUri("http://sso-location.com").build(), response.getSsoLocation());
 
         Mockito.verify(jsonClient).post(
-            Mockito.argThat((AuthnRequestGenerationBody request) -> request.getLevelOfAssurance() == "LEVEL_2"),
-            eq(UriBuilder.fromUri(String.format("%s/generate-request", testVspClientRule.baseUri())).build()),
-            eq(AuthnRequestResponse.class)
+                Mockito.argThat((AuthnRequestGenerationBody request) -> request.getLevelOfAssurance().equals("LEVEL_2")),
+                eq(UriBuilder.fromUri(String.format("%s/generate-request", testVspClientRule.baseUri())).build()),
+                eq(AuthnRequestResponse.class)
         );
     }
 
@@ -106,12 +106,12 @@ public class VerifyServiceProviderProxyTest {
             fail("Expected exception not thrown");
         } catch (VspGenerateAuthnRequestResponseException e) {
             assertThat(e.getCause().getMessage())
-                .startsWith(
-                    String.format(
-                        "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/generate-request",
-                        testVspServerErrorClientRule.baseUri().toString()
-                    )
-                );
+                    .startsWith(
+                            String.format(
+                                    "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/generate-request",
+                                    testVspServerErrorClientRule.baseUri().toString()
+                            )
+                    );
             assertEquals("session-id", e.getSessionId());
         }
     }
@@ -125,14 +125,13 @@ public class VerifyServiceProviderProxyTest {
             fail("Expected exception not thrown");
         } catch (VspGenerateAuthnRequestResponseException e) {
             assertThat(e.getCause().getMessage())
-                .startsWith(
-                    String.format(
-                        "Exception of type [CLIENT_ERROR] whilst contacting uri: %s/generate-request",
-                        testVspClientErrorClientRule.baseUri().toString()
-                    )
-                );
+                    .startsWith(
+                            String.format(
+                                    "Exception of type [CLIENT_ERROR] whilst contacting uri: %s/generate-request",
+                                    testVspClientErrorClientRule.baseUri().toString()
+                            )
+                    );
             assertEquals("session-id", e.getSessionId());
         }
     }
-
 }
