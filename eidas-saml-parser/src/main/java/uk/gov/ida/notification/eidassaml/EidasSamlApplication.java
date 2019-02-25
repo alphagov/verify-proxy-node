@@ -31,6 +31,7 @@ import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidat
 
 import java.security.cert.CertificateEncodingException;
 import java.util.Base64;
+import java.util.Optional;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
@@ -68,7 +69,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
 
         VerifySamlInitializer.init();
 
-        connectorMetadataResolverBundle = new MetadataResolverBundle<>(EidasSamlConfiguration::getConnectorMetadataConfiguration);
+        connectorMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getConnectorMetadataConfiguration()));
 
         bootstrap.addBundle(connectorMetadataResolverBundle);
         bootstrap.addBundle(new LogstashBundle());
