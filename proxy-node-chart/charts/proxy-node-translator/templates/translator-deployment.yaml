@@ -67,3 +67,17 @@ spec:
             secretKeyRef:
               name: proxy-node-pki
               key: SIGNING_CERT
+      - name: {{ .Chart.Name }}-cloudhsm-client
+        image: "{{ .Values.cloudHsmClient.image.repository }}:{{ .Values.cloudHsmClient.image.tag }}"
+        imagePullPolicy: {{ .Values.cloudHsmClient.image.pullPolicy }}
+        readinessProbe:
+          tcpSocket:
+            port: 1111
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        env:
+          - name: HSM_IP
+            value: "{{ .Values.hsmIP }}"
+        volumeMounts:
+          name: customer-ca-crt
+          mountPath: /opt/cloudhsm/etc

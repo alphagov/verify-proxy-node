@@ -15,8 +15,6 @@ proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_U
 
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 
-keyRetrieverServiceName: ${KEY_RETRIEVER_SERVICE_NAME:-softHSM}
-
 signerConfiguration:
   type: ${SIGNER_CONFIG_TYPE:-file}
   hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-signing_key}

@@ -31,11 +31,6 @@ public class TranslatorConfiguration extends Configuration {
     @JsonProperty
     private String connectorNodeIssuerId;
 
-    @Valid
-    @NotNull
-    @JsonProperty
-    private String keyRetrieverServiceName = "";
-
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
         return proxyNodeMetadataForConnectorNodeUrl;
     }
