@@ -20,6 +20,8 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.ComparisonVa
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValidator;
+import uk.gov.ida.notification.exceptions.mappers.InvalidAuthnRequestExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.SamlTransformationErrorExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
@@ -103,6 +105,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
                 configuration.getConnectorMetadataConfiguration(),
                 environment,
                 "connector-metadata");
+        registerExceptionMappers(environment);
     }
 
     private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
@@ -113,6 +116,11 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         );
 
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
+    }
+
+    private void registerExceptionMappers(Environment environment) {
+        environment.jersey().register(new SamlTransformationErrorExceptionMapper());
+        environment.jersey().register(new InvalidAuthnRequestExceptionMapper());
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
