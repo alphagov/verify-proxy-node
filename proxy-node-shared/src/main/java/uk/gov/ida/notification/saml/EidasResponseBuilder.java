@@ -2,7 +2,6 @@ package uk.gov.ida.notification.saml;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.joda.time.DateTime;
-import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameIDType;
@@ -16,9 +15,17 @@ public class EidasResponseBuilder {
 
     private static final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
     private Response eidasResponse;
+    private EidasAssertionBuilder assertionBuilder;
 
-    public EidasResponseBuilder() {
+    private EidasResponseBuilder() {
         eidasResponse = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
+        assertionBuilder = new EidasAssertionBuilder();
+        withId(generateRandomId());
+        assertionBuilder.withId(generateRandomId());
+    }
+
+    public static EidasResponseBuilder instance() {
+        return new EidasResponseBuilder();
     }
 
     public EidasResponseBuilder withId(String id) {
@@ -27,6 +34,7 @@ public class EidasResponseBuilder {
     }
 
     public EidasResponseBuilder withIssuer(String issuerId) {
+        assertionBuilder.withIssuer(issuerId);
         eidasResponse.setIssuer(createIssuer(issuerId));
         return this;
     }
@@ -47,50 +55,34 @@ public class EidasResponseBuilder {
     }
 
     public EidasResponseBuilder withIssueInstant(DateTime issueInstant) {
+        assertionBuilder.withIssueInstant(issueInstant);
         eidasResponse.setIssueInstant(issueInstant);
         return this;
     }
 
-    public EidasResponseBuilder addAssertion(Assertion assertion) {
-        eidasResponse.getAssertions().add(assertion);
+    public EidasResponseBuilder withAssertionSubject(String subject) {
+        assertionBuilder.withSubject(subject);
         return this;
     }
-    public Response build() {
-        return eidasResponse;
+
+    public EidasResponseBuilder addAssertionAuthnStatement(String authnStatement, DateTime authnIssueInstant) {
+        assertionBuilder.addAuthnStatement(authnStatement, authnIssueInstant);
+        return this;
     }
 
-    public static Response createEidasResponse(
-        String responseIssuerId,
-        String statusCodeValue,
-        String pid,
-        String loa,
-        List<Attribute> attributes,
-        String inResponseTo,
-        DateTime issueInstant,
-        DateTime assertionIssueInstant,
-        DateTime authnStatementAuthnInstant,
-        String destinationUrl,
-        String connectorNodeIssuerId
-    ) {
-        Assertion assertion = new EidasAssertionBuilder()
-            .withId(generateRandomId())
-            .withSubject(pid)
-            .withIssuer(responseIssuerId)
-            .withIssueInstant(assertionIssueInstant)
-            .withConditions(connectorNodeIssuerId)
-            .addAuthnStatement(loa, authnStatementAuthnInstant)
-            .addAttributeStatement(attributes)
-            .build();
+    public EidasResponseBuilder addAssertionAttributeStatement(List<Attribute> attributes) {
+        assertionBuilder.addAttributeStatement(attributes);
+        return this;
+    }
 
-        return new EidasResponseBuilder()
-                .withId(generateRandomId())
-                .withIssuer(responseIssuerId)
-                .withStatus(statusCodeValue)
-                .withInResponseTo(inResponseTo)
-                .withDestination(destinationUrl)
-                .withIssueInstant(issueInstant)
-                .addAssertion(assertion)
-                .build();
+    public EidasResponseBuilder withAssertionConditions(String assertionConditions) {
+        assertionBuilder.withConditions(assertionConditions);
+        return this;
+    }
+
+    public Response build() {
+        eidasResponse.getAssertions().add(assertionBuilder.build());
+        return eidasResponse;
     }
 
     private static String generateRandomId(){

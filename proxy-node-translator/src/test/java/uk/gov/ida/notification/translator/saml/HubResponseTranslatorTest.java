@@ -10,9 +10,11 @@ import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseTestAssertions;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
+import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import java.net.URI;
+import java.util.function.Supplier;
 
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
@@ -27,6 +29,8 @@ public class HubResponseTranslatorTest {
         }
     }
 
+    private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier = () -> EidasResponseBuilder.instance();
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -34,7 +38,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldReturnValidResponseWhenIdentityVerified() {
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
         Response response =
             translator.translate(buildHubResponseContainer());
@@ -48,7 +52,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldReturnResponseForCancelledStatus() {
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
         Response response =
             translator.translate(buildTranslatedHubResponseForCancelledStatus());
@@ -61,7 +65,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldReturnResponseForAuthenticationFailedStatus() {
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
         Response response =
                 translator.translate(buildTranslatedHubResponseForAuthenticationFailedStatus());
@@ -77,10 +81,9 @@ public class HubResponseTranslatorTest {
         expectedException.expectMessage("HubResponseContainer Attributes null.");
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
-        Response response =
-                translator.translate(buildHubResponseContainerWithNoAttributes());
+        translator.translate(buildHubResponseContainerWithNoAttributes());
     }
 
     @Test
@@ -90,7 +93,7 @@ public class HubResponseTranslatorTest {
         expectedException.expectMessage("HubResponseContainer Attribute Surnames null.");
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
         translator.translate(buildHubResponseContainerWithOnlyOneAttribute());
     }
@@ -102,7 +105,7 @@ public class HubResponseTranslatorTest {
         expectedException.expectMessage("Received error status from VSP: ");
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
         translator.translate(buildTranslatedHubResponseRequestError());
     }
@@ -114,7 +117,7 @@ public class HubResponseTranslatorTest {
         expectedException.expectMessage("Received unsupported LOA from VSP: ");
 
         HubResponseTranslator translator =
-                new HubResponseTranslator("Issuer", "connectorMetadataURL");
+                new HubResponseTranslator(eidasResponseBuilderSupplier, "Issuer", "connectorMetadataURL");
 
         translator.translate(buildHubResponseContainerLOA1());
     }

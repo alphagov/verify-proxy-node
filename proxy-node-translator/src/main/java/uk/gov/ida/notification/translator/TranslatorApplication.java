@@ -13,6 +13,7 @@ import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseTranslationExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
+import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
@@ -90,6 +91,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
     private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration) {
         HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
+                () -> EidasResponseBuilder.instance(),
                 configuration.getConnectorNodeIssuerId(),
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
