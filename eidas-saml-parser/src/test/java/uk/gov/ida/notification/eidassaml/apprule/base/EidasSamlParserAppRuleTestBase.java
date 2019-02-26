@@ -2,7 +2,6 @@ package uk.gov.ida.notification.eidassaml.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
 import keystore.KeyStoreResource;
-import org.glassfish.jersey.internal.util.Base64;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
@@ -19,6 +18,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
+import java.util.Base64;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -60,9 +60,12 @@ public class EidasSamlParserAppRuleTestBase {
     );
 
     protected Response postEidasAuthnRequest(AuthnRequest authnRequest) throws MarshallingException {
-        System.out.println(marshaller.transformToString(authnRequest));
 
-        String eidasAuthnRequest = Base64.encodeAsString(ObjectUtils.toString(authnRequest));
+        String eidasAuthnRequest =
+                Base64.getEncoder().encodeToString(
+                        new SamlObjectMarshaller().transformToString(authnRequest).getBytes()
+                );
+
         EidasSamlParserRequest request = new EidasSamlParserRequest(eidasAuthnRequest);
 
         Response response = null;
