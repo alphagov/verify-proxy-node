@@ -23,17 +23,18 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
     @Before
     public void setup() throws Throwable {
-        request = new EidasAuthnRequestBuilder().withIssuer(CONNECTOR_NODE_ENTITY_ID);
+        request = new EidasAuthnRequestBuilder()
+                .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+                .withDestination("http://proxy-node/eidasAuthnRequest");
     }
 
     @Test
-    @Ignore
     public void shouldReturnRequestIdAndIssuer() throws Exception {
         AuthnRequest postedRequest = request
-                .withRandomRequestId()
+                .withRequestId("request_id")
                 .build();
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(
-            X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY)
+                X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY)
         );
         samlObjectSigner.sign(postedRequest);
 
