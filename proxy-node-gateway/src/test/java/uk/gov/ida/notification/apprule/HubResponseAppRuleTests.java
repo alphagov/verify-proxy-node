@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -8,15 +9,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.EidasSamlParserClientRule;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorClientErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
-import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
-import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
 import uk.gov.ida.notification.exceptions.mappers.SessionAttributeExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
@@ -41,19 +39,19 @@ import static org.mockito.Mockito.verify;
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @ClassRule
-    public static final TranslatorClientRule<TestTranslatorResource> translatorClientRule = new TranslatorClientRule<>(new TestTranslatorResource());
+    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
 
     @ClassRule
-    public static final TranslatorClientRule<TestTranslatorServerErrorResource> translatorClientServerErrorRule = new TranslatorClientRule<>(new TestTranslatorServerErrorResource());
+    public static final DropwizardClientRule translatorClientServerErrorRule = new DropwizardClientRule(new TestTranslatorServerErrorResource());
 
     @ClassRule
-    public static final TranslatorClientRule<TestTranslatorClientErrorResource> translatorClientClientErrorRule = new TranslatorClientRule<>(new TestTranslatorClientErrorResource());
+    public static final DropwizardClientRule translatorClientClientErrorRule = new DropwizardClientRule(new TestTranslatorClientErrorResource());
 
     @ClassRule
-    public static final EidasSamlParserClientRule<TestEidasSamlResource> espClientRule = new EidasSamlParserClientRule<>(new TestEidasSamlResource());
+    public static final DropwizardClientRule espClientRule = new DropwizardClientRule(new TestEidasSamlResource());
 
     @ClassRule
-    public static final VerifyServiceProviderClientRule<TestVerifyServiceProviderResource> vspClientRule = new VerifyServiceProviderClientRule<>(new TestVerifyServiceProviderResource());
+    public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(

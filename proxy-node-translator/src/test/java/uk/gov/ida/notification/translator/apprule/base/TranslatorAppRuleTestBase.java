@@ -1,12 +1,13 @@
 package uk.gov.ida.notification.translator.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.VerifySamlInitializer;
+import uk.gov.ida.notification.translator.apprule.rules.StubVspResource;
 import uk.gov.ida.notification.translator.apprule.rules.TranslatorAppRule;
-import uk.gov.ida.notification.translator.apprule.rules.VspClientRule;
 
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
@@ -14,13 +15,13 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 public class TranslatorAppRuleTestBase {
 
     @ClassRule
-    public static final VspClientRule vspClientRule;
+    public static final DropwizardClientRule vspClientRule;
 
     static {
         try {
             InitializationService.initialize();
             VerifySamlInitializer.init();
-            vspClientRule = new VspClientRule();
+            vspClientRule = new DropwizardClientRule(new StubVspResource());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
