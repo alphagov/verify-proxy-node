@@ -28,6 +28,6 @@ copy gradlew build.gradle settings.gradle ./
 copy gradle/ gradle/
 copy proxy-node-shared/ proxy-node-shared/
 copy ${component}/ ${component}/
-run ./gradlew --no-daemon -p ${component} installDist -x test
+run ./gradlew -Pcloudhsm --no-daemon -p ${component} installDist -x test
 
 entrypoint "/app/$COMPONENT/build/install/$COMPONENT/bin/$COMPONENT"
