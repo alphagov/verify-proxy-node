@@ -32,7 +32,6 @@ public class EidasAuthnRequestResource {
 
     private final Logger log = Logger.getLogger(getClass().getName());
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
-
     private final EidasSamlParserProxy eidasSamlParserService;
     private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;

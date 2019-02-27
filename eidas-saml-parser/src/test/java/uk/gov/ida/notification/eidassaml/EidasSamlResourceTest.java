@@ -2,6 +2,7 @@ package uk.gov.ida.notification.eidassaml;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.glassfish.jersey.internal.util.Base64;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -46,6 +47,8 @@ public class EidasSamlResourceTest {
         issuer.setValue("issuer");
         authnRequest.setID("request_id");
         authnRequest.setIssuer(issuer);
+        authnRequest.setDestination("destination");
+        authnRequest.setIssueInstant(new DateTime(2019, 02, 28, 9, 54));
 
         EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(ObjectUtils.toString(authnRequest)));
         EidasSamlParserResponse response = resources.target("/eidasAuthnRequest")

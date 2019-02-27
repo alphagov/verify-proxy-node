@@ -7,6 +7,7 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.eidassaml.logging.EidasAuthnRequestAttributesLogger;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
@@ -22,7 +23,6 @@ import java.util.Base64;
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class EidasSamlResource {
-
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
     private SamlRequestSignatureValidator samlRequestSignatureValidator;
     private String x509EncryptionCertString;
@@ -48,6 +48,8 @@ public class EidasSamlResource {
 
         samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         eidasAuthnRequestValidator.validate(authnRequest);
+
+        EidasAuthnRequestAttributesLogger.logAuthnRequestAttributes(authnRequest);
 
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
