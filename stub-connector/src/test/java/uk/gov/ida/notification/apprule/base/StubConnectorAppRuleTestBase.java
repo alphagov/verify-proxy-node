@@ -1,15 +1,16 @@
 package uk.gov.ida.notification.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import keystore.KeyStoreResource;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
 import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
-import uk.gov.ida.notification.apprule.rules.ProxyNodeClientRule;
+import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
+import uk.gov.ida.notification.apprule.rules.TestProxyNodeResource;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 
 import javax.ws.rs.client.Entity;
@@ -29,10 +30,10 @@ public class StubConnectorAppRuleTestBase {
     private Map<String, NewCookie> cookies;
 
     @ClassRule
-    public static final MetadataClientRule metadataClientRule;
+    public static final DropwizardClientRule metadataClientRule;
 
     @ClassRule
-    public static final ProxyNodeClientRule proxyNodeClientRule;
+    public static final DropwizardClientRule proxyNodeClientRule;
 
     private static final KeyStoreResource truststore = aKeyStoreResource()
             .withCertificate(
@@ -48,8 +49,8 @@ public class StubConnectorAppRuleTestBase {
         try {
             InitializationService.initialize();
             VerifySamlInitializer.init();
-            metadataClientRule = new MetadataClientRule();
-            proxyNodeClientRule = new ProxyNodeClientRule();
+            metadataClientRule = new DropwizardClientRule(new TestMetadataResource());
+            proxyNodeClientRule = new DropwizardClientRule(new TestProxyNodeResource());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

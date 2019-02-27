@@ -1,17 +1,15 @@
 package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.EidasSamlParserClientRule;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
-import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
-import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
 
 import javax.ws.rs.core.Response;
 
@@ -19,13 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
     @ClassRule
-    public static final TranslatorClientRule translatorClientRule = new TranslatorClientRule(new TestTranslatorResource());
+    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
 
     @ClassRule
-    public static final EidasSamlParserClientRule espClientRule = new EidasSamlParserClientRule(new TestEidasSamlResource());
+    public static final DropwizardClientRule espClientRule = new DropwizardClientRule(new TestEidasSamlResource());
 
     @ClassRule
-    public static final VerifyServiceProviderClientRule vspClientRule = new VerifyServiceProviderClientRule(new TestVerifyServiceProviderResource());
+    public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(

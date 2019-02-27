@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.eidassaml.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import keystore.KeyStoreResource;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -9,7 +10,7 @@ import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.apprule.rules.MetadataClientRule;
+import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -30,7 +31,7 @@ public class EidasSamlParserAppRuleTestBase {
     protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
 
     @ClassRule
-    public static final MetadataClientRule metadataClientRule;
+    public static final DropwizardClientRule metadataClientRule;
 
     private static final KeyStoreResource truststore = aKeyStoreResource()
             .withCertificate("VERIFY-FEDERATION", aCertificate().withCertificate(METADATA_SIGNING_A_PUBLIC_CERT).build().getCertificate())
@@ -40,7 +41,7 @@ public class EidasSamlParserAppRuleTestBase {
         try {
             InitializationService.initialize();
             VerifySamlInitializer.init();
-            metadataClientRule = new MetadataClientRule();
+            metadataClientRule = new DropwizardClientRule(new TestMetadataResource());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
