@@ -1,7 +1,13 @@
 package uk.gov.ida.notification.translator.resources;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.security.SecurityException;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -17,7 +23,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static uk.gov.ida.saml.core.transformers.ResponseAttributesHashFactory.hashResponseDetails;
 
 @Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -37,7 +48,7 @@ public class HubResponseTranslatorResource {
 
     @POST
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
-    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
+    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) throws MarshallingException, SecurityException, SignatureException {
 
         final VerifyServiceProviderTranslationRequest vspRequest = new VerifyServiceProviderTranslationRequest(
                 hubResponseTranslatorRequest.getSamlResponse(),
@@ -50,14 +61,42 @@ public class HubResponseTranslatorResource {
         final X509Certificate encryptionCertificate = X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate());
 
         final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(hubResponseContainer, encryptionCertificate);
+
+        DateTime dateOfBirth = translatedHubResponse.getAttributes().getDateOfBirth().getValue();
+
+        String hashedEidasDetails = hashResponseDetails(
+                translatedHubResponse.getPid(),
+                translatedHubResponse.getAttributes().getFirstName().getValue(),
+                combineAttributeValues(translatedHubResponse.getAttributes().getMiddleNames()),
+                combineAttributeValues(translatedHubResponse.getAttributes().getSurnames()),
+                dateOfBirth.toString(DateTimeFormat.forPattern("YYYY-MM-dd"))
+        );
+
+        logHashedResponseDetails(
+                hubResponseTranslatorRequest.getRequestId(),
+                hubResponseTranslatorRequest.getDestinationUrl().toString(),
+                hashedEidasDetails);
         logEidasResponse(eidasResponse);
 
         final String samlMessage = MARSHALLER.transformToString(eidasResponse);
         return Response.ok().entity(samlMessage).build();
     }
 
+    private String combineAttributeValues(List<Attribute<String>> attributes) {
+        return attributes.stream()
+                .filter(Objects::nonNull)
+                .map(Attribute::getValue)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(" "));
+    }
+
     private void logEidasResponse(org.opensaml.saml.saml2.core.Response eidasResponse) {
         LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
         LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
+    }
+
+    private void logHashedResponseDetails(String requestId, String destination, String hashedDetails){
+        LOG.info(String.format("[eIDAS Response HASH] received for hub authn request ID '%s', destination '%s', hashedEidasDetails '%s'",
+                requestId, destination, hashedDetails));
     }
 }

@@ -1,48 +1,33 @@
-FROM openjdk:11-jre-slim AS libs
-WORKDIR /app
-ARG version=2.5.0
+from amazonlinux:2.0.20190212
 
-RUN apt-get update && \
-    apt-get install -y \
-    opensc build-essential wget libsqlite3-dev libssl-dev \
-    cmake libseccomp-dev
+# Install AWS CloudHSM client and libs
+run yum install -y wget tar gzip \
+ && wget https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-latest.el7.x86_64.rpm \
+ && yum install -y ./cloudhsm-client-latest.*.rpm \
+ && rm ./cloudhsm-client-latest.*.rpm \
+ && wget https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-latest.el7.x86_64.rpm \
+ && yum install -y ./cloudhsm-client-jce-latest.*.rpm \
+ && rm ./cloudhsm-client-jce-latest.*.rpm \
+ && wget https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz \
+ && mkdir -p /usr/lib/jvm \
+ && tar -C /usr/lib/jvm -xf ./openjdk-11.0.2*.tar.gz \
+ && rm ./openjdk-11.0.2*.tar.gz \
+ && sed -i 's/UNIXSOCKET/TCPSOCKET/g' /opt/cloudhsm/data/application.cfg
 
-RUN wget https://github.com/SUNET/pkcs11-proxy/archive/master.zip && \
-    unzip master.zip && \
-    cd pkcs11-proxy-master && \
-    cmake . && make && make install
+arg component=proxy-node-translator
+workdir /app
+env GRADLE_USER_HOME=/build/.gradle \
+    LD_LIBRARY_PATH=/opt/cloudhsm/lib \
+    HSM_PARTITION=PARTITION_1 \
+    HSM_USER=user \
+    HSM_PASSWORD=password \
+    JAVA_HOME=/usr/lib/jvm/jdk-11.0.2 \
+    COMPONENT=$component \
+    CONFIG_FILE=/app/${component}/build/install/${component}/config.yml
+copy gradlew build.gradle settings.gradle ./
+copy gradle/ gradle/
+copy proxy-node-shared/ proxy-node-shared/
+copy ${component}/ ${component}/
+run ./gradlew -Pcloudhsm --no-daemon -p ${component} installDist -x test
 
-FROM gradle:jdk11 AS build
-WORKDIR /app
-USER root
-ENV GRADLE_USER_HOME ~/.gradle
-
-COPY build.gradle build.gradle
-COPY settings.gradle settings.gradle
-COPY proxy-node-shared/ proxy-node-shared/
-
-ARG component=proxy-node-translator
-COPY ${component}/src ${component}/src
-COPY ${component}/build.gradle ${component}/build.gradle
-
-RUN gradle --no-daemon --quiet -p ${component} --parallel install -x test
-ENTRYPOINT ["gradle", "--no-daemon"]
-
-FROM openjdk:11-jre-slim
-WORKDIR /app
-USER root
-
-COPY --from=libs /usr/local/lib/libpkcs11-proxy* /usr/local/lib/
-COPY --from=libs /usr/local/bin/pkcs11-daemon /usr/local/bin/
-
-ARG component=proxy-node-translator
-COPY --from=build /app/${component}/build/install/${component} /app
-
-RUN apt-get update && apt-get install -y dumb-init
-
-ENV CONFIG_FILE config.yml
-ENV COMPONENT $component
-ENV SOFT_HSM_LIB_PATH /usr/local/lib/libpkcs11-proxy.so
-ENV KEY_RETRIEVER_SERVICE_NAME softhsm
-ENTRYPOINT ["dumb-init", "--"]
-CMD "/app/bin/$COMPONENT"
+entrypoint "/app/$COMPONENT/build/install/$COMPONENT/bin/$COMPONENT"

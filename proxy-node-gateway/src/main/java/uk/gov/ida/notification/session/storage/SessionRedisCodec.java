@@ -6,14 +6,11 @@ import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import io.lettuce.core.codec.RedisCodec;
 import uk.gov.ida.notification.exceptions.RedisSerializationException;
 import uk.gov.ida.notification.session.GatewaySessionData;
-import wiremock.com.google.common.io.ByteStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SessionRedisCodec implements RedisCodec<String, GatewaySessionData> {
 

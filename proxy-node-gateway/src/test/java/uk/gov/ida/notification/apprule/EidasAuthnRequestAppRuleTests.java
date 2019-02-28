@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.EidasSamlParserClientRule;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlClientErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
@@ -19,8 +19,6 @@ import uk.gov.ida.notification.apprule.rules.TestEidasSamlServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
-import uk.gov.ida.notification.apprule.rules.TranslatorClientRule;
-import uk.gov.ida.notification.apprule.rules.VerifyServiceProviderClientRule;
 import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
@@ -42,22 +40,22 @@ import static org.mockito.Mockito.verify;
 public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @ClassRule
-    public static final TranslatorClientRule<TestTranslatorResource> translatorClientRule = new TranslatorClientRule(new TestTranslatorResource());
+    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
 
     @ClassRule
-    public static final EidasSamlParserClientRule<TestEidasSamlResource> espClientRule = new EidasSamlParserClientRule<>(new TestEidasSamlResource());
+    public static final DropwizardClientRule espClientRule = new DropwizardClientRule(new TestEidasSamlResource());
 
     @ClassRule
-    public static final EidasSamlParserClientRule<TestEidasSamlServerErrorResource> espClientServerErrorRule = new EidasSamlParserClientRule<>(new TestEidasSamlServerErrorResource());
+    public static final DropwizardClientRule espClientServerErrorRule = new DropwizardClientRule(new TestEidasSamlServerErrorResource());
 
     @ClassRule
-    public static final EidasSamlParserClientRule<TestEidasSamlClientErrorResource> espClientClientErrorRule = new EidasSamlParserClientRule<>(new TestEidasSamlClientErrorResource());
+    public static final DropwizardClientRule espClientClientErrorRule = new DropwizardClientRule(new TestEidasSamlClientErrorResource());
 
     @ClassRule
-    public static final VerifyServiceProviderClientRule vspClientRule = new VerifyServiceProviderClientRule(new TestVerifyServiceProviderResource());
+    public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
 
     @ClassRule
-    public static final VerifyServiceProviderClientRule vspClientServerErrorRule = new VerifyServiceProviderClientRule(new TestVerifyServiceProviderServerErrorResource());
+    public static final DropwizardClientRule vspClientServerErrorRule = new DropwizardClientRule(new TestVerifyServiceProviderServerErrorResource());
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(

@@ -29,6 +29,11 @@ buildNumber.properties
 .gradle
 build/
 */build/
+*/logs/
+*/out/
+*/.git/
+*/.gradle/
+*/.idea/
 .gradletasknamecache
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
@@ -47,3 +52,7 @@ local_eidas_reference/docker/pki
 local_eidas_reference/gateway
 local_eidas_reference/translator
 .local_pki
+
+*/Dockerfile
+proxy-node-test/
+mdgen/

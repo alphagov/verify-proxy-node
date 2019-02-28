@@ -1,7 +1,5 @@
 package uk.gov.ida.mdgen;
 
-import com.cavium.key.CaviumRSAPrivateKey;
-import com.cavium.provider.CaviumProvider;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import org.apache.xml.security.signature.XMLSignature;
@@ -35,10 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import picocli.CommandLine;
 import se.litsec.opensaml.utils.ObjectUtils;
-import se.swedenconnect.opensaml.pkcs11.PKCS11Provider;
-import se.swedenconnect.opensaml.pkcs11.PKCS11ProviderFactory;
-import se.swedenconnect.opensaml.pkcs11.configuration.PKCS11ProviderConfiguration;
-import se.swedenconnect.opensaml.pkcs11.credential.PKCS11Credential;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -48,10 +42,10 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -62,10 +56,10 @@ public class MetadataGenerator implements Callable<Void> {
     private BasicX509Credential signingCredential;
     private X509KeyInfoGeneratorFactory keyInfoGeneratorFactory;
 
-    private enum NodeType { connector, proxy }
-    private enum CredentialType { file, pkcs11, cloudhsm }
+    enum NodeType { connector, proxy }
+    enum CredentialType { file, cloudhsm }
 
-    private enum SigningAlgoType {
+    enum SigningAlgoType {
         rsa(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256),
         rsapss(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1),
         ecdsa(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256);
@@ -101,20 +95,8 @@ public class MetadataGenerator implements Callable<Void> {
     @CommandLine.Option(names = "--key-pass", description = "Passphrase for encrypted private key")
     private String keyPass = "";
 
-    @CommandLine.Option(names = "--hsm-token-label", description = "HSM name")
-    private String hsmTokenLabel = "softhsm";
-
     @CommandLine.Option(names = "--hsm-key-label", description = "HSM key label")
     private String hsmKeyLabel = "private_key";
-
-    @CommandLine.Option(names = "--hsm-slot-index", description = "HSM slot index")
-    private Integer hsmSlotIndex = 0;
-
-    @CommandLine.Option(names = "--hsm-pin", description = "HSM token PIN")
-    private String hsmPin = "1234";
-
-    @CommandLine.Option(names = "--hsm-module", description = "HSM shared object module")
-    private String hsmModule = "/usr/lib/hsm/libsofthsm2.so";
 
     public static void main(String[] args) throws InitializationException {
         InitializationService.initialize();
@@ -132,9 +114,6 @@ public class MetadataGenerator implements Callable<Void> {
         switch (credentialType) {
             case file:
                 signingCredential = getSigningCredentialFromFile(signingCert, keyFile, keyPass);
-                break;
-            case pkcs11:
-                signingCredential = getSigningCredentialFromPKCS11(signingCert);
                 break;
             case cloudhsm:
                 signingCredential = getSigningCredentialFromCloudHSM(signingCert);
@@ -162,12 +141,14 @@ public class MetadataGenerator implements Callable<Void> {
     }
 
     private BasicX509Credential getSigningCredentialFromCloudHSM(X509Certificate cert) throws Exception {
-        Security.addProvider(new CaviumProvider());
-        return new PKCS11Credential(cert, List.of("Cavium"), hsmKeyLabel, (providerName, alias) -> {
-            KeyStore cloudHsmStore = KeyStore.getInstance("Cavium");
-            cloudHsmStore.load(null, null);
-            return (CaviumRSAPrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null);
-        });
+        Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
+            .loadClass("com.cavium.provider.CaviumProvider")
+            .getConstructor()
+            .newInstance();
+        Security.addProvider(caviumProvider);
+        KeyStore cloudHsmStore = KeyStore.getInstance("Cavium");
+        cloudHsmStore.load(null, null);
+        return new BasicX509Credential(cert, (PrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null));
     }
 
     private BasicX509Credential getSigningCredentialFromFile(X509Certificate cert, File keyFile, String keyPass) {
@@ -184,23 +165,6 @@ public class MetadataGenerator implements Callable<Void> {
             System.exit(1);
         }
         return null;
-    }
-
-    private BasicX509Credential getSigningCredentialFromPKCS11(X509Certificate cert) throws Exception {
-        LOG.info("Using credential from PKCS11: module={} token={} key={} slot={} pin={}", hsmModule, hsmTokenLabel, hsmKeyLabel, hsmSlotIndex, hsmPin);
-        PKCS11ProviderConfiguration config = new PKCS11ProviderConfiguration();
-        config.setLibrary(hsmModule);
-        config.setName(hsmTokenLabel);
-        config.setSlotListIndex(hsmSlotIndex);
-        PKCS11ProviderFactory providerFactory = new PKCS11ProviderFactory(
-            config,
-            configData -> Security.getProvider("SunPKCS11").configure("--"+configData)
-        );
-        PKCS11Provider provider = providerFactory.createInstance();
-        for (String name : provider.getProviderNameList()) {
-            LOG.info("Provider: " + name);
-        }
-        return new PKCS11Credential(cert, provider.getProviderNameList(), hsmKeyLabel, hsmPin);
     }
 
     private String renderTemplate(String template, Map values) {
@@ -230,7 +194,7 @@ public class MetadataGenerator implements Callable<Void> {
 
         SignatureSigningParameters signingParams = new SignatureSigningParameters();
         signingParams.setSignatureAlgorithm(signingAlgo.uri);
-        signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_OMIT_COMMENTS);
+        signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
         signingParams.setSigningCredential(signingCredential);
         signingParams.setKeyInfoGenerator(keyInfoGeneratorFactory.newInstance());
 

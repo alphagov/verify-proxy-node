@@ -24,15 +24,13 @@ dependencies {
     'org.opensaml:opensaml-xmlsec-impl:3.4.0',
     'org.bouncycastle:bcprov-jdk15on:1.60',
     'org.slf4j:slf4j-simple:1.7.25',
-    'se.litsec.eidas:eidas-opensaml3:1.3.1',
     'se.litsec.opensaml:opensaml3-ext:1.2.2',
     'com.github.spullara.mustache.java:compiler:0.9.6',
-    'org.yaml:snakeyaml:1.24-SNAPSHOT',
-    'se.swedenconnect.opensaml:opensaml-pkcs11-support:1.1.1'
+    'org.yaml:snakeyaml:1.24-SNAPSHOT'
 
-  implementation name: 'cloudhsm-2.0.0'
-  implementation name: 'log4j-api-2.8'
-  implementation name: 'log4j-core-2.8'
-
-  testImplementation name: 'cloudhsm-test-2.0.0'
+    if (project.hasProperty('cloudhsm')) {
+      implementation name: 'cloudhsm-2.0.0'
+      implementation name: 'log4j-api-2.8'
+      implementation name: 'log4j-core-2.8'
+    }
 }

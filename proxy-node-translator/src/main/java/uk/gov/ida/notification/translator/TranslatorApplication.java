@@ -18,8 +18,6 @@ import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
-import uk.gov.ida.notification.translator.signing.KeyRetrieverService;
-import uk.gov.ida.notification.translator.signing.KeyRetrieverServiceFactory;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
 
@@ -96,7 +94,6 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
 
-        KeyRetrieverService keyRetrieverService = KeyRetrieverServiceFactory.createKeyRetrieverService(configuration);
-        return new EidasResponseGenerator(hubResponseTranslator, keyRetrieverService.createSamlObjectSigner());
+        return new EidasResponseGenerator(hubResponseTranslator, configuration.getSignerConfiguration().getSigner());
     }
 }

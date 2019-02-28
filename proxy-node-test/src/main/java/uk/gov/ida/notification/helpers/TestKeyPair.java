@@ -1,20 +1,15 @@
 package uk.gov.ida.notification.helpers;
 
-import io.dropwizard.testing.ResourceHelpers;
+import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Support;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -22,7 +17,6 @@ import java.util.Base64;
 
 public class TestKeyPair {
 
-    private static final String X509 = "X.509";
     private static final String RSA = "RSA";
     private static final String TEST_CERTIFICATE_FILE = "test_certificate.crt";
     private static final String TEST_PRIVATE_KEY_FILE = "test_private_key.pk8";
@@ -53,11 +47,13 @@ public class TestKeyPair {
         return Base64.getEncoder().encodeToString(certificate.getEncoded());
     }
 
+    public BasicX509Credential getX509Credential() {
+        return new BasicX509Credential(certificate, privateKey);
+    }
+
     private X509Certificate readX509Certificate(String certificateFile) throws CertificateException, IOException {
-        CertificateFactory certificateFactory = CertificateFactory.getInstance(X509);
         byte[] cert = FileHelpers.readFileAsBytes(certificateFile);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cert);
-        return (X509Certificate) certificateFactory.generateCertificate(byteArrayInputStream);
+        return X509Support.decodeCertificate(cert);
     }
 
     private PrivateKey readPrivateKey(String privateKeyFile) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
