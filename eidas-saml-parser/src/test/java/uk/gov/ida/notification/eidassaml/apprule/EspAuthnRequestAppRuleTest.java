@@ -1,21 +1,31 @@
 package uk.gov.ida.notification.eidassaml.apprule;
 
 import org.apache.http.HttpStatus;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
+import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import se.litsec.eidas.opensaml.common.EidasConstants;
+import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
+import uk.gov.ida.notification.eidassaml.logging.EidasAuthnRequestAttributesLogger;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 
+import java.util.Map;
 import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
@@ -214,5 +224,26 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     private void assertErrorResponseWithMessage(Response response, String errorMessageContains) {
         assertErrorResponse(response);
         assertThat(response.readEntity(String.class)).contains(errorMessageContains);
+    }
+
+    @Test
+    public void shouldLogAuthnRequestAttributes() throws Exception {
+        Appender<ILoggingEvent> appender = mock(Appender.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(EidasAuthnRequestAttributesLogger.class);
+        logger.addAppender(appender);
+        AuthnRequest authnRequest = request.withRequestId("request_id").build();
+        samlObjectSigner.sign(authnRequest);
+
+        postEidasAuthnRequest(authnRequest);
+
+        ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+        verify(appender).doAppend(loggingEventArgumentCaptor.capture());
+
+        ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
+        Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
+        assertEquals("request_id", mdcPropertyMap.get("eidasRequestId"));
+        assertEquals("http://proxy-node/eidasAuthnRequest", mdcPropertyMap.get("eidasDestination"));
+        assertEquals("2015-04-30T19:25:14.273Z", mdcPropertyMap.get("eidasIssueInstant"));
+        assertEquals("http://connector-node:8080/ConnectorResponderMetadata", mdcPropertyMap.get("eidasIssuer"));
     }
 }
