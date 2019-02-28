@@ -8,6 +8,7 @@ import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.session.GatewaySessionData;
@@ -26,8 +27,6 @@ import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.util.logging.Logger;
 
-import static uk.gov.ida.notification.session.SessionKeys.SESSION_KEY_SESSION_DATA;
-
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
 
@@ -37,15 +36,19 @@ public class EidasAuthnRequestResource {
     private final EidasSamlParserProxy eidasSamlParserService;
     private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;
+    private final SessionStore sessionStorage;
 
     public EidasAuthnRequestResource(
             EidasSamlParserProxy eidasSamlParserService,
             VerifyServiceProviderProxy vspProxy,
-            SamlFormViewBuilder samlFormViewBuilder) {
+            SamlFormViewBuilder samlFormViewBuilder,
+            SessionStore sessionStorage) {
         this.eidasSamlParserService = eidasSamlParserService;
         this.vspProxy = vspProxy;
         this.samlFormViewBuilder = samlFormViewBuilder;
+        this.sessionStorage = sessionStorage;
     }
+
 
     @GET
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH)
@@ -53,7 +56,7 @@ public class EidasAuthnRequestResource {
             @QueryParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
             @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session.getId());
     }
 
     @POST
@@ -63,24 +66,26 @@ public class EidasAuthnRequestResource {
             @FormParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
             @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session);
+        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session.getId());
     }
 
-    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, session.getId());
-        AuthnRequestResponse vspResponse = generateHubRequestWithVsp(session.getId());
-        logAuthnRequestInformation(session, eidasSamlParserResponse, vspResponse);
-        setResponseDataInSession(session, eidasSamlParserResponse, vspResponse, eidasRelayState);
+    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, String sessionId) {
+        final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
+        AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
+        logAuthnRequestInformation(sessionId, eidasSamlParserResponse, vspResponse);
+        setResponseDataInSession(sessionId, eidasSamlParserResponse, vspResponse, eidasRelayState);
         return buildSamlFormView(vspResponse, eidasRelayState);
     }
 
-    private void setResponseDataInSession(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse, String eidasRelayState) {
-        GatewaySessionData gatewaySessionData = new GatewaySessionData(
-            eidasSamlParserResponse,
-            vspResponse,
-            eidasRelayState
+    private void setResponseDataInSession(String sessionId, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse, String eidasRelayState) {
+        sessionStorage.addSession(
+            sessionId,
+            new GatewaySessionData(
+                eidasSamlParserResponse,
+                vspResponse,
+                eidasRelayState
+            )
         );
-        session.setAttribute(SESSION_KEY_SESSION_DATA, gatewaySessionData);
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {
@@ -95,8 +100,8 @@ public class EidasAuthnRequestResource {
         return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, SUBMIT_BUTTON_TEXT, relayState);
     }
 
-    private void logAuthnRequestInformation(HttpSession session, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse) {
-        log.info(String.format("[eIDAS AuthnRequest] Session ID: '%s'", session.getId()));
+    private void logAuthnRequestInformation(String sessionId, EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse) {
+        log.info(String.format("[eIDAS AuthnRequest] Session ID: '%s'", sessionId));
         log.info(String.format("[eIDAS AuthnRequest] eIDAS Request ID: '%s'", eidasSamlParserResponse.getRequestId()));
         log.info(String.format("[eIDAS AuthnRequest] eIDAS Issuer: '%s'", eidasSamlParserResponse.getIssuer()));
         log.info(String.format("[eIDAS AuthnRequest] eIDAS Destination: '%s'", eidasSamlParserResponse.getDestination()));

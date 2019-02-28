@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.apprule.base;
 
+import com.github.fppt.jedismock.RedisServer;
 import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -12,11 +13,14 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class GatewayAppRuleTestBase {
 
     protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
+
+    private RedisServer server = null;
 
     static {
         try {
@@ -49,5 +53,20 @@ public class GatewayAppRuleTestBase {
             .withIssuer(CONNECTOR_NODE_ENTITY_ID)
             .withRandomRequestId()
             .build();
+    }
+
+    protected String setupTestRedis() {
+        try {
+            server = RedisServer.newRedisServer();
+            server.start();
+            return "redis://" + server.getHost() + ":" + server.getBindPort() + "/";
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    protected void killTestRedis() {
+        server.stop();
+        server = null;
     }
 }

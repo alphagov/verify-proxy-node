@@ -67,7 +67,7 @@ subprojects {
         common (
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
-                "io.lettuce:lettuce-core:5.1.3.RELEASE",
+                "io.lettuce:lettuce-core:5.1.4.RELEASE",
         )
 
         dropwizard (
@@ -124,6 +124,7 @@ subprojects {
             "io.dropwizard:dropwizard-testing:${dropwizard_version}",
             "net.sourceforge.htmlunit:htmlunit:2.28",
             "com.github.stefanbirkner:system-rules:1.19.0",
+            "com.github.fppt:jedis-mock:0.1.9",
             project(':proxy-node-test'),
         )
 

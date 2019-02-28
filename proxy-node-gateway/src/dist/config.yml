@@ -31,3 +31,7 @@ translatorService:
     timeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
     connectionTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
     connectionRequestTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
+
+redisService:
+  local: false
+  url: ${REDIS_SERVER_URI}
