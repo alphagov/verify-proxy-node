@@ -1,9 +1,9 @@
 package uk.gov.ida.notification.resources;
 
-import com.google.common.collect.Lists;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.apache.commons.lang.StringUtils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -11,10 +11,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
+import uk.gov.ida.notification.logging.CombinedAuthnRequestAttributesLogger;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
@@ -23,15 +25,12 @@ import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.util.Map;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -67,28 +66,16 @@ public class EidasAuthnRequestResourceTest {
     private AuthnRequestResponse vspResponse;
 
     @Mock
-    private Handler logHandler;
+    private Appender<ILoggingEvent> appender;
 
     @Captor
-    private ArgumentCaptor<LogRecord> captorLoggingEvent;
+    private ArgumentCaptor<ILoggingEvent> captorILoggingEvent;
 
     @Captor
     private ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
 
     @Captor
     private ArgumentCaptor<GatewaySessionData> captorGatewaySessionData;
-
-    @Before
-    public void setup() {
-        Logger logger = Logger.getLogger(EidasAuthnRequestResource.class.getName());
-        logger.addHandler(logHandler);
-    }
-
-    @After
-    public void teardown() {
-        Logger logger = Logger.getLogger(EidasAuthnRequestResource.class.getName());
-        logger.removeHandler(logHandler);
-    }
 
     @Test
     public void testHappyPathRedirect() throws URISyntaxException {
@@ -105,6 +92,8 @@ public class EidasAuthnRequestResourceTest {
     }
 
     private void setupHappyPath() throws URISyntaxException {
+        Logger logger = (Logger) LoggerFactory.getLogger(CombinedAuthnRequestAttributesLogger.class);
+        logger.addAppender(appender);
         when(eidasSamlParserService.parse(any(EidasSamlParserRequest.class), any(String.class))).thenReturn(eidasSamlParserResponse);
         when(vspProxy.generateAuthnRequest(any(String.class))).thenReturn(vspResponse);
         when(eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()).thenReturn(UNCHAINED_PUBLIC_CERT);
@@ -122,30 +111,25 @@ public class EidasAuthnRequestResourceTest {
 
         verify(sessionStore).addSession(eq(sessionId), any(GatewaySessionData.class));
         verify(session).getId();
-        verify(logHandler, times(7)).publish(captorLoggingEvent.capture());
+        verify(appender).doAppend(captorILoggingEvent.capture());
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
-        verifyNoMoreInteractions(vspProxy, eidasSamlParserService, logHandler, samlFormViewBuilder, session);
+        verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder, session);
         verifyNoMoreInteractions(sessionStore);
 
         assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo("eidas blob");
-        List<LogRecord> allLogRecords = captorLoggingEvent.getAllValues();
 
-        List<String> expectedLogOutput = Lists.newArrayList(
-                "some session id",
-                "eidas request id",
-                "issuer",
-                "destination",
-                StringUtils.right(UNCHAINED_PUBLIC_CERT, 10),
-                "hub request id",
-                "http://hub.bub");
+        ILoggingEvent loggingEvent = captorILoggingEvent.getValue();
+        Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        assertThat(allLogRecords.size()).isEqualTo(expectedLogOutput.size());
-
-        for (int i = 0; i < allLogRecords.size(); i++) {
-            String actualMessage = allLogRecords.get(i).getMessage();
-            assertThat(actualMessage).contains(expectedLogOutput.get(i));
-        }
+        assertEquals("some session id", mdcPropertyMap.get("sessionId"));
+        assertEquals("eidas request id", mdcPropertyMap.get("eidasRequestId"));
+        assertEquals("issuer", mdcPropertyMap.get("eidasIssuer"));
+        assertEquals("destination", mdcPropertyMap.get("eidasDestination"));
+        assertEquals(StringUtils.right(UNCHAINED_PUBLIC_CERT, 10), mdcPropertyMap.get("eidasConnectorPublicKeySuffix"));
+        assertEquals("hub request id", mdcPropertyMap.get("hubRequestId"));
+        assertEquals("http://hub.bub", mdcPropertyMap.get("hubUrl"));
+        assertEquals("Authn requests received from ESP and VSP", loggingEvent.getMessage());
     }
 }

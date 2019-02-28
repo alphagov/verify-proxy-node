@@ -16,9 +16,9 @@ public class EidasAuthnRequestAttributesLogger {
             MDC.put("eidasIssuer", authnRequest.getIssuer().getValue());
             log.info("Authn request validated by ESP");
         } catch (Exception e) {
-            MDC.clear();
             throw e;
+        } finally {
+            MDC.clear();
         }
-        MDC.clear();
     }
 }
