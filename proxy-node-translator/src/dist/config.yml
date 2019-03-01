@@ -15,6 +15,13 @@ proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_U
 
 connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
 
+vspConfiguration:
+  url: ${VERIFY_SERVICE_PROVIDER_URL}
+  clientConfig:
+    timeout: ${VERIFY_SERVICE_PROVIDER_TIMEOUT:-5s}
+    connectionTimeout: ${VERIFY_SERVICE_PROVIDER_TIMEOUT:-5s}
+    connectionRequestTimeout: ${VERIFY_SERVICE_PROVIDER_TIMEOUT:-5s}
+
 signerConfiguration:
   type: ${SIGNER_CONFIG_TYPE:-file}
   hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-signing_key}
