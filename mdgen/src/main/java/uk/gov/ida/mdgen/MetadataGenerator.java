@@ -2,6 +2,7 @@ package uk.gov.ida.mdgen;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+import org.apache.xml.security.algorithms.JCEMapper;
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
@@ -146,6 +147,7 @@ public class MetadataGenerator implements Callable<Void> {
             .getConstructor()
             .newInstance();
         Security.addProvider(caviumProvider);
+        JCEMapper.setProviderId("Cavium");
         KeyStore cloudHsmStore = KeyStore.getInstance("Cavium");
         cloudHsmStore.load(null, null);
         return new BasicX509Credential(cert, (PrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null));
