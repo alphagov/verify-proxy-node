@@ -3,6 +3,7 @@ package uk.gov.ida.notification.translator.configuration;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.xml.security.algorithms.JCEMapper;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Support;
 import uk.gov.ida.common.shared.configuration.DeserializablePublicKeyConfiguration;
@@ -27,6 +28,7 @@ public class CloudHsmSignerConfiguration extends SignerConfiguration {
                 .getConstructor()
                 .newInstance();
             Security.addProvider(caviumProvider);
+            JCEMapper.setProviderId("Cavium");
             KeyStore cloudHsmStore = KeyStore.getInstance("Cavium");
             cloudHsmStore.load(null, null);
             BasicX509Credential credential = new BasicX509Credential(
