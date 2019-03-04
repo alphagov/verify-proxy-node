@@ -90,8 +90,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration) {
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
-                () -> EidasResponseBuilder.instance(),
+        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(EidasResponseBuilder::instance,
                 configuration.getConnectorNodeIssuerId(),
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );

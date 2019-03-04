@@ -3,6 +3,7 @@ package uk.gov.ida.notification.saml;
 import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.Attribute;
@@ -26,8 +27,8 @@ public class EidasResponseBuilderTest {
     static {
         try {
             InitializationService.initialize();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (InitializationException e) {
+            throw new IllegalStateException("Could not initialize opensaml in test", e);
         }
     }
 
