@@ -20,8 +20,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
@@ -72,7 +72,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
     private void hasValidity(String samlMessage, String validity) throws URISyntaxException {
         String html = postEidasResponse(samlMessage);
-        assertThat(html, containsString("Saml Validity: "+validity));
+        assertThat(html).contains("Saml Validity: "+validity);
     }
 
     private Response getEidasSamlMessage(String authid) {

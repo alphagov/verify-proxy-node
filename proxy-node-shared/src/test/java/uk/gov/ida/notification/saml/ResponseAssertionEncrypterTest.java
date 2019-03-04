@@ -17,7 +17,7 @@ import uk.gov.ida.saml.security.DecrypterFactory;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResponseAssertionEncrypterTest extends SamlInitializedTest {
     @Test
@@ -34,9 +34,9 @@ public class ResponseAssertionEncrypterTest extends SamlInitializedTest {
 
         EncryptedAssertion encryptedAssertion = encryptedResponse.getEncryptedAssertions().get(0);
 
-        assertEquals("hi", decryptAssertion(encryptedAssertion, decryptionCredential).getID());
-        assertEquals(1, encryptedResponse.getEncryptedAssertions().size());
-        assertEquals(0, encryptedResponse.getAssertions().size());
+        assertThat("hi").isEqualTo(decryptAssertion(encryptedAssertion, decryptionCredential).getID());
+        assertThat(1).isEqualTo(encryptedResponse.getEncryptedAssertions().size());
+        assertThat(0).isEqualTo(encryptedResponse.getAssertions().size());
     }
 
     private static Assertion decryptAssertion(EncryptedAssertion encryptedAssertion, Credential credential) throws Exception {

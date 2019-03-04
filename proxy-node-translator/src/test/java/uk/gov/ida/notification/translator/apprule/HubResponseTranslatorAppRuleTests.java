@@ -34,11 +34,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_SIGNING_CERT;
@@ -104,15 +100,21 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
         Signature signature = eidasResponse.getSignature();
 
-        assertNotNull("EIDAS SAML Response needs to be signed", signature);
-        assertTrue("Invalid signature", signatureValidator.validate(eidasResponse, null, Response.DEFAULT_ELEMENT_NAME));
-        assertEquals(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, signature.getSignatureAlgorithm());
+        assertThat(signature)
+                .withFailMessage("EIDAS SAML Response needs to be signed")
+                .isNotNull();
+
+        assertThat(signatureValidator.validate(eidasResponse, null, Response.DEFAULT_ELEMENT_NAME))
+                .withFailMessage("Invalid signature")
+                .isTrue();
+
+        assertThat(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256).isEqualTo(signature.getSignatureAlgorithm());
     }
 
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
         Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
-        assertEquals(1, eidasResponse.getEncryptedAssertions().size());
+        assertThat(1).isEqualTo(eidasResponse.getEncryptedAssertions().size());
         assertThat(eidasResponse.getAssertions()).isEmpty();
     }
 
@@ -123,7 +125,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         Response eidasResponse = extractEidasResponseFromTranslator(hubResponse);
         Response decryptedEidasResponse = decryptResponse(eidasResponse, eidasDecryptingCredential);
 
-        assertEquals(hubResponse.getInResponseTo(), eidasResponse.getInResponseTo());
+        assertThat(hubResponse.getInResponseTo()).isEqualTo(eidasResponse.getInResponseTo());
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(decryptedEidasResponse);
     }

@@ -25,8 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -86,9 +85,9 @@ public class VspProxyGenerateRequestTest {
 
         AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
 
-        assertEquals("saml_request", response.getSamlRequest());
-        assertEquals("request_id", response.getRequestId());
-        assertEquals(UriBuilder.fromUri("http://sso-location.com").build(), response.getSsoLocation());
+        assertThat("saml_request").isEqualTo(response.getSamlRequest());
+        assertThat("request_id").isEqualTo(response.getRequestId());
+        assertThat(UriBuilder.fromUri("http://sso-location.com").build()).isEqualTo(response.getSsoLocation());
 
         Mockito.verify(jsonClient).post(
                 Mockito.argThat((AuthnRequestGenerationBody request) -> request.getLevelOfAssurance().equals("LEVEL_2")),
@@ -112,7 +111,7 @@ public class VspProxyGenerateRequestTest {
                                     testVspServerErrorClientRule.baseUri().toString()
                             )
                     );
-            assertEquals("session-id", e.getSessionId());
+            assertThat("session-id").isEqualTo(e.getSessionId());
         }
     }
 
@@ -131,7 +130,7 @@ public class VspProxyGenerateRequestTest {
                                     testVspClientErrorClientRule.baseUri().toString()
                             )
                     );
-            assertEquals("session-id", e.getSessionId());
+            assertThat("session-id").isEqualTo(e.getSessionId());
         }
     }
 }

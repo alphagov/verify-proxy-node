@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 
 import static java.util.logging.Level.WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -100,7 +99,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             .cookie(getSessionCookie(proxyNodeAppRule))
             .post(Entity.form(postForm));
 
-        assertEquals(200, response.getStatus());
+        assertThat(200).isEqualTo(response.getStatus());
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
@@ -126,7 +125,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             .request()
             .post(Entity.form(postForm));
 
-        assertEquals(400, response.getStatus());
+        assertThat(400).isEqualTo(response.getStatus());
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
@@ -151,7 +150,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             .cookie(getSessionCookie(proxyNodeServerErrorAppRule))
             .post(Entity.form(postForm));
 
-        assertEquals(500, response.getStatus());
+        assertThat(500).isEqualTo(response.getStatus());
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
@@ -176,7 +175,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             .cookie(getSessionCookie(proxyNodeClientErrorAppRule))
             .post(Entity.form(postForm));
 
-        assertEquals(400, response.getStatus());
+        assertThat(400).isEqualTo(response.getStatus());
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(

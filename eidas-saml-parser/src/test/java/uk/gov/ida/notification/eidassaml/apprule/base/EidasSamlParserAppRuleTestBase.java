@@ -8,7 +8,6 @@ import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
@@ -22,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.Base64;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
@@ -76,7 +75,7 @@ public class EidasSamlParserAppRuleTestBase {
                     .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
 
         } catch (URISyntaxException e) {
-            fail(e);
+            fail(e.getMessage());
         }
 
         return response;

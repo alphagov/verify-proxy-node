@@ -10,8 +10,7 @@ import uk.gov.ida.notification.SamlInitializedTest;
 import javax.xml.namespace.QName;
 import java.text.MessageFormat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SamlObjectMarshallerTest extends SamlInitializedTest {
 
@@ -29,21 +28,21 @@ public class SamlObjectMarshallerTest extends SamlInitializedTest {
         String issuerXML = marshaller.transformToString(issuer);
 
         String expectedIssuerXML = buildExpectedXmlObjectFormat(defaultElementName, entity, aValue);
-        assertEquals(expectedIssuerXML, issuerXML);
+        assertThat(expectedIssuerXML).isEqualTo(issuerXML);
     }
 
     @Test
     public void shouldMarshallSamlObject() throws Throwable {
         Issuer issuer = buildXmlObject(defaultElementName, entity, aValue);
-        assertEquals(issuer.getDOM(), null);
+        assertThat(issuer.getDOM()).isEqualTo(null);
 
         Element element = marshaller.marshallToElement(issuer);
 
-        assertEquals(element.getNamespaceURI(), defaultElementName.getNamespaceURI() );
-        assertEquals(element.getLocalName(), "Issuer");
-        assertEquals(element.getFirstChild().getNodeValue(), aValue );
-        assertNotNull(element.getAttribute(entity));
-        assertEquals(element, issuer.getDOM());
+        assertThat(element.getNamespaceURI()).isEqualTo(defaultElementName.getNamespaceURI() );
+        assertThat(element.getLocalName()).isEqualTo("Issuer");
+        assertThat(element.getFirstChild().getNodeValue()).isEqualTo(aValue );
+        assertThat(element.getAttribute(entity)).isNotNull();
+        assertThat(element).isEqualTo(issuer.getDOM());
     }
 
     private Issuer buildXmlObject(QName defaultElementName, String entity, String aValue) {

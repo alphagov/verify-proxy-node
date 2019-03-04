@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 
 import static java.util.logging.Level.WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -106,7 +105,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             proxyNodeEspServerErrorAppRule
         );
 
-        assertEquals(500, response.getStatus());
+        assertThat(500).isEqualTo(response.getStatus());
         HtmlHelpers.assertXPath(
             getHtmlStringFromResponse(response),
             "//div[@class='issues'][text()='Something went wrong with the ESP']"
@@ -126,7 +125,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         AuthnRequest request = buildAuthnRequest();
         Response response = postEidasAuthnRequest(request, proxyNodeEspClientErrorAppRule);
 
-        assertEquals(400, response.getStatus());
+        assertThat(400).isEqualTo(response.getStatus());
         HtmlHelpers.assertXPath(
             getHtmlStringFromResponse(response),
             "//div[@class='issues'][text()='Something went wrong with the ESP']"
@@ -148,7 +147,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             proxyNodeVspServerErrorAppRule
         );
 
-        assertEquals(500, response.getStatus());
+        assertThat(500).isEqualTo(response.getStatus());
         HtmlHelpers.assertXPath(
             getHtmlStringFromResponse(response),
             "//div[@class='issues'][text()='Something went wrong with the VSP']"

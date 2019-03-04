@@ -10,8 +10,7 @@ import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SamlObjectSignerTest extends SamlInitializedTest {
     private TestKeyPair testKeyPair;
@@ -31,13 +30,13 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
 
         String actualCertificate = signature.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0).getValue();
 
-        assertEquals(testKeyPair.getEncodedCertificate(), actualCertificate.replaceAll("\\s+", ""));
-        assertNotNull(signature);
+        assertThat(testKeyPair.getEncodedCertificate()).isEqualTo(actualCertificate.replaceAll("\\s+", ""));
+        assertThat(signature).isNotNull();
         String algoIdSignatureRsaSha256 = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
-        assertEquals(signature.getSignatureAlgorithm(), algoIdSignatureRsaSha256);
-        assertEquals(signature.getSigningCredential().getPublicKey(), signingCredential.getPublicKey());
-        assertEquals(signature.getSigningCredential().getPrivateKey(), signingCredential.getPrivateKey());
-        assertEquals(signature.getCanonicalizationAlgorithm(), SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+        assertThat(signature.getSignatureAlgorithm()).isEqualTo(algoIdSignatureRsaSha256);
+        assertThat(signature.getSigningCredential().getPublicKey()).isEqualTo(signingCredential.getPublicKey());
+        assertThat(signature.getSigningCredential().getPrivateKey()).isEqualTo(signingCredential.getPrivateKey());
+        assertThat(signature.getCanonicalizationAlgorithm()).isEqualTo(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
         SignatureValidator.validate(signature, signingCredential);
     }
 }

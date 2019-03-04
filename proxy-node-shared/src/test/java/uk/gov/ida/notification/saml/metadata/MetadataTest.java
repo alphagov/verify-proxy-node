@@ -17,7 +17,7 @@ import uk.gov.ida.notification.helpers.TestMetadataBuilder;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +42,7 @@ public class MetadataTest {
         Metadata metadata = new Metadata(metadataCredentialResolver);
         PublicKey connectorNodeEncryptionPublicKey = metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
 
-        assertEquals(expectedPublicKey, connectorNodeEncryptionPublicKey);
+        assertThat(expectedPublicKey).isEqualTo(connectorNodeEncryptionPublicKey);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class MetadataTest {
         Metadata metadata = new Metadata(metadataCredentialResolver);
         PublicKey hubSigningPublicKey = metadata.getCredential(UsageType.SIGNING, TEST_HUB_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
 
-        assertEquals(expectedPublicKey, hubSigningPublicKey);
+        assertThat(expectedPublicKey).isEqualTo(hubSigningPublicKey);
     }
 
     @Test(expected = MissingMetadataException.class)
@@ -102,7 +102,7 @@ public class MetadataTest {
         MetadataResolver metadataResolver = new TestMetadataBuilder("local-connector-metadata.xml").buildResolver("connector");
         String location = Metadata.getAssertionConsumerServiceLocation("http://localhost:55000/local-connector/metadata.xml", metadataResolver);
 
-        assertEquals("http://localhost:50300/SAML2/SSO/EidasResponse/POST", location);
+        assertThat("http://localhost:50300/SAML2/SSO/EidasResponse/POST").isEqualTo(location);
     }
 
     @Test(expected = ConnectorMetadataException.class)

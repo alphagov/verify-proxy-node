@@ -28,9 +28,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -108,10 +107,10 @@ public class VspProxyTranslateResponseTest {
                         new VerifyServiceProviderTranslationRequest(null, "_1234", "LEVEL_2")
                 );
 
-        assertEquals(VspScenario.AUTHENTICATION_FAILED, response.getScenario());
-        assertEquals("pid1234", response.getPid());
-        assertEquals(VspLevelOfAssurance.LEVEL_2, response.getLevelOfAssurance());
-        assertNull(response.getAttributes());
+        assertThat(VspScenario.AUTHENTICATION_FAILED).isEqualTo(response.getScenario());
+        assertThat("pid1234").isEqualTo(response.getPid());
+        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
+        assertThat(response.getAttributes()).isNull();
 
         Mockito.verify(jsonClient).post(
                 Mockito.argThat((VerifyServiceProviderTranslationRequest request) -> request.getLevelOfAssurance().equals("LEVEL_2")),
@@ -130,9 +129,9 @@ public class VspProxyTranslateResponseTest {
                         new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")
                 );
 
-        assertEquals(VspScenario.IDENTITY_VERIFIED, response.getScenario());
-        assertEquals("123456", response.getPid());
-        assertEquals(VspLevelOfAssurance.LEVEL_2, response.getLevelOfAssurance());
+        assertThat(VspScenario.IDENTITY_VERIFIED).isEqualTo(response.getScenario());
+        assertThat("123456").isEqualTo(response.getPid());
+        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
     }
 
     @Test(expected = ApplicationException.class)

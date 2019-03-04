@@ -1,8 +1,7 @@
 package uk.gov.ida.notification.saml.validation.components;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.notification.helpers.HubResponseBuilder.aHubResponse;
 import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
 
@@ -17,7 +16,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 
-import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 public class RequestIdWatcherTest {
@@ -33,7 +31,7 @@ public class RequestIdWatcherTest {
   public void shouldNotValidateIdThatHasNotBeenObserved() throws MarshallingException, SignatureException {
     Response response = aHubResponse().withInResponseTo(ResponseBuilder.DEFAULT_REQUEST_ID).build();
 
-    assertFalse(this.requestIdWatcher.haveSeenRequestFor(response));
+    assertThat(this.requestIdWatcher.haveSeenRequestFor(response)).isFalse();
   }
 
   @Test
@@ -42,7 +40,7 @@ public class RequestIdWatcherTest {
     Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
 
     this.requestIdWatcher.observe(authnRequest);
-    assertTrue(this.requestIdWatcher.haveSeenRequestFor(response));
+    assertThat(this.requestIdWatcher.haveSeenRequestFor(response)).isTrue();
   }
 
   @Test
@@ -51,7 +49,7 @@ public class RequestIdWatcherTest {
       this.requestIdWatcher.observe(authnRequest);
       Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
 
-      assertTrue(this.requestIdWatcher.haveSeenRequestFor(response));
+      assertThat(this.requestIdWatcher.haveSeenRequestFor(response)).isTrue();
     }
   }
 }
