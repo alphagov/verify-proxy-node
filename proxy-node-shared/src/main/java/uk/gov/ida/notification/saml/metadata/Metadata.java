@@ -40,11 +40,11 @@ public class Metadata {
         try {
             Credential credential = metadataCredentialResolver.resolveSingle(criteria);
             if (credential == null) {
-                throw new MissingMetadataException(String.format("Missing %s certificate", usageType));
+                throw new MissingMetadataException(String.format("Missing %s certificate from Connector Metadata with entityID %s", usageType, entityId));
             }
             return credential;
         } catch (ResolverException ex) {
-            throw new InvalidMetadataException("Unable to resolve metadata credentials", ex);
+            throw new InvalidMetadataException(String.format("Unable to resolve metadata credentials from Connector Metadata with entityID %s", entityId), ex);
         }
     }
 
