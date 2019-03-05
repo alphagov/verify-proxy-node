@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.translator.saml;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.opensaml.saml.saml2.core.Response;
@@ -33,8 +34,8 @@ public class HubResponseTranslator {
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
 
-    private String combineFirstAndMiddleNames(Attribute<String> firstName, List<Attribute<String>> middleNames) {
-        return firstName.getValue() + " " + combineAttributeValues(middleNames);
+    private String combineFirstAndMiddleNames(List<Attribute<String>> firstNames, List<Attribute<String>> middleNames) {
+        return firstNames.stream().findFirst().get() + " " + combineAttributeValues(middleNames);
     }
 
     private String combineAttributeValues(List<Attribute<String>> attributes) {
@@ -54,7 +55,7 @@ public class HubResponseTranslator {
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                    combineFirstAndMiddleNames(hubResponseContainer.getAttributes().getFirstName(), hubResponseContainer.getAttributes().getMiddleNames())
+                    combineFirstAndMiddleNames(hubResponseContainer.getAttributes().getFirstNames(), hubResponseContainer.getAttributes().getMiddleNames())
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
@@ -62,9 +63,11 @@ public class HubResponseTranslator {
                     combineAttributeValues(hubResponseContainer.getAttributes().getSurnames())
             ));
 
+            List<Attribute<DateTime>> dateOfBirths = hubResponseContainer.getAttributes().getDateOfBirths();
+            Attribute<DateTime> dateTimeAttribute = dateOfBirths.stream().findFirst().get();
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                    hubResponseContainer.getAttributes().getDateOfBirth().getValue().toString(DateTimeFormat.forPattern("YYYY-MM-dd"))
+                    dateTimeAttribute.getValue().toString(DateTimeFormat.forPattern("YYYY-MM-dd"))
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
@@ -100,14 +103,13 @@ public class HubResponseTranslator {
             if (hubResponseContainer.getAttributes() == null) {
                 throw new HubResponseTranslationException("HubResponseContainer Attributes null.");
             }
-            if (hubResponseContainer.getAttributes().getFirstName() == null) {
+            if (CollectionUtils.isEmpty(hubResponseContainer.getAttributes().getFirstNames())) {
                 throw new HubResponseTranslationException("HubResponseContainer Attribute FirstName null.");
             }
             if (hubResponseContainer.getAttributes().getSurnames() == null) {
                 throw new HubResponseTranslationException("HubResponseContainer Attribute Surnames null.");
             }
-            if (hubResponseContainer.getAttributes().getDateOfBirth() == null
-                    && hubResponseContainer.getAttributes().getDateOfBirth().getValue() == null) {
+            if (hubResponseContainer.getAttributes().getDateOfBirths() == null) {
                 throw new HubResponseTranslationException("HubResponseContainer Attribute DateOfBirth null or missing value.");
             }
             if (hubResponseContainer.getPid() == null) {
