@@ -51,7 +51,7 @@ public class HubResponseValidatorTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         hubResponseValidator = new HubResponseValidator(
             idpResponseValidator,
             responseAttributesValidator,

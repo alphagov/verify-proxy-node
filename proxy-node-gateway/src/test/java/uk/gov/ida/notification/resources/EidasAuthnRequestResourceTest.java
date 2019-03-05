@@ -28,7 +28,6 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -123,13 +122,13 @@ public class EidasAuthnRequestResourceTest {
         ILoggingEvent loggingEvent = captorILoggingEvent.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        assertEquals("some session id", mdcPropertyMap.get("sessionId"));
-        assertEquals("eidas request id", mdcPropertyMap.get("eidasRequestId"));
-        assertEquals("issuer", mdcPropertyMap.get("eidasIssuer"));
-        assertEquals("destination", mdcPropertyMap.get("eidasDestination"));
-        assertEquals(StringUtils.right(UNCHAINED_PUBLIC_CERT, 10), mdcPropertyMap.get("eidasConnectorPublicKeySuffix"));
-        assertEquals("hub request id", mdcPropertyMap.get("hubRequestId"));
-        assertEquals("http://hub.bub", mdcPropertyMap.get("hubUrl"));
-        assertEquals("Authn requests received from ESP and VSP", loggingEvent.getMessage());
+        assertThat("some session id").isEqualTo(mdcPropertyMap.get("sessionId"));
+        assertThat("eidas request id").isEqualTo(mdcPropertyMap.get("eidasRequestId"));
+        assertThat("issuer").isEqualTo(mdcPropertyMap.get("eidasIssuer"));
+        assertThat("destination").isEqualTo(mdcPropertyMap.get("eidasDestination"));
+        assertThat(StringUtils.right(UNCHAINED_PUBLIC_CERT, 10)).isEqualTo(mdcPropertyMap.get("eidasConnectorPublicKeySuffix"));
+        assertThat("hub request id").isEqualTo(mdcPropertyMap.get("hubRequestId"));
+        assertThat("http://hub.bub").isEqualTo(mdcPropertyMap.get("hubUrl"));
+        assertThat("Authn requests received from ESP and VSP").isEqualTo(loggingEvent.getMessage());
     }
 }

@@ -28,8 +28,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -106,17 +105,17 @@ public class HubResponseResourceTest {
         HubResponseTranslatorRequest request = requestCaptor.getValue();
 
         verifyNoMoreInteractions(translatorProxy);
-        assertEquals("hub_saml_response", request.getSamlResponse());
-        assertEquals("hub_request_id_in_session", request.getRequestId());
-        assertEquals(HubResponseResource.LEVEL_OF_ASSURANCE, request.getLevelOfAssurance());
-        assertEquals("eidas_request_id_in_session", request.getEidasRequestId());
-        assertEquals("connector_public_cert_in_session", request.getConnectorEncryptionCertificate());
+        assertThat("hub_saml_response").isEqualTo(request.getSamlResponse());
+        assertThat("hub_request_id_in_session").isEqualTo(request.getRequestId());
+        assertThat(HubResponseResource.LEVEL_OF_ASSURANCE).isEqualTo(request.getLevelOfAssurance());
+        assertThat("eidas_request_id_in_session").isEqualTo(request.getEidasRequestId());
+        assertThat("connector_public_cert_in_session").isEqualTo(request.getConnectorEncryptionCertificate());
 
-        assertEquals("http://conector.node", response.getPostUrl());
-        assertEquals("SAMLResponse", response.getSamlMessageType());
-        assertEquals("translated_eidas_response", response.getEncodedSamlMessage());
-        assertEquals(HubResponseResource.SUBMIT_TEXT, response.getSubmitText());
-        assertEquals("eidas_relay_state_in_session", response.getRelayState());
+        assertThat("http://conector.node").isEqualTo(response.getPostUrl());
+        assertThat("SAMLResponse").isEqualTo(response.getSamlMessageType());
+        assertThat("translated_eidas_response").isEqualTo(response.getEncodedSamlMessage());
+        assertThat(HubResponseResource.SUBMIT_TEXT).isEqualTo(response.getSubmitText());
+        assertThat("eidas_relay_state_in_session").isEqualTo(response.getRelayState());
 
         verify(logHandler, times(2)).publish(captorLoggingEvent.capture());
         List<String> allLogRecords = captorLoggingEvent
@@ -131,7 +130,7 @@ public class HubResponseResourceTest {
             "[eIDAS Response] received for session 'session-id', hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'"
         );
 
-        assertEquals(expectedLogOutput, allLogRecords);
+        assertThat(expectedLogOutput).isEqualTo(allLogRecords);
     }
 
     @Test(expected = SessionMissingException.class)

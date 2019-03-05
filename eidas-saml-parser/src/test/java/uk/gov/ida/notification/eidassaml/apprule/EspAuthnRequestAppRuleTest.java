@@ -23,7 +23,6 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
@@ -241,9 +240,9 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
-        assertEquals("request_id", mdcPropertyMap.get("eidasRequestId"));
-        assertEquals("http://proxy-node/eidasAuthnRequest", mdcPropertyMap.get("eidasDestination"));
-        assertEquals("2015-04-30T19:25:14.273Z", mdcPropertyMap.get("eidasIssueInstant"));
-        assertEquals("http://connector-node:8080/ConnectorResponderMetadata", mdcPropertyMap.get("eidasIssuer"));
+        assertThat("request_id").isEqualTo(mdcPropertyMap.get("eidasRequestId"));
+        assertThat("http://proxy-node/eidasAuthnRequest").isEqualTo(mdcPropertyMap.get("eidasDestination"));
+        assertThat("2015-04-30T19:25:14.273Z").isEqualTo(mdcPropertyMap.get("eidasIssueInstant"));
+        assertThat("http://connector-node:8080/ConnectorResponderMetadata").isEqualTo(mdcPropertyMap.get("eidasIssuer"));
     }
 }

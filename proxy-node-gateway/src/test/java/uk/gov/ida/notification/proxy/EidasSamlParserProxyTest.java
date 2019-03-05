@@ -10,7 +10,6 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
-import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 
 import javax.validation.Valid;
 import javax.ws.rs.POST;
@@ -23,7 +22,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.Assert.assertEquals;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
 
 public class EidasSamlParserProxyTest {
@@ -64,10 +62,10 @@ public class EidasSamlParserProxyTest {
 
         EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
 
-        assertEquals("request_id", response.getRequestId());
-        assertEquals("issuer", response.getIssuer());
-        assertEquals(UNCHAINED_PUBLIC_CERT, response.getConnectorEncryptionPublicCertificate());
-        assertEquals("destination", response.getDestination());
+        assertThat("request_id").isEqualTo(response.getRequestId());
+        assertThat("issuer").isEqualTo(response.getIssuer());
+        assertThat(UNCHAINED_PUBLIC_CERT).isEqualTo(response.getConnectorEncryptionPublicCertificate());
+        assertThat("destination").isEqualTo(response.getDestination());
     }
 
     @Test

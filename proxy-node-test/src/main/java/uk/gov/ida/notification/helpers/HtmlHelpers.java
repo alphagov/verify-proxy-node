@@ -20,7 +20,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HtmlHelpers {
     public static String getValueFromForm(String html, String inputName) throws IOException {
@@ -39,6 +39,6 @@ public class HtmlHelpers {
         Document doc = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
         XPath xpath = XPathFactory.newInstance().newXPath();
 
-        assertTrue((Boolean) xpath.evaluate(xPathExpression, doc, XPathConstants.BOOLEAN));
+        assertThat((Boolean)xpath.evaluate(xPathExpression, doc, XPathConstants.BOOLEAN)).isTrue();
     }
 }

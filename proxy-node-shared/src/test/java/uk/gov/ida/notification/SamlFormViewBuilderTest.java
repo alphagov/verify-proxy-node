@@ -8,7 +8,7 @@ import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.views.SamlFormView;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
@@ -23,22 +23,22 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
         SamlFormView view = builder.buildRequest("url", authnRequest, "submit", "relay");
 
-        assertEquals(SamlFormMessageType.SAML_REQUEST, view.getSamlMessageType());
-        assertEquals(encodedAuthnRequest, view.getEncodedSamlMessage());
-        assertEquals("url", view.getPostUrl());
-        assertEquals("submit", view.getSubmitText());
-        assertEquals("relay", view.getRelayState());
+        assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
+        assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
+        assertThat("url").isEqualTo(view.getPostUrl());
+        assertThat("submit").isEqualTo(view.getSubmitText());
+        assertThat("relay").isEqualTo(view.getRelayState());
     }
 
     @Test
     public void shouldGenerateSAMLRequestFormFromEncodedSAMLMessage() {
         String encodedAuthnRequest = Base64.encodeAsString("a saml blob");
         SamlFormView view = builder.buildRequest("url", encodedAuthnRequest, "submit", "relay");
-        assertEquals(SamlFormMessageType.SAML_REQUEST, view.getSamlMessageType());
-        assertEquals(encodedAuthnRequest, view.getEncodedSamlMessage());
-        assertEquals("url", view.getPostUrl());
-        assertEquals("submit", view.getSubmitText());
-        assertEquals("relay", view.getRelayState());
+        assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
+        assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
+        assertThat("url").isEqualTo(view.getPostUrl());
+        assertThat("submit").isEqualTo(view.getSubmitText());
+        assertThat("relay").isEqualTo(view.getRelayState());
     }
 
     @Test
@@ -49,11 +49,11 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
         SamlFormView view = builder.buildResponse("url", response, "submit", "relay");
 
-        assertEquals(SamlFormMessageType.SAML_RESPONSE, view.getSamlMessageType());
-        assertEquals(encodedResponse, view.getEncodedSamlMessage());
-        assertEquals("url", view.getPostUrl());
-        assertEquals("submit", view.getSubmitText());
-        assertEquals("relay", view.getRelayState());
+        assertThat(SamlFormMessageType.SAML_RESPONSE).isEqualTo(view.getSamlMessageType());
+        assertThat(encodedResponse).isEqualTo(view.getEncodedSamlMessage());
+        assertThat("url").isEqualTo(view.getPostUrl());
+        assertThat("submit").isEqualTo(view.getSubmitText());
+        assertThat("relay").isEqualTo(view.getRelayState());
     }
 
     @Test
@@ -63,10 +63,10 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
         SamlFormView view = builder.buildResponse("url", encodedResponse, "submit", "relay");
 
-        assertEquals(SamlFormMessageType.SAML_RESPONSE, view.getSamlMessageType());
-        assertEquals(encodedResponse, view.getEncodedSamlMessage());
-        assertEquals("url", view.getPostUrl());
-        assertEquals("submit", view.getSubmitText());
-        assertEquals("relay", view.getRelayState());
+        assertThat(SamlFormMessageType.SAML_RESPONSE).isEqualTo(view.getSamlMessageType());
+        assertThat(encodedResponse).isEqualTo(view.getEncodedSamlMessage());
+        assertThat("url").isEqualTo(view.getPostUrl());
+        assertThat("submit").isEqualTo(view.getSubmitText());
+        assertThat("relay").isEqualTo(view.getRelayState());
     }
 }

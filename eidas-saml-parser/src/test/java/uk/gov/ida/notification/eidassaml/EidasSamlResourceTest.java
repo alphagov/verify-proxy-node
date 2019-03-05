@@ -19,7 +19,7 @@ import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidat
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
 public class EidasSamlResourceTest {
@@ -56,9 +56,9 @@ public class EidasSamlResourceTest {
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE))
                 .readEntity(EidasSamlParserResponse.class);
 
-        assertEquals(response.getRequestId(), "request_id");
-        assertEquals(response.getIssuer(), "issuer");
-        assertEquals(response.getConnectorEncryptionPublicCertificate(), TEST_RP_PUBLIC_ENCRYPTION_CERT);
-        assertEquals(response.getDestination(), TEST_CONNECTOR_DESTINATION);
+        assertThat(response.getRequestId()).isEqualTo("request_id");
+        assertThat(response.getIssuer()).isEqualTo("issuer");
+        assertThat(response.getConnectorEncryptionPublicCertificate()).isEqualTo(TEST_RP_PUBLIC_ENCRYPTION_CERT);
+        assertThat(response.getDestination()).isEqualTo(TEST_CONNECTOR_DESTINATION);
     }
 }

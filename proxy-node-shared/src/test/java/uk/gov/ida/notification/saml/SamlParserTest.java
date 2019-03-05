@@ -10,9 +10,8 @@ import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
-import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 
 public class SamlParserTest extends SamlInitializedTest {
 
@@ -29,7 +28,7 @@ public class SamlParserTest extends SamlInitializedTest {
 
         AuthnRequestImpl authnRequest = parser.parseSamlString(testXML);
 
-        assertEquals(AuthnRequestImpl.class, authnRequest.getClass());
+        assertThat(AuthnRequestImpl.class).isEqualTo(authnRequest.getClass());
     }
 
     @Test
@@ -38,7 +37,7 @@ public class SamlParserTest extends SamlInitializedTest {
 
         Response authnResponse = parser.parseSamlString(testXML);
 
-        assertEquals(ResponseImpl.class, authnResponse.getClass());
+        assertThat(ResponseImpl.class).isEqualTo(authnResponse.getClass());
     }
 
     @Test

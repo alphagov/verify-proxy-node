@@ -9,7 +9,8 @@ import uk.gov.ida.notification.helpers.TestKeyPair;
 import uk.gov.ida.saml.core.test.builders.AssertionBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class ResponseAssertionDecrypterTest extends SamlInitializedTest {
     @Test
@@ -25,7 +26,7 @@ public class ResponseAssertionDecrypterTest extends SamlInitializedTest {
         ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(credential);
         Response decryptedResponse = decrypter.decrypt(encryptedResponse);
 
-        assertEquals("hi", decryptedResponse.getAssertions().get(0).getID());
-        assertEquals(0, decryptedResponse.getEncryptedAssertions().size());
+        assertThat("hi").isEqualTo(decryptedResponse.getAssertions().get(0).getID());
+        assertThat(0).isEqualTo(decryptedResponse.getEncryptedAssertions().size());
     }
 }

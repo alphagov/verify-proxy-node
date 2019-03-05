@@ -24,7 +24,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TranslatorProxyTest {
@@ -71,7 +70,7 @@ public class TranslatorProxyTest {
 
         String samlResponse = translatorProxy.getTranslatedResponse(request, "session-id");
 
-        assertEquals("translated_saml_response_blob", samlResponse);
+        assertThat("translated_saml_response_blob").isEqualTo(samlResponse);
         Mockito.verify(jsonClient).post(
             request,
             UriBuilder.fromUri(String.format("%s/translate-hub-response/happy", clientRule.baseUri())).build(),
