@@ -12,7 +12,7 @@ public class Attributes {
 
     @NotNull
     @JsonProperty
-    private Attribute<String> firstName;
+    private List<Attribute<String>> firstNames;
 
     @JsonProperty
     private List<Attribute<String>> middleNames;
@@ -23,7 +23,7 @@ public class Attributes {
 
     @NotNull
     @JsonProperty
-    private Attribute<DateTime> dateOfBirth;
+    private List<Attribute<DateTime>> dateOfBirths;
 
     @JsonProperty
     private Attribute<String> gender;
@@ -36,22 +36,22 @@ public class Attributes {
     }
 
     public Attributes(
-            Attribute<String> firstName,
+            List<Attribute<String>> firstNames,
             List<Attribute<String>> middleNames,
             List<Attribute<String>> surnames,
-            Attribute<DateTime> dateOfBirth,
+            List<Attribute<DateTime>> dateOfBirths,
             Attribute<String> gender,
             List<Attribute<Address>> addresses) {
-        this.firstName = firstName;
+        this.firstNames = firstNames;
         this.middleNames = middleNames;
         this.surnames = surnames;
-        this.dateOfBirth = dateOfBirth;
+        this.dateOfBirths = dateOfBirths;
         this.gender = gender;
         this.addresses = addresses;
     }
 
-    public Attribute<String> getFirstName() {
-        return firstName;
+    public List<Attribute<String>> getFirstNames() {
+        return firstNames;
     }
 
     public List<Attribute<String>> getMiddleNames() {
@@ -62,8 +62,8 @@ public class Attributes {
         return surnames;
     }
 
-    public Attribute<DateTime> getDateOfBirth() {
-        return dateOfBirth;
+    public List<Attribute<DateTime>> getDateOfBirths() {
+        return dateOfBirths;
     }
 
     public Attribute<String> getGender() {

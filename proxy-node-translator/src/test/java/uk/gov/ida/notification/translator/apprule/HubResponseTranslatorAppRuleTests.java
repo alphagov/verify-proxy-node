@@ -2,6 +2,7 @@ package uk.gov.ida.notification.translator.apprule;
 
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
@@ -17,7 +18,6 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResp
 import uk.gov.ida.notification.helpers.BasicCredentialBuilder;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
 import uk.gov.ida.notification.helpers.HubResponseBuilder;
-import uk.gov.ida.notification.pki.KeyPairConfiguration;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -130,6 +130,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(decryptedEidasResponse);
     }
 
+    @Ignore
     @Test
     public void eidasResponseShouldContainCorrectAttributes() throws Exception {
 

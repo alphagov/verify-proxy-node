@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import java.util.Collections;
+import java.util.Date;
 
 import org.joda.time.DateTime;
 
@@ -36,10 +37,10 @@ public class TranslatedHubResponseBuilder {
 
     private static Attributes buildAttributes() {
         return new Attributes(
-                new Attribute<>("Jean Paul", true, createDateTime(2001, 1, 1, 12, 0), null),
+                Collections.singletonList(new Attribute<>("Jean Paul", true, createDateTime(2001, 1, 1, 12, 0), null)),
                 null,
                 Collections.singletonList(new Attribute<>("Smith", true, createDateTime(2001, 1, 1, 12, 0), null)),
-                new Attribute<>(createDateTime(1990, 1, 1, 0, 0), true, createDateTime(2001, 1, 1, 12, 0), null),
+                Collections.singletonList(new Attribute<>(createDateTime(1990, 1, 1, 0, 0), true, createDateTime(2001, 1, 1, 12, 0), null)),
                 new Attribute<>("NOT_SPECIFIED", true, createDateTime(2001, 1, 1, 12, 0), null),
                 Collections.singletonList(new Attribute<>(new Address(Collections.singletonList("1 Acacia Avenue"), "SW1A 1AA", null, null),
                         true, createDateTime(2001, 1, 1, 12, 0), null)));
@@ -47,7 +48,7 @@ public class TranslatedHubResponseBuilder {
 
     private static Attributes buildAttributesOneAttributeOnly() {
         return new Attributes(
-                new Attribute<>("Jean Paul", true, createDateTime(2001, 1, 1, 12, 0), null),
+                Collections.singletonList(new Attribute<>("Jean Paul", true, createDateTime(2001, 1, 1, 12, 0), null)),
                 null,
                 null,
                 null,
