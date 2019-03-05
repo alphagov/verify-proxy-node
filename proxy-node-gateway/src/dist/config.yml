@@ -33,5 +33,5 @@ translatorService:
     connectionRequestTimeout: ${TRANSLATOR_CONNECTION_TIMEOUT:-5s}
 
 redisService:
-  local: false
+  local: ${USE_REDIS_LOCAL:-false}
   url: ${REDIS_SERVER_URI}
