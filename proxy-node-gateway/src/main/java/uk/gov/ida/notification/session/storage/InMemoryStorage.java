@@ -13,6 +13,11 @@ public class InMemoryStorage implements SessionStore {
     @Override
     public void addSession(String sessionId, GatewaySessionData sessionData) {
         if (sessionExists(sessionId)) throw new SessionAlreadyExistsException(sessionId);
+        this.createOrUpdateSession(sessionId, sessionData);
+    }
+
+    @Override
+    public void createOrUpdateSession(String sessionId, GatewaySessionData sessionData) {
         storage.put(sessionId, sessionData);
     }
 

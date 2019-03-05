@@ -108,7 +108,7 @@ public class EidasAuthnRequestResourceTest {
     private void verifyHappyPath() {
         final String sessionId = "some session id";
 
-        verify(sessionStore).addSession(eq(sessionId), any(GatewaySessionData.class));
+        verify(sessionStore).createOrUpdateSession(eq(sessionId), any(GatewaySessionData.class));
         verify(session).getId();
         verify(appender).doAppend(captorILoggingEvent.capture());
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
