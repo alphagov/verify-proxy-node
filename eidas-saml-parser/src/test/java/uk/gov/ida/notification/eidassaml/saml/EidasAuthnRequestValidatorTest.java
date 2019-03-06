@@ -27,6 +27,7 @@ import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -170,11 +171,20 @@ public class EidasAuthnRequestValidatorTest {
         eidasAuthnRequestValidator.validate(request);
     }
 
-    @Test(expected = InvalidAuthnRequestException.class)
-    public void shouldThrowIfAuthnRequestHasUnsupportedSamlVersion() throws XPathExpressionException, TransformerException {
+    @Test
+    public void shouldThrowIfAuthnRequestHasUnsupportedSamlVersion() {
         final String expectedMessage = "Bad Authn Request from Connector Node: SAML Version should be " + SAMLVersion.VERSION_20.toString();
 
-        eidasAuthnRequestValidator.validate(eidasAuthnRequestBuilder.withSamlVersion(SAMLVersion.VERSION_10).build());
+        assertThatThrownBy(
+                () -> eidasAuthnRequestValidator
+                        .validate(
+                                eidasAuthnRequestBuilder
+                                        .withSamlVersion(SAMLVersion.VERSION_10)
+                                        .build()
+                        )
+        )
+        .isInstanceOf(InvalidAuthnRequestException.class)
+        .hasMessageContaining(expectedMessage);
     }
 
     @Test
