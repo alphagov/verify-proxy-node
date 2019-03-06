@@ -144,7 +144,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     private Response extractEidasResponseFromTranslator(Response hubResponse) throws Exception {
-        return new SamlParser().parseSamlString(postHubResponseToTranslator(hubResponse).readEntity(String.class));
+        return new SamlParser().parseSamlString(Base64.decodeAsString(postHubResponseToTranslator(hubResponse).readEntity(String.class)));
     }
 
     private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws URISyntaxException {
