@@ -14,6 +14,7 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProv
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
+import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLoggerHelper;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseContainer;
 
@@ -26,7 +27,6 @@ import javax.ws.rs.core.Response;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static uk.gov.ida.saml.core.transformers.ResponseAttributesHashFactory.hashResponseDetails;
@@ -35,7 +35,6 @@ import static uk.gov.ida.saml.core.transformers.ResponseAttributesHashFactory.ha
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class HubResponseTranslatorResource {
-    private static final Logger LOG = Logger.getLogger(HubResponseTranslatorResource.class.getName());
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
 
@@ -73,11 +72,12 @@ public class HubResponseTranslatorResource {
                 dateOfBirth.toString(DateTimeFormat.forPattern("YYYY-MM-dd"))
         );
 
-        logHashedResponseDetails(
+        HubResponseTranslatorLoggerHelper.logHashedResponseDetails(
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl().toString(),
                 hashedEidasDetails);
-        logEidasResponse(eidasResponse);
+
+        HubResponseTranslatorLoggerHelper.logEidasResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
 
@@ -90,15 +90,5 @@ public class HubResponseTranslatorResource {
                 .map(Attribute::getValue)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.joining(" "));
-    }
-
-    private void logEidasResponse(org.opensaml.saml.saml2.core.Response eidasResponse) {
-        LOG.info("[eIDAS Response] ID: " + eidasResponse.getID());
-        LOG.info("[eIDAS Response] In response to: " + eidasResponse.getInResponseTo());
-    }
-
-    private void logHashedResponseDetails(String requestId, String destination, String hashedDetails){
-        LOG.info(String.format("[eIDAS Response HASH] received for hub authn request ID '%s', destination '%s', hashedEidasDetails '%s'",
-                requestId, destination, hashedDetails));
     }
 }

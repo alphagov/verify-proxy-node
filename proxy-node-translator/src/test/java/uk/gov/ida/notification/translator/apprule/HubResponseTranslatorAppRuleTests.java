@@ -1,8 +1,14 @@
 package uk.gov.ida.notification.translator.apprule;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import org.assertj.core.api.Assertions;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
@@ -11,6 +17,7 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.slf4j.LoggerFactory;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseTestAssertions;
@@ -22,6 +29,8 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
+import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLoggerHelper;
+import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLoggerHelper.HubResponseTranslatorLoggerAttributes;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
@@ -29,11 +38,17 @@ import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
 import javax.ws.rs.client.Entity;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_SIGNING_CERT;
@@ -45,6 +60,7 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_P
 public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
 
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
+    private static final String EIDAS_TEST_CONNECTOR_DESTINATION = "http://proxy-node/SAML2/SSO/Response";
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
 
@@ -52,6 +68,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private EncryptedAssertion authnAssertion;
     private EncryptedAssertion matchingDatasetAssertion;
     private Credential eidasDecryptingCredential;
+
+    private static final String publicBuild = (System.getenv("VERIFY_USE_PUBLIC_BINARIES"));
 
     @Before
     public void setup() throws Throwable {
@@ -93,7 +111,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     public void shouldReturnASignedEidasResponse() throws Exception {
         Credential signingCredential = translatorAppRule.getConfiguration().getSignerConfiguration().getSigner().getCredential();
         CredentialFactorySignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(
-            entityId -> Collections.singletonList(signingCredential.getPublicKey())));
+                entityId -> Collections.singletonList(signingCredential.getPublicKey())));
 
         Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
 
@@ -141,6 +159,56 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         TranslatedHubResponseTestAssertions.assertAttributes(decryptedEidasResponse);
     }
 
+    @Test
+    public void shouldLogEidasResponseAttributesToMDC() throws Exception {
+        Logger logger = (Logger) LoggerFactory.getLogger(HubResponseTranslatorLoggerHelper.class);
+        Appender<ILoggingEvent> appender = mock(Appender.class);
+        logger.addAppender(appender);
+
+        Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
+
+        ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+
+        // Resource method logs twice: once for Response Details and once for the Hash, so expect 2 invocations.
+        verify(appender, Mockito.times(2)).doAppend(loggingEventArgumentCaptor.capture());
+
+        ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
+        Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
+
+        Assertions.assertThat(loggingEvent.getMessage()).contains(HubResponseTranslatorLoggerHelper.EIDAS_RESPONSE_LOGGER_MESSAGE);
+        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID)).isEqualTo(eidasResponse.getID());
+        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION)).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
+        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO)).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
+        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER)).isEqualTo(eidasResponse.getIssuer().getValue());
+    }
+
+    @Test
+    public void shouldLogEidasResponseAttributesToConsole() throws Exception {
+
+        ByteArrayOutputStream consoleOutput = new ByteArrayOutputStream();
+        PrintStream defaultConsolePrintStream = System.out;
+        System.setOut(new PrintStream(consoleOutput));
+
+        Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
+
+        // Checking System.out does not work in a Travis build.  Only run this assertion outside of Travis.
+        if (!"true".equals(publicBuild)) {
+            // Proxy Node logs in json format
+            Assertions.assertThat(consoleOutput.toString()).containsPattern(
+                    Pattern.compile(
+                            String.format("%s.*\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"",
+                                    HubResponseTranslatorLoggerHelper.EIDAS_RESPONSE_LOGGER_MESSAGE,
+                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION, EIDAS_TEST_CONNECTOR_DESTINATION,
+                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID, eidasResponse.getID(),
+                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO, ResponseBuilder.DEFAULT_REQUEST_ID,
+                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER, eidasResponse.getIssuer().getValue()
+                            )
+                    )
+            );
+        }
+        System.setOut(defaultConsolePrintStream);
+    }
+
     private Response extractEidasResponseFromTranslator(Response hubResponse) throws Exception {
         return new SamlParser().parseSamlString(Base64.decodeAsString(postHubResponseToTranslator(hubResponse).readEntity(String.class)));
     }
@@ -154,7 +222,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         "_1234",
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
-                        URI.create("http://localhost:8081/bob"),
+                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
                         STUB_COUNTRY_PUBLIC_PRIMARY_CERT
                 );
 
@@ -176,7 +244,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private HubResponseBuilder getHubResponseBuilder() {
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.HUB_ENTITY_ID)
-                .withDestination("http://proxy-node/SAML2/SSO/Response")
+                .withDestination(EIDAS_TEST_CONNECTOR_DESTINATION)
                 .addEncryptedAssertion(authnAssertion)
                 .addEncryptedAssertion(matchingDatasetAssertion);
     }
