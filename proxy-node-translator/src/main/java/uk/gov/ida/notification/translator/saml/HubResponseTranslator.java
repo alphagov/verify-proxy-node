@@ -35,7 +35,7 @@ public class HubResponseTranslator {
     }
 
     private String combineFirstAndMiddleNames(List<Attribute<String>> firstNames, List<Attribute<String>> middleNames) {
-        return firstNames.stream().findFirst().get() + " " + combineAttributeValues(middleNames);
+        return firstNames.stream().findFirst().get().getValue() + " " + combineAttributeValues(middleNames);
     }
 
     private String combineAttributeValues(List<Attribute<String>> attributes) {

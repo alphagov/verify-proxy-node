@@ -130,7 +130,6 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(decryptedEidasResponse);
     }
 
-    @Ignore
     @Test
     public void eidasResponseShouldContainCorrectAttributes() throws Exception {
 

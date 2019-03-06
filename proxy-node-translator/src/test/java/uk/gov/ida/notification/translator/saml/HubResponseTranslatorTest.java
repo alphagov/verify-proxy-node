@@ -31,7 +31,6 @@ public class HubResponseTranslatorTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Ignore
     @Test
     public void translateShouldReturnValidResponseWhenIdentityVerified() {
 
