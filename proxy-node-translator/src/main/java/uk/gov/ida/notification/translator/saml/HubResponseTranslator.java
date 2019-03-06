@@ -63,7 +63,7 @@ public class HubResponseTranslator {
                     combineAttributeValues(hubResponseContainer.getAttributes().getSurnames())
             ));
 
-            List<Attribute<DateTime>> dateOfBirths = hubResponseContainer.getAttributes().getDateOfBirths();
+            List<Attribute<DateTime>> dateOfBirths = hubResponseContainer.getAttributes().getDatesOfBirth();
             Attribute<DateTime> dateTimeAttribute = dateOfBirths.stream().findFirst().get();
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
@@ -109,7 +109,7 @@ public class HubResponseTranslator {
             if (hubResponseContainer.getAttributes().getSurnames() == null) {
                 throw new HubResponseTranslationException("HubResponseContainer Attribute Surnames null.");
             }
-            if (hubResponseContainer.getAttributes().getDateOfBirths() == null) {
+            if (hubResponseContainer.getAttributes().getDatesOfBirth() == null) {
                 throw new HubResponseTranslationException("HubResponseContainer Attribute DateOfBirth null or missing value.");
             }
             if (hubResponseContainer.getPid() == null) {

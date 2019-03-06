@@ -62,7 +62,7 @@ public class HubResponseTranslatorResource {
 
         final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(hubResponseContainer, encryptionCertificate);
 
-        DateTime dateOfBirth = translatedHubResponse.getAttributes().getDateOfBirths().iterator().next().getValue();
+        DateTime dateOfBirth = translatedHubResponse.getAttributes().getDatesOfBirth().iterator().next().getValue();
 
         String hashedEidasDetails = hashResponseDetails(
                 translatedHubResponse.getPid(),
