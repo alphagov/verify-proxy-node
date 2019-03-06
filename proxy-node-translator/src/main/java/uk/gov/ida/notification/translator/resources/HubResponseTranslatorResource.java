@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.translator.resources;
 
+import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -78,7 +79,8 @@ public class HubResponseTranslatorResource {
                 hashedEidasDetails);
         logEidasResponse(eidasResponse);
 
-        final String samlMessage = MARSHALLER.transformToString(eidasResponse);
+        final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
+
         return Response.ok().entity(samlMessage).build();
     }
 
