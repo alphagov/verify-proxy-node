@@ -25,7 +25,10 @@ public class HubResponseTranslatorLoggerHelper {
             MDC.put(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER, eidasResponse.getIssuer() != null ? eidasResponse.getIssuer().getValue() : "");
             log.info(EIDAS_RESPONSE_LOGGER_MESSAGE);
         } finally {
-            MDC.clear();
+            MDC.remove(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID);
+            MDC.remove(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO);
+            MDC.remove(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION);
+            MDC.remove(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER);
         }
     }
 
