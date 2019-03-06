@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.session;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
@@ -9,24 +11,50 @@ import uk.gov.ida.notification.exceptions.SessionAttributeException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GatewaySessionData {
+
+    @NotNull
     @NotEmpty
+    @JsonProperty
     private final String hubRequestId;
 
+    @NotNull
     @NotEmpty
+    @JsonProperty
     private final String eidasRequestId;
 
+    @NotNull
     @NotEmpty
+    @JsonProperty
     private final String eidasDestination;
 
+    @JsonProperty
     private final String eidasRelayState;
 
+    @NotNull
     @NotEmpty
+    @JsonProperty
     private final String eidasConnectorPublicKey;
+
+    @JsonCreator
+    public GatewaySessionData(
+        @JsonProperty("hubRequestId") String hubRequestId,
+        @JsonProperty("eidasRequestId") String eidasRequestId,
+        @JsonProperty("eidasDestination") String eidasDestination,
+        @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
+        @JsonProperty("eidasRelayState") String eidasRelayState
+    ) {
+       this.hubRequestId = hubRequestId;
+       this.eidasRequestId = eidasRequestId;
+       this.eidasDestination = eidasDestination;
+       this.eidasConnectorPublicKey = eidasConnectorPublicKey;
+       this.eidasRelayState = eidasRelayState;
+    }
 
     public GatewaySessionData(
         EidasSamlParserResponse eidasSamlParserResponse,

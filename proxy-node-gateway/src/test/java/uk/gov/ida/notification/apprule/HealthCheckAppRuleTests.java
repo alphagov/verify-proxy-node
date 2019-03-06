@@ -29,7 +29,9 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response")
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+        ConfigOverride.config("redisService.local", "true"),
+        ConfigOverride.config("redisService.url", "")
     );
 
     @Test
