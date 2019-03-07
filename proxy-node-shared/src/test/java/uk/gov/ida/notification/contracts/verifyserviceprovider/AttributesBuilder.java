@@ -5,7 +5,6 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class AttributesBuilder {
@@ -18,17 +17,17 @@ public class AttributesBuilder {
     public static DateTime DATE_OF_BIRTH = createDateTime(1990, 1, 1, 0, 0);
 
     private List<Attribute<String>> firstNames = new ArrayList<>(singletonList(createAttribute(FIRST_NAME)));
-    private Attribute<String> middleName = createAttribute(MIDDLE_NAME);
-    private Attribute<String> lastName = createAttribute(LAST_NAME);
+    private List<Attribute<String>> middleNames = new ArrayList<>(singletonList(createAttribute(MIDDLE_NAME)));
+    private List<Attribute<String>> lastNames = new ArrayList<>(singletonList(createAttribute(LAST_NAME)));
     private Attribute<String> gender = createAttribute(GENDER);
-    private Attribute<DateTime> dateOfBirth = createAttribute(DATE_OF_BIRTH);
+    private List<Attribute<DateTime>> datesOfBirth = new ArrayList<>(singletonList(createAttribute(DATE_OF_BIRTH)));
 
     public Attributes build() {
         return new Attributes(
                 firstNames,
-                middleName != null ? singletonList(middleName) : emptyList(),
-                lastName != null ? singletonList(lastName) : emptyList(),
-                dateOfBirth != null ? singletonList(dateOfBirth) : emptyList(),
+                middleNames,
+                lastNames,
+                datesOfBirth,
                 gender,
                 singletonList(createAttribute(new Address(singletonList("1 Acacia Avenue"), "SW1A 1AA", null, null))));
     }
@@ -43,23 +42,38 @@ public class AttributesBuilder {
         return this;
     }
 
+    public AttributesBuilder addMiddleName(Attribute<String> middleName) {
+        this.middleNames.add(middleName);
+        return this;
+    }
+
+    public AttributesBuilder addLastName(Attribute<String> lastName) {
+        this.lastNames.add(lastName);
+        return this;
+    }
+
+    public AttributesBuilder addDateOfBirth(Attribute<DateTime> dateOfBirth) {
+        this.datesOfBirth.add(dateOfBirth);
+        return this;
+    }
+
     public AttributesBuilder withoutFirstName() {
-        this.firstNames = emptyList();
+        this.firstNames = new ArrayList<>();
         return this;
     }
 
     public AttributesBuilder withoutMiddleName() {
-        this.middleName = null;
+        this.middleNames = new ArrayList<>();
         return this;
     }
 
     public AttributesBuilder withoutLastName() {
-        this.lastName = null;
+        this.lastNames = new ArrayList<>();
         return this;
     }
 
     public AttributesBuilder withoutDateOfBirth() {
-        this.dateOfBirth = null;
+        this.datesOfBirth = new ArrayList<>();
         return this;
     }
 

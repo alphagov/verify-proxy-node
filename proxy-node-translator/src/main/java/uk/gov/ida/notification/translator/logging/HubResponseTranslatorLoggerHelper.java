@@ -31,9 +31,4 @@ public class HubResponseTranslatorLoggerHelper {
             MDC.remove(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER);
         }
     }
-
-    public static void logHashedResponseDetails(String requestId, String destination, String hashedDetails) {
-        log.info(String.format("[eIDAS Response HASH] received for hub authn request ID '%s', destination '%s', hashedEidasDetails '%s'",
-                requestId, destination, hashedDetails));
-    }
 }

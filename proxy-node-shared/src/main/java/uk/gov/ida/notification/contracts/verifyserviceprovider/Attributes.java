@@ -54,7 +54,7 @@ public class Attributes {
     }
 
     public List<Attribute<String>> getFirstNames() {
-        return firstNames;
+        return firstNames != null ? firstNames : new ArrayList<>();
     }
 
     public List<Attribute<String>> getMiddleNames() {
@@ -62,11 +62,11 @@ public class Attributes {
     }
 
     public List<Attribute<String>> getSurnames() {
-        return surnames;
+        return surnames != null ? surnames : new ArrayList<>();
     }
 
     public List<Attribute<DateTime>> getDatesOfBirth() {
-        return datesOfBirth;
+        return datesOfBirth != null ? datesOfBirth : new ArrayList<>();
     }
 
     public Attribute<String> getGender() {

@@ -12,7 +12,11 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
-import uk.gov.ida.notification.saml.*;
+import uk.gov.ida.notification.saml.EidasAttributeBuilder;
+import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -21,7 +25,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
