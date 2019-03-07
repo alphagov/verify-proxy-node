@@ -66,7 +66,6 @@ function generate_pki {
       --connector-url "http://$(minikube ip):31100" \
       --proxy-url "http://$(minikube ip):31200" \
       --idp-url "http://$(minikube ip):31300/stub-idp-demo" \
-      --softhsm \
       --secrets \
       "${PKI_OUTPUT_DIR}"
 
