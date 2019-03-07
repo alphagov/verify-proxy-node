@@ -1,9 +1,0 @@
-replicaCount: 1
-
-signingKeyPIN: "fake:user"
-signingKeyLabel: vfpn-uk-signing
-signingKeyToken: vfpn-uk-signing
-signingKeySlot: "0"
-signingKeyID: DEF0
-signingKeySOPIN: "fake:user"
-

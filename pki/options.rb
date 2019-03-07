@@ -16,7 +16,6 @@ Options =
     :do_env,
     :xmlsectool_path,
     :truststore_pass,
-    :softhsm
   )
 
 class Parser
@@ -50,7 +49,6 @@ class Parser
       opts.on('--env', 'Output environment files for Docker Compose') { |_| options.do_env = true }
       opts.on('--xmlsectool PATH', 'Path to xmlsectool (default: xmlsectool)') { |s| options.xmlsectool_path = s }
       opts.on('--truststore-pass PASSWORD', 'Password for generated truststores (default: marshmallow)') { |s| options.truststore_pass = s }
-      opts.on('--softhsm', 'Use softhsm for testing') { |_| options.softhsm = true }
       opts.on('-h', '--help', 'Print help message') { |_| abort(opts.to_s) }
     end
 

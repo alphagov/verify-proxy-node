@@ -1,5 +1,0 @@
-replicaCount: 1
-
-
-hsm:
-  proxySocketService: softhsm

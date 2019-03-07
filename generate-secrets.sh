@@ -20,7 +20,6 @@ function generate_pki {
       --connector-url "https://${RELEASE}-stub-connector.${DOMAIN}" \
       --proxy-url "https://${RELEASE}-gateway.${DOMAIN}" \
       --idp-url "https://${RELEASE}-stub-idp.${DOMAIN}" \
-      --softhsm \
       --secrets \
       "${PKI_OUTPUT_DIR}"
   popd
