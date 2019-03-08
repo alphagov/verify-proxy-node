@@ -22,14 +22,20 @@ import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
 
     private String connectorNodeIssuerId;
     private String proxyNodeMetadataForConnectorNodeUrl;
+    private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
 
-    public HubResponseTranslator(String connectorNodeIssuerId, String proxyNodeMetadataForConnectorNodeUrl) {
+    public HubResponseTranslator(
+            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
+            String connectorNodeIssuerId,
+            String proxyNodeMetadataForConnectorNodeUrl) {
+        this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
         this.connectorNodeIssuerId = connectorNodeIssuerId;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
@@ -80,19 +86,20 @@ public class HubResponseTranslator {
                 .map(EidasAttributeBuilder::build)
                 .collect(Collectors.toList());
 
-        return EidasResponseBuilder.createEidasResponse(
-                proxyNodeMetadataForConnectorNodeUrl,
-                getMappedStatusCode(hubResponseContainer.getVspScenario()),
-                hubResponseContainer.getPid(),
-                getMappedLoa(hubResponseContainer.getLevelOfAssurance()),
-                eidasAttributes,
-                hubResponseContainer.getEidasRequestId(),
-                DateTime.now(),
-                DateTime.now(),
-                DateTime.now(),
-                hubResponseContainer.getDestinationURL(),
-                connectorNodeIssuerId
-        );
+
+        DateTime now = DateTime.now();
+        return eidasResponseBuilderSupplier.get()
+                .withIssuer(proxyNodeMetadataForConnectorNodeUrl)
+                .withStatus(getMappedStatusCode(hubResponseContainer.getVspScenario()))
+                .withInResponseTo(hubResponseContainer.getEidasRequestId())
+                .withIssueInstant(now)
+                .withDestination(hubResponseContainer.getDestinationURL())
+                .withAssertionSubject(hubResponseContainer.getPid())
+                .addAssertionAuthnStatement(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
+                .addAssertionAttributeStatement(eidasAttributes)
+                .withAssertionConditions(connectorNodeIssuerId)
+                .build();
+
     }
 
     private void validateHubResponseContainerAttributes(HubResponseContainer hubResponseContainer) {

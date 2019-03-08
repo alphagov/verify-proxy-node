@@ -90,21 +90,17 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
         DateTime now = DateTime.now();
 
-        Response response = EidasResponseBuilder.createEidasResponse(
-                "http://stub-connector/",
-                StatusCode.SUCCESS,
-                UUID.randomUUID().toString(),
-                EidasConstants.EIDAS_LOA_SUBSTANTIAL,
-                eidasAttributes,
-                authid,
-                now,
-                now,
-                now,
-                "http://stub-connector/SAML2/Response/POST",
-                "http://localhost:5000/Metadata"
-        );
-
-        return response;
+        return EidasResponseBuilder.instance()
+                .withIssuer("http://stub-connector/")
+                .withStatus(StatusCode.SUCCESS)
+                .withAssertionSubject(UUID.randomUUID().toString())
+                .addAssertionAuthnStatement(EidasConstants.EIDAS_LOA_SUBSTANTIAL, now)
+                .addAssertionAttributeStatement(eidasAttributes)
+                .withInResponseTo(authid)
+                .withIssueInstant(now)
+                .withDestination("http://stub-connector/SAML2/Response/POST")
+                .withAssertionConditions("http://localhost:5000/Metadata")
+                .build();
     }
 
     private Response signResponse(Response response) throws Exception {
