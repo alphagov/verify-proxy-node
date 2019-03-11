@@ -156,7 +156,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         eidasDecryptingCredential
                 );
 
-        TranslatedHubResponseTestAssertions.assertAttributes(decryptedEidasResponse);
+        TranslatedHubResponseTestAssertions.checkAllAttributesValid(decryptedEidasResponse);
     }
 
     @Test

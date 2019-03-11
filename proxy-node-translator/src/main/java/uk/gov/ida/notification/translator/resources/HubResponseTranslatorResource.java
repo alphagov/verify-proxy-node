@@ -1,16 +1,16 @@
 package uk.gov.ida.notification.translator.resources;
 
 import org.glassfish.jersey.internal.util.Base64;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.security.SecurityException;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
+import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
@@ -25,10 +25,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.combineAttributeValues;
 import static uk.gov.ida.saml.core.transformers.ResponseAttributesHashFactory.hashResponseDetails;
 
 @Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
@@ -62,33 +60,37 @@ public class HubResponseTranslatorResource {
 
         final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(hubResponseContainer, encryptionCertificate);
 
-        DateTime dateOfBirth = translatedHubResponse.getAttributes().getDatesOfBirth().iterator().next().getValue();
-
-        String hashedEidasDetails = hashResponseDetails(
-                translatedHubResponse.getPid(),
-                combineAttributeValues(translatedHubResponse.getAttributes().getFirstNames()),
-                combineAttributeValues(translatedHubResponse.getAttributes().getMiddleNames()),
-                combineAttributeValues(translatedHubResponse.getAttributes().getSurnames()),
-                dateOfBirth.toString(DateTimeFormat.forPattern("YYYY-MM-dd"))
-        );
-
-        HubResponseTranslatorLoggerHelper.logHashedResponseDetails(
-                hubResponseTranslatorRequest.getRequestId(),
-                hubResponseTranslatorRequest.getDestinationUrl().toString(),
-                hashedEidasDetails);
-
-        HubResponseTranslatorLoggerHelper.logEidasResponse(eidasResponse);
+        logResponseDetailsHash(hubResponseTranslatorRequest, translatedHubResponse);
+        logResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
 
         return Response.ok().entity(samlMessage).build();
     }
 
-    private String combineAttributeValues(List<Attribute<String>> attributes) {
-        return attributes.stream()
-                .filter(Objects::nonNull)
+    private void logResponse(final org.opensaml.saml.saml2.core.Response eidasResponse) {
+        HubResponseTranslatorLoggerHelper.logEidasResponse(eidasResponse);
+    }
+
+    private void logResponseDetailsHash(final HubResponseTranslatorRequest hubResponseTranslatorRequest, final TranslatedHubResponse translatedHubResponse) {
+        final String firstDateOfBirth = translatedHubResponse.getAttributes().getDatesOfBirth()
+                .stream()
+                .findFirst()
                 .map(Attribute::getValue)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(" "));
+                .map(Attributes::getFormattedDate)
+                .orElseThrow(() -> new HubResponseTranslationException("No date of birth present"));
+
+        final String hashedEidasDetails = hashResponseDetails(
+                translatedHubResponse.getPid(),
+                combineAttributeValues(translatedHubResponse.getAttributes().getFirstNames()),
+                combineAttributeValues(translatedHubResponse.getAttributes().getMiddleNames()),
+                combineAttributeValues(translatedHubResponse.getAttributes().getSurnames()),
+                firstDateOfBirth
+        );
+
+        HubResponseTranslatorLoggerHelper.logHashedResponseDetails(
+                hubResponseTranslatorRequest.getRequestId(),
+                hubResponseTranslatorRequest.getDestinationUrl().toString(),
+                hashedEidasDetails);
     }
 }

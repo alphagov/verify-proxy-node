@@ -108,7 +108,7 @@ public class VspProxyTranslateResponseTest {
                 );
 
         assertThat(VspScenario.AUTHENTICATION_FAILED).isEqualTo(response.getScenario());
-        assertThat("pid1234").isEqualTo(response.getPid());
+        assertThat("123456").isEqualTo(response.getPid());
         assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
         assertThat(response.getAttributes()).isNull();
 
