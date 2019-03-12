@@ -3,30 +3,32 @@ require 'uri'
 require 'securerandom'
 
 Given('the user is at Stub Connector') do
-  visit(ENV.fetch('PROXY_NODE_URL') + ':31100/Request')
+  visit(ENV.fetch('STUB_CONNECTOR_URL') + '/Request')
+end
+
+And('they progress through verify') do
+  find('label', :text => 'I’ve used Verify before').click
+  click_button('Continue')
+  find('button', :text => 'Stub Idp Demo One').click
 end
 
 Given("the stub connector supplies a bad authn request") do
-  visit(ENV.fetch('PROXY_NODE_URL') + ':31100/BadRequest')
+  visit(ENV.fetch('STUB_CONNECTOR_URL') + '/BadRequest')
 end
 
-Given('they login as {string}') do |username|
-  fill_in('username', with: username)
+Given('they login to stub idp') do
+  fill_in('username', with: ENV.fetch('STUB_IDP_USER'))
   fill_in('password', with: 'bar')
   click_on('SignIn')
   click_on('I Agree')
 end
 
-Given("the stub idp supplies a {string}") do |error_to_throw|
-  click_on(error_to_throw)
-end
-
 Given("the user accesses a invalid page") do
-  visit(ENV.fetch('PROXY_NODE_URL') + ':31200/Request')
+  visit(ENV.fetch('PROXY_NODE_URL') + '/asdfasdfasfsaf')
 end
 
-Given("the user accesses a route they shouldnt") do
-  visit(ENV.fetch('PROXY_NODE_URL') + ':31200/SAML2/SSO/Response/POST/')
+Given("the user accesses a route they shouldn't") do
+  visit(ENV.fetch('PROXY_NODE_URL') + '/SAML2/SSO/Response/POST')
 end
 
 Then('they should arrive at the success page') do
@@ -36,14 +38,9 @@ Then('they should arrive at the success page') do
   assert_text('1984-02-29')
 end
 
-Then("the user should be presented with an authn error page") do
-  assert_text('Sorry, something went wrong')
-  assert_text('Error handling authn request.')
-end
-
 Then("the user should be presented with an hub error page") do
-  assert_text('Sorry, something went wrong')
-  assert_text('Error handling hub response.')
+  assert_text('Stub Idp Demo One couldn’t sign you in')
+  assert_text('You may have selected the wrong company. Check your emails and text messages for confirmation of who verified you.')
 end
 
 

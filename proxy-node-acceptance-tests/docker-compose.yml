@@ -16,3 +16,5 @@ services:
       - selenium-hub
     environment:
       - PROXY_NODE_URL=${PROXY_NODE_URL}
+      - STUB_CONNECTOR_URL=${STUB_CONNECTOR_URL}
+      - STUB_IDP_USER=${STUB_IDP_USER}
