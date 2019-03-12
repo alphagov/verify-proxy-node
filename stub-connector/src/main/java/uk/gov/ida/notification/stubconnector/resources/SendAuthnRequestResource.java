@@ -70,9 +70,9 @@ public class SendAuthnRequestResource {
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
         MessageContext context = generateAuthnRequestContext(session);
 
-        AuthnRequest authenRequest = (AuthnRequest) context.getMessage();
-        authenRequest.setSignature(null);
-        context.setMessage(authenRequest);
+        AuthnRequest authnRequest = (AuthnRequest) context.getMessage();
+        authnRequest.setSignature(null);
+        context.setMessage(authnRequest);
 
         encode(httpServletResponse, context);
         return Response.ok().build();
