@@ -18,7 +18,10 @@ public class EidasAuthnRequestAttributesLogger {
         } catch (Exception e) {
             throw e;
         } finally {
-            MDC.clear();
+            MDC.remove("eidasRequestId");
+            MDC.remove("eidasDestination");
+            MDC.remove("eidasIssueInstant");
+            MDC.remove("eidasIssuer");
         }
     }
 }

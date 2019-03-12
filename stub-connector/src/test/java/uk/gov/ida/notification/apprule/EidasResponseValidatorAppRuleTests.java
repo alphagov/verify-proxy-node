@@ -109,7 +109,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
             TEST_RP_PRIVATE_SIGNING_KEY
         ));
 
-        signer.sign(response);
+        signer.sign(response, "request-id");
 
         return response;
     }
