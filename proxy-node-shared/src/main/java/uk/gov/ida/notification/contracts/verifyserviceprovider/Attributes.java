@@ -1,12 +1,15 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.joda.time.DateTime;
+import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.ISODateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.joda.time.DateTime;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Attributes {
 
@@ -72,5 +75,18 @@ public class Attributes {
 
     public List<Attribute<Address>> getAddresses() {
         return addresses;
+    }
+
+    public static String combineAttributeValues(List<Attribute<String>> attributes) {
+        return attributes.stream()
+                .filter(Objects::nonNull)
+                .map(Attribute::getValue)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(" "));
+    }
+
+    // Prints date in EIDAS format YYYY-MM-dd
+    public static String getFormattedDate(DateTime date) {
+        return ISODateTimeFormat.date().withChronology(ISOChronology.getInstanceUTC()).print(date);
     }
 }

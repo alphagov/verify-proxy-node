@@ -1,20 +1,32 @@
 package uk.gov.ida.notification.translator.saml;
 
-import org.junit.Rule;
+import org.joda.time.DateTime;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseTestAssertions;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import java.net.URI;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createAttribute;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createDateTime;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseCancellation;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerified;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseRequestError;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 public class HubResponseTranslatorTest {
@@ -28,129 +40,147 @@ public class HubResponseTranslatorTest {
         }
     }
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private static HubResponseTranslator TRANSLATOR =
+            new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
+
+    private AttributesBuilder attributesBuilder;
+
+    @Before
+    public void setUp() {
+        this.attributesBuilder = new AttributesBuilder();
+    }
+
 
     @Test
     public void translateShouldReturnValidResponseWhenIdentityVerified() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseIdentityVerified());
 
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
+        final Response identityVerifiedResponse = TRANSLATOR.translate(hubResponseContainer);
 
-        Response response =
-            translator.translate(buildHubResponseContainer());
-
-        TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
-        TranslatedHubResponseTestAssertions.assertAttributes(response);
-        TranslatedHubResponseTestAssertions.assertResponseForIdentityVerifiedStatus(response);
+        TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(identityVerifiedResponse);
+        TranslatedHubResponseTestAssertions.checkAllAttributesValid(identityVerifiedResponse);
+        TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(identityVerifiedResponse);
     }
 
     @Test
     public void translateShouldReturnResponseForCancelledStatus() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseCancellation());
 
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
+        Response cancelledResponse = TRANSLATOR.translate(hubResponseContainer);
 
-        Response response =
-            translator.translate(buildTranslatedHubResponseForCancelledStatus());
-
-        TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
-        TranslatedHubResponseTestAssertions.assertResponseForCancelledStatus(response);
+        TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(cancelledResponse);
+        TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForCancelledStatus(cancelledResponse);
     }
 
     @Test
     public void translateShouldReturnResponseForAuthenticationFailedStatus() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseAuthenticationFailed());
 
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
+        Response authnFailedResponse = TRANSLATOR.translate(hubResponseContainer);
 
-        Response response =
-                translator.translate(buildTranslatedHubResponseForAuthenticationFailedStatus());
+        TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(authnFailedResponse);
+        TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForAuthenticationFailedStatus(authnFailedResponse);
+    }
+
+    @Test
+    public void translateShouldThrowWhenNoFirstNamePresent() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutFirstName().build());
+
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("No verified current first name present");
+    }
+
+    @Test
+    public void translateShouldThrowWhenNoSurnamePresent() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutLastName().build());
+
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("No verified current surname present");
+    }
+
+    @Test
+    public void translateShouldThrowWhenNoDateOfBirthPresent() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutDateOfBirth().build());
+
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("No verified current date of birth present");
+    }
+
+    @Test
+    public void translateShouldThrowWhenNoCurrentFirstName() {
+        final DateTime validTo = createDateTime(2018, 1, 1, 0, 0);
+        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, true, AttributesBuilder.VALID_FROM, validTo);
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
+
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("No verified current first name present");
+    }
+
+    @Test
+    public void translateShouldThrowWhenCurrentFirstNameNotValid() {
+        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, AttributesBuilder.VALID_FROM, null);
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
+
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("No verified current first name present");
+    }
+
+    @Test
+    public void translateShouldIgnoreExpiredExtraNames() {
+        final DateTime validTo = AttributesBuilder.VALID_FROM;
+        final DateTime validFrom = AttributesBuilder.VALID_FROM.minusYears(3);
+        final Attribute<String> firstName = createAttribute("Expired", true, validFrom, validTo);
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
+
+        final Response response = TRANSLATOR.translate(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
-        TranslatedHubResponseTestAssertions.assertResponseForAuthenticationFailedStatus(response);
+        TranslatedHubResponseTestAssertions.checkAllAttributesValid(response);
+        TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(response);
     }
 
     @Test
-    public void translateShouldThrowHubResponseTranslationExceptionWhenAttributesNull() {
+    public void translateShouldIgnoreUnverifiedExtraNames() {
+        final Attribute<String> firstName = createAttribute("Unverified", false, AttributesBuilder.VALID_FROM, null);
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
 
-        expectedException.expect(HubResponseTranslationException.class);
-        expectedException.expectMessage("HubResponseContainer Attributes null.");
+        final Response response = TRANSLATOR.translate(hubResponseContainer);
 
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
-
-        translator.translate(buildHubResponseContainerWithNoAttributes());
-    }
-
-    @Test
-    public void translateShouldThrowHubResponseTranslationExceptionWhenRequiredAttributeNull() {
-
-        expectedException.expect(HubResponseTranslationException.class);
-        expectedException.expectMessage("HubResponseContainer Attribute Surnames null.");
-
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
-
-        translator.translate(buildHubResponseContainerWithOnlyOneAttribute());
+        TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
+        TranslatedHubResponseTestAssertions.checkAllAttributesValid(response);
+        TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(response);
     }
 
     @Test
     public void translateShouldThrowExceptionWhenRequestError() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseRequestError());
 
-        expectedException.expect(HubResponseTranslationException.class);
-        expectedException.expectMessage("Received error status from VSP: ");
-
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
-
-        translator.translate(buildTranslatedHubResponseRequestError());
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("Received error status from VSP: ");
     }
 
     @Test
     public void translateShouldThrowExceptionWhenIdentityVerifiedWithLOA1() {
+        final HubResponseContainer hubResponseContainer =
+                buildHubResponseContainer(new TranslatedHubResponseBuilder().withLevelOfAssurance(VspLevelOfAssurance.LEVEL_1).build());
 
-        expectedException.expect(HubResponseTranslationException.class);
-        expectedException.expectMessage("Received unsupported LOA from VSP: ");
-
-        HubResponseTranslator translator =
-                new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
-
-        translator.translate(buildHubResponseContainerLOA1());
+        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("Received unsupported LOA from VSP: ");
     }
 
-    private HubResponseContainer buildHubResponseContainerWithNoAttributes() {
-        return new HubResponseContainer(
-                new HubResponseTranslatorRequest(),
-                TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerifiedNoAttributes()
-        );
+    private HubResponseContainer buildHubResponseContainer(Attributes attributes) {
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(), new TranslatedHubResponseBuilder().withAttributes(attributes).build());
     }
 
-    private HubResponseContainer buildHubResponseContainerWithOnlyOneAttribute() {
-        return new HubResponseContainer(
-                new HubResponseTranslatorRequest(),
-                TranslatedHubResponseBuilder.buildTranslatedHubResponseIncompleteAttributes()
-        );
-    }
-
-    private HubResponseContainer buildHubResponseContainer() {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerified());
-    }
-
-    private HubResponseContainer buildHubResponseContainerLOA1() {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerifiedLOA1());
-    }
-
-    private HubResponseContainer buildTranslatedHubResponseForCancelledStatus() {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), TranslatedHubResponseBuilder.buildTranslatedHubResponseCancellation());
-    }
-
-    private HubResponseContainer buildTranslatedHubResponseForAuthenticationFailedStatus() {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed());
-    }
-
-    private HubResponseContainer buildTranslatedHubResponseRequestError() {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), TranslatedHubResponseBuilder.buildTranslatedHubResponseRequestError());
+    private HubResponseContainer buildHubResponseContainer(TranslatedHubResponse translatedHubResponse) {
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(), translatedHubResponse);
     }
 
     private HubResponseTranslatorRequest buildHubResponseTranslatorRequest() {
