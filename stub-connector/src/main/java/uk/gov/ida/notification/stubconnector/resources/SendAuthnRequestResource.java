@@ -10,6 +10,7 @@ import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
 import org.opensaml.saml.common.messaging.context.SAMLMessageInfoContext;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.security.x509.X509Credential;
@@ -68,6 +69,11 @@ public class SendAuthnRequestResource {
         @Context HttpServletResponse httpServletResponse
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
         MessageContext context = generateAuthnRequestContext(session);
+
+        AuthnRequest authenRequest = (AuthnRequest) context.getMessage();
+        authenRequest.setSignature(null);
+        context.setMessage(authenRequest);
+
         encode(httpServletResponse, context);
         return Response.ok().build();
     }
