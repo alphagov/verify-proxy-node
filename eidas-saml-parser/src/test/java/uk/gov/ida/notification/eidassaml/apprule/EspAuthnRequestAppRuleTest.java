@@ -159,7 +159,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void authnRequestShouldHaveSupportedLOA() throws Exception {
         assertGoodRequest(request.withLoa(EidasConstants.EIDAS_LOA_SUBSTANTIAL));
-        assertBadRequest(request.withLoa(EidasConstants.EIDAS_LOA_LOW));
+        assertGoodRequest(request.withLoa(EidasConstants.EIDAS_LOA_LOW));
         assertBadRequest(request.withLoa(EidasConstants.EIDAS_LOA_HIGH));
         assertBadRequest(request.withoutLoa());
     }

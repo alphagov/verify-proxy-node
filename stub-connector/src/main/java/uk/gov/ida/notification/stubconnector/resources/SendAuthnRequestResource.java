@@ -52,12 +52,34 @@ public class SendAuthnRequestResource {
     }
 
     @GET
-    @Path("/Request")
-    public Response authnRequest(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
+    @Path("/RequestLow")
+    public Response authnRequestLow(
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
-        MessageContext context = generateAuthnRequestContext(session);
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_LOW);
+        encode(httpServletResponse, context);
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/RequestSubstantial")
+    public Response authnRequestSubstantial(
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
+    ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL);
+        encode(httpServletResponse, context);
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/RequestHigh")
+    public Response authnRequestHigh(
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
+    ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_HIGH);
         encode(httpServletResponse, context);
         return Response.ok().build();
     }
@@ -68,7 +90,7 @@ public class SendAuthnRequestResource {
         @Session HttpSession session,
         @Context HttpServletResponse httpServletResponse
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
-        MessageContext context = generateAuthnRequestContext(session);
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL);
 
         AuthnRequest authnRequest = (AuthnRequest) context.getMessage();
         authnRequest.setSignature(null);
@@ -78,7 +100,7 @@ public class SendAuthnRequestResource {
         return Response.ok().build();
     }
 
-    private MessageContext generateAuthnRequestContext(HttpSession session) throws ResolverException, ComponentInitializationException, MessageHandlerException {
+    private MessageContext generateAuthnRequestContext(HttpSession session, EidasLoaEnum loaType) throws ResolverException, ComponentInitializationException, MessageHandlerException {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
         String connectorEntityId = configuration.getConnectorNodeBaseUrl() + "/Metadata";
         Endpoint proxyNodeEndpoint = proxyNodeMetadata.getEndpoint(proxyNodeEntityId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
@@ -95,7 +117,7 @@ public class SendAuthnRequestResource {
             connectorEntityId,
             SPTypeEnumeration.PUBLIC,
             requestedAttributes,
-            EidasLoaEnum.LOA_SUBSTANTIAL,
+            loaType,
             signingCredential);
 
         session.setAttribute("authn_id", context.getSubcontext(SAMLMessageInfoContext.class, true).getMessageId());
