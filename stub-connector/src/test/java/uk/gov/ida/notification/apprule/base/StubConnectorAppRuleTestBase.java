@@ -79,7 +79,7 @@ public class StubConnectorAppRuleTestBase {
     );
 
     protected String getEidasRequest() throws URISyntaxException {
-        Response response = stubConnectorAppRule.target("/Request")
+        Response response = stubConnectorAppRule.target("/RequestSubstantial")
                 .request()
                 .get();
 

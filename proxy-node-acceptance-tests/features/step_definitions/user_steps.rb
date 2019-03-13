@@ -2,8 +2,18 @@ require 'yaml'
 require 'uri'
 require 'securerandom'
 
-Given('the user is at Stub Connector') do
-  visit(ENV.fetch('STUB_CONNECTOR_URL') + '/Request')
+Given("the proxy node is sent a LOA {string} request") do |load_type|
+  loa_url = case load_type
+    when "Low"
+      "/RequestLow"
+    when "Substantial"
+      "/RequestSubstantial"
+    when "High"
+      "/RequestHigh"
+    else
+      "/BadRequest"
+  end
+  visit(ENV.fetch('STUB_CONNECTOR_URL') + loa_url)
 end
 
 And('they progress through verify') do

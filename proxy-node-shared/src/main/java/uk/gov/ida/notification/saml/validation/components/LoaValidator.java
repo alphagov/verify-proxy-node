@@ -22,7 +22,7 @@ public class LoaValidator {
         String loa = authnContextClassRefs.get(0).getAuthnContextClassRef();
         if (Strings.isNullOrEmpty(loa)) throw new InvalidAuthnRequestException("Missing LoA");
 
-        if (!EidasConstants.EIDAS_LOA_SUBSTANTIAL.equals(loa)) {
+        if (!EidasConstants.EIDAS_LOA_SUBSTANTIAL.equals(loa) && !EidasConstants.EIDAS_LOA_LOW.equals(loa)) {
             String message = MessageFormat.format("Invalid LoA ''{0}''", loa);
             throw new InvalidAuthnRequestException(message);
         }

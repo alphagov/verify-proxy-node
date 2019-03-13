@@ -1,10 +1,20 @@
 Feature: proxy-node feature
 
-    Scenario: Proxy node happy path
-        Given the user is at Stub Connector
+    Scenario: Proxy node happy path - LOA LOW
+        Given the proxy node is sent a LOA 'Low' request
         And they progress through verify
         And they login to stub idp
         Then they should arrive at the success page
+
+    Scenario: Proxy node happy path - LOA Substantial
+        Given the proxy node is sent a LOA 'Substantial' request
+        And they progress through verify
+        And they login to stub idp
+        Then they should arrive at the success page
+
+    Scenario: Proxy node happy path - LOA High
+        Given the proxy node is sent a LOA 'High' request
+        Then the user should be presented with an '400' page
 
     # This probably works but needs a deployment of stub connector to test if it works.
     @ignore
