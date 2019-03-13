@@ -12,11 +12,10 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
-import uk.gov.ida.notification.logging.TranslatorSigningLoggerHelper;
 
 public class SamlObjectSigner {
     private final SignatureSigningParameters signingParams;
-    
+
     public SamlObjectSigner(BasicX509Credential credential) {
         this(credential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
     }
@@ -31,8 +30,7 @@ public class SamlObjectSigner {
         signingParams.setKeyInfoGenerator(keyInfoGeneratorFactory.newInstance());
     }
 
-    public void sign(SignableSAMLObject signableSAMLObject, String responseId) throws MarshallingException, SecurityException, SignatureException {
-        TranslatorSigningLoggerHelper.logSigningRequest(responseId, signingParams.getSigningCredential().getEntityId());
+    public void sign(SignableSAMLObject signableSAMLObject) throws MarshallingException, SecurityException, SignatureException {
         SignatureSupport.signObject(signableSAMLObject, signingParams);
         SAMLSignatureProfileValidator signatureProfileValidator = new SAMLSignatureProfileValidator();
         signatureProfileValidator.validate(signableSAMLObject.getSignature());

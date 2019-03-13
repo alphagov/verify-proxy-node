@@ -56,7 +56,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(
                 X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY)
         );
-        samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey, "request-id");
+        samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey);
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(requestWithIncorrectSigningKey),
                 "Error during AuthnRequest Signature Validation: SAML Validation Specification: Signature was not valid."
@@ -83,7 +83,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestMissingRequestId() throws Exception {
         AuthnRequest requestWithoutId = request.withoutRequestId().build();
-        samlObjectSigner.sign(requestWithoutId, "request-id");
+        samlObjectSigner.sign(requestWithoutId);
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(requestWithoutId),
                 "Bad Authn Request from Connector Node: Missing Request ID."
@@ -183,7 +183,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void authnRequestShouldNotBeNotDuplicated() throws Exception {
         AuthnRequest duplicatedRequest = request.build();
-        samlObjectSigner.sign(duplicatedRequest, "request-id");
+        samlObjectSigner.sign(duplicatedRequest);
         assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(duplicatedRequest));
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(duplicatedRequest),
@@ -193,19 +193,19 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
     private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest,"request-id");
+        samlObjectSigner.sign(postedRequest);
         assertGoodResponse(postedRequest, postEidasAuthnRequest(postedRequest));
     }
 
     private void assertBadRequest(EidasAuthnRequestBuilder builder) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest, "request-id");
+        samlObjectSigner.sign(postedRequest);
         assertErrorResponse(postEidasAuthnRequest(postedRequest));
     }
 
     private void assertBadRequestWithMessage(EidasAuthnRequestBuilder builder, String errorMessageContains) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest, "request-id");
+        samlObjectSigner.sign(postedRequest);
         assertErrorResponseWithMessage(postEidasAuthnRequest(postedRequest), errorMessageContains);
     }
 
@@ -231,7 +231,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         Logger logger = (Logger) LoggerFactory.getLogger(EidasAuthnRequestAttributesLogger.class);
         logger.addAppender(appender);
         AuthnRequest authnRequest = request.withRequestId("request_id").build();
-        samlObjectSigner.sign(authnRequest, "request_id");
+        samlObjectSigner.sign(authnRequest);
 
         postEidasAuthnRequest(authnRequest);
 
