@@ -1,14 +1,28 @@
 package uk.gov.ida.notification.apprule.rules;
 
-import org.opensaml.saml.saml2.core.*;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.AttributeValue;
+import org.opensaml.saml.saml2.core.AuthnStatement;
+import org.opensaml.saml.saml2.core.EncryptedAssertion;
+import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.Credential;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
-import uk.gov.ida.saml.core.test.builders.*;
+import uk.gov.ida.saml.core.test.builders.AssertionBuilder;
+import uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder;
+import uk.gov.ida.saml.core.test.builders.AuthnStatementBuilder;
+import uk.gov.ida.saml.core.test.builders.PersonNameAttributeBuilder_1_1;
+import uk.gov.ida.saml.core.test.builders.PersonNameAttributeValueBuilder;
+import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_ENCRYPTION_KEY;

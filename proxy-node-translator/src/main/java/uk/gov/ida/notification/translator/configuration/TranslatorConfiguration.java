@@ -2,8 +2,8 @@ package uk.gov.ida.notification.translator.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
-import uk.gov.ida.notification.pki.KeyPairConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -24,7 +24,7 @@ public class TranslatorConfiguration extends Configuration {
     @Valid
     @NotNull
     @JsonProperty
-    private SignerConfiguration signerConfiguration;
+    private CredentialConfiguration credentialConfiguration;
 
     @Valid
     @NotNull
@@ -43,7 +43,7 @@ public class TranslatorConfiguration extends Configuration {
         return connectorNodeIssuerId;
     }
 
-    public SignerConfiguration getSignerConfiguration() {
-        return signerConfiguration;
+    public CredentialConfiguration getCredentialConfiguration() {
+        return credentialConfiguration;
     }
 }

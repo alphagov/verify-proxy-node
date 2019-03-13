@@ -10,10 +10,12 @@ import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
+import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseTranslationExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
@@ -95,6 +97,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
 
-        return new EidasResponseGenerator(hubResponseTranslator, configuration.getSignerConfiguration().getSigner());
+        CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
+        return new EidasResponseGenerator(hubResponseTranslator, new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm()));
     }
 }

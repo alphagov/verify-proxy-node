@@ -2,7 +2,7 @@ package uk.gov.ida.notification.stubconnector;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-import uk.gov.ida.notification.pki.KeyPairConfiguration;
+import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
@@ -13,45 +13,31 @@ public class StubConnectorConfiguration extends Configuration {
     @JsonProperty
     @Valid
     @NotNull
-    private KeyPairConfiguration signingKeyPair;
-
-    @JsonProperty
-    @Valid
-    @NotNull
-    private KeyPairConfiguration encryptionKeyPair;
-
-    @JsonProperty
-    @Valid
-    @NotNull
     private URI connectorNodeBaseUrl;
 
-    @JsonProperty
     @Valid
     @NotNull
-    private String proxyNodeEntityId;
+    @JsonProperty
+    private CredentialConfiguration credentialConfiguration;
 
     @JsonProperty
     @Valid
     @NotNull
     private TrustStoreBackedMetadataConfiguration proxyNodeMetadataConfiguration;
 
-    public KeyPairConfiguration getEncryptionKeyPair() {
-        return encryptionKeyPair;
-    }
-
     public URI getConnectorNodeBaseUrl() {
         return connectorNodeBaseUrl;
     }
 
     public String getProxyNodeEntityId() {
-        return proxyNodeEntityId;
+        return proxyNodeMetadataConfiguration.getExpectedEntityId();
     }
 
     public TrustStoreBackedMetadataConfiguration getProxyNodeMetadataConfiguration() {
         return proxyNodeMetadataConfiguration;
     }
 
-    public KeyPairConfiguration getSigningKeyPair() {
-        return signingKeyPair;
+    public CredentialConfiguration getCredentialConfiguration() {
+        return credentialConfiguration;
     }
 }

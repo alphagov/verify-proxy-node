@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator.configuration;
+package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,12 +15,12 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CloudHsmSignerConfiguration extends SignerConfiguration {
+public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
     @JsonCreator
-    public CloudHsmSignerConfiguration(
+    public CloudHsmCredentialConfiguration(
         @JsonProperty("publicKey") DeserializablePublicKeyConfiguration publicKey,
         @JsonProperty("hsmKeyLabel") String hsmKeyLabel
-    ) throws SignerConfigurationException {
+    ) throws CredentialConfigurationException {
         try {
             X509Certificate certificate = X509Support.decodeCertificate(publicKey.getCert().getBytes());
             Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
@@ -34,9 +34,9 @@ public class CloudHsmSignerConfiguration extends SignerConfiguration {
             BasicX509Credential credential = new BasicX509Credential(
                 certificate,
                 (PrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null));
-            this.signer = buildSigner(credential);
+            setCredential(credential);
         } catch(Exception e) {
-            throw new SignerConfigurationException(e);
+            throw new CredentialConfigurationException(e);
         }
     }
 }

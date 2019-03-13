@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator.configuration;
+package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,18 +11,18 @@ import uk.gov.ida.common.shared.configuration.PrivateKeyConfiguration;
 import java.security.cert.X509Certificate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KeyFileSignerConfiguration extends SignerConfiguration {
+public class KeyFileCredentialConfiguration extends CredentialConfiguration {
     @JsonCreator
-    public KeyFileSignerConfiguration(
+    public KeyFileCredentialConfiguration(
         @JsonProperty("publicKey") DeserializablePublicKeyConfiguration publicKey,
         @JsonProperty("privateKey") PrivateKeyConfiguration privateKey
-    ) throws SignerConfigurationException {
+    ) throws CredentialConfigurationException {
         try {
             X509Certificate cert = X509Support.decodeCertificate(publicKey.getCert().getBytes());
             BasicX509Credential credential = new BasicX509Credential(cert, privateKey.getPrivateKey());
-            this.signer = buildSigner(credential);
+            setCredential(credential);
         } catch(Exception e) {
-            throw new SignerConfigurationException(e);
+            throw new CredentialConfigurationException(e);
         }
     }
 }

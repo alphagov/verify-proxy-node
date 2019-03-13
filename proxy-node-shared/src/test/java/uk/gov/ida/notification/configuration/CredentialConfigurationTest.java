@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator.configuration;
+package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
@@ -15,7 +15,7 @@ import java.io.File;
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SignerConfigurationTest {
+public class CredentialConfigurationTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Before
@@ -27,16 +27,16 @@ public class SignerConfigurationTest {
     public void buildSignerFromKeyFileSignerConfiguration() throws Exception {
         String configJson = fixture("key_file_signer_config.yml");
 
-        SignerConfiguration configuration = mapper.readValue(
+        CredentialConfiguration configuration = mapper.readValue(
             String.format(configJson, getPath("test_private_key.pk8"), getPath("test_certificate.crt")),
-            SignerConfiguration.class);
+            CredentialConfiguration.class);
 
         BasicX509Credential expectedCredential = new BasicX509Credential(
             X509Support.decodeCertificate(fixture("test_certificate.crt").getBytes()),
             KeySupport.decodePrivateKey(new File(getPath("test_private_key.pk8")), null)
         );
 
-        Credential actualCredential = configuration.getSigner().getCredential();
+        Credential actualCredential = configuration.getCredential();
 
         assertThat(actualCredential.getPublicKey()).isEqualTo(expectedCredential.getPublicKey());
         assertThat(actualCredential.getPrivateKey()).isEqualTo(expectedCredential.getPrivateKey());

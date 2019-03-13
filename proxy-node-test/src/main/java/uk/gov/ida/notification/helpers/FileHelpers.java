@@ -1,9 +1,9 @@
 package uk.gov.ida.notification.helpers;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.io.IOUtils;
 
 public class FileHelpers {
     public static String readFileAsString(String resourceFilename) throws IOException {

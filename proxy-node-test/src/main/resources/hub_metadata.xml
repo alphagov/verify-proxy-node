@@ -60,7 +60,7 @@
     <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" xsi:type="md:SPSSODescriptorType">
       <md:KeyDescriptor use="encryption" xsi:type="md:KeyDescriptorType">
         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
-          <ds:KeyName xmlns:xs="http://www.w3.org/2001/XMLSchema">encryption</ds:KeyName>
+          <ds:KeyName>encryption</ds:KeyName>
           <ds:X509Data xsi:type="ds:X509DataType">
             <ds:X509Certificate>MIIEBDCCAuygAwIBAgIUCN/nO2XPnNR7wBkKNNH/m1ycsFEwDQYJKoZIhvcNAQEL
               BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u
@@ -89,7 +89,7 @@
       </md:KeyDescriptor>
       <md:KeyDescriptor use="signing" xsi:type="md:KeyDescriptorType">
         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
-          <ds:KeyName xmlns:xs="http://www.w3.org/2001/XMLSchema">signing_primary</ds:KeyName>
+          <ds:KeyName>signing_primary</ds:KeyName>
           <ds:X509Data xsi:type="ds:X509DataType">
             <ds:X509Certificate>MIIEATCCAumgAwIBAgIUB/OlgZzyCzsO0fK15rGfkycFyQUwDQYJKoZIhvcNAQEL
               BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u
@@ -128,7 +128,7 @@
     <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" xsi:type="md:IDPSSODescriptorType">
       <md:KeyDescriptor use="signing" xsi:type="md:KeyDescriptorType">
         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xsi:type="ds:KeyInfoType">
-          <ds:KeyName xmlns:xs="http://www.w3.org/2001/XMLSchema">signing_1</ds:KeyName>
+            <ds:KeyName>signing_1</ds:KeyName>
           <ds:X509Data xsi:type="ds:X509DataType">
             <ds:X509Certificate>MIIEBDCCAuygAwIBAgIUP050BWkfBeRdOqtTWijNsz6nLwMwDQYJKoZIhvcNAQEL
               BQAwazELMAkGA1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9u

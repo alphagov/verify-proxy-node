@@ -19,6 +19,7 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.LoggerFactory;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
+import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseTestAssertions;
 import uk.gov.ida.notification.helpers.BasicCredentialBuilder;
@@ -41,7 +42,6 @@ import javax.ws.rs.client.Entity;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -109,7 +109,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     @Test
     public void shouldReturnASignedEidasResponse() throws Exception {
-        Credential signingCredential = translatorAppRule.getConfiguration().getSignerConfiguration().getSigner().getCredential();
+        CredentialConfiguration credentialConfiguration = translatorAppRule.getConfiguration().getCredentialConfiguration();
+        Credential signingCredential = credentialConfiguration.getCredential();
         CredentialFactorySignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(
                 entityId -> Collections.singletonList(signingCredential.getPublicKey())));
 
@@ -213,7 +214,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         return new SamlParser().parseSamlString(Base64.decodeAsString(postHubResponseToTranslator(hubResponse).readEntity(String.class)));
     }
 
-    private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws URISyntaxException {
+    private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
         String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
@@ -232,7 +233,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 .post(Entity.json(hubResponseTranslatorRequest));
     }
 
-    private static Response decryptResponse(Response response, Credential credential) {
+    private static Response decryptResponse(Response response, Credential credential) throws Exception {
         ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(credential);
         return decrypter.decrypt(response);
     }

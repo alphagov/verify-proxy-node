@@ -2,9 +2,9 @@ package uk.gov.ida.notification.translator.saml;
 
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 
 import java.net.URI;
 

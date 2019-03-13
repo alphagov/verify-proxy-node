@@ -5,12 +5,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.metadata.Endpoint;
-import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.SignatureSigningParameters;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import uk.gov.ida.notification.VerifySamlInitializer;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -33,7 +33,7 @@ public class EidasAuthnRequestContextFactoryTest {
 
     @Test
     public void testThatEidasAuthnRequestSetsARequestDestination() {
-        Credential signingCredential = mock(Credential.class);
+        SignatureSigningParameters signingParams = mock(SignatureSigningParameters.class);
         Endpoint destinationEndpoint = mock(Endpoint.class);
         when(destinationEndpoint.getLocation()).thenReturn("a location");
         try {
@@ -41,9 +41,9 @@ public class EidasAuthnRequestContextFactoryTest {
                     destinationEndpoint,
                     "a connecter entity id",
                     SPTypeEnumeration.PUBLIC,
-                    new ArrayList<String>(),
+                    Collections.emptyList(),
                     EidasLoaEnum.LOA_SUBSTANTIAL,
-                    signingCredential);
+                    signingParams);
         } catch (Exception e) {
             // expected
         }
