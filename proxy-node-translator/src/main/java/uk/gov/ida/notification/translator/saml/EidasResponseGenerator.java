@@ -23,8 +23,9 @@ public class EidasResponseGenerator {
         final Response eidasResponse = translator.translate(hubResponseContainer);
         final BasicX509Credential encryptionCredential = new BasicX509Credential(encryptionCertificate);
         final ResponseAssertionEncrypter assertionEncrypter = new ResponseAssertionEncrypter(encryptionCredential);
+
         Response eidasResponseWithEncryptedAssertion = assertionEncrypter.encrypt(eidasResponse);
-        samlObjectSigner.sign(eidasResponseWithEncryptedAssertion, hubResponseContainer.getEidasRequestId());
+        samlObjectSigner.sign(eidasResponseWithEncryptedAssertion);
 
         return eidasResponseWithEncryptedAssertion;
     }

@@ -25,7 +25,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
         BasicX509Credential signingCredential = testKeyPair.getX509Credential();
         SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential);
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
-        samlObjectSigner.sign(authnRequest, "request-id");
+        samlObjectSigner.sign(authnRequest);
         Signature signature = authnRequest.getSignature();
 
         String actualCertificate = signature.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0).getValue();
