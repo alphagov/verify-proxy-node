@@ -10,6 +10,7 @@ import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -40,9 +41,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         request = new EidasAuthnRequestBuilder()
                 .withIssuer(CONNECTOR_NODE_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest");
-        samlObjectSigner = new SamlObjectSigner(
-                X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY)
-        );
+        samlObjectSigner = new SamlObjectSigner(X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
     }
 
     @Test
@@ -53,9 +52,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestNotSignedCorrectly() throws Exception {
         AuthnRequest requestWithIncorrectSigningKey = request.build();
-        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(
-                X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY)
-        );
+        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
         samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey);
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(requestWithIncorrectSigningKey),

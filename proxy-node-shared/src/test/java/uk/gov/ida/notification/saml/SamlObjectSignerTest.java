@@ -23,7 +23,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
     @Test
     public void shouldSignAuthRequest() throws Throwable {
         BasicX509Credential signingCredential = testKeyPair.getX509Credential();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential);
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         samlObjectSigner.sign(authnRequest);
         Signature signature = authnRequest.getSignature();

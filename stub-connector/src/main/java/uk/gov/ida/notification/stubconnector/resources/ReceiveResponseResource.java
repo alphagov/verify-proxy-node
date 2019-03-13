@@ -15,6 +15,7 @@ import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
 import se.litsec.eidas.opensaml.ext.attributes.EidasAttributeValueType;
 import se.litsec.opensaml.common.validation.CoreValidatorParameters;
 import se.litsec.opensaml.saml2.common.response.ResponseValidator;
@@ -60,7 +61,7 @@ public class ReceiveResponseResource {
     public ResponseView receiveResponse(
             @Session HttpSession session,
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response response,
-            @FormParam("RelayState") String relayState) {
+            @FormParam("RelayState") String relayState) throws DecryptionException {
 
         SAMLSignatureProfileValidator samlSignatureProfileValidator = new SAMLSignatureProfileValidator();
         responseValidator = new ResponseValidator(connectorMetadataResolverBundle.getSignatureTrustEngine(), samlSignatureProfileValidator);

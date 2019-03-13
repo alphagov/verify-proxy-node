@@ -6,6 +6,7 @@ import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
@@ -108,9 +109,9 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
     private Response signResponse(Response response) throws Exception {
         SamlObjectSigner signer = new SamlObjectSigner(X509CredentialFactory.build(
-            TEST_RP_PUBLIC_SIGNING_CERT,
-            TEST_RP_PRIVATE_SIGNING_KEY
-        ));
+                    TEST_RP_PUBLIC_SIGNING_CERT,
+                    TEST_RP_PRIVATE_SIGNING_KEY
+                ), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
 
         signer.sign(response);
 

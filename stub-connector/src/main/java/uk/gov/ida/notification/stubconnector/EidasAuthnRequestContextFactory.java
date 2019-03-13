@@ -22,10 +22,8 @@ import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.metadata.Endpoint;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.context.SecurityParametersContext;
-import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.eidas.opensaml.ext.RequestedAttribute;
@@ -46,7 +44,7 @@ public class EidasAuthnRequestContextFactory {
         SPTypeEnumeration spType,
         List<String> requestedAttributes,
         EidasLoaEnum loa,
-        Credential signingCredential) throws ComponentInitializationException, MessageHandlerException {
+        SignatureSigningParameters signingParameters) throws ComponentInitializationException, MessageHandlerException {
 
         AuthnRequest request = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         request.getNamespaceManager().registerNamespaceDeclaration(new Namespace(EidasConstants.EIDAS_NS, EidasConstants.EIDAS_PREFIX));
@@ -108,11 +106,6 @@ public class EidasAuthnRequestContextFactory {
         requestedAuthnContext.getAuthnContextClassRefs().add(authnContextClassRef);
         request.setRequestedAuthnContext(requestedAuthnContext);
 
-        SignatureSigningParameters signatureSigningParameters = new SignatureSigningParameters();
-        signatureSigningParameters.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
-        signatureSigningParameters.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
-        signatureSigningParameters.setSigningCredential(signingCredential);
-
         MessageContext context = new MessageContext() {{
             setMessage(request);
 
@@ -124,7 +117,7 @@ public class EidasAuthnRequestContextFactory {
                 .setEntityId(connectorEntityId);
 
             getSubcontext(SecurityParametersContext.class, true)
-                .setSignatureSigningParameters(signatureSigningParameters);
+                .setSignatureSigningParameters(signingParameters);
         }};
 
         SAMLOutboundProtocolMessageSigningHandler signingHandler = new SAMLOutboundProtocolMessageSigningHandler();

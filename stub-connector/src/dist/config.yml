@@ -11,7 +11,6 @@ logging:
   appenders:
     - type: logstash-console
 
-proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
 
 proxyNodeMetadataConfiguration:
@@ -23,20 +22,13 @@ proxyNodeMetadataConfiguration:
     store: ${PROXY_NODE_METADATA_TRUSTSTORE}
     password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD}
 
-signingKeyPair:
+credentialConfiguration:
+  type: ${SIGNER_CONFIG_TYPE:-file}
+  hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-stub_connector_key}
   publicKey:
     type: ${CERT_TYPES:-encoded}
     cert: ${SIGNING_CERT}
-    name: proxy_node_signing
+    name: stub_connector
   privateKey:
     type: ${KEY_TYPES:-encoded}
     key: ${SIGNING_KEY}
-
-encryptionKeyPair:
-  publicKey:
-    type: ${CERT_TYPES:-encoded}
-    cert: ${ENCRYPTION_CERT}
-    name: proxy_node_encryption
-  privateKey:
-    type: ${KEY_TYPES:-encoded}
-    key: ${ENCRYPTION_KEY}

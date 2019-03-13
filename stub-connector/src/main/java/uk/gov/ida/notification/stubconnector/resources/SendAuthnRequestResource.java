@@ -13,10 +13,13 @@ import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.security.x509.X509Credential;
+import org.opensaml.xmlsec.SignatureSigningParameters;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
+import uk.gov.ida.notification.configuration.CredentialConfiguration;
+import uk.gov.ida.notification.saml.ParametersFactory;
+import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.stubconnector.EidasAuthnRequestContextFactory;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
@@ -36,12 +39,10 @@ public class SendAuthnRequestResource {
     private final StubConnectorConfiguration configuration;
     private final Metadata proxyNodeMetadata;
     private final EidasAuthnRequestContextFactory contextFactory;
-    private final X509Credential signingCredential;
 
-    public SendAuthnRequestResource(StubConnectorConfiguration configuration, Metadata proxyNodeMetadata, X509Credential signingCredential) {
+    public SendAuthnRequestResource(StubConnectorConfiguration configuration, Metadata proxyNodeMetadata) {
         this.configuration = configuration;
         this.proxyNodeMetadata = proxyNodeMetadata;
-        this.signingCredential = signingCredential;
         this.contextFactory = new EidasAuthnRequestContextFactory();
     }
 
@@ -112,13 +113,19 @@ public class SendAuthnRequestResource {
             AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME
         );
 
+        CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
+
+        SignatureSigningParameters signingParameters = ParametersFactory.buildSignatureSigningParameters(
+            credentialConfiguration.getCredential(),
+            credentialConfiguration.getAlgorithm());
+
         MessageContext context = contextFactory.generate(
             proxyNodeEndpoint,
             connectorEntityId,
             SPTypeEnumeration.PUBLIC,
             requestedAttributes,
             loaType,
-            signingCredential);
+            signingParameters);
 
         session.setAttribute("authn_id", context.getSubcontext(SAMLMessageInfoContext.class, true).getMessageId());
 
