@@ -69,7 +69,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private EncryptedAssertion matchingDatasetAssertion;
     private Credential eidasDecryptingCredential;
 
-    private static final String publicBuild = (System.getenv("VERIFY_USE_PUBLIC_BINARIES"));
+    private static final String publicBuild = System.getenv("VERIFY_USE_PUBLIC_BINARIES");
 
     @Before
     public void setup() throws Throwable {
@@ -170,7 +170,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 
         // Resource method logs twice: once for Response Details and once for the Hash, so expect 2 invocations.
-        verify(appender, Mockito.times(2)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, Mockito.times(1)).doAppend(loggingEventArgumentCaptor.capture());
 
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();

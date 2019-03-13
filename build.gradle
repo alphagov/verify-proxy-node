@@ -18,11 +18,10 @@ ext {
     opensaml_version = '3.4.0'
     dropwizard_version = '1.3.9'
     utils_version = '2.0.0-350'
-    saml_libs_version = "${opensaml_version}-176"
+    saml_libs_version = "${opensaml_version}-180"
     soft_hsm_version = '1.1.1'
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
-
 
 subprojects {
 
@@ -64,13 +63,13 @@ subprojects {
     }
 
     dependencies {
-        common (
+        common(
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
                 "io.lettuce:lettuce-core:5.1.4.RELEASE",
         )
 
-        dropwizard (
+        dropwizard(
                 "io.dropwizard:dropwizard-core:${dropwizard_version}",
                 "io.dropwizard:dropwizard-client:${dropwizard_version}",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
@@ -78,22 +77,22 @@ subprojects {
                 "uk.gov.ida:dropwizard-logstash:1.3.5-68"
         )
 
-        opensaml (
+        opensaml(
                 "org.opensaml:opensaml-core:${opensaml_version}",
                 "org.opensaml:opensaml-saml-impl:${opensaml_version}",
                 "org.opensaml:opensaml-storage-impl:${opensaml_version}",
         )
 
-        eidas_saml (
+        eidas_saml(
                 "se.litsec.eidas:eidas-opensaml3:1.3.1",
                 "se.litsec.opensaml:opensaml3-ext:1.2.2",
         )
 
-        ida_utils (
+        ida_utils(
                 "uk.gov.ida:rest-utils:${utils_version}"
         )
 
-        verify_saml (
+        verify_saml(
                 "uk.gov.ida:saml-extensions:${saml_libs_version}",
                 "uk.gov.ida:saml-metadata-bindings:${saml_libs_version}",
                 "uk.gov.ida:saml-security:${saml_libs_version}",
@@ -101,26 +100,26 @@ subprojects {
                 "uk.gov.ida:security-utils:${utils_version}",
         )
 
-        verify_saml_test (
+        verify_saml_test(
                 "uk.gov.ida:common-test-utils:${utils_version}",
                 "uk.gov.ida:saml-metadata-bindings-test:${saml_libs_version}",
         )
 
-        soft_hsm (
+        soft_hsm(
                 "se.swedenconnect.opensaml:opensaml-pkcs11-support:${soft_hsm_version}",
         )
 
-        proxy_node_test (
+        proxy_node_test(
                 "net.sourceforge.htmlcleaner:htmlcleaner:2.22",
                 "net.sourceforge.htmlunit:htmlunit:2.28",
         )
 
-        testCompile (
-                "org.junit.jupiter:junit-jupiter-api:5.3.1",
+        testCompile(
+                "org.junit.jupiter:junit-jupiter-api:5.4.0",
+                'org.junit.jupiter:junit-jupiter-params:5.4.0',
                 "org.assertj:assertj-core:3.11.1",
-                "org.hamcrest:hamcrest-core:1.3",
-                "org.hamcrest:hamcrest-library:1.3",
-                "org.mockito:mockito-core:2.23.0",
+                "org.mockito:mockito-core:2.25.0",
+                "org.mockito:mockito-junit-jupiter:2.17.0",
                 "io.dropwizard:dropwizard-testing:${dropwizard_version}",
                 "net.sourceforge.htmlunit:htmlunit:2.28",
                 "com.github.stefanbirkner:system-rules:1.19.0",
