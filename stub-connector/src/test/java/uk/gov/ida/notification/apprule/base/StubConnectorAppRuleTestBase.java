@@ -22,7 +22,9 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.*;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public class StubConnectorAppRuleTestBase {
@@ -59,23 +61,18 @@ public class StubConnectorAppRuleTestBase {
 
     @Rule
     public StubConnectorAppRule stubConnectorAppRule = new StubConnectorAppRule(
-            ConfigOverride.config("proxyNodeEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
-
             ConfigOverride.config("connectorNodeBaseUrl", "http://stub-connector"),
 
-            ConfigOverride.config("proxyNodeMetadataConfiguration.url", metadataClientRule.baseUri() + "/stub-connector/metadata"), //
-            ConfigOverride.config("proxyNodeMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
+            ConfigOverride.config("proxyNodeMetadataConfiguration.url", metadataClientRule.baseUri() + "/proxy-node/metadata"), //
+            ConfigOverride.config("proxyNodeMetadataConfiguration.expectedEntityId", "http://proxy-node/Metadata"),
             ConfigOverride.config("proxyNodeMetadataConfiguration.trustStore.type", "file"),
             ConfigOverride.config("proxyNodeMetadataConfiguration.trustStore.store", truststore.getAbsolutePath()),
             ConfigOverride.config("proxyNodeMetadataConfiguration.trustStore.password", truststore.getPassword()),
 
-            ConfigOverride.config("signingKeyPair.publicKey.type", "x509"),
-            ConfigOverride.config("signingKeyPair.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("signingKeyPair.privateKey.key", TEST_PRIVATE_KEY),
-
-            ConfigOverride.config("encryptionKeyPair.publicKey.type", "x509"),
-            ConfigOverride.config("encryptionKeyPair.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("encryptionKeyPair.privateKey.key", TEST_PRIVATE_KEY)
+            ConfigOverride.config("credentialConfiguration.type", "file"),
+            ConfigOverride.config("credentialConfiguration.publicKey.type", "x509"),
+            ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_CERT),
+            ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY)
     );
 
     protected String getEidasRequest() throws URISyntaxException {

@@ -18,8 +18,7 @@ import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
-import uk.gov.ida.notification.saml.ParametersFactory;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.saml.SignatureSigningParametersHelper;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.stubconnector.EidasAuthnRequestContextFactory;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
@@ -115,7 +114,7 @@ public class SendAuthnRequestResource {
 
         CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
 
-        SignatureSigningParameters signingParameters = ParametersFactory.buildSignatureSigningParameters(
+        SignatureSigningParameters signingParameters = SignatureSigningParametersHelper.build(
             credentialConfiguration.getCredential(),
             credentialConfiguration.getAlgorithm());
 

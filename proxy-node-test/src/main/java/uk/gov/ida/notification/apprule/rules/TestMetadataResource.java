@@ -24,14 +24,15 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SI
 
 @Path("/")
 public class TestMetadataResource {
-    private final String connectorEntityId = "http://connector-node:8080/ConnectorResponderMetadata";
+    public final static String CONNECTOR_ENTITY_ID = "http://connector-node/Metadata";
+    public final static String PROXY_NODE_ENTITY_ID = "http://proxy-node/Metadata";
     private String connectorMetadataXml;
-    private String stubConnectorMetadataXml;
+    private String proxyNodeMetadataXml;
     private String hubMetadata;
 
     public TestMetadataResource() throws Exception {
         connectorMetadataXml = new MetadataFactory().singleEntityMetadata(buildConnectorEntityDescriptor());
-        stubConnectorMetadataXml = new MetadataFactory().singleEntityMetadata(buildStubConnectorEntityDescriptor());
+        proxyNodeMetadataXml = new MetadataFactory().singleEntityMetadata(buildProxyNodeEntityDescriptor());
         hubMetadata = new MetadataFactory().defaultMetadata();
     }
 
@@ -57,7 +58,7 @@ public class TestMetadataResource {
                 .build();
 
         return EntityDescriptorBuilder.anEntityDescriptor()
-                .withEntityId(connectorEntityId)
+                .withEntityId(CONNECTOR_ENTITY_ID)
                 .withIdpSsoDescriptor(null)
                 .setAddDefaultSpServiceDescriptor(false)
                 .addSpServiceDescriptor(spssoDescriptor)
@@ -67,7 +68,7 @@ public class TestMetadataResource {
                 .build();
     }
 
-    private EntityDescriptor buildStubConnectorEntityDescriptor() throws Exception {
+    private EntityDescriptor buildProxyNodeEntityDescriptor() throws Exception {
         KeyDescriptor signingKeyDescriptor = KeyDescriptorBuilder.aKeyDescriptor()
                 .withX509ForSigning(TEST_RP_PUBLIC_SIGNING_CERT)
                 .build();
@@ -83,7 +84,7 @@ public class TestMetadataResource {
                 .build();
 
         return EntityDescriptorBuilder.anEntityDescriptor()
-                .withEntityId(connectorEntityId)
+                .withEntityId(PROXY_NODE_ENTITY_ID)
                 .withIdpSsoDescriptor(idpssoDescriptor)
                 .setAddDefaultSpServiceDescriptor(false)
                 .addSpServiceDescriptor(null)
@@ -94,9 +95,9 @@ public class TestMetadataResource {
     }
 
     @GET
-    @Path("/stub-connector/metadata")
-    public String getStubConnectorMetadata() {
-        return stubConnectorMetadataXml;
+    @Path("/proxy-node/metadata")
+    public String getProxyNodeMetadata() {
+        return proxyNodeMetadataXml;
     }
 
     @GET

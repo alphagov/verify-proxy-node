@@ -9,7 +9,6 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.security.crypto.KeySupport;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Support;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 
 import java.io.File;
 

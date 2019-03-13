@@ -1,18 +1,19 @@
 package uk.gov.ida.notification.eidassaml.apprule;
 
-import org.apache.http.HttpStatus;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
-import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
-import se.litsec.eidas.opensaml.common.EidasConstants;
 import org.slf4j.LoggerFactory;
+import se.litsec.eidas.opensaml.common.EidasConstants;
+import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
 import uk.gov.ida.notification.eidassaml.logging.EidasAuthnRequestAttributesLogger;
@@ -20,8 +21,8 @@ import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 
-import java.util.Map;
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -39,7 +40,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Before
     public void setup() throws Exception {
         request = new EidasAuthnRequestBuilder()
-                .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+                .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest");
         samlObjectSigner = new SamlObjectSigner(X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
     }
@@ -210,7 +211,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
         EidasSamlParserResponse espResponse = response.readEntity(EidasSamlParserResponse.class);
         assertThat(espResponse.getRequestId()).isEqualTo(eidasAuthnRequest.getID());
-        assertThat(espResponse.getIssuer()).isEqualTo(CONNECTOR_NODE_ENTITY_ID);
+        assertThat(espResponse.getIssuer()).isEqualTo(TestMetadataResource.CONNECTOR_ENTITY_ID);
     }
 
     private void assertErrorResponse(Response response) {
@@ -240,6 +241,6 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         assertThat("request_id").isEqualTo(mdcPropertyMap.get("eidasRequestId"));
         assertThat("http://proxy-node/eidasAuthnRequest").isEqualTo(mdcPropertyMap.get("eidasDestination"));
         assertThat("2015-04-30T19:25:14.273Z").isEqualTo(mdcPropertyMap.get("eidasIssueInstant"));
-        assertThat("http://connector-node:8080/ConnectorResponderMetadata").isEqualTo(mdcPropertyMap.get("eidasIssuer"));
+        assertThat("http://connector-node/Metadata").isEqualTo(mdcPropertyMap.get("eidasIssuer"));
     }
 }

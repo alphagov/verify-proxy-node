@@ -14,7 +14,7 @@ public class SamlObjectSigner {
     private final SignatureSigningParameters signingParams;
 
     public SamlObjectSigner(BasicX509Credential signingCredential, String signingAlgorithm) {
-        signingParams = ParametersFactory.buildSignatureSigningParameters(signingCredential, signingAlgorithm);
+        signingParams = SignatureSigningParametersHelper.build(signingCredential, signingAlgorithm);
     }
 
     public void sign(SignableSAMLObject signableSAMLObject) throws MarshallingException, SecurityException, SignatureException {

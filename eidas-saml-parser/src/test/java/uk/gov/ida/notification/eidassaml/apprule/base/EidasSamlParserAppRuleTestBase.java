@@ -24,9 +24,6 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public class EidasSamlParserAppRuleTestBase {
-
-    protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
-
     @ClassRule
     public static final DropwizardClientRule metadataClientRule;
 
@@ -49,7 +46,7 @@ public class EidasSamlParserAppRuleTestBase {
     public EidasSamlParserAppRule eidasSamlParserAppRule = new EidasSamlParserAppRule(
             ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
             ConfigOverride.config("connectorMetadataConfiguration.url", metadataClientRule.baseUri() + "/connector-node/metadata"),
-            ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", "http://connector-node:8080/ConnectorResponderMetadata"),
+            ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", TestMetadataResource.CONNECTOR_ENTITY_ID),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.store", truststore.getAbsolutePath()),
             ConfigOverride.config("connectorMetadataConfiguration.trustStore.password", truststore.getPassword())

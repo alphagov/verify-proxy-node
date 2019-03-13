@@ -5,7 +5,7 @@ import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
-public class ParametersFactory {
+public class SignatureSigningParametersHelper {
     private static final X509KeyInfoGeneratorFactory keyInfoGeneratorFactory;
 
     static {
@@ -13,7 +13,7 @@ public class ParametersFactory {
         keyInfoGeneratorFactory.setEmitEntityCertificate(true);
     }
 
-    public static SignatureSigningParameters buildSignatureSigningParameters(BasicX509Credential credential, String algorithm) {
+    public static SignatureSigningParameters build(BasicX509Credential credential, String algorithm) {
         SignatureSigningParameters signingParams = new SignatureSigningParameters();
         signingParams.setSignatureAlgorithm(algorithm);
         signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);

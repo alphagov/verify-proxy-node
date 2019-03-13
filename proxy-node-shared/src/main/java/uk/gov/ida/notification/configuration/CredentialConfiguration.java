@@ -2,10 +2,8 @@ package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.opensaml.security.credential.Credential;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
-import uk.gov.ida.notification.saml.SamlObjectSigner;
 
 import java.security.interfaces.ECPublicKey;
 
