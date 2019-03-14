@@ -53,14 +53,6 @@ public class HubResponseTranslatorResource {
                         )
                 );
 
-        final org.opensaml.saml.saml2.core.Response eidasResponse =
-                eidasResponseGenerator.generate(
-                        new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
-                        X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate())
-                );
-
-        logResponse(eidasResponse);
-
         final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
                 new EidasResponseAttributesHashLoggerHelper(EidasResponseAttributesHashLogger.instance());
 
@@ -71,6 +63,14 @@ public class HubResponseTranslatorResource {
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl().toString()
         );
+
+        final org.opensaml.saml.saml2.core.Response eidasResponse =
+                eidasResponseGenerator.generate(
+                        new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
+                        X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate())
+                );
+
+        logResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
 
