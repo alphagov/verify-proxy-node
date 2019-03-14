@@ -19,6 +19,7 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
+import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
@@ -104,6 +105,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
     }
 
     private void registerProviders(Environment environment) {
+        environment.jersey().register(IstioHeaderMapperFilter.class);
         environment.jersey().register(AuthnRequestParameterProvider.class);
         environment.jersey().register(ResponseParameterProvider.class);
 

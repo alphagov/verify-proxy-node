@@ -26,6 +26,7 @@ import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
@@ -87,6 +88,8 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
         SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
         String x509EncryptionCert = getX509EncryptionCert(configuration);
+
+        environment.jersey().register(IstioHeaderMapperFilter.class);
 
         environment.jersey().register(
                 new EidasSamlResource(
