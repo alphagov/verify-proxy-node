@@ -3,22 +3,26 @@ package uk.gov.ida.notification.translator.logging;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
+import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder;
 import uk.gov.ida.saml.core.transformers.EidasResponseAttributesHashLogger;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 public class EidasResponseAttributesHashLoggerParameterizedTest {
@@ -26,31 +30,30 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
     private final static String REQUEST_ID = "request-id";
     private final static String DESTINATION_URL = "http://connnector.eu";
 
-    public TranslatedHubResponse translatedHubResponse;
-    public String hashResult;
+    @Mock
+    private Appender<ILoggingEvent> appender;
+
+    @Mock
+    HubResponseTranslatorRequest hubResponseTranslatorRequest;
+
+    private TranslatedHubResponse translatedHubResponse;
+    private String hashResult;
 
     public EidasResponseAttributesHashLoggerParameterizedTest(TranslatedHubResponse translatedHubResponse, String hashResult) {
         this.translatedHubResponse = translatedHubResponse;
         this.hashResult = hashResult;
+
+        MockitoAnnotations.initMocks(this);
+        when(hubResponseTranslatorRequest.getRequestId()).thenReturn(REQUEST_ID);
+        when(hubResponseTranslatorRequest.getDestinationUrl()).thenReturn(URI.create(DESTINATION_URL));
     }
 
     @Test
-    public void shouldLogHashForTranslatedHubReponses() {
-
+    public void shouldLogHashForTranslatedHubResponses() {
         Logger logger = (Logger) LoggerFactory.getLogger(EidasResponseAttributesHashLogger.class);
-        Appender<ILoggingEvent> appender = mock(Appender.class);
         logger.addAppender(appender);
 
-        final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
-                new EidasResponseAttributesHashLoggerHelper(EidasResponseAttributesHashLogger.instance());
-
-        eidasResponseAttributesHashLoggerHelper.applyAttributesToHashLogger(
-                translatedHubResponse.getAttributes(),
-                translatedHubResponse.getPid()
-        ).logHashFor(
-                REQUEST_ID,
-                DESTINATION_URL
-        );
+        HubResponseTranslatorLogger.logResponseAttributesHash(hubResponseTranslatorRequest, translatedHubResponse);
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender).doAppend(loggingEventArgumentCaptor.capture());
@@ -58,7 +61,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        Assertions.assertThat(
+        assertThat(
                 mdcPropertyMap.get(EidasResponseAttributesHashLogger.MDC_KEY_EIDAS_USER_HASH))
                 .as("EidasResponse Hash Test Failure.\n" +
                         "Method used to calculate the hash (or the test data) may have changed.\n" +
@@ -67,7 +70,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
     }
 
     @Parameterized.Parameters(name = "Run {index}: translatedHubResponse={0}, hashResult={1}")
-    public static Collection<Object[]> getHashTestParameters() throws Throwable {
+    public static Collection<Object[]> getHashTestParameters() {
         return Arrays.asList(
                 new Object[][]{
                         {
@@ -87,7 +90,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
                                 "bff88ccaf63d6700d8112b3a0409b469b6301e2fc5a1adcf1c158d600e62352f"
                         },
                         {
-                                TranslatedHubResponseBuilder.buildTranslatedHubResponseIncompleteAttributes(),
+                                TranslatedHubResponseBuilder.buildTranslatedHubResponseFirstNameAttributeOnly(),
                                 "4d11a15b7f8a391b2f5cf4909dde7d68e34b5ac9d11762b848d3f7345bab8b0b"
                         },
                         {

@@ -10,6 +10,8 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.saml.core.transformers.EidasResponseAttributesHashLogger;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,142 +24,137 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class EidasResponseAttributesHashLoggerTest {
 
-    private final static String PID = "pid1234ABCD";
+    private static final String PID = "pid1234ABCD";
+    private static final Method APPLY_ATTRIBUTES_TO_LOGGER_METHOD = getApplyAttributesToLoggerMethod();
 
     @Mock
-    Attributes attributesMock;
+    Attributes attributes;
 
     @Mock
-    EidasResponseAttributesHashLogger hashLoggerMock;
+    EidasResponseAttributesHashLogger attributesHashLogger;
 
     @Test
     public void shouldOnlyIncludeFirstVerifiedFirstNameInHash() {
-
-        when(attributesMock.getFirstNames()).thenReturn(List.of(
+        when(attributes.getFirstNames()).thenReturn(List.of(
                 new Attribute<>("FirstNameA", false, null, null),
                 new Attribute<>("FirstNameV1", true, null, null),
                 new Attribute<>("FirstNameB", false, null, null),
                 new Attribute<>("FirstNameV2", true, null, null)
         ));
 
-        final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
-                new EidasResponseAttributesHashLoggerHelper(hashLoggerMock);
+        applyAttributesToLogger();
 
-        eidasResponseAttributesHashLoggerHelper.applyAttributesToHashLogger(
-                attributesMock,
-                PID
-        );
+        verify(attributesHashLogger).setPid(PID);
+        verify(attributesHashLogger, times(1)).setFirstName(any());
+        verify(attributesHashLogger, never()).setFirstName("FirstNameA");
+        verify(attributesHashLogger, never()).setFirstName("FirstNameB");
+        verify(attributesHashLogger).setFirstName("FirstNameV1");
+        verify(attributesHashLogger, never()).setFirstName("FirstNameV2");
 
-        verify(hashLoggerMock).setPid(PID);
-        verify(hashLoggerMock, times(1)).setFirstName(any());
-        verify(hashLoggerMock, never()).setFirstName("FirstNameA");
-        verify(hashLoggerMock, never()).setFirstName("FirstNameB");
-        verify(hashLoggerMock).setFirstName("FirstNameV1");
-        verify(hashLoggerMock, never()).setFirstName("FirstNameV2");
-
-        verify(hashLoggerMock, never()).addMiddleName(any());
-        verify(hashLoggerMock, never()).addSurname(any());
-        verify(hashLoggerMock, never()).setDateOfBirth(any());
+        verify(attributesHashLogger, never()).addMiddleName(any());
+        verify(attributesHashLogger, never()).addSurname(any());
+        verify(attributesHashLogger, never()).setDateOfBirth(any());
     }
 
     @Test
     public void shouldIncludeAllMiddleNamesInHash() {
-
-        when(attributesMock.getMiddleNames()).thenReturn(List.of(
+        when(attributes.getMiddleNames()).thenReturn(List.of(
                 new Attribute<>("MiddleNameA", false, null, null),
                 new Attribute<>("MiddleNameV1", true, null, null),
                 new Attribute<>("MiddleNameC", false, null, null),
                 new Attribute<>("MiddleNameV2", true, null, null)
         ));
 
-        final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
-                new EidasResponseAttributesHashLoggerHelper(hashLoggerMock);
+        applyAttributesToLogger();
 
-        eidasResponseAttributesHashLoggerHelper.applyAttributesToHashLogger(
-                attributesMock,
-                PID
-        );
+        verify(attributesHashLogger).setPid(PID);
+        verify(attributesHashLogger, times(4)).addMiddleName(any());
 
-        verify(hashLoggerMock).setPid(PID);
-        verify(hashLoggerMock, times(4)).addMiddleName(any());
+        InOrder inOrder = inOrder(attributesHashLogger);
+        inOrder.verify(attributesHashLogger).addMiddleName("MiddleNameA");
+        inOrder.verify(attributesHashLogger).addMiddleName("MiddleNameV1");
+        inOrder.verify(attributesHashLogger).addMiddleName("MiddleNameC");
+        inOrder.verify(attributesHashLogger).addMiddleName("MiddleNameV2");
 
-        InOrder inOrder = inOrder(hashLoggerMock);
-        inOrder.verify(hashLoggerMock).addMiddleName("MiddleNameA");
-        inOrder.verify(hashLoggerMock).addMiddleName("MiddleNameV1");
-        inOrder.verify(hashLoggerMock).addMiddleName("MiddleNameC");
-        inOrder.verify(hashLoggerMock).addMiddleName("MiddleNameV2");
-
-        verify(hashLoggerMock, never()).setFirstName(any());
-        verify(hashLoggerMock, never()).addSurname(any());
-        verify(hashLoggerMock, never()).setDateOfBirth(any());
+        verify(attributesHashLogger, never()).setFirstName(any());
+        verify(attributesHashLogger, never()).addSurname(any());
+        verify(attributesHashLogger, never()).setDateOfBirth(any());
     }
 
     @Test
     public void shouldIncludeAllSurnamesInHash() {
-
-        when(attributesMock.getSurnames()).thenReturn(List.of(
+        when(attributes.getSurnames()).thenReturn(List.of(
                 new Attribute<>("SurnameV1", true, null, null),
                 new Attribute<>("SurnameA", false, null, null),
                 new Attribute<>("SurnameV2", true, null, null),
                 new Attribute<>("SurnameB", false, null, null)
         ));
 
-        final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
-                new EidasResponseAttributesHashLoggerHelper(hashLoggerMock);
+        applyAttributesToLogger();
 
-        eidasResponseAttributesHashLoggerHelper.applyAttributesToHashLogger(
-                attributesMock,
-                PID
-        );
+        verify(attributesHashLogger).setPid(PID);
+        verify(attributesHashLogger, times(4)).addSurname(any());
 
-        verify(hashLoggerMock).setPid(PID);
-        verify(hashLoggerMock, times(4)).addSurname(any());
+        InOrder inOrder = inOrder(attributesHashLogger);
+        inOrder.verify(attributesHashLogger).addSurname("SurnameV1");
+        inOrder.verify(attributesHashLogger).addSurname("SurnameA");
+        inOrder.verify(attributesHashLogger).addSurname("SurnameV2");
+        inOrder.verify(attributesHashLogger).addSurname("SurnameB");
 
-        InOrder inOrder = inOrder(hashLoggerMock);
-        inOrder.verify(hashLoggerMock).addSurname("SurnameV1");
-        inOrder.verify(hashLoggerMock).addSurname("SurnameA");
-        inOrder.verify(hashLoggerMock).addSurname("SurnameV2");
-        inOrder.verify(hashLoggerMock).addSurname("SurnameB");
-
-        verify(hashLoggerMock, never()).setFirstName(any());
-        verify(hashLoggerMock, never()).addMiddleName(any());
-        verify(hashLoggerMock, never()).setDateOfBirth(any());
+        verify(attributesHashLogger, never()).setFirstName(any());
+        verify(attributesHashLogger, never()).addMiddleName(any());
+        verify(attributesHashLogger, never()).setDateOfBirth(any());
     }
 
     @Test
     public void shouldOnlyIncludeFirstVerifiedDateOfBirthInHash() {
-
-        DateTime[] datesOfBirth = new DateTime[]{
+        final DateTime[] datesOfBirth = new DateTime[]{
                 new DateTime(1990, 1, 1, 0, 0),
                 new DateTime(1985, 9, 7, 14, 0),
                 new DateTime(1984, 10, 1, 0, 0),
                 new DateTime(1977, 12, 6, 12, 0)
         };
 
-        when(attributesMock.getDatesOfBirth()).thenReturn(List.of(
+        when(attributes.getDatesOfBirth()).thenReturn(List.of(
                 new Attribute<>(datesOfBirth[0], false, null, null),
                 new Attribute<>(datesOfBirth[1], true, null, null),
                 new Attribute<>(datesOfBirth[2], false, null, null),
                 new Attribute<>(datesOfBirth[3], true, null, null)
         ));
 
-        final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
-                new EidasResponseAttributesHashLoggerHelper(hashLoggerMock);
+        applyAttributesToLogger();
 
-        eidasResponseAttributesHashLoggerHelper.applyAttributesToHashLogger(
-                attributesMock,
-                PID
-        );
+        verify(attributesHashLogger).setPid(PID);
+        verify(attributesHashLogger, times(1)).setDateOfBirth(any());
+        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[0]);
+        verify(attributesHashLogger).setDateOfBirth(datesOfBirth[1]);
+        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[2]);
+        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[3]);
 
-        verify(hashLoggerMock).setPid(PID);
-        verify(hashLoggerMock, times(1)).setDateOfBirth(any());
-        verify(hashLoggerMock, never()).setDateOfBirth(datesOfBirth[0]);
-        verify(hashLoggerMock).setDateOfBirth(datesOfBirth[1]);
-        verify(hashLoggerMock, never()).setDateOfBirth(datesOfBirth[2]);
-        verify(hashLoggerMock, never()).setDateOfBirth(datesOfBirth[3]);
+        verify(attributesHashLogger, never()).addMiddleName(any());
+        verify(attributesHashLogger, never()).addSurname(any());
+        verify(attributesHashLogger, never()).setFirstName(any());
+    }
 
-        verify(hashLoggerMock, never()).addMiddleName(any());
-        verify(hashLoggerMock, never()).addSurname(any());
-        verify(hashLoggerMock, never()).setFirstName(any());
+    private void applyAttributesToLogger() {
+        try {
+            APPLY_ATTRIBUTES_TO_LOGGER_METHOD.invoke(null, attributesHashLogger, attributes, PID);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Method getApplyAttributesToLoggerMethod() {
+        Method applyAttributesToLoggerMethod;
+        try {
+            applyAttributesToLoggerMethod =
+                    HubResponseTranslatorLogger.class.getDeclaredMethod("applyAttributesToHashLogger", EidasResponseAttributesHashLogger.class, Attributes.class, String.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
+        applyAttributesToLoggerMethod.setAccessible(true);
+
+        return applyAttributesToLoggerMethod;
     }
 }

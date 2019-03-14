@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import org.joda.time.DateTime;
+import org.joda.time.chrono.ISOChronology;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,8 @@ public class AttributesBuilder {
     }
 
     public static DateTime createDateTime(int year, int month, int day, int hour, int minute) {
-        return new DateTime().withYear(year).withMonthOfYear(month).withDayOfMonth(day).withHourOfDay(hour).withMinuteOfHour(minute);
+        return new DateTime().withYear(year).withMonthOfYear(month).withDayOfMonth(day)
+                .withHourOfDay(hour).withMinuteOfHour(minute).withChronology(ISOChronology.getInstance());
     }
 
     public static <T> Attribute<T> createAttribute(T value, boolean verified, DateTime validFrom, DateTime validTo) {

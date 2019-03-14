@@ -7,8 +7,11 @@ import org.assertj.core.api.Assertions;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml.saml2.core.Response;
@@ -30,8 +33,8 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
-import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLoggerHelper;
-import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLoggerHelper.HubResponseTranslatorLoggerAttributes;
+import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger;
+import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger.HubResponseTranslatorLoggerAttributes;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
@@ -47,7 +50,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_ENCRYPTION_CERT;
@@ -57,6 +59,7 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBL
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY;
 
+@RunWith(MockitoJUnitRunner.class)
 public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
 
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
@@ -64,12 +67,15 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
 
+    private static final String publicBuild = System.getenv("VERIFY_USE_PUBLIC_BINARIES");
+
     private BasicCredential hubSigningCredential;
     private EncryptedAssertion authnAssertion;
     private EncryptedAssertion matchingDatasetAssertion;
     private Credential eidasDecryptingCredential;
 
-    private static final String publicBuild = System.getenv("VERIFY_USE_PUBLIC_BINARIES");
+    @Mock
+    private Appender<ILoggingEvent> appender;
 
     @Before
     public void setup() throws Throwable {
@@ -162,8 +168,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     @Test
     public void shouldLogEidasResponseAttributesToMDC() throws Exception {
-        Logger logger = (Logger) LoggerFactory.getLogger(HubResponseTranslatorLoggerHelper.class);
-        Appender<ILoggingEvent> appender = mock(Appender.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(HubResponseTranslatorLogger.class);
         logger.addAppender(appender);
 
         Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
@@ -176,7 +181,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        Assertions.assertThat(loggingEvent.getMessage()).contains(HubResponseTranslatorLoggerHelper.EIDAS_RESPONSE_LOGGER_MESSAGE);
+        Assertions.assertThat(loggingEvent.getMessage()).contains(HubResponseTranslatorLogger.EIDAS_RESPONSE_LOGGER_MESSAGE);
         Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID)).isEqualTo(eidasResponse.getID());
         Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION)).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
         Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO)).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
@@ -198,7 +203,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
             Assertions.assertThat(consoleOutput.toString()).containsPattern(
                     Pattern.compile(
                             String.format("%s.*\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"",
-                                    HubResponseTranslatorLoggerHelper.EIDAS_RESPONSE_LOGGER_MESSAGE,
+                                    HubResponseTranslatorLogger.EIDAS_RESPONSE_LOGGER_MESSAGE,
                                     HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION, EIDAS_TEST_CONNECTOR_DESTINATION,
                                     HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID, eidasResponse.getID(),
                                     HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO, ResponseBuilder.DEFAULT_REQUEST_ID,

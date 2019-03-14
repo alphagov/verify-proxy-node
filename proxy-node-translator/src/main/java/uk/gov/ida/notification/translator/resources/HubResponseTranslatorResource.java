@@ -11,11 +11,8 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProv
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
-import uk.gov.ida.notification.translator.logging.EidasResponseAttributesHashLoggerHelper;
-import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLoggerHelper;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseContainer;
-import uk.gov.ida.saml.core.transformers.EidasResponseAttributesHashLogger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -23,6 +20,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import static uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger.logResponseAttributesHash;
+import static uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger.logSamlResponse;
 
 @Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -53,31 +53,17 @@ public class HubResponseTranslatorResource {
                         )
                 );
 
-        final EidasResponseAttributesHashLoggerHelper eidasResponseAttributesHashLoggerHelper =
-                new EidasResponseAttributesHashLoggerHelper(EidasResponseAttributesHashLogger.instance());
+        logResponseAttributesHash(hubResponseTranslatorRequest, translatedHubResponse);
 
-        eidasResponseAttributesHashLoggerHelper.applyAttributesToHashLogger(
-                translatedHubResponse.getAttributes(),
-                translatedHubResponse.getPid()
-        ).logHashFor(
-                hubResponseTranslatorRequest.getRequestId(),
-                hubResponseTranslatorRequest.getDestinationUrl().toString()
+        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(
+                new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
+                X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate())
         );
 
-        final org.opensaml.saml.saml2.core.Response eidasResponse =
-                eidasResponseGenerator.generate(
-                        new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
-                        X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate())
-                );
-
-        logResponse(eidasResponse);
+        logSamlResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
 
         return Response.ok().entity(samlMessage).build();
-    }
-
-    private void logResponse(final org.opensaml.saml.saml2.core.Response eidasResponse) {
-        HubResponseTranslatorLoggerHelper.logEidasResponse(eidasResponse);
     }
 }
