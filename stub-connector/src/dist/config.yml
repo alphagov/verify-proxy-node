@@ -32,3 +32,8 @@ credentialConfiguration:
   privateKey:
     type: ${KEY_TYPES:-encoded}
     key: ${SIGNING_KEY}
+
+zipkin:
+  enabled: ${ZIPKIN_ENABLED:-false}
+  serviceHost: ${ZIPKIN_HOST:-127.0.0.1}
+  servicePort: ${ZIPKIN_PORT:-8080}

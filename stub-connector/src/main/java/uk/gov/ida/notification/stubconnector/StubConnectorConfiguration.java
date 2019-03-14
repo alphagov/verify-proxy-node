@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.stubconnector;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.smoketurner.dropwizard.zipkin.ZipkinFactory;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
@@ -25,6 +26,10 @@ public class StubConnectorConfiguration extends Configuration {
     @NotNull
     private TrustStoreBackedMetadataConfiguration proxyNodeMetadataConfiguration;
 
+    @JsonProperty
+    @Valid
+    private ZipkinFactory zipkin;
+
     public URI getConnectorNodeBaseUrl() {
         return connectorNodeBaseUrl;
     }
@@ -39,5 +44,9 @@ public class StubConnectorConfiguration extends Configuration {
 
     public CredentialConfiguration getCredentialConfiguration() {
         return credentialConfiguration;
+    }
+
+    public ZipkinFactory getZipkin() {
+        return zipkin;
     }
 }

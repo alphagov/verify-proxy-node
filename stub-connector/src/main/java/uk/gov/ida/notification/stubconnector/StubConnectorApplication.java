@@ -1,5 +1,7 @@
 package uk.gov.ida.notification.stubconnector;
 
+import com.smoketurner.dropwizard.zipkin.ZipkinBundle;
+import com.smoketurner.dropwizard.zipkin.ZipkinFactory;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -77,6 +79,13 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
 
+        // Zipkin
+        bootstrap.addBundle(new ZipkinBundle<StubConnectorConfiguration>(getName()) {
+            @Override
+            public ZipkinFactory getZipkinFactory(StubConnectorConfiguration configuration) {
+                return configuration.getZipkin();
+            }
+        });
 
         // Metadata
         proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getProxyNodeMetadataConfiguration()));
@@ -85,7 +94,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
     @Override
     public void run(final StubConnectorConfiguration configuration,
-                    final Environment environment) throws Exception {
+                    final Environment environment) {
 
         proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
 
