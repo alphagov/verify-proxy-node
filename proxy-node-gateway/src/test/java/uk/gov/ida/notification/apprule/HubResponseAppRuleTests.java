@@ -11,11 +11,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.mockito.ArgumentCaptor;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
+import uk.gov.ida.notification.apprule.rules.RedisTestRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorClientErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
+import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.exceptions.mappers.SessionMissingExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
@@ -26,6 +28,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -34,11 +38,18 @@ import static java.util.logging.Level.WARNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
+    private static final int EMBEDDED_REDIS_PORT = 6380;
+
+    private static List<HubResponseTranslatorRequest> translatorArgList = new ArrayList<>();
+
+    private String redisMockURI = this.setupTestRedis();
+
     @ClassRule
-    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
+    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource(translatorArgList));
 
     @ClassRule
     public static final DropwizardClientRule translatorClientServerErrorRule = new DropwizardClientRule(new TestTranslatorServerErrorResource());
@@ -52,14 +63,23 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     @ClassRule
     public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
 
-    private String redisURI = this.setupTestRedis();
+    @ClassRule
+    public static final RedisTestRule embeddedRedis = new RedisTestRule(EMBEDDED_REDIS_PORT);
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", redisMockURI)
+    );
+
+    @Rule
+    public GatewayAppRule proxyNodeAppRuleEmbeddedRedis = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
+        ConfigOverride.config("redisService.url", "redis://localhost:" + EMBEDDED_REDIS_PORT)
     );
 
     @Rule
@@ -67,7 +87,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientServerErrorRule.baseUri().toString()),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", redisMockURI)
     );
 
     @Rule
@@ -75,7 +95,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientClientErrorRule.baseUri().toString()),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", redisMockURI)
     );
 
     private final Form postForm = new Form()
@@ -113,6 +133,20 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             htmlString,
             "//form[@action='http://connector-node.com']/input[@name='RelayState'][@value='relay-state']"
         );
+    }
+
+    @Test
+    public void redisCanStoreCertificateInSession() throws Exception, Throwable {
+        Response response = proxyNodeAppRuleEmbeddedRedis
+            .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+            .request()
+            .cookie(getSessionCookie(proxyNodeAppRuleEmbeddedRedis))
+            .post(Entity.form(postForm));
+
+        assertThat(200).isEqualTo(response.getStatus());
+
+        assertThat(translatorArgList.get(0).getConnectorEncryptionCertificate()).isEqualTo(STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
+        assertThat(translatorArgList.size()).isOne();
     }
 
     @Test

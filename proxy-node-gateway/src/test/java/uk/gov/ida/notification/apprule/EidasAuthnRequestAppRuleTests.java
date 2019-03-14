@@ -10,16 +10,19 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
+import uk.gov.ida.notification.apprule.rules.RedisTestRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlClientErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
+import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
@@ -28,6 +31,8 @@ import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -57,14 +62,14 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     @ClassRule
     public static final DropwizardClientRule vspClientServerErrorRule = new DropwizardClientRule(new TestVerifyServiceProviderServerErrorResource());
 
-    private String redisURI = this.setupTestRedis();
+    private String mockedRedisUrl = this.setupTestRedis();
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -72,7 +77,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -80,7 +85,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -88,7 +93,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Mock
