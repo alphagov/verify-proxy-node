@@ -9,12 +9,13 @@ import static java.text.MessageFormat.format;
 public class ApplicationExceptionMapper extends BaseExceptionMapper<ApplicationException> {
 
     @Override
-    protected void handleException(ApplicationException exception) { }
+    protected Response.Status getResponseStatus() {
+        return Response.Status.INTERNAL_SERVER_ERROR;
+    }
 
     @Override
-    protected Response getResponse(ApplicationException exception) {
-        final String message = format("Exception with id {0} of type {1} whilst contacting uri [{2}]: {3}",
+    protected String getResponseMessage(ApplicationException exception) {
+        return format("Exception with id {0} of type {1} whilst contacting uri [{2}]: {3}",
                 exception.getErrorId(), exception.getExceptionType(), exception.getUri(), exception.getMessage());
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(message).build();
     }
 }

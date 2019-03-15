@@ -1,33 +1,35 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
-import io.dropwizard.jersey.errors.ErrorMessage;
+import org.joda.time.DateTime;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.MessageFormat;
 
 public class HubResponseExceptionMapper extends BaseExceptionMapper<HubResponseException> {
 
     @Override
-    protected void handleException(HubResponseException exception) {
-        setAuthnRequestValues(
-                exception.getSamlResponse().getID(),
-                exception.getSamlResponse().getIssuer().getValue(),
-                exception.getSamlResponse().getIssueInstant());
+    protected Response.Status getResponseStatus() {
+        return Response.Status.BAD_REQUEST;
     }
 
     @Override
-    protected Response getResponse(HubResponseException exception) {
-        String message = MessageFormat.format("Error handling hub response. logId: {0}", getLogId());
+    protected String getResponseMessage(HubResponseException exception) {
+        return MessageFormat.format("Error handling hub response. logId: {0}", getLogId());
+    }
 
-        return Response.status(Response.Status.BAD_REQUEST)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(
-                        new ErrorMessage(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                message
-                        ))
-                .build();
+    @Override
+    protected String getAuthnRequestId(HubResponseException exception) {
+        return exception.getSamlResponse().getID();
+    }
+
+    @Override
+    protected String getIssuerId(HubResponseException exception) {
+        return exception.getSamlResponse().getIssuer().getValue();
+    }
+
+    @Override
+    protected DateTime getIssueInstant(HubResponseException exception) {
+        return exception.getSamlResponse().getIssueInstant();
     }
 }

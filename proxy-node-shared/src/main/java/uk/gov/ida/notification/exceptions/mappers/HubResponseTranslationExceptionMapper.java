@@ -9,11 +9,12 @@ import static java.text.MessageFormat.format;
 public class HubResponseTranslationExceptionMapper extends BaseExceptionMapper<HubResponseTranslationException> {
 
     @Override
-    protected void handleException(HubResponseTranslationException exception) { }
+    protected Response.Status getResponseStatus() {
+        return Response.Status.BAD_REQUEST;
+    }
 
     @Override
-    protected Response getResponse(HubResponseTranslationException exception) {
-        final String message = format("Error whilst handling hub response: {0}; {1}", exception.getMessage(), exception.getCause().getMessage());
-        return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+    protected String getResponseMessage(HubResponseTranslationException exception) {
+        return format("Error whilst handling hub response: {0}; {1}", exception.getMessage(), exception.getCause().getMessage());
     }
 }

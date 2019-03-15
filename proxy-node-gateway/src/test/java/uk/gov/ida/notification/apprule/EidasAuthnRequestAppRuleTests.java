@@ -154,7 +154,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             proxyNodeVspServerErrorAppRule
         );
 
-        assertThat(500).isEqualTo(response.getStatus());
+        assertThat(response.getStatus()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         HtmlHelpers.assertXPath(
             getHtmlStringFromResponse(response),
             "//div[@class='issues'][text()='Something went wrong with the VSP']"

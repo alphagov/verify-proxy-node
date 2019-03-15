@@ -14,11 +14,11 @@ public class VspGenerateAuthnRequestResponseExceptionMapper implements Exception
     @Override
     public Response toResponse(VspGenerateAuthnRequestResponseException exception) {
         log.warning(
-            String.format(
-                "Exception calling verify-service-provider for session '%s': %s",
-                exception.getSessionId(),
-                exception.getCause().getMessage()
-            )
+                String.format(
+                        "Exception calling verify-service-provider for session '%s': %s",
+                        exception.getSessionId(),
+                        exception.getCause().getMessage()
+                )
         );
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorPageView("Something went wrong with the VSP")).build();

@@ -1,27 +1,34 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
-import io.dropwizard.jersey.errors.ErrorMessage;
+import org.joda.time.DateTime;
 import uk.gov.ida.notification.exceptions.authnrequest.AuthnRequestException;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class AuthnRequestExceptionMapper extends BaseExceptionMapper<AuthnRequestException> {
 
     @Override
-    protected void handleException(AuthnRequestException exception) {
-        setAuthnRequestValues(
-                exception.getAuthnRequest().getID(),
-                exception.getAuthnRequest().getIssuer().getValue(),
-                exception.getAuthnRequest().getIssueInstant()
-        );
+    protected Response.Status getResponseStatus() {
+        return Response.Status.BAD_REQUEST;
     }
 
     @Override
-    protected Response getResponse(AuthnRequestException exception) {
-        return Response.status(Response.Status.BAD_REQUEST)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "Error handling authn request. logId: " + getLogId()))
-                .build();
+    protected String getResponseMessage(AuthnRequestException exception) {
+        return "Error handling authn request. logId: " + getLogId();
+    }
+
+    @Override
+    protected String getAuthnRequestId(AuthnRequestException exception) {
+        return exception.getAuthnRequest().getID();
+    }
+
+    @Override
+    protected String getIssuerId(AuthnRequestException exception) {
+        return exception.getAuthnRequest().getIssuer().getValue();
+    }
+
+    @Override
+    protected DateTime getIssueInstant(AuthnRequestException exception) {
+        return exception.getAuthnRequest().getIssueInstant();
     }
 }

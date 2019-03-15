@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
 import uk.gov.ida.notification.exceptions.SessionAlreadyExistsException;
-import uk.gov.ida.notification.exceptions.SessionMissingException;
 import uk.gov.ida.notification.views.ErrorPageView;
 
 import javax.ws.rs.core.Response;
