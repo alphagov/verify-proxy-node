@@ -3,11 +3,19 @@ language: java
 jdk:
   - openjdk11
 
-script: ./gradlew --no-daemon --quiet test
+install:
+  - npm install -g snyk
+
+script:
+  - ./gradlew --no-daemon --quiet test
+  - snyk/test.sh
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+after_success:
+  - snyk/monitor.sh
 
 cache:
   directories:
