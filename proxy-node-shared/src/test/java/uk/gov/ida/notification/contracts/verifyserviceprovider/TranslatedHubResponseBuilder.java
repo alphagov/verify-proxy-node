@@ -62,7 +62,7 @@ public class TranslatedHubResponseBuilder {
         return new TranslatedHubResponseBuilder().withScenario(VspScenario.IDENTITY_VERIFIED).withoutAttributes().build();
     }
 
-    public static TranslatedHubResponse buildTranslatedHubResponseIncompleteAttributes() {
+    public static TranslatedHubResponse buildTranslatedHubResponseFirstNameAttributeOnly() {
         return new TranslatedHubResponseBuilder()
                 .withScenario(VspScenario.IDENTITY_VERIFIED)
                 .withAttributes(

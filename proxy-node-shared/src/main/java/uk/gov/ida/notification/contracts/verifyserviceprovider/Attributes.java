@@ -87,6 +87,6 @@ public class Attributes {
 
     // Prints date in EIDAS format YYYY-MM-dd
     public static String getFormattedDate(DateTime date) {
-        return ISODateTimeFormat.date().withChronology(ISOChronology.getInstanceUTC()).print(date);
+        return ISODateTimeFormat.date().withChronology(ISOChronology.getInstance()).print(date);
     }
 }
