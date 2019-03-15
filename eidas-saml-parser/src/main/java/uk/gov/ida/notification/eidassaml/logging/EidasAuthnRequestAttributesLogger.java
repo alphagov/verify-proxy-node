@@ -15,10 +15,11 @@ public class EidasAuthnRequestAttributesLogger {
             MDC.put("eidasIssueInstant", authnRequest.getIssueInstant().toString());
             MDC.put("eidasIssuer", authnRequest.getIssuer().getValue());
             log.info("Authn request validated by ESP");
-        } catch (Exception e) {
-            throw e;
         } finally {
-            MDC.clear();
+            MDC.remove("eidasRequestId");
+            MDC.remove("eidasDestination");
+            MDC.remove("eidasIssueInstant");
+            MDC.remove("eidasIssuer");
         }
     }
 }
