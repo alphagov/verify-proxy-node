@@ -25,7 +25,7 @@ public class EidasResponseGenerator {
         final ResponseAssertionEncrypter assertionEncrypter = new ResponseAssertionEncrypter(encryptionCredential);
 
         Response eidasResponseWithEncryptedAssertion = assertionEncrypter.encrypt(eidasResponse);
-        samlObjectSigner.sign(eidasResponseWithEncryptedAssertion);
+        samlObjectSigner.sign(eidasResponseWithEncryptedAssertion, hubResponseContainer.getEidasRequestId());
 
         return eidasResponseWithEncryptedAssertion;
     }

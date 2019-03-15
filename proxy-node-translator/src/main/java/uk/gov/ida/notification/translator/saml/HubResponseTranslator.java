@@ -44,7 +44,7 @@ public class HubResponseTranslator {
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
 
-    Response translate(HubResponseContainer hubResponseContainer) {
+    public Response translate(HubResponseContainer hubResponseContainer) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {

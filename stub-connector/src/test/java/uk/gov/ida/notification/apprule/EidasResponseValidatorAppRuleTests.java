@@ -113,7 +113,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
                     TEST_RP_PRIVATE_SIGNING_KEY
                 ), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
 
-        signer.sign(response);
+        signer.sign(response, "response-id");
 
         return response;
     }
