@@ -24,6 +24,7 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public class EidasSamlParserAppRuleTestBase {
+
     @ClassRule
     public static final DropwizardClientRule metadataClientRule;
 

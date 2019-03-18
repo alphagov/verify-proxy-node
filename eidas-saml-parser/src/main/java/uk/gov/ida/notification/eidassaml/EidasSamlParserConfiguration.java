@@ -9,7 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class EidasSamlConfiguration extends Configuration {
+public class EidasSamlParserConfiguration extends Configuration {
 
     @JsonProperty
     @Valid

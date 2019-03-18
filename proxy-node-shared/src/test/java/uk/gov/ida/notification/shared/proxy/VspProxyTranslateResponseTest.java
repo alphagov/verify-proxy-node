@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
@@ -29,7 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -134,23 +133,19 @@ public class VspProxyTranslateResponseTest {
         assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
     }
 
-    @Test(expected = ApplicationException.class)
+    @Test
     public void shouldThrowApplicationExceptionOnClientError() {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspClientErrorClientRule.baseUri());
 
-        vspProxy.getTranslatedHubResponse(
-                new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")
-        );
-        fail("Expected exception not thrown");
+        assertThatThrownBy(() -> vspProxy.getTranslatedHubResponse(
+                new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")));
     }
 
-    @Test(expected = ApplicationException.class)
+    @Test
     public void shouldThrowApplicationExceptionOnServerError() {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspServerErrorClientRule.baseUri());
 
-        vspProxy.getTranslatedHubResponse(
-                new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")
-        );
-        fail("Expected exception not thrown");
+        assertThatThrownBy(() -> vspProxy.getTranslatedHubResponse(
+                new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")));
     }
 }

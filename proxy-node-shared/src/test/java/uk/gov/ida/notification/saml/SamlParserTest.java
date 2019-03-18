@@ -7,12 +7,13 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
 import org.opensaml.saml.saml2.core.impl.ResponseImpl;
+import org.xml.sax.SAXParseException;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SamlParserTest extends SamlInitializedTest {
 
@@ -44,7 +45,7 @@ public class SamlParserTest extends SamlInitializedTest {
     @Test
     public void shouldFailToParseUnknownElement() {
         String xmlString = "<?xml version=\"1.0\"?>\n" +
-            "<lolz>hey</lolz>";
+                "<lolz>hey</lolz>";
 
         try {
             parser.parseSamlString(xmlString);

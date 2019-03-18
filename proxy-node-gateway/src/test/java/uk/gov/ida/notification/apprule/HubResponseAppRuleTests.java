@@ -3,12 +3,10 @@ package uk.gov.ida.notification.apprule;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.glassfish.jersey.internal.util.Base64;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
-import org.mockito.ArgumentCaptor;
 import uk.gov.ida.notification.apprule.base.GatewayAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.RedisTestRule;
@@ -18,8 +16,6 @@ import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
-import uk.gov.ida.notification.exceptions.mappers.SessionMissingExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.shared.Urls;
@@ -28,28 +24,20 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
-import static java.util.logging.Level.WARNING;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     private static final int EMBEDDED_REDIS_PORT = 6380;
 
-    private static List<HubResponseTranslatorRequest> translatorArgList = new ArrayList<>();
-
-    private String redisMockURI = this.setupTestRedis();
+    private static final TestTranslatorResource testTranslatorResource = new TestTranslatorResource();
 
     @ClassRule
-    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource(translatorArgList));
+    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(testTranslatorResource);
 
     @ClassRule
     public static final DropwizardClientRule translatorClientServerErrorRule = new DropwizardClientRule(new TestTranslatorServerErrorResource());
@@ -65,6 +53,8 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @ClassRule
     public static final RedisTestRule embeddedRedis = new RedisTestRule(EMBEDDED_REDIS_PORT);
+
+    private final String redisMockURI = this.setupTestRedis();
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
@@ -102,15 +92,6 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         .param(SamlFormMessageType.SAML_RESPONSE, Base64.encodeAsString("I'm going to be a SAML blob"))
         .param("RelayState", "relay-state");
 
-    private Handler logHandler;
-    private ArgumentCaptor<LogRecord> captorLoggingEvent;
-
-    @Before
-    public void setup() {
-        logHandler = mock(Handler.class);
-        captorLoggingEvent = ArgumentCaptor.forClass(LogRecord.class);
-    }
-
     @Test
     public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception {
         Response response = proxyNodeAppRule
@@ -119,7 +100,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             .cookie(getSessionCookie(proxyNodeAppRule))
             .post(Entity.form(postForm));
 
-        assertThat(200).isEqualTo(response.getStatus());
+        assertThat(response.getStatus()).isEqualTo(200);
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
@@ -136,7 +117,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void redisCanStoreCertificateInSession() throws Exception, Throwable {
+    public void redisCanStoreCertificateInSession() throws Throwable {
         Response response = proxyNodeAppRuleEmbeddedRedis
             .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
             .request()
@@ -145,82 +126,59 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
         assertThat(200).isEqualTo(response.getStatus());
 
-        assertThat(translatorArgList.get(0).getConnectorEncryptionCertificate()).isEqualTo(STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
-        assertThat(translatorArgList.size()).isOne();
+        final List<HubResponseTranslatorRequest> translatorArgs = testTranslatorResource.getTranslatorArgs();
+        assertThat(translatorArgs.get(0).getConnectorEncryptionCertificate()).isEqualTo(STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
+        assertThat(translatorArgs.size()).isOne();
     }
 
     @Test
-    public void returnsErrorPageAndLogsIfSessionMissingException() throws Exception {
-        Logger logger = Logger.getLogger(SessionMissingExceptionMapper.class.getName());
-        logger.addHandler(logHandler);
-
+    public void returnsErrorPageIfSessionMissingException() throws Exception {
         Response response = proxyNodeAppRule
             .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
             .request()
             .post(Entity.form(postForm));
 
-        assertThat(400).isEqualTo(response.getStatus());
+        assertThat(response.getStatus()).isEqualTo(400);
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
             htmlString,
-            "//div[@class='issues'][text()='Something went wrong session should exist']"
+            "//div[@class='issues'][text()='Something went wrong; session does not exist']"
         );
-
-        verify(logHandler).publish(captorLoggingEvent.capture());
-        assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
-        assertThat(captorLoggingEvent.getValue().getMessage())
-            .matches("Session should exist for session_id: .+");
     }
 
     @Test
-    public void serverErrorResponseFromTranslatorLogsAndReturns500() throws Exception {
-        Logger logger = Logger.getLogger(TranslatorResponseExceptionMapper.class.getName());
-        logger.addHandler(logHandler);
-
+    public void serverErrorResponseFromTranslatorReturns500() throws Exception {
         Response response = proxyNodeServerErrorAppRule
             .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
             .request()
             .cookie(getSessionCookie(proxyNodeServerErrorAppRule))
             .post(Entity.form(postForm));
 
-        assertThat(500).isEqualTo(response.getStatus());
+        assertThat(response.getStatus()).isEqualTo(500);
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
             htmlString,
-            "//div[@class='issues'][text()='Something went wrong with the Translator']"
+            "//div[@class='issues'][text()='Something went wrong when contacting the Translator']"
         );
-
-        verify(logHandler).publish(captorLoggingEvent.capture());
-        assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
-        assertThat(captorLoggingEvent.getValue().getMessage())
-            .matches("Exception calling translator for session '.*': Exception of type \\[REMOTE_SERVER_ERROR\\] whilst contacting uri:.*\n.*");
     }
 
     @Test
-    public void clientErrorResponseFromTranslatorLogsAndReturns400() throws Exception {
-        Logger logger = Logger.getLogger(TranslatorResponseExceptionMapper.class.getName());
-        logger.addHandler(logHandler);
-
+    public void clientErrorResponseFromTranslatorReturns400() throws Exception {
         Response response = proxyNodeClientErrorAppRule
             .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
             .request()
             .cookie(getSessionCookie(proxyNodeClientErrorAppRule))
             .post(Entity.form(postForm));
 
-        assertThat(400).isEqualTo(response.getStatus());
+        assertThat(response.getStatus()).isEqualTo(400);
 
         String htmlString = response.readEntity(String.class);
         HtmlHelpers.assertXPath(
             htmlString,
-            "//div[@class='issues'][text()='Something went wrong with the Translator']"
+            "//div[@class='issues'][text()='Something went wrong when contacting the Translator']"
         );
-
-        verify(logHandler).publish(captorLoggingEvent.capture());
-        assertThat(captorLoggingEvent.getValue().getLevel()).isEqualTo(WARNING);
-        assertThat(captorLoggingEvent.getValue().getMessage())
-            .matches("Exception calling translator for session '.*': Exception of type \\[CLIENT_ERROR\\] whilst contacting uri:.*\n.*");
     }
 
     private NewCookie getSessionCookie(GatewayAppRule appRule) throws Exception {
@@ -231,5 +189,4 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     public void tearDown() {
         this.killTestRedis();
     }
-
 }

@@ -1,33 +1,35 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
+import org.joda.time.DateTime;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseException;
-import uk.gov.ida.notification.views.ErrorPageView;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import java.text.MessageFormat;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class HubResponseExceptionMapper implements ExceptionMapper<HubResponseException> {
-    private final Logger log = Logger.getLogger(getClass().getName());
+public class HubResponseExceptionMapper extends ExceptionToErrorPageMapper<HubResponseException> {
 
     @Override
-    public Response toResponse(HubResponseException exception) {
-        String logId = String.format("%016x", ThreadLocalRandom.current().nextLong());
+    protected Response.Status getResponseStatus(HubResponseException exception) {
+        return Response.Status.BAD_REQUEST;
+    }
 
-        log.log(Level.WARNING, String.format("logId=%s, requestId=%s, issuer=%s, issueInstant=%s, cause=%s",
-                logId,
-                exception.getSamlResponse().getID(),
-                exception.getSamlResponse().getIssuer().getValue(),
-                exception.getSamlResponse().getIssueInstant(),
-                exception.getCause())
-        );
+    @Override
+    protected String getErrorPageMessage(HubResponseException exception) {
+        return MessageFormat.format("Error handling hub response. logId: {0}", getLogId());
+    }
 
-        String message = MessageFormat.format("Error handling hub response. logId: {0}", logId);
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity(new ErrorPageView(message))
-                .build();
+    @Override
+    protected String getAuthnRequestId(HubResponseException exception) {
+        return exception.getSamlResponse().getID();
+    }
+
+    @Override
+    protected String getIssuerId(HubResponseException exception) {
+        return exception.getSamlResponse().getIssuer().getValue();
+    }
+
+    @Override
+    protected DateTime getIssueInstant(HubResponseException exception) {
+        return exception.getSamlResponse().getIssueInstant();
     }
 }

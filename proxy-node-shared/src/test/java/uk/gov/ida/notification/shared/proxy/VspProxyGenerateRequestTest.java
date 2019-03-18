@@ -13,7 +13,7 @@ import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
-import uk.gov.ida.notification.exceptions.proxy.VspGenerateAuthnRequestResponseException;
+import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderRequestException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,9 +85,9 @@ public class VspProxyGenerateRequestTest {
 
         AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
 
-        assertThat("saml_request").isEqualTo(response.getSamlRequest());
-        assertThat("request_id").isEqualTo(response.getRequestId());
-        assertThat(UriBuilder.fromUri("http://sso-location.com").build()).isEqualTo(response.getSsoLocation());
+        assertThat(response.getSamlRequest()).isEqualTo("saml_request");
+        assertThat(response.getRequestId()).isEqualTo("request_id");
+        assertThat(response.getSsoLocation()).isEqualTo(UriBuilder.fromUri("http://sso-location.com").build());
 
         Mockito.verify(jsonClient).post(
                 Mockito.argThat((AuthnRequestGenerationBody request) -> request.getLevelOfAssurance().equals("LEVEL_2")),
@@ -100,37 +100,23 @@ public class VspProxyGenerateRequestTest {
     public void shouldThrowVerifyServiceProviderResponseExceptionOnServerError() {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspServerErrorClientRule.baseUri());
 
-        try {
-            AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
-            fail("Expected exception not thrown");
-        } catch (VspGenerateAuthnRequestResponseException e) {
-            assertThat(e.getCause().getMessage())
-                    .startsWith(
-                            String.format(
-                                    "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/generate-request",
-                                    testVspServerErrorClientRule.baseUri().toString()
-                            )
-                    );
-            assertThat("session-id").isEqualTo(e.getSessionId());
-        }
+        assertThatThrownBy(() -> vspProxy.generateAuthnRequest("session-id"))
+                .isInstanceOfSatisfying(VerifyServiceProviderRequestException.class, e -> {
+                    assertThat(e.getSessionId()).isEqualTo("session-id");
+                    assertThat(e.getCause()).hasMessageStartingWith(
+                            String.format("Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/generate-request",
+                                    testVspServerErrorClientRule.baseUri().toString()));
+                });
     }
 
     @Test
     public void shouldThrowVerifyServiceProviderResponseExceptionOnClientError() {
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspClientErrorClientRule.baseUri());
 
-        try {
-            AuthnRequestResponse response = vspProxy.generateAuthnRequest("session-id");
-            fail("Expected exception not thrown");
-        } catch (VspGenerateAuthnRequestResponseException e) {
-            assertThat(e.getCause().getMessage())
-                    .startsWith(
-                            String.format(
-                                    "Exception of type [CLIENT_ERROR] whilst contacting uri: %s/generate-request",
-                                    testVspClientErrorClientRule.baseUri().toString()
-                            )
-                    );
-            assertThat("session-id").isEqualTo(e.getSessionId());
-        }
+        assertThatThrownBy(() -> vspProxy.generateAuthnRequest("session-id"))
+                .isInstanceOfSatisfying(VerifyServiceProviderRequestException.class, e ->
+                        assertThat(e.getCause()).hasMessageStartingWith(
+                                String.format("Exception of type [CLIENT_ERROR] whilst contacting uri: %s/generate-request",
+                                        testVspClientErrorClientRule.baseUri().toString())));
     }
 }

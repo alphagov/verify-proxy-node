@@ -1,22 +1,18 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
 import uk.gov.ida.notification.exceptions.SessionAttributeException;
-import uk.gov.ida.notification.views.ErrorPageView;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import java.util.logging.Logger;
 
-public class SessionAttributeExceptionMapper implements ExceptionMapper<SessionAttributeException> {
-    private final Logger log = Logger.getLogger(getClass().getName());
+public class SessionAttributeExceptionMapper extends ExceptionToErrorPageMapper<SessionAttributeException> {
 
     @Override
-    public Response toResponse(SessionAttributeException exception) {
-        log.warning(exception.getMessage());
+    protected Response.Status getResponseStatus(SessionAttributeException exception) {
+        return Response.Status.BAD_REQUEST;
+    }
 
-        return Response
-            .status(Response.Status.BAD_REQUEST)
-            .entity(new ErrorPageView("Something went wrong with the session attributes"))
-            .build();
+    @Override
+    protected String getErrorPageMessage(SessionAttributeException exception) {
+        return "Something went wrong; invalid session attributes";
     }
 }

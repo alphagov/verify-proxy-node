@@ -7,7 +7,7 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProv
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
-import uk.gov.ida.notification.exceptions.proxy.VspGenerateAuthnRequestResponseException;
+import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderRequestException;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -35,7 +35,7 @@ public class VerifyServiceProviderProxy {
         try {
             return jsonClient.post(request, generateHubAuthnRequestEndpoint, AuthnRequestResponse.class);
         } catch (ApplicationException e) {
-            throw new VspGenerateAuthnRequestResponseException(e, sessionId);
+            throw new VerifyServiceProviderRequestException(e, sessionId);
         }
     }
 

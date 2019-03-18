@@ -15,7 +15,7 @@ import uk.gov.ida.notification.exceptions.mappers.SessionAlreadyExistsExceptionM
 import uk.gov.ida.notification.exceptions.mappers.SessionAttributeExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.SessionMissingExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.VerifyServiceProviderRequestExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -87,7 +87,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new EidasSamlParserResponseExceptionMapper());
-        environment.jersey().register(new VspGenerateAuthnRequestResponseExceptionMapper());
+        environment.jersey().register(new VerifyServiceProviderRequestExceptionMapper());
         environment.jersey().register(new TranslatorResponseExceptionMapper());
         environment.jersey().register(new SessionAttributeExceptionMapper());
         environment.jersey().register(new SessionMissingExceptionMapper());

@@ -15,5 +15,4 @@ public class AuthnRequestException extends WebApplicationException {
     public AuthnRequest getAuthnRequest() {
         return authnRequest;
     }
-
 }

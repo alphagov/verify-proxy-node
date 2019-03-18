@@ -2,10 +2,10 @@ package uk.gov.ida.notification.exceptions.proxy;
 
 import javax.ws.rs.WebApplicationException;
 
-public class VspGenerateAuthnRequestResponseException extends WebApplicationException {
+public class VerifyServiceProviderRequestException extends WebApplicationException {
     private final String sessionId;
 
-    public VspGenerateAuthnRequestResponseException(Throwable cause, String sessionId) {
+    public VerifyServiceProviderRequestException(Throwable cause, String sessionId) {
         super(cause);
         this.sessionId = sessionId;
     }
