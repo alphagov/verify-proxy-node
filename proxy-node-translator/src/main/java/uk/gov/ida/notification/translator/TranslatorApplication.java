@@ -16,6 +16,7 @@ import uk.gov.ida.notification.exceptions.mappers.HubResponseTranslationExceptio
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
@@ -69,6 +70,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
     @Override
     public void run(final TranslatorConfiguration configuration, final Environment environment) {
+        environment.jersey().register(IstioHeaderMapperFilter.class);
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);

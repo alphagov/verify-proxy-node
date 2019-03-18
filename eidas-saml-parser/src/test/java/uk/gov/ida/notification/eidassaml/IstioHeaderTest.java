@@ -14,17 +14,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_FLAGS;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_PARENTSPANID;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_SAMPLED;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_SPANID;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_OT_SPAN_CONTEXT;
+import static uk.gov.ida.notification.shared.IstioHeaders.X_REQUEST_ID;
 
 public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
-
-    private static final String X_REQUEST_ID = "x-request-id";
-    private static final String X_B3_TRACEID = "x-b3-traceid";
-    private static final String X_B3_SPANID = "x-b3-spanid";
-    private static final String X_B3_PARENTSPANID = "x-b3-parentspanid";
-    private static final String X_B3_SAMPLED = "x-b3-sampled";
-    private static final String X_B3_FLAGS = "x-b3-flags";
-    private static final String X_OT_SPAN_CONTEXT = "x-ot-span-context";
-    private static final String SOME_RANDOM_HEADER = "some-random-header";
 
     @Test
     public void checkIfHeadersPersist() throws Exception {
@@ -36,38 +34,30 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
         authnRequest.setDestination("destination");
         authnRequest.setIssueInstant(new DateTime(2019, 02, 28, 9, 54));
 
-
-        final String xRequestId = "x-request-id";
-        final String xB3Traceid = "x-b3-traceid";
-        final String xB3Spanid = "x-b3-spanid";
-        final String xB3Parentspanid = "x-b3-parentspanid";
-        final String xB3Sampled = "x-b3-sampled";
-        final String xB3Flags = "x-b3-flags";
-        final String xOtSpanContext = "x-ot-span-context";
-        final String someRandomHeader = "somerandomheader";
+        String SOME_RANDOM_HEADER = "some-random-header";
 
         EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(ObjectUtils.toString(authnRequest)));
         Response response = eidasSamlParserAppRule.target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
-                .header(X_REQUEST_ID, xRequestId)
-                .header(X_B3_TRACEID, xB3Traceid)
-                .header(X_B3_SPANID, xB3Spanid)
-                .header(X_B3_PARENTSPANID, xB3Parentspanid)
-                .header(X_B3_SAMPLED, xB3Sampled)
-                .header(X_B3_FLAGS, xB3Flags)
-                .header(X_OT_SPAN_CONTEXT, xOtSpanContext)
-                .header(SOME_RANDOM_HEADER, someRandomHeader)
+                .header(X_REQUEST_ID, X_REQUEST_ID)
+                .header(X_B3_TRACEID, X_B3_TRACEID)
+                .header(X_B3_SPANID, X_B3_SPANID)
+                .header(X_B3_PARENTSPANID, X_B3_PARENTSPANID)
+                .header(X_B3_SAMPLED, X_B3_SAMPLED)
+                .header(X_B3_FLAGS, X_B3_FLAGS)
+                .header(X_OT_SPAN_CONTEXT, X_OT_SPAN_CONTEXT)
+                .header(SOME_RANDOM_HEADER, SOME_RANDOM_HEADER)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
 
 
 
-        assertThat(response.getHeaders().getFirst(X_REQUEST_ID)).isEqualTo(xRequestId);
-        assertThat(response.getHeaders().getFirst(X_B3_TRACEID)).isEqualTo(xB3Traceid);
-        assertThat(response.getHeaders().getFirst(X_B3_SPANID)).isEqualTo(xB3Spanid);
-        assertThat(response.getHeaders().getFirst(X_B3_PARENTSPANID)).isEqualTo(xB3Parentspanid);
-        assertThat(response.getHeaders().getFirst(X_B3_SAMPLED)).isEqualTo(xB3Sampled);
-        assertThat(response.getHeaders().getFirst(X_B3_FLAGS)).isEqualTo(xB3Flags);
-        assertThat(response.getHeaders().getFirst(X_OT_SPAN_CONTEXT)).isEqualTo(xOtSpanContext);
+        assertThat(response.getHeaders().getFirst(X_REQUEST_ID)).isEqualTo(X_REQUEST_ID);
+        assertThat(response.getHeaders().getFirst(X_B3_TRACEID)).isEqualTo(X_B3_TRACEID);
+        assertThat(response.getHeaders().getFirst(X_B3_SPANID)).isEqualTo(X_B3_SPANID);
+        assertThat(response.getHeaders().getFirst(X_B3_PARENTSPANID)).isEqualTo(X_B3_PARENTSPANID);
+        assertThat(response.getHeaders().getFirst(X_B3_SAMPLED)).isEqualTo(X_B3_SAMPLED);
+        assertThat(response.getHeaders().getFirst(X_B3_FLAGS)).isEqualTo(X_B3_FLAGS);
+        assertThat(response.getHeaders().getFirst(X_OT_SPAN_CONTEXT)).isEqualTo(X_OT_SPAN_CONTEXT);
         assertThat(response.getHeaders().containsKey(SOME_RANDOM_HEADER)).isFalse();
     }
 }

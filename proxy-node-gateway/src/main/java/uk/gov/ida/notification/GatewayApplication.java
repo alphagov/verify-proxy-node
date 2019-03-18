@@ -24,6 +24,7 @@ import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
+import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 public class GatewayApplication extends Application<GatewayConfiguration> {
@@ -80,6 +81,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         SessionHandler sessionHandler = new SessionHandler();
         sessionHandler.setSessionCookie("gateway-session");
         environment.servlets().setSessionHandler(sessionHandler);
+
+        environment.jersey().register(IstioHeaderMapperFilter.class);
     }
 
     private void registerExceptionMappers(Environment environment) {

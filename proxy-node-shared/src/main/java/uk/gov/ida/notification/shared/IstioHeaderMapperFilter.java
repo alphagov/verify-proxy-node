@@ -7,18 +7,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
+import static uk.gov.ida.notification.shared.IstioHeaders.ISTIO_HEADERS;
+
 @Provider
 public class IstioHeaderMapperFilter implements ContainerResponseFilter {
-
-    private static final String[] ISTIO_HEADERS = {
-        "x-request-id",
-        "x-b3-traceid",
-        "x-b3-spanid",
-        "x-b3-parentspanid",
-        "x-b3-sampled",
-        "x-b3-flags",
-        "x-ot-span-context"
-    };
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
