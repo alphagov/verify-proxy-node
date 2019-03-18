@@ -27,7 +27,10 @@ spec:
         - name: SERVICE_ENTITY_IDS
           value: "[\"https://{{ include "gateway.host" . }}\"]"
         - name: VERIFY_ENVIRONMENT
-          value: "{{ required "vsp.environment is required ie 'INTEGRATION'" .Values.vsp.environment }}"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-vsp
+              key: VERIFY_ENVIRONMENT
         - name: SAML_SIGNING_KEY
           valueFrom:
             secretKeyRef:

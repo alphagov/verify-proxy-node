@@ -3,14 +3,14 @@ kind: Metadata
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: {{ .Release.Name }}-proxy-metadata
+  name: {{ .Release.Name }}-connector-metadata
 spec:
   id: _entities
-  type: proxy
+  type: connector
   data:
-    entityID: https://{{ include "gateway.host" . }}
-    postURL: https://{{ include "gateway.host" . }}/SAML2/SSO/POST
-    redirectURL: https://{{ include "gateway.host" . }}/Redirect
+    entityID: https://{{ include "connector.host" . }}
+    postURL: https://{{ include "connector.host" . }}/SAML2/SSO/POST
+    redirectURL: https://{{ include "connector.host" . }}/Redirect
     orgName: {{ .Release.Name }}
     orgDisplayName: {{ .Release.Name }}
     orgURL: example.com

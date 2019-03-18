@@ -54,7 +54,10 @@ spec:
         imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
         env:
         - name: HSM_IP
-          value: "{{ required "hsm.IP is required" .Values.hsm.IP }}"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-vmc
+              key: hsmIP
         volumeMounts:
         - name: config
           mountPath: /opt/cloudhsm/etc/customerCA.crt
@@ -62,6 +65,6 @@ spec:
       volumes:
       - name: config
         secret:
-          name: {{ .Release.Name }}-vmc
+          secretName: {{ .Release.Name }}-vmc
       terminationGracePeriodSeconds: 10
       serviceAccountName: {{ .Release.Name }}-vmc

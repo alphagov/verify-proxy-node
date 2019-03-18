@@ -49,8 +49,8 @@ spec:
           value: "60000"
         - name: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
           valueFrom:
-            configMapKeyRef:
-              name: {{ .Release.Name }}-saml-metadata
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
               key: postURL
         - name: CONNECTOR_NODE_ENTITY_ID
           value: {{ include "connector.entityID" . }}
@@ -59,12 +59,12 @@ spec:
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-node-pki
-              key: CONNECTOR_NODE_METADATA_TRUSTSTORE
+              name: {{ .Release.Name }}-connector-metadata
+              key: metadataSigningTruststoreBase64
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-node-pki
-              key: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
+              name: {{ .Release.Name }}-connector-metadata
+              key: metadataSigningTruststorePassword
         - name: REDIS_SERVER_URI
           value: redis://{{ .Release.Name }}-esp-redis:6379/

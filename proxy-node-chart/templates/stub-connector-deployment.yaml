@@ -23,6 +23,10 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: Always
+      volumes:
+      - name: hsm-client-crt
+        secret:
+          secretName: {{ .Release.Name }}-connector-metadata
       containers:
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
@@ -48,44 +52,62 @@ spec:
           value: "80"
         - name: CONNECTOR_NODE_BASE_URL
           value: https://{{ include "connector.host" . }}
-        - name: ENCRYPTION_CERT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-stub-connector-pki
-              key: ENCRYPTION_CERT
-        - name: ENCRYPTION_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-stub-connector-pki
-              key: ENCRYPTION_KEY
-        - name: SIGNING_CERT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-stub-connector-pki
-              key: SIGNING_CERT
-        - name: SIGNING_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-stub-connector-pki
-              key: SIGNING_KEY
         - name: PROXY_NODE_ENTITY_ID
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-saml-metadata
+              name: {{ .Release.Name }}-proxy-metadata
               key: entityID
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-saml-metadata
+              name: {{ .Release.Name }}-proxy-metadata
               key: metadataInternalURL
         - name: PROXY_NODE_METADATA_TRUSTSTORE
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-saml-metadata
+              name: {{ .Release.Name }}-proxy-metadata
               key: metadataSigningTruststoreBase64
         - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: {{ .Release.Name }}-saml-metadata
+              name: {{ .Release.Name }}-proxy-metadata
               key: metadataSigningTruststorePassword
+        - name: SIGNER_CONFIG_TYPE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: samlSigningKeyType
+        - name: HSM_SIGNING_KEY_LABEL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: samlSigningKeyLabel
+        - name: SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: samlSigningCertBase64
+        - name: HSM_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: hsmUser
+        - name: HSM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: hsmPassword
+      - name: hsm-client
+        image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
+        imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
+        env:
+        - name: HSM_IP
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: hsmIP
+        volumeMounts:
+        - name: hsm-client-crt
+          mountPath: /opt/cloudhsm/etc/customerCA.crt
+          subPath: hsmCustomerCA.crt
 {{- end -}}
