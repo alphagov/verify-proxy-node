@@ -57,14 +57,14 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     @ClassRule
     public static final DropwizardClientRule vspClientServerErrorRule = new DropwizardClientRule(new TestVerifyServiceProviderServerErrorResource());
 
-    private String redisURI = this.setupTestRedis();
+    private String mockedRedisUrl = this.setupTestRedis();
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -72,7 +72,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -80,7 +80,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -88,7 +88,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
         ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
         ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", redisURI)
+        ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Mock

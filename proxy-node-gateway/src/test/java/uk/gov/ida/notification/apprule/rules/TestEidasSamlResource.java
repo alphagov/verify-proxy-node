@@ -10,6 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
+
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class TestEidasSamlResource {
@@ -17,6 +19,11 @@ public class TestEidasSamlResource {
     @POST
     @Valid
     public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) {
-        return new EidasSamlParserResponse("eidas request id", "issuer", "cert", "http://connector-node.com");
+        return new EidasSamlParserResponse(
+            "eidas request id",
+            "issuer",
+            STUB_COUNTRY_PUBLIC_PRIMARY_CERT,
+            "http://connector-node.com"
+        );
     }
 }
