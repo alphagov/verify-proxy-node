@@ -22,6 +22,33 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
+      - name: controller
+        image: "{{ .Values.vmc.image.repository }}:{{ .Values.vmc.image.tag }}"
+        imagePullPolicy: {{ .Values.vmc.image.pullPolicy }}
+        env:
+        - name: HSM_IP
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-vmc
+              key: hsmIP
+        - name: HSM_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-vmc
+              key: hsmUser
+        - name: HSM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-vmc
+              key: hsmPassword
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: config
+          mountPath: /opt/cloudhsm/etc/customerCA.crt
+          subPath: customerCA.crt
       - name: hsm-client
         image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
         imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
@@ -32,31 +59,9 @@ spec:
         - name: config
           mountPath: /opt/cloudhsm/etc/customerCA.crt
           subPath: customerCA.crt
-      - name: controller
-        image: "{{ .Values.vmc.image.repository }}:{{ .Values.vmc.image.tag }}"
-        imagePullPolicy: {{ .Values.vmc.image.pullPolicy }}
-        env:
-        - name: HSM_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-hsm
-              key: username
-        - name: HSM_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-hsm
-              key: password
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        volumeMounts:
-        - name: config
-          mountPath: /etc/verify-proxy-node/hsm_signing_cert.pem
-          subPath: hsm_signing_cert.pem
       volumes:
-        - name: config
-          configMap:
-            name: {{ .Release.Name }}-vmc
+      - name: config
+        secret:
+          name: {{ .Release.Name }}-vmc
       terminationGracePeriodSeconds: 10
       serviceAccountName: {{ .Release.Name }}-vmc

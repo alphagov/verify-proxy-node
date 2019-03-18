@@ -20,7 +20,6 @@ vmc:
     repository: registry.tools.verify.govsvc.uk/eidas/metadata-controller
     tag: latest
     pullPolicy: IfNotPresent
-  signingCert:
 
 gateway:
   replicaCount: 1
@@ -39,6 +38,8 @@ translator:
 hsm:
   IP:
   customerCA:
+  user:
+  password:
   image:
     repository: registry.tools.verify.govsvc.uk/eidas/cloudhsm
     tag: latest

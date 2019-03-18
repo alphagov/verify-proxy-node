@@ -24,8 +24,8 @@ spec:
       restartPolicy: Always
       volumes:
         - name: hsm-client-crt
-          configMap:
-            name: {{ .Release.Name }}-translator
+          secret:
+            name: {{ .Release.Name }}-saml-metadata
       containers:
       - name: translator
         image: "{{ .Values.translator.image.repository }}:{{ .Values.translator.image.tag }}"
@@ -53,43 +53,46 @@ spec:
           value: {{ include "connector.entityID" . }}
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: {{ .Release.Name }}-saml-metadata
               key: metadataInternalURL
         - name: SIGNER_CONFIG_TYPE
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: {{ .Release.Name }}-saml-metadata
               key: samlSigningKeyType
         - name: HSM_SIGNING_KEY_LABEL
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: {{ .Release.Name }}-saml-metadata
               key: samlSigningKeyLabel
         - name: SIGNING_CERT
           valueFrom:
-            configMapKeyRef:
+            secretKeyRef:
               name: {{ .Release.Name }}-saml-metadata
               key: samlSigningCertBase64
         - name: HSM_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-hsm
-              key: username
+              name: {{ .Release.Name }}-saml-metadata
+              key: hsmUser
         - name: HSM_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-hsm
-              key: password
+              name: {{ .Release.Name }}-saml-metadata
+              key: hsmPassword
         - name: VERIFY_SERVICE_PROVIDER_URL
           value: http://{{ .Release.Name }}-vsp/
       - name: hsm-client
         image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
         imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
         env:
-          - name: HSM_IP
-            value: "{{ required "hsm.IP is required" .Values.hsm.IP }}"
+        - name: HSM_IP
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-saml-metadata
+              key: hsmIP
         volumeMounts:
         - name: hsm-client-crt
           mountPath: /opt/cloudhsm/etc/customerCA.crt
-          subPath: customerCA.crt
+          subPath: hsmCustomerCA.crt
