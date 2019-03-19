@@ -5,7 +5,6 @@ import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
@@ -21,23 +20,27 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.text.MessageFormat;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static uk.gov.ida.notification.shared.Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH;
+import static uk.gov.ida.notification.shared.Urls.TranslatorUrls.TRANSLATOR_ROOT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TranslatorProxyTest {
-    @Path("/translate-hub-response")
+    @Path(TRANSLATOR_ROOT)
     @Produces(MediaType.APPLICATION_JSON)
     public static class TestTranslatorResource {
 
-        @Path("/happy")
+        @Path("/happy" + TRANSLATE_HUB_RESPONSE_PATH)
         @POST
         public Response testTranslate(HubResponseTranslatorRequest request) {
             return Response.ok().entity("translated_saml_response_blob").build();
         }
 
-        @Path("/server-error")
+        @Path("/server-error" + TRANSLATE_HUB_RESPONSE_PATH)
         @POST
         public Response testServerErrorTranslate(HubResponseTranslatorRequest request) {
             return Response.serverError().build();
@@ -49,59 +52,57 @@ public class TranslatorProxyTest {
 
     @Spy
     JsonClient jsonClient = new JsonClient(
-        new ErrorHandlingClient(ClientBuilder.newClient()),
-        new JsonResponseProcessor(new ObjectMapper())
+            new ErrorHandlingClient(ClientBuilder.newClient()),
+            new JsonResponseProcessor(new ObjectMapper())
     );
 
     @Test
     public void shouldAcceptHubResponseTranslatorRequestAndReturnString() {
-        HubResponseTranslatorRequest request = new HubResponseTranslatorRequest(
-            "hub_response",
-            "requestid",
-            "eidas_request_id",
-            "level_of_assurance",
-            UriBuilder.fromUri("http://connector.node").build(),
-            "connector_encryption_certificate"
-        );
-        TranslatorProxy translatorProxy = new TranslatorProxy(
-            jsonClient,
-            UriBuilder.fromUri(clientRule.baseUri()).path("/translate-hub-response/happy").build()
+        final HubResponseTranslatorRequest request = new HubResponseTranslatorRequest(
+                "hub_response",
+                "requestid",
+                "eidas_request_id",
+                "level_of_assurance",
+                UriBuilder.fromUri("http://connector.node").build(),
+                "connector_encryption_certificate"
         );
 
-        String samlResponse = translatorProxy.getTranslatedResponse(request, "session-id");
+        final TranslatorProxy translatorProxy = new TranslatorProxy(
+                jsonClient,
+                UriBuilder.fromUri(clientRule.baseUri()).path(TRANSLATOR_ROOT).path("/happy").build()
+        );
 
-        assertThat("translated_saml_response_blob").isEqualTo(samlResponse);
-        Mockito.verify(jsonClient).post(
-            request,
-            UriBuilder.fromUri(String.format("%s/translate-hub-response/happy", clientRule.baseUri())).build(),
-            String.class
+        final String samlResponse = translatorProxy.getTranslatedHubResponse(request, "session-id");
+
+        assertThat(samlResponse).isEqualTo("translated_saml_response_blob");
+
+        verify(jsonClient).post(
+                request,
+                UriBuilder.fromUri(MessageFormat.format("{0}{1}/happy{2}", clientRule.baseUri(), TRANSLATOR_ROOT, TRANSLATE_HUB_RESPONSE_PATH)).build(),
+                String.class
         );
     }
 
     @Test
     public void shouldThrowTranslatorResponseExceptionWhenErrorPostingToTranslator() {
-        HubResponseTranslatorRequest request = new HubResponseTranslatorRequest(
-            "hub_response",
-            "requestid",
-            "eidas_request_id",
-            "level_of_assurance",
-            UriBuilder.fromUri("http://connector.node").build(),
-            "connector_encryption_certificate"
+        final HubResponseTranslatorRequest request = new HubResponseTranslatorRequest(
+                "hub_response",
+                "requestid",
+                "eidas_request_id",
+                "level_of_assurance",
+                UriBuilder.fromUri("http://connector.node").build(),
+                "connector_encryption_certificate"
         );
 
-        TranslatorProxy translatorProxy = new TranslatorProxy(
-            jsonClient,
-            UriBuilder.fromUri(clientRule.baseUri()).path("/translate-hub-response/server-error").build()
+        final TranslatorProxy translatorProxy = new TranslatorProxy(
+                jsonClient,
+                UriBuilder.fromUri(clientRule.baseUri()).path(TRANSLATOR_ROOT).path("/server-error").build()
         );
 
-        Throwable thrown = catchThrowable(() -> { translatorProxy.getTranslatedResponse(request, "session-id"); });
-        assertThat(thrown).isInstanceOf(TranslatorResponseException.class);
-        assertThat(thrown.getCause().getMessage())
-            .startsWith(
-                String.format(
-                    "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/translate-hub-response/server-error",
-                    clientRule.baseUri().toString()
-                )
-            );
+        assertThatThrownBy(() -> translatorProxy.getTranslatedHubResponse(request, "session-id"))
+                .isInstanceOfSatisfying(TranslatorResponseException.class, e ->
+                        assertThat(e.getCause()).hasMessageStartingWith(MessageFormat.format(
+                                "Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: {0}{1}/server-error{2}",
+                                clientRule.baseUri().toString(), TRANSLATOR_ROOT, TRANSLATE_HUB_RESPONSE_PATH)));
     }
 }

@@ -1,11 +1,9 @@
 package uk.gov.ida.notification.translator.resources;
 
 import org.glassfish.jersey.internal.util.Base64;
-import org.opensaml.core.xml.io.MarshallingException;
-import org.opensaml.security.SecurityException;
-import org.opensaml.xmlsec.signature.support.SignatureException;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -42,7 +40,7 @@ public class HubResponseTranslatorResource {
 
     @POST
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
-    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) throws MarshallingException, SecurityException, SignatureException {
+    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
 
         final TranslatedHubResponse translatedHubResponse =
                 verifyServiceProviderProxy.getTranslatedHubResponse(
@@ -55,7 +53,7 @@ public class HubResponseTranslatorResource {
 
         logResponseAttributesHash(hubResponseTranslatorRequest, translatedHubResponse);
 
-        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generate(
+        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(
                 new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
                 X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate())
         );
@@ -63,6 +61,23 @@ public class HubResponseTranslatorResource {
         logSamlResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
+
+        return Response.ok().entity(samlMessage).build();
+    }
+
+    @POST
+    @Path(Urls.TranslatorUrls.GENERATE_FAILURE_RESPONSE_PATH)
+    public Response failureResponse(SamlFailureResponseGenerationRequest failureResponseRequest) {
+
+        final org.opensaml.saml.saml2.core.Response failureEidasResponse = eidasResponseGenerator.generateFailureResponse(
+                failureResponseRequest.getResponseStatus(),
+                failureResponseRequest.getEidasRequestId(),
+                failureResponseRequest.getDestinationUrl()
+        );
+
+        logSamlResponse(failureEidasResponse);
+
+        final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(failureEidasResponse));
 
         return Response.ok().entity(samlMessage).build();
     }

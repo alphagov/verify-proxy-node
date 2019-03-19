@@ -28,8 +28,6 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
 
     @Override
     public Response toResponse(TException exception) {
-        this.logId = String.format("%016x", ThreadLocalRandom.current().nextLong());
-
         logException(exception);
 
         return Response.status(getResponseStatus(exception))
@@ -45,7 +43,6 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
         return logId;
     }
 
-    // TODO: Log these three properties via the logger itself as context attributes
     protected String getAuthnRequestId(TException exception) {
         return null;
     }
@@ -63,8 +60,9 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
     }
 
     private void logException(TException exception) {
-        String message = exception.getMessage();
-        String cause = Optional.ofNullable(exception.getCause()).map(Throwable::getMessage).orElse(null);
+        this.logId = String.format("%016x", ThreadLocalRandom.current().nextLong());
+        final String message = exception.getMessage();
+        final String cause = Optional.ofNullable(exception.getCause()).map(Throwable::getMessage).orElse(null);
 
         LOG.error(format("Error whilst contacting uri [{0}]; logId: {1}; requestId: {2}; sessionId: {3}, issuer: {4}; issueInstant: {5}; message: {6}, cause: {7}",
                 uriInfo.getPath(), logId, getAuthnRequestId(exception), getSessionId(exception), getIssuerId(exception), getIssueInstant(exception), message, cause),

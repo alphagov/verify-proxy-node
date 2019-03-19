@@ -13,6 +13,7 @@ import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseTranslationExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.ResponseSigningExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -20,6 +21,7 @@ import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
+import uk.gov.ida.notification.translator.saml.EidasFailureResponseGenerator;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
 
@@ -83,6 +85,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new ApplicationExceptionMapper());
         environment.jersey().register(new HubResponseTranslationExceptionMapper());
+        environment.jersey().register(new ResponseSigningExceptionMapper());
     }
 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
@@ -94,12 +97,21 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration) {
-        HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(EidasResponseBuilder::instance,
+        final HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
+                EidasResponseBuilder::instance,
                 configuration.getConnectorNodeIssuerId(),
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
 
-        CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
-        return new EidasResponseGenerator(hubResponseTranslator, new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm()));
+        final EidasFailureResponseGenerator failureResponseGenerator = new EidasFailureResponseGenerator(
+                EidasResponseBuilder::instance,
+                configuration.getConnectorNodeIssuerId(),
+                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
+        );
+
+        final CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
+        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm());
+
+        return new EidasResponseGenerator(hubResponseTranslator, failureResponseGenerator, samlObjectSigner);
     }
 }

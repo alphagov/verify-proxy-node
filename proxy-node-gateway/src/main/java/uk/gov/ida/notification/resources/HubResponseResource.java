@@ -19,13 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.util.logging.Logger;
 
-
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class HubResponseResource {
     private static final Logger LOG = Logger.getLogger(HubResponseResource.class.getName());
 
-    public static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
-    public static final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
+    static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
+    static final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
 
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final TranslatorProxy translatorProxy;
@@ -68,7 +67,7 @@ public class HubResponseResource {
             sessionData.getEidasConnectorPublicKey()
         );
 
-        String eidasResponse = translatorProxy.getTranslatedResponse(translatorRequest, session.getId());
+        String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, session.getId());
 
         LOG.info(
             String.format(

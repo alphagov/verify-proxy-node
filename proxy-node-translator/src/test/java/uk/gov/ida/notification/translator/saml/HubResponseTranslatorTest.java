@@ -55,7 +55,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldReturnValidResponseWhenIdentityVerified() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseIdentityVerified());
 
-        final Response identityVerifiedResponse = TRANSLATOR.translate(hubResponseContainer);
+        final Response identityVerifiedResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(identityVerifiedResponse);
@@ -66,7 +66,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldReturnResponseForCancelledStatus() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseCancellation());
 
-        Response cancelledResponse = TRANSLATOR.translate(hubResponseContainer);
+        Response cancelledResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(cancelledResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForCancelledStatus(cancelledResponse);
@@ -76,7 +76,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldReturnResponseForAuthenticationFailedStatus() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseAuthenticationFailed());
 
-        Response authnFailedResponse = TRANSLATOR.translate(hubResponseContainer);
+        Response authnFailedResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(authnFailedResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForAuthenticationFailedStatus(authnFailedResponse);
@@ -86,7 +86,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldThrowWhenNoFirstNamePresent() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutFirstName().build());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("No verified current first name present");
     }
@@ -95,7 +95,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldThrowWhenNoSurnamePresent() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutLastName().build());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("No verified current surname present");
     }
@@ -104,7 +104,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldThrowWhenNoDateOfBirthPresent() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutDateOfBirth().build());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("No verified current date of birth present");
     }
@@ -115,7 +115,7 @@ public class HubResponseTranslatorTest {
         final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, true, AttributesBuilder.VALID_FROM, validTo);
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("No verified current first name present");
     }
@@ -125,7 +125,7 @@ public class HubResponseTranslatorTest {
         final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, AttributesBuilder.VALID_FROM, null);
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("No verified current first name present");
     }
@@ -137,7 +137,7 @@ public class HubResponseTranslatorTest {
         final Attribute<String> firstName = createAttribute("Expired", true, validFrom, validTo);
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
 
-        final Response response = TRANSLATOR.translate(hubResponseContainer);
+        final Response response = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(response);
@@ -149,7 +149,7 @@ public class HubResponseTranslatorTest {
         final Attribute<String> firstName = createAttribute("Unverified", false, AttributesBuilder.VALID_FROM, null);
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
 
-        final Response response = TRANSLATOR.translate(hubResponseContainer);
+        final Response response = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(response);
@@ -160,7 +160,7 @@ public class HubResponseTranslatorTest {
     public void translateShouldThrowExceptionWhenRequestError() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseRequestError());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("Received error status from VSP: ");
     }
@@ -170,7 +170,7 @@ public class HubResponseTranslatorTest {
         final HubResponseContainer hubResponseContainer =
                 buildHubResponseContainer(new TranslatedHubResponseBuilder().withLevelOfAssurance(VspLevelOfAssurance.LEVEL_1).build());
 
-        assertThatThrownBy(() -> TRANSLATOR.translate(hubResponseContainer))
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
                 .isInstanceOf(HubResponseTranslationException.class)
                 .hasMessageContaining("Received unsupported LOA from VSP: ");
     }

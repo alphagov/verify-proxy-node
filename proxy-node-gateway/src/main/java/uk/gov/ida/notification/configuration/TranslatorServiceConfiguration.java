@@ -9,7 +9,6 @@ import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
-import uk.gov.ida.notification.shared.Urls;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -17,7 +16,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
-import static uk.gov.ida.notification.shared.Urls.TranslatorUrls.TRANSLATOR_HUB_RESPONSE_RESOURCE;
+import static uk.gov.ida.notification.shared.Urls.TranslatorUrls.TRANSLATOR_ROOT;
 
 public class TranslatorServiceConfiguration extends Configuration {
 
@@ -46,7 +45,7 @@ public class TranslatorServiceConfiguration extends Configuration {
         );
         return new TranslatorProxy(
             jsonClient,
-            UriBuilder.fromUri(url).path(TRANSLATOR_HUB_RESPONSE_RESOURCE).build()
+            UriBuilder.fromUri(url).path(TRANSLATOR_ROOT).build()
         );
     }
 }

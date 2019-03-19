@@ -49,7 +49,6 @@ public abstract class BaseExceptionMapper<TException extends Exception> implemen
         return logId;
     }
 
-    // TODO: Log these three properties via the logger itself as context attributes
     protected String getAuthnRequestId(TException exception) {
         return null;
     }

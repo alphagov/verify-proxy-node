@@ -91,7 +91,7 @@ public class HubResponseResourceTest {
 
         when(sessionStore.getSession(eq("session-id"))).thenReturn(sessionData);
         when(session.getId()).thenReturn("session-id");
-        when(translatorProxy.getTranslatedResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
+        when(translatorProxy.getTranslatedHubResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
 
         HubResponseResource resource = new HubResponseResource(
             new SamlFormViewBuilder(),
@@ -101,7 +101,7 @@ public class HubResponseResourceTest {
 
         SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
 
-        verify(translatorProxy).getTranslatedResponse(requestCaptor.capture(), eq("session-id"));
+        verify(translatorProxy).getTranslatedHubResponse(requestCaptor.capture(), eq("session-id"));
         HubResponseTranslatorRequest request = requestCaptor.getValue();
 
         verifyNoMoreInteractions(translatorProxy);

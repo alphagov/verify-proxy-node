@@ -22,7 +22,6 @@ import uk.gov.ida.notification.helpers.HtmlHelpers;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -110,7 +109,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void serverErrorResponseFromVspLogsAndReturns500() throws Exception {
+    public void serverErrorResponseFromVspReturns500() throws Exception {
         Response response = postEidasAuthnRequest(
             buildAuthnRequest(),
             proxyNodeVspServerErrorAppRule
@@ -124,12 +123,12 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     private void assertGoodRequest(AuthnRequest request) throws Throwable {
-        assertGoodResponse(postEidasAuthnRequest(request, proxyNodeAppRule));
-        assertGoodResponse(redirectEidasAuthnRequest(request, proxyNodeAppRule));
+        assertGoodSamlSuccessResponse(postEidasAuthnRequest(request, proxyNodeAppRule));
+        assertGoodSamlSuccessResponse(redirectEidasAuthnRequest(request, proxyNodeAppRule));
     }
 
-    private void assertGoodResponse(Response response) throws IOException, XPathExpressionException, ParserConfigurationException {
-        String htmlString = getHtmlStringFromResponse(response);
+    private void assertGoodSamlSuccessResponse(Response response) throws XPathExpressionException, ParserConfigurationException {
+        final String htmlString = getHtmlStringFromResponse(response);
 
         HtmlHelpers.assertXPath(
             htmlString,
