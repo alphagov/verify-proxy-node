@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-GDS requires that all GDS-run services are hosted and maintained internally and in a consistent manner. For microservice architectures such as the proxy node, the technology GDS has chosen is Kubernetes deployed to Amazon AWS EC2 instances, dubbed the GDS Supported Platform (GSP). Applications running on the platform are containerised using Docker.
+GDS requires that all GDS-run services are hosted and maintained internally and in a consistent manner. For microservice architectures such as the proxy node, the technology GDS has chosen is Kubernetes deployed to AWS instances, dubbed the GDS Supported Platform (GSP). Applications running on the platform are containerised using Docker.
 
 The platform provides a number of features out of the box such as a continuous integration and deployment (CI/CD) pipeline of the hosted applications using Concourse and application logs being pushed to AWS CloudWatch.
 
