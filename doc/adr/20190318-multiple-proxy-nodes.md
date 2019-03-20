@@ -22,7 +22,7 @@ In turn, we will provide our URL and certificate to the requesting MS.
 
 Running a single instance of the proxy node services and infrastructure to handle requests from all potential requesting MS would need some way of aggregating their metadata. An additional service would most likely be required to do this, bringing with it the added cost of having to secure and administer that service, as it would end up being the root of trust for _all_ requesting MS. In our current implementation, a single proxy node would also mean a single signing key being used to export all UK identities to every requesting MS, making that key all the more valuable.
 
-Instead, we will run one instance of the proxy node services and infrastructure _per_ requesting MS connector node. They will share a single hardware security module (HSM) but will each have independent credentials to access the HSM and an independent signing key held by the HSM.
+Instead, we will run one instance of the proxy node services and infrastructure isolation _per_ requesting MS connector node. They will share a single hardware security module (HSM) but will each have independent credentials to access the HSM and an independent signing key held by the HSM.
 
 Having multiple instances running, one per requesting MS, would be fairly easy to implement and provides additional benefits, such as:
 - a compromise to the infrastructure of one proxy node should not easily affect another
