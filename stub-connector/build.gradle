@@ -1,9 +1,22 @@
+repositories {
+    // cloudhsm libraries downloaded from AWS
+    flatDir {
+        dirs '/opt/cloudhsm/java'
+    }
+}
+
 dependencies {
     compile configurations.dropwizard,
             configurations.opensaml,
             configurations.eidas_saml,
             configurations.common,
             project(':proxy-node-shared')
+
+    if (project.hasProperty('cloudhsm')) {
+        compile name: 'cloudhsm-2.0.0'
+        compile name: 'log4j-api-2.8'
+        compile name: 'log4j-core-2.8'
+    }
 }
 
 group = 'uk.gov.ida.notification.stubconnector'
