@@ -6,7 +6,7 @@ set -eu
 : "${ENVIRONMENT:?}"
 
 export DOMAIN="${ENVIRONMENT}.verify.govsvc.uk"
-export KUBECONFIG="$HOME/src/github.com/alphagov/gsp-teams/terraform/accounts/verify/clusters/${ENVIRONMENT}/kubeconfig"
+export KUBECONFIG="$HOME/src/gsp/gsp-teams/terraform/accounts/verify/clusters/${ENVIRONMENT}/kubeconfig"
 
 # apply the proxy-node yaml
 helm template proxy-node-chart/ \

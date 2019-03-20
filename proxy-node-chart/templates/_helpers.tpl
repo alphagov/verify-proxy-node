@@ -13,7 +13,7 @@
 
 {{- define "connector.entityID" -}}
 {{- if .Values.stubConnector.enabled -}}
-https://{{ include "connector.host" . }}/Metadata
+https://{{ include "connector.host" . }}
 {{- else -}}
 {{ printf "%s" (required "connector.entityID or stubConnector.enabled required" .Values.connector.entityID) }}
 {{- end -}}
@@ -21,7 +21,7 @@ https://{{ include "connector.host" . }}/Metadata
 
 {{- define "connector.metadataURL" -}}
 {{- if .Values.stubConnector.enabled -}}
-https://{{ include "connector.host" . }}/Metadata
+http://{{ .Release.Name }}-connector-metadata/metadata.xml
 {{- else -}}
 {{ printf "%s" (required "connector.metadataURL or stubConnector.enabled required" .Values.connector.metadataURL) }}
 {{- end -}}
