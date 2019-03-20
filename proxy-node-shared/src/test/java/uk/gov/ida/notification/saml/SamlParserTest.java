@@ -1,11 +1,12 @@
 package uk.gov.ida.notification.saml;
 
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.impl.AuthnRequestImpl;
 import org.opensaml.saml.saml2.core.impl.ResponseImpl;
-import org.xml.sax.SAXParseException;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.helpers.FileHelpers;
@@ -49,8 +50,8 @@ public class SamlParserTest extends SamlInitializedTest {
             parser.parseSamlString(xmlString);
             fail("expected exception not thrown");
         } catch(SamlParsingException e) {
-            assertThat(e.getCause()).isInstanceOf(NullPointerException.class);
-            assertThat(e.getCause().getMessage()).isEqualTo("No unmarshaller for element <lolz>");
+            assertThat(e.getCause()).isInstanceOf(UnmarshallingException.class);
+            assertThat(e.getCause().getMessage()).isEqualTo("No unmarshaller found for lolz");
         }
     }
 
@@ -80,7 +81,7 @@ public class SamlParserTest extends SamlInitializedTest {
             parser.parseSamlString(xmlString);
             fail("expected exception not thrown");
         } catch(SamlParsingException e) {
-            assertThat(e.getCause()).isInstanceOf(SAXParseException.class);
+            assertThat(e.getCause()).isInstanceOf(XMLParserException.class);
         }
     }
 
@@ -99,8 +100,7 @@ public class SamlParserTest extends SamlInitializedTest {
             parser.parseSamlString(xmlString);
             fail("expected exception not thrown");
         } catch(SamlParsingException e) {
-            assertThat(e.getCause()).isInstanceOf(SAXParseException.class);
-            assertThat(e.getCause().getMessage()).contains("DOCTYPE is disallowed");
+            assertThat(e.getCause()).isInstanceOf(XMLParserException.class);
         }
     }
 }
