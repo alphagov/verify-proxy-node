@@ -10,20 +10,21 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.FailureResponseGenerationExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.SessionAlreadyExistsExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.SessionAttributeExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.SessionMissingExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.VspGenerateAuthnRequestResponseExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.VerifyServiceProviderRequestExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
+import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
+import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
-import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
-import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
@@ -72,9 +73,20 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
+        RedisServiceConfiguration redisService = configuration.getRedisService();
+
+        SessionStore sessionStorage = redisService.isLocal() ?
+                new InMemoryStorage() : new RedisStorage(redisService);
+
+        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+
+        TranslatorProxy translatorProxy = configuration
+                .getTranslatorServiceConfiguration()
+                .buildTranslatorProxy(environment);
+
         registerProviders(environment);
-        registerExceptionMappers(environment);
-        registerResources(configuration, environment);
+        registerExceptionMappers(environment, samlFormViewBuilder, translatorProxy, sessionStorage);
+        registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage);
     }
 
     private void registerProviders(Environment environment) {
@@ -85,38 +97,35 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.jersey().register(IstioHeaderMapperFilter.class);
     }
 
-    private void registerExceptionMappers(Environment environment) {
+    private void registerExceptionMappers(
+            Environment environment,
+            SamlFormViewBuilder samlFormViewBuilder,
+            TranslatorProxy translatorProxy,
+            SessionStore sessionStore) {
         environment.jersey().register(new EidasSamlParserResponseExceptionMapper());
-        environment.jersey().register(new VspGenerateAuthnRequestResponseExceptionMapper());
-        environment.jersey().register(new TranslatorResponseExceptionMapper());
-        environment.jersey().register(new SessionAttributeExceptionMapper());
+        environment.jersey().register(new VerifyServiceProviderRequestExceptionMapper());
+        environment.jersey().register(new TranslatorResponseExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
+        environment.jersey().register(new SessionAttributeExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
         environment.jersey().register(new SessionMissingExceptionMapper());
-        environment.jersey().register(new SessionAlreadyExistsExceptionMapper());
+        environment.jersey().register(new SessionAlreadyExistsExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
         environment.jersey().register(new GenericExceptionMapper());
+        environment.jersey().register(new FailureResponseGenerationExceptionMapper());
     }
 
-    private void registerResources(GatewayConfiguration configuration, Environment environment) {
-
-
-        RedisServiceConfiguration redisService = configuration.getRedisService();
-
-        SessionStore sessionStorage = redisService.isLocal() ?
-                new InMemoryStorage() : new RedisStorage(redisService);
-
-        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+    private void registerResources(
+            GatewayConfiguration configuration,
+            Environment environment,
+            SamlFormViewBuilder samlFormViewBuilder,
+            TranslatorProxy translatorProxy,
+            SessionStore sessionStorage) {
 
         EidasSamlParserProxy espProxy = configuration
-            .getEidasSamlParserServiceConfiguration()
-            .buildEidasSamlParserService(environment);
+                .getEidasSamlParserServiceConfiguration()
+                .buildEidasSamlParserService(environment);
 
         VerifyServiceProviderProxy vspProxy = configuration
-            .getVerifyServiceProviderConfiguration()
-            .buildVerifyServiceProviderProxy(environment);
-
-        TranslatorProxy translatorProxy = configuration
-            .getTranslatorServiceConfiguration()
-            .buildTranslatorProxy(environment);
-
+                .getVerifyServiceProviderConfiguration()
+                .buildVerifyServiceProviderProxy(environment);
 
         environment.lifecycle().manage(sessionStorage);
 

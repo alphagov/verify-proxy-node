@@ -1,23 +1,25 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
+import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.exceptions.SessionAlreadyExistsException;
-import uk.gov.ida.notification.exceptions.SessionMissingException;
-import uk.gov.ida.notification.views.ErrorPageView;
+import uk.gov.ida.notification.proxy.TranslatorProxy;
+import uk.gov.ida.notification.session.storage.SessionStore;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import java.util.logging.Logger;
 
-public class SessionAlreadyExistsExceptionMapper implements ExceptionMapper<SessionAlreadyExistsException> {
-    private final Logger log = Logger.getLogger(getClass().getName());
+public class SessionAlreadyExistsExceptionMapper extends ExceptionToSamlErrorResponseMapper<SessionAlreadyExistsException> {
+
+    public SessionAlreadyExistsExceptionMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage) {
+        super(samlFormViewBuilder, translatorProxy, sessionStorage);
+    }
 
     @Override
-    public Response toResponse(SessionAlreadyExistsException exception) {
-        log.warning(exception.getMessage());
+    protected Response.Status getResponseStatus(SessionAlreadyExistsException exception) {
+        return Response.Status.BAD_REQUEST;
+    }
 
-        return Response
-            .status(Response.Status.BAD_REQUEST)
-            .entity(new ErrorPageView("Something went wrong session already exists"))
-            .build();
+    @Override
+    protected String getErrorPageMessage(SessionAlreadyExistsException exception) {
+        return "Something went wrong; session already exists";
     }
 }

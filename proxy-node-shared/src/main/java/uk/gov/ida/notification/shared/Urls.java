@@ -16,8 +16,12 @@ public interface Urls {
 
     interface TranslatorUrls {
         String TRANSLATOR_ROOT = "/translator";
+
         String TRANSLATE_HUB_RESPONSE_PATH = "/translate-hub-response";
+        String GENERATE_FAILURE_RESPONSE_PATH = "/generate-failure-response";
+
         String TRANSLATOR_HUB_RESPONSE_RESOURCE = TRANSLATOR_ROOT + TRANSLATE_HUB_RESPONSE_PATH;
+        String GENERATE_FAILURE_RESPONSE_RESOURCE = TRANSLATOR_ROOT + GENERATE_FAILURE_RESPONSE_PATH;
     }
 
     interface VerifyServiceProviderUrls {

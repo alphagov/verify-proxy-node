@@ -26,27 +26,27 @@ public class HubResponseContainer {
         this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance();
     }
 
-    public String getPid() {
+    String getPid() {
         return pid;
     }
 
-    public String getEidasRequestId() {
+    String getEidasRequestId() {
         return eidasRequestId;
     }
 
-    public String getDestinationURL() {
+    String getDestinationURL() {
         return destinationURL.toString();
     }
 
-    public Attributes getAttributes() {
+    Attributes getAttributes() {
         return attributes;
     }
 
-    public VspScenario getVspScenario() {
+    VspScenario getVspScenario() {
         return vspScenario;
     }
 
-    public VspLevelOfAssurance getLevelOfAssurance() {
+    VspLevelOfAssurance getLevelOfAssurance() {
         return levelOfAssurance;
     }
 }

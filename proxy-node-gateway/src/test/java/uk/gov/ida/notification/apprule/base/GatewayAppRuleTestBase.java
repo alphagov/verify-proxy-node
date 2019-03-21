@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
 
 public class GatewayAppRuleTestBase {
 
-    protected static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
+    private static final String CONNECTOR_NODE_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
 
     private RedisServer server = null;
 

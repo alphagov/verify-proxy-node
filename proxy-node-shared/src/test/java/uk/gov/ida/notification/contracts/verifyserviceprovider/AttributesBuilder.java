@@ -84,8 +84,8 @@ public class AttributesBuilder {
     }
 
     public static DateTime createDateTime(int year, int month, int day, int hour, int minute) {
-        return new DateTime().withYear(year).withMonthOfYear(month).withDayOfMonth(day)
-                .withHourOfDay(hour).withMinuteOfHour(minute).withChronology(ISOChronology.getInstance());
+        return new DateTime(ISOChronology.getInstanceUTC()).withYear(year).withMonthOfYear(month).withDayOfMonth(day)
+                .withHourOfDay(hour).withMinuteOfHour(minute);
     }
 
     public static <T> Attribute<T> createAttribute(T value, boolean verified, DateTime validFrom, DateTime validTo) {

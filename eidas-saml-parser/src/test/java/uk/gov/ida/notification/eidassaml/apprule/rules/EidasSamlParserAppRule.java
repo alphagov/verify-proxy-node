@@ -5,7 +5,7 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
 import uk.gov.ida.notification.eidassaml.EidasSamlApplication;
-import uk.gov.ida.notification.eidassaml.EidasSamlConfiguration;
+import uk.gov.ida.notification.eidassaml.EidasSamlParserConfiguration;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -17,7 +17,7 @@ import java.util.List;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
-public class EidasSamlParserAppRule extends DropwizardAppRule<EidasSamlConfiguration> {
+public class EidasSamlParserAppRule extends DropwizardAppRule<EidasSamlParserConfiguration> {
 
     private Client client;
 

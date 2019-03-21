@@ -38,10 +38,10 @@ import java.util.Optional;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
-public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
+public class EidasSamlApplication extends Application<EidasSamlParserConfiguration> {
 
     private Metadata connectorMetadata;
-    private MetadataResolverBundle<EidasSamlConfiguration> connectorMetadataResolverBundle;
+    private MetadataResolverBundle<EidasSamlParserConfiguration> connectorMetadataResolverBundle;
 
     public static void main(final String[] args) throws Exception {
         if (args == null || args.length == 0) {
@@ -56,7 +56,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         }
     }
 
-    public void initialize(final Bootstrap<EidasSamlConfiguration> bootstrap) {
+    public void initialize(final Bootstrap<EidasSamlParserConfiguration> bootstrap) {
 
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
@@ -79,7 +79,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
     }
 
     @Override
-    public void run(EidasSamlConfiguration configuration, Environment environment) throws Exception {
+    public void run(EidasSamlParserConfiguration configuration, Environment environment) throws Exception {
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("parser");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
@@ -126,7 +126,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         environment.jersey().register(new InvalidAuthnRequestExceptionMapper());
     }
 
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlParserConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
         MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("eidas-saml-parser");
         DestinationValidator destinationValidator = new DestinationValidator(
                 configuration.getProxyNodeAuthnRequestUrl(), configuration.getProxyNodeAuthnRequestUrl().getPath());
@@ -143,7 +143,7 @@ public class EidasSamlApplication extends Application<EidasSamlConfiguration> {
         );
     }
 
-    private String getX509EncryptionCert(EidasSamlConfiguration configuration) throws CertificateEncodingException {
+    private String getX509EncryptionCert(EidasSamlParserConfiguration configuration) throws CertificateEncodingException {
 
         X509Credential credential = (X509Credential) connectorMetadata.getCredential(UsageType.ENCRYPTION,
                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),

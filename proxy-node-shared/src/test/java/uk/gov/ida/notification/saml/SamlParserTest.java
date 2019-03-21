@@ -12,14 +12,14 @@ import uk.gov.ida.notification.exceptions.saml.SamlParsingException;
 import uk.gov.ida.notification.helpers.FileHelpers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SamlParserTest extends SamlInitializedTest {
 
     private static SamlParser parser;
 
     @Before
-    public void setup() throws Exception {
+    public void setUp() {
         parser = new SamlParser();
     }
 
@@ -44,15 +44,13 @@ public class SamlParserTest extends SamlInitializedTest {
     @Test
     public void shouldFailToParseUnknownElement() {
         String xmlString = "<?xml version=\"1.0\"?>\n" +
-            "<lolz>hey</lolz>";
+                "<lolz>hey</lolz>";
 
-        try {
-            parser.parseSamlString(xmlString);
-            fail("expected exception not thrown");
-        } catch(SamlParsingException e) {
-            assertThat(e.getCause()).isInstanceOf(UnmarshallingException.class);
-            assertThat(e.getCause().getMessage()).isEqualTo("No unmarshaller found for lolz");
-        }
+        assertThatThrownBy(() -> parser.parseSamlString(xmlString))
+                .isInstanceOfSatisfying(SamlParsingException.class, e -> {
+                    assertThat(e.getCause()).isInstanceOf(UnmarshallingException.class);
+                    assertThat(e.getCause()).hasMessage("No unmarshaller found for lolz");
+                });
     }
 
     /**
@@ -77,12 +75,9 @@ public class SamlParserTest extends SamlInitializedTest {
                 "]>\n" +
                 "<lolz>&lol9;</lolz>";
 
-        try {
-            parser.parseSamlString(xmlString);
-            fail("expected exception not thrown");
-        } catch(SamlParsingException e) {
-            assertThat(e.getCause()).isInstanceOf(XMLParserException.class);
-        }
+        assertThatThrownBy(() -> parser.parseSamlString(xmlString))
+                .isInstanceOfSatisfying(SamlParsingException.class, e ->
+                        assertThat(e.getCause()).isInstanceOf(XMLParserException.class));
     }
 
     /**
@@ -96,11 +91,9 @@ public class SamlParserTest extends SamlInitializedTest {
                 "<!DOCTYPE foo [" +
                 "  <!ELEMENT foo ANY >" +
                 "  <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]><foo>&xxe;</foo>";
-        try {
-            parser.parseSamlString(xmlString);
-            fail("expected exception not thrown");
-        } catch(SamlParsingException e) {
-            assertThat(e.getCause()).isInstanceOf(XMLParserException.class);
-        }
+
+        assertThatThrownBy(() -> parser.parseSamlString(xmlString))
+                .isInstanceOfSatisfying(SamlParsingException.class, e ->
+                        assertThat(e.getCause()).isInstanceOf(XMLParserException.class));
     }
 }

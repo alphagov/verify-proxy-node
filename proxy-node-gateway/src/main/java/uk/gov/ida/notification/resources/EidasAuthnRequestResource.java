@@ -68,7 +68,7 @@ public class EidasAuthnRequestResource {
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, String sessionId) {
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
-        AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
+        final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 
         sessionStorage.createOrUpdateSession(
             sessionId,
@@ -82,7 +82,6 @@ public class EidasAuthnRequestResource {
         CombinedAuthnRequestAttributesLogger.logAuthnRequestAttributes(sessionId, eidasSamlParserResponse, vspResponse);
         return buildSamlFormView(vspResponse, eidasRelayState);
     }
-
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {
         return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest), sessionId);
