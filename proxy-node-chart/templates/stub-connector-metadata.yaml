@@ -9,7 +9,7 @@ spec:
   type: connector
   data:
     entityID: https://{{ include "connector.host" . }}
-    postURL: https://{{ include "connector.host" . }}/SAML2/SSO/POST
+    postURL: https://{{ include "connector.host" . }}/SAML2/Response/POST
     redirectURL: https://{{ include "connector.host" . }}/Redirect
     orgName: {{ .Release.Name }}
     orgDisplayName: {{ .Release.Name }}
