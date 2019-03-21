@@ -102,7 +102,7 @@ public class SendAuthnRequestResource {
 
     private MessageContext generateAuthnRequestContext(HttpSession session, EidasLoaEnum loaType) throws ResolverException, ComponentInitializationException, MessageHandlerException {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
-        String connectorEntityId = configuration.getConnectorNodeBaseUrl() + "/Metadata";
+        String connectorEntityId = configuration.getConnectorNodeBaseUrl().toString();
         Endpoint proxyNodeEndpoint = proxyNodeMetadata.getEndpoint(proxyNodeEntityId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
         List<String> requestedAttributes = Arrays.asList(
