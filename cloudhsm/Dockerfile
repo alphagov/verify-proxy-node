@@ -3,8 +3,8 @@ workdir /cloudhsm
 
 # Install AWS CloudHSM client
 run yum install -y wget \
- && wget https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-latest.el7.x86_64.rpm \
- && yum install -y ./cloudhsm-client-latest.*.rpm
+ && wget https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-2.0.0-3.el7.x86_64.rpm \
+ && yum install -y ./cloudhsm-client-*.rpm
 
 copy init.sh .
 run chmod +x init.sh
