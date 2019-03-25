@@ -7,7 +7,7 @@ server:
       port: ${ADMIN_PORT:-6667}
 
 logging:
-  level: INFO
+  level: ${LOG_LEVEL:-INFO}
   appenders:
     - type: logstash-console
 
