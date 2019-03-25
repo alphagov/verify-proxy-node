@@ -11,12 +11,7 @@ public class ResponseAssertionDecrypter {
     private final SAMLObjectDecrypter decrypter;
 
     public ResponseAssertionDecrypter(Credential credential) {
-        this(credential, false);
-    }
-
-    public ResponseAssertionDecrypter(Credential credential, boolean usingHsm) {
         this.decrypter = new SAMLObjectDecrypter(credential);
-        this.decrypter.setPkcs11Workaround(usingHsm);
     }
 
     public Response decrypt(Response response) throws DecryptionException {
