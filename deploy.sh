@@ -23,7 +23,7 @@ helm template proxy-node-chart/ \
 	--set "gateway.image.tag=v0.0.0-dev-78830bd" \
 	--set "translator.image.tag=v0.0.0-dev-78830bd" \
 	--set "stubConnector.enabled=true" \
-	--set "stubConnector.image.tag=v0.0.0-dev-78830bd" \
+	--set "stubConnector.image.tag=v0.0.0-dev-22c0082" \
 	--set "vmc.image.tag=v0.0.0-dev-20c5227" \
 	--set "vsp.image.tag=v0.0.0-dev-2503371" \
 	| kubectl -n "${RELEASE}-proxy-node" apply -f -
