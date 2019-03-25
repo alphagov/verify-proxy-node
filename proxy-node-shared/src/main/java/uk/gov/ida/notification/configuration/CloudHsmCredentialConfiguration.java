@@ -18,7 +18,7 @@ import java.security.cert.X509Certificate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
-
+    public static final String ID = "CloudHsmCredentialConfiguration";
     private static final Logger LOG = LoggerFactory.getLogger(CloudHsmCredentialConfiguration.class);
 
     @JsonCreator
@@ -40,7 +40,7 @@ public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
             BasicX509Credential credential = new BasicX509Credential(
                 certificate,
                 (PrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null));
-            credential.setEntityId("CloudHsmCredentialConfiguration");
+            credential.setEntityId(ID);
             setCredential(credential);
         } catch(Exception e) {
             throw new CredentialConfigurationException(e);
