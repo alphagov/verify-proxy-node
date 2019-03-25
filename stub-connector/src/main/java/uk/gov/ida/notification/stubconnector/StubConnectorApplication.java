@@ -124,9 +124,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
             configuration,
             proxyNodeMetadata));
 
-        ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(
-            configuration.getCredentialConfiguration().getCredential(),
-            true);
+        ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(configuration.getCredentialConfiguration().getCredential());
 
         environment.jersey().register(
                 new ReceiveResponseResource(
