@@ -28,6 +28,8 @@ import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
+import java.net.URI;
+
 public class GatewayApplication extends Application<GatewayConfiguration> {
 
     @SuppressWarnings("WeakerAccess") // Needed for DropwizardAppRules
@@ -70,23 +72,23 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     public void run(final GatewayConfiguration configuration,
                     final Environment environment) {
 
-        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
+        final ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
-        RedisServiceConfiguration redisService = configuration.getRedisService();
+        final RedisServiceConfiguration redisService = configuration.getRedisService();
 
-        SessionStore sessionStorage = redisService.isLocal() ?
+        final SessionStore sessionStorage = redisService.isLocal() ?
                 new InMemoryStorage() : new RedisStorage(redisService);
 
-        SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
+        final SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
 
-        TranslatorProxy translatorProxy = configuration
+        final TranslatorProxy translatorProxy = configuration
                 .getTranslatorServiceConfiguration()
                 .buildTranslatorProxy(environment);
 
         registerProviders(environment);
-        registerExceptionMappers(environment, samlFormViewBuilder, translatorProxy, sessionStorage);
         registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage);
+        registerExceptionMappers(environment, samlFormViewBuilder, translatorProxy, sessionStorage, configuration.getErrorPageRedirectUrl());
     }
 
     private void registerProviders(Environment environment) {
@@ -101,15 +103,17 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             Environment environment,
             SamlFormViewBuilder samlFormViewBuilder,
             TranslatorProxy translatorProxy,
-            SessionStore sessionStore) {
-        environment.jersey().register(new EidasSamlParserResponseExceptionMapper());
-        environment.jersey().register(new VerifyServiceProviderRequestExceptionMapper());
-        environment.jersey().register(new TranslatorResponseExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
+            SessionStore sessionStore,
+            URI errorPageRedirectUrl) {
+        environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new SessionMissingExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new EidasSamlParserResponseExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new FailureResponseGenerationExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new VerifyServiceProviderRequestExceptionMapper(errorPageRedirectUrl));
+
         environment.jersey().register(new SessionAttributeExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
-        environment.jersey().register(new SessionMissingExceptionMapper());
+        environment.jersey().register(new TranslatorResponseExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
         environment.jersey().register(new SessionAlreadyExistsExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
-        environment.jersey().register(new GenericExceptionMapper());
-        environment.jersey().register(new FailureResponseGenerationExceptionMapper());
     }
 
     private void registerResources(

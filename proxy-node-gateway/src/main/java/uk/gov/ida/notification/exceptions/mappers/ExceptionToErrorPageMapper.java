@@ -9,6 +9,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -18,8 +19,14 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
 
     private static final Logger LOG = LoggerFactory.getLogger(ExceptionToErrorPageMapper.class);
 
+    private final URI errorPageRedirectUrl;
+
     private UriInfo uriInfo;
     private String logId;
+
+    ExceptionToErrorPageMapper(URI errorPageRedirectUrl) {
+        this.errorPageRedirectUrl = errorPageRedirectUrl;
+    }
 
     @Context
     public void setUriInfo(UriInfo uriInfo) {
@@ -30,14 +37,14 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
     public Response toResponse(TException exception) {
         logException(exception);
 
-        return Response.status(getResponseStatus(exception))
-                .entity(new ErrorPageView(getErrorPageMessage(exception)))
-                .build();
+        return errorPageRedirectUrl != null ?
+                Response.seeOther(errorPageRedirectUrl).build() :
+                Response.status(getResponseStatus(exception))
+                        .entity(new ErrorPageView())
+                        .build();
     }
 
     protected abstract Response.Status getResponseStatus(TException exception);
-
-    protected abstract String getErrorPageMessage(TException exception);
 
     String getLogId() {
         return logId;
