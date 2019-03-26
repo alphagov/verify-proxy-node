@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-translator
+  labels:
+    app.kubernetes.io/name: translator
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.translator.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: translator
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: translator
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      volumes:
+      - name: hsm-client-crt
+        secret:
+          secretName: {{ .Release.Name }}-proxy-metadata
+      containers:
+      - name: translator
+        image: "{{ .Values.translator.image.repository }}:{{ .Values.translator.image.tag }}"
+        imagePullPolicy: {{ .Values.translator.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6661
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        env:
+        - name: PORT
+          value: "80"
+        - name: CONNECTOR_NODE_ISSUER_ID
+          value: {{ include "connector.entityID" . }}
+        - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: metadataInternalURL
+        - name: SIGNER_CONFIG_TYPE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: samlSigningKeyType
+        - name: HSM_SIGNING_KEY_LABEL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: samlSigningKeyLabel
+        - name: SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: samlSigningCertBase64
+        - name: HSM_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: hsmUser
+        - name: HSM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: hsmPassword
+        - name: VERIFY_SERVICE_PROVIDER_URL
+          value: http://{{ .Release.Name }}-vsp/
+      - name: hsm-client
+        image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
+        imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
+        env:
+        - name: HSM_IP
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: hsmIP
+        volumeMounts:
+        - name: hsm-client-crt
+          mountPath: /opt/cloudhsm/etc/customerCA.crt
+          subPath: hsmCustomerCA.crt

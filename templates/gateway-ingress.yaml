@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-gateway
   labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/name: gateway
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -11,13 +12,13 @@ metadata:
 spec:
   tls:
     - hosts:
-      - {{ .Release.Name }}-gateway.{{ .Values.cluster.domain }}
-      secretName: {{ .Release.Name }}-gateway
+      - {{ include "gateway.host" . }}
+      secretName: {{ .Release.Name }}-gateway-ingress
   rules:
-    - host: {{ .Release.Name }}-gateway.{{ .Values.cluster.domain }}
+    - host: {{ include "gateway.host" . }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-gateway
-              servicePort: 6100
+              servicePort: 80

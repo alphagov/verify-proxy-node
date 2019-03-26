@@ -1,0 +1,23 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-connector
+  labels:
+    app.kubernetes.io/name: connector
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  - name: mgmt
+    port: 6667
+    targetPort: mgmt
+  selector:
+    app.kubernetes.io/name: connector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}

@@ -1,0 +1,21 @@
+apiVersion: verify.gov.uk/v1beta1
+kind: Metadata
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: {{ .Release.Name }}-connector-metadata
+spec:
+  id: _entities
+  type: connector
+  data:
+    entityID: https://{{ include "connector.host" . }}
+    postURL: https://{{ include "connector.host" . }}/SAML2/Response/POST
+    redirectURL: https://{{ include "connector.host" . }}/Redirect
+    orgName: {{ .Release.Name }}
+    orgDisplayName: {{ .Release.Name }}
+    orgURL: example.com
+    contactCompany: example
+    contactGivenName: jeff
+    contactSurname: jefferson
+    contactEmail: jeff@example.local
+  enabled: true

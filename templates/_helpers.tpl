@@ -1,32 +1,28 @@
-{{/* vim: set filetype=mustache: */}}
-{{/*
-Expand the name of the chart.
-*/}}
-{{- define "verify-eidas-deployment.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+
+{{- define "gateway.host" -}}
+{{- printf "%s-%s.%s" .Release.Name .Chart.Name (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "verify-eidas-deployment.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "connector.host" -}}
+{{- if .Values.stubConnector.enabled -}}
+{{- printf "%s-%s.%s" .Release.Name "connector" (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- required "connector.host or stubConnector.enabled required" .Values.connector.host -}}
 {{- end -}}
 {{- end -}}
 
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "verify-eidas-deployment.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- define "connector.entityID" -}}
+{{- if .Values.stubConnector.enabled -}}
+https://{{ include "connector.host" . }}
+{{- else -}}
+{{ printf "%s" (required "connector.entityID or stubConnector.enabled required" .Values.connector.entityID) }}
+{{- end -}}
+{{- end -}}
+
+{{- define "connector.metadataURL" -}}
+{{- if .Values.stubConnector.enabled -}}
+http://{{ .Release.Name }}-connector-metadata/metadata.xml
+{{- else -}}
+{{ printf "%s" (required "connector.metadataURL or stubConnector.enabled required" .Values.connector.metadataURL) }}
+{{- end -}}
 {{- end -}}

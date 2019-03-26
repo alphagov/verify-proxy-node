@@ -1,0 +1,21 @@
+apiVersion: verify.gov.uk/v1beta1
+kind: Metadata
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: {{ .Release.Name }}-proxy-metadata
+spec:
+  id: _entities
+  type: proxy
+  data:
+    entityID: https://{{ include "gateway.host" . }}
+    postURL: https://{{ include "gateway.host" . }}/SAML2/SSO/POST
+    redirectURL: https://{{ include "gateway.host" . }}/Redirect
+    orgName: {{ .Release.Name }}
+    orgDisplayName: {{ .Release.Name }}
+    orgURL: example.com
+    contactCompany: example
+    contactGivenName: jeff
+    contactSurname: jefferson
+    contactEmail: jeff@example.local
+  enabled: true

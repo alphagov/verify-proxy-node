@@ -1,0 +1,113 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-connector
+  labels:
+    app.kubernetes.io/name: connector
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.stubConnector.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: connector
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: connector
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      volumes:
+      - name: hsm-client-crt
+        secret:
+          secretName: {{ .Release.Name }}-connector-metadata
+      containers:
+      - name: connector
+        image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
+        imagePullPolicy: {{ .Values.stubConnector.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6667
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        env:
+        - name: PORT
+          value: "80"
+        - name: CONNECTOR_NODE_BASE_URL
+          value: https://{{ include "connector.host" . }}
+        - name: PROXY_NODE_ENTITY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: entityID
+        - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: metadataInternalURL
+        - name: PROXY_NODE_METADATA_TRUSTSTORE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: metadataSigningTruststoreBase64
+        - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-metadata
+              key: metadataSigningTruststorePassword
+        - name: SIGNER_CONFIG_TYPE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: samlSigningKeyType
+        - name: HSM_SIGNING_KEY_LABEL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: samlSigningKeyLabel
+        - name: SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: samlSigningCertBase64
+        - name: HSM_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: hsmUser
+        - name: HSM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: hsmPassword
+      - name: hsm-client
+        image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
+        imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
+        env:
+        - name: HSM_IP
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: hsmIP
+        volumeMounts:
+        - name: hsm-client-crt
+          mountPath: /opt/cloudhsm/etc/customerCA.crt
+          subPath: hsmCustomerCA.crt
+{{- end -}}
