@@ -9,9 +9,12 @@ import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
-import uk.gov.ida.notification.logging.SamlSigningLoggerHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class SamlObjectSigner {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final SignatureSigningParameters signingParams;
 
     public SamlObjectSigner(BasicX509Credential signingCredential, String signingAlgorithm) {
@@ -19,7 +22,7 @@ public class SamlObjectSigner {
     }
 
     public void sign(SignableSAMLObject signableSAMLObject, String responseId) throws MarshallingException, SecurityException, SignatureException {
-        SamlSigningLoggerHelper.logSigningRequest(responseId, signingParams.getSigningCredential().getEntityId());
+        logSigningRequest(responseId, signingParams.getSigningCredential().getEntityId());
         SignatureSupport.signObject(signableSAMLObject, signingParams);
         SAMLSignatureProfileValidator signatureProfileValidator = new SAMLSignatureProfileValidator();
         signatureProfileValidator.validate(signableSAMLObject.getSignature());
@@ -28,5 +31,16 @@ public class SamlObjectSigner {
 
     public SignatureSigningParameters getSigningParams() {
         return signingParams;
+    }
+
+    private  void logSigningRequest(String responseId, String signingProvider) {
+        try {
+            MDC.put("eidasResponseID", responseId);
+            MDC.put("signingProvider", signingProvider);
+            log.info("Signing eIDAS response");
+        } finally {
+            MDC.remove("eidasResponseID");
+            MDC.remove("signingProvider");
+        }
     }
 }
