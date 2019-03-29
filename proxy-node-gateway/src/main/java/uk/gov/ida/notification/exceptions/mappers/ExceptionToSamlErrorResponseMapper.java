@@ -34,7 +34,7 @@ public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exce
     private UriInfo uriInfo;
     private String logId;
 
-    public ExceptionToSamlErrorResponseMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage) {
+    ExceptionToSamlErrorResponseMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage) {
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.translatorProxy = translatorProxy;
         this.sessionStorage = sessionStorage;

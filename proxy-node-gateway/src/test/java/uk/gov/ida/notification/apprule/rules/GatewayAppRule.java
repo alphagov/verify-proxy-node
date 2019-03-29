@@ -18,13 +18,15 @@ import java.util.List;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
 public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
+
     private Client client;
+    private Client noRedirectClient;
 
     public GatewayAppRule(ConfigOverride... configOverrides) {
         super(
-            GatewayApplication.class,
-            resourceFilePath("config.yml"),
-            getConfigOverrides(configOverrides)
+                GatewayApplication.class,
+                resourceFilePath("config.yml"),
+                getConfigOverrides(configOverrides)
         );
     }
 
@@ -42,11 +44,42 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
 
     public WebTarget target(String path, int port) throws URISyntaxException {
         if (client == null) {
-            client = new JerseyClientBuilder(getEnvironment())
-                    .withProperty(ClientProperties.CONNECT_TIMEOUT, 10000)
-                    .withProperty(ClientProperties.READ_TIMEOUT, 10000)
-                    .build("test client");
+            client = buildClient();
         }
+
+        return target(client, path, port);
+    }
+
+    public WebTarget target(String path, boolean followRedirects) throws URISyntaxException {
+        if (!followRedirects) {
+            return target(path);
+        }
+
+        if (noRedirectClient == null) {
+            noRedirectClient = buildClient(false, "test client - no redirects");
+        }
+
+        return target(noRedirectClient, path, getLocalPort());
+    }
+
+    private WebTarget target(Client client, String path, int port) throws URISyntaxException {
         return client.target(new URI("http://localhost:" + port).resolve(path));
+    }
+
+    private Client buildClient() {
+        return buildClient(true, "test client");
+    }
+
+    private Client buildClient(boolean followRedirects, String clientName) {
+        final Client client = new JerseyClientBuilder(getEnvironment())
+                .withProperty(ClientProperties.CONNECT_TIMEOUT, 10000)
+                .withProperty(ClientProperties.READ_TIMEOUT, 10000)
+                .build(clientName);
+
+        if (followRedirects) {
+            client.property(ClientProperties.FOLLOW_REDIRECTS, false);
+        }
+
+        return client;
     }
 }

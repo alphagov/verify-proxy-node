@@ -26,7 +26,7 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +37,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     private static final int EMBEDDED_REDIS_PORT = 6380;
 
+    private static final String errorPageRedirectUrl = "https://proxy-node-error-page";
     private static final TestTranslatorResource testTranslatorResource = new TestTranslatorResource();
 
     @ClassRule
@@ -61,6 +62,15 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
+            ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
+            ConfigOverride.config("redisService.url", redisMockURI),
+            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
+    );
+
+    @Rule
+    public GatewayAppRule proxyNodeAppRuleNoErrorPageUrl = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
@@ -133,18 +143,35 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void returnsErrorPageIfSessionMissingException() throws Exception {
+    public void redirectsToErrorPageIfSessionMissingException() throws URISyntaxException {
         Response response = proxyNodeAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE, false)
+                .request()
+                .post(Entity.form(postForm));
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
+    }
+
+    @Test
+    public void returnsErrorPageIfSessionMissingExceptionAndNoRedirectUrlConfigured() throws Exception {
+        Response response = proxyNodeAppRuleNoErrorPageUrl
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
                 .post(Entity.form(postForm));
 
         assertThat(response.getStatus()).isEqualTo(400);
 
-        String htmlString = response.readEntity(String.class);
+        final String htmlString = response.readEntity(String.class);
+
         HtmlHelpers.assertXPath(
-            htmlString,
-            "//div[@class='issues'][text()='Something went wrong; session does not exist']"
+                htmlString,
+                "//div[@class='title'][text()='Sorry, something went wrong']"
+        );
+
+        HtmlHelpers.assertXPath(
+                htmlString,
+                "//div[@class='issues'][text()='This may be because your session timed out or there was a system error.']"
         );
     }
 
@@ -174,7 +201,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         return postEidasAuthnRequest(buildAuthnRequest(), appRule).getCookies().get("gateway-session");
     }
 
-    private void assertGoodSamlErrorResponse(Response response) throws XPathExpressionException, ParserConfigurationException, IOException {
+    private void assertGoodSamlErrorResponse(Response response) throws XPathExpressionException, ParserConfigurationException {
         final String htmlString = response.readEntity(String.class);
 
         assertThat(response.getStatus()).isEqualTo(200);

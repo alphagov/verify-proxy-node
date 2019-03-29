@@ -28,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
+    private static final String errorPageRedirectUrl = "https://proxy-node-error-page";
+
     @ClassRule
     public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
 
@@ -50,34 +52,38 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @Rule
     public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
-        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
-        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
     );
 
     @Rule
     public GatewayAppRule proxyNodeEspServerErrorAppRule = new GatewayAppRule(
-        ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
-        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
     );
 
     @Rule
     public GatewayAppRule proxyNodeEspClientErrorAppRule = new GatewayAppRule(
-        ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
-        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
     );
 
     @Rule
     public GatewayAppRule proxyNodeVspServerErrorAppRule = new GatewayAppRule(
-        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
-        ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
     );
 
     @Test
@@ -86,40 +92,27 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void serverErrorResponseFromEspReturns500() throws Exception {
-        Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspServerErrorAppRule);
+    public void serverErrorResponseFromEspRedirectsToErrorPage() throws Exception {
+        Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspServerErrorAppRule, false);
 
-        assertThat(response.getStatus()).isEqualTo(500);
-        HtmlHelpers.assertXPath(
-            getHtmlStringFromResponse(response),
-            "//div[@class='issues'][text()='Something went wrong when contacting the ESP']"
-        );
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
     }
 
     @Test
-    public void clientErrorResponseFromEspReturns400() throws Exception {
-        AuthnRequest request = buildAuthnRequest();
-        Response response = postEidasAuthnRequest(request, proxyNodeEspClientErrorAppRule);
+    public void clientErrorResponseFromEspRedirectsToErrorPage() throws Exception {
+        Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspClientErrorAppRule, false);
 
-        assertThat(response.getStatus()).isEqualTo(400);
-        HtmlHelpers.assertXPath(
-            getHtmlStringFromResponse(response),
-            "//div[@class='issues'][text()='Something went wrong when contacting the ESP']"
-        );
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
     }
 
     @Test
-    public void serverErrorResponseFromVspReturns500() throws Exception {
-        Response response = postEidasAuthnRequest(
-            buildAuthnRequest(),
-            proxyNodeVspServerErrorAppRule
-        );
+    public void serverErrorResponseFromVspRedirectsToErrorPage() throws Exception {
+        Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeVspServerErrorAppRule, false);
 
-        assertThat(response.getStatus()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        HtmlHelpers.assertXPath(
-            getHtmlStringFromResponse(response),
-            "//div[@class='issues'][text()='Something went wrong when contacting the VSP']"
-        );
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
     }
 
     private void assertGoodRequest(AuthnRequest request) throws Throwable {
@@ -131,12 +124,12 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         final String htmlString = getHtmlStringFromResponse(response);
 
         HtmlHelpers.assertXPath(
-            htmlString,
-            String.format("//form[@action='http://www.hub.com']/input[@name='SAMLRequest'][@value='%s']", TestVerifyServiceProviderResource.ENCODED_SAML_BLOB)
+                htmlString,
+                String.format("//form[@action='http://www.hub.com']/input[@name='SAMLRequest'][@value='%s']", TestVerifyServiceProviderResource.ENCODED_SAML_BLOB)
         );
         HtmlHelpers.assertXPath(
-            htmlString,
-            "//form[@action='http://www.hub.com']/input[@name='RelayState'][@value='relay-state']"
+                htmlString,
+                "//form[@action='http://www.hub.com']/input[@name='RelayState'][@value='relay-state']"
         );
     }
 

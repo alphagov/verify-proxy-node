@@ -9,6 +9,7 @@ import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.net.URI;
 
 public class GatewayConfiguration extends Configuration {
 
@@ -32,6 +33,10 @@ public class GatewayConfiguration extends Configuration {
     @NotNull
     private RedisServiceConfiguration redisService;
 
+    @JsonProperty
+    @Valid
+    private URI errorPageRedirectUrl;
+
 
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }
 
@@ -39,8 +44,11 @@ public class GatewayConfiguration extends Configuration {
 
     public VerifyServiceProviderConfiguration getVerifyServiceProviderConfiguration() { return verifyServiceProviderService; }
 
-
     public RedisServiceConfiguration getRedisService() {
         return redisService;
+    }
+
+    public URI getErrorPageRedirectUrl() {
+        return errorPageRedirectUrl;
     }
 }

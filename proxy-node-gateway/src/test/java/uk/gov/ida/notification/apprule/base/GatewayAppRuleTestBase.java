@@ -34,9 +34,13 @@ public class GatewayAppRuleTestBase {
     private final SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
 
     protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule) throws URISyntaxException {
+        return postEidasAuthnRequest(eidasAuthnRequest, proxyNodeAppRule, true);
+    }
+
+    protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule, boolean followRedirects) throws URISyntaxException {
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
         Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest).param("RelayState", "relay-state");
-        return proxyNodeAppRule.target("/SAML2/SSO/POST").request().post(Entity.form(postForm));
+        return proxyNodeAppRule.target("/SAML2/SSO/POST", followRedirects).request().post(Entity.form(postForm));
     }
 
     protected Response redirectEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule) throws URISyntaxException {
