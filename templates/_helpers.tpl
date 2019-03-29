@@ -11,6 +11,10 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "metadata.host" -}}
+{{- printf "%s-%s.%s" .Release.Name "metadata" (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "connector.entityID" -}}
 {{- if .Values.stubConnector.enabled -}}
 https://{{ include "connector.host" . }}
