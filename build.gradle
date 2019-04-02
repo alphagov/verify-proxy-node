@@ -18,7 +18,7 @@ ext {
     opensaml_version = '3.4.2'
     dropwizard_version = '1.3.9'
     utils_version = '2.0.0-351'
-    saml_libs_version = "${opensaml_version}-182"
+    saml_lib_version = "${opensaml_version}-185"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
@@ -105,27 +105,20 @@ subprojects {
         )
 
         verify_saml(
-                "uk.gov.ida:saml-extensions:${saml_libs_version}",
-                "uk.gov.ida:saml-metadata-bindings:${saml_libs_version}",
-                "uk.gov.ida:saml-security:${saml_libs_version}",
-                "uk.gov.ida:saml-utils:${saml_libs_version}",
+                "uk.gov.ida:saml-lib:${saml_lib_version}",
                 "uk.gov.ida:security-utils:${utils_version}",
         )
 
         constraints {
-            verify_saml("commons-collections:commons-collections:3.2.2") {
-                because "saml_libs_version-176 has a dep on commons-collections:3.2.1 which is vulnerable to CVE-2015-7501"
-            }
             verify_saml("org.bouncycastle:bcprov-jdk15on:1.60") {
-                because "saml_libs_version-176 has a dep on bcprov-jdk15on:1.59 which is vulnerable to CVE-2018-1000180"
+                because "saml_lib_version 185 has a dep on bcprov-jdk15on:1.59 which is vulnerable to CVE-2018-1000180"
             }
         }
 
         verify_saml_test(
-                "uk.gov.ida:common-test-utils:${utils_version}",
-                "uk.gov.ida:saml-metadata-bindings-test:${saml_libs_version}",
+                "uk.gov.ida:saml-test:${saml_lib_version}",
         )
-        
+
         proxy_node_test(
                 "net.sourceforge.htmlcleaner:htmlcleaner:2.22",
                 "net.sourceforge.htmlunit:htmlunit:2.28",
