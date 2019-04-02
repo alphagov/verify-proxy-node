@@ -21,6 +21,14 @@ spec:
         app.kubernetes.io/name: esp
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: talksToHsm
+                operator: Exists
+            topologyKey: "kubernetes.io/hostname"
       restartPolicy: Always
       containers:
       - name: esp

@@ -21,6 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: connector
         app.kubernetes.io/instance: {{ .Release.Name }}
+        talksToHsm: ""
     spec:
       restartPolicy: Always
       volumes:
