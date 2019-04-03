@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: metadata-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      deployment: {{ .Release.Name }}-proxy-metadata-deployment
+  policyTypes:
+  - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: nginx-ingress
+            release: ingress-system
+        namespaceSelector:
+          matchLabels:
+            namespace: ingress-system
+{{ if .Values.stubConnector.enabled }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: connector
+            app.kubernetes.io/instance: {{ .Release.Name }}
+{{ end }}
+      ports:
+      - protocol: TCP
+        port: 80

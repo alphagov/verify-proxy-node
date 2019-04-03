@@ -1,0 +1,25 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: stub-connector-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: connector
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: nginx-ingress
+            release: ingress-system
+        namespaceSelector:
+          matchLabels:
+            namespace: ingress-system
+      ports:
+      - protocol: TCP
+        port: 80
+{{- end -}}
