@@ -1,15 +1,22 @@
-# eIDAS Notification
+# eIDAS Proxy Node
 
 This repository contains the eIDAS Proxy Node implementation, which consists of the following services:
 
-* `stub-connector`
 * `proxy-node-gateway`
 * `proxy-node-translator`
-* `soft-hsm`
+* `eidas-saml-parser`
 * `stub-idp`
+* `stub-connector`
 
-This stack allows a user journey from a stub EU connector, through the eIDAS Proxy Node, to a stub UK IDP, and back.
-The eIDAS Proxy Node will not perform matching.
+The eIDAS Proxy Node also runs the [verify-service-provider](https://github.com/alphagov/verify-service-provider) to build Verify SAML AuthnRequests and parse SAML Responses from the Verify Hub.
+
+The eIDAS Proxy Node does not perform matching.
+
+## Architectural Descision Records and documentation
+
+We record our architectural decisions in `doc/adr`
+
+A technical overview of the Proxy Node is available [here](doc/overview.md).
 
 ## Running the proxy node services
 
@@ -42,3 +49,7 @@ The latter will rebuild all services and possibly reassign the minikube ip addre
 
 1. To run the tests manually, execute: `./gradlew clean test`.
 1. Test results are output to `./build/test-results`.  
+
+## License
+
+[MIT](https://github.com/alphagov/verify-proxy-node/blob/master/LICENCE)
