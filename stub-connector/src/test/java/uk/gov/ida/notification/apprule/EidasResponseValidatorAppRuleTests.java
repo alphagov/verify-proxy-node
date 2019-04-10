@@ -18,6 +18,7 @@ import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -111,7 +112,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
         SamlObjectSigner signer = new SamlObjectSigner(X509CredentialFactory.build(
                     TEST_RP_PUBLIC_SIGNING_CERT,
                     TEST_RP_PRIVATE_SIGNING_KEY
-                ), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
+                ), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, new ProxyNodeLogger());
 
         signer.sign(response, "response-id");
 

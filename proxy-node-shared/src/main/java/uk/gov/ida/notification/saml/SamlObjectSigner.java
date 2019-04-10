@@ -11,13 +11,16 @@ import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 public class SamlObjectSigner {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final SignatureSigningParameters signingParams;
+    private ProxyNodeLogger proxyNodeLogger;
 
-    public SamlObjectSigner(BasicX509Credential signingCredential, String signingAlgorithm) {
+    public SamlObjectSigner(BasicX509Credential signingCredential, String signingAlgorithm, ProxyNodeLogger proxyNodeLogger) {
+        this.proxyNodeLogger = proxyNodeLogger;
         signingParams = SignatureSigningParametersHelper.build(signingCredential, signingAlgorithm);
     }
 
@@ -34,13 +37,8 @@ public class SamlObjectSigner {
     }
 
     private  void logSigningRequest(String responseId, String signingProvider) {
-        try {
-            MDC.put("eidasResponseID", responseId);
-            MDC.put("signingProvider", signingProvider);
-            log.info("Signing eIDAS response");
-        } finally {
-            MDC.remove("eidasResponseID");
-            MDC.remove("signingProvider");
-        }
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasRequestId, responseId);
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.signingProvider, signingProvider);
+        log.info("Signing eIDAS response");
     }
 }

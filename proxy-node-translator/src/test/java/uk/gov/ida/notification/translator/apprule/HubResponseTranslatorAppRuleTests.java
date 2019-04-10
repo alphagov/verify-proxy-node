@@ -31,10 +31,10 @@ import uk.gov.ida.notification.helpers.HubResponseBuilder;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
-import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger;
-import uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger.HubResponseTranslatorLoggerAttributes;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.TestEntityIds;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
@@ -47,10 +47,10 @@ import java.io.PrintStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource.EIDAS_RESPONSE_LOGGER_MESSAGE;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_SIGNING_CERT;
@@ -168,7 +168,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     @Test
     public void shouldLogEidasResponseAttributesToMDC() throws Exception {
-        Logger logger = (Logger) LoggerFactory.getLogger(HubResponseTranslatorLogger.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
 
         Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
@@ -181,11 +181,10 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        Assertions.assertThat(loggingEvent.getMessage()).contains(HubResponseTranslatorLogger.EIDAS_RESPONSE_LOGGER_MESSAGE);
-        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID)).isEqualTo(eidasResponse.getID());
-        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION)).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
-        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO)).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
-        Assertions.assertThat(mdcPropertyMap.get(HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER)).isEqualTo(eidasResponse.getIssuer().getValue());
+        Assertions.assertThat(loggingEvent.getMessage()).contains(EIDAS_RESPONSE_LOGGER_MESSAGE);
+        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.eidasDestination.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
+        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.eidasRequestId.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
+        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.eidasIssuer.name())).isEqualTo(eidasResponse.getIssuer().getValue());
     }
 
     @Test
@@ -200,16 +199,11 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         // Checking System.out does not work in a Travis build.  Only run this assertion outside of Travis.
         if (!"true".equals(publicBuild)) {
             // Proxy Node logs in json format
-            Assertions.assertThat(consoleOutput.toString()).containsPattern(
-                    Pattern.compile(
-                            String.format("%s.*\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"",
-                                    HubResponseTranslatorLogger.EIDAS_RESPONSE_LOGGER_MESSAGE,
-                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_DESTINATION, EIDAS_TEST_CONNECTOR_DESTINATION,
-                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID, eidasResponse.getID(),
-                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_IN_RESPONSE_TO, ResponseBuilder.DEFAULT_REQUEST_ID,
-                                    HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ISSUER, eidasResponse.getIssuer().getValue()
-                            )
-                    )
+            String consoleOutoutString = consoleOutput.toString();
+            Assertions.assertThat(consoleOutoutString).contains(EIDAS_RESPONSE_LOGGER_MESSAGE,
+                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.eidasDestination.name(), EIDAS_TEST_CONNECTOR_DESTINATION),
+                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.eidasRequestId.name(), ResponseBuilder.DEFAULT_REQUEST_ID),
+                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.eidasIssuer.name(), eidasResponse.getIssuer().getValue())
             );
         }
         System.setOut(defaultConsolePrintStream);

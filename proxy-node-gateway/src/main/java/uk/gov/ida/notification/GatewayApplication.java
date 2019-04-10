@@ -26,6 +26,8 @@ import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import java.net.URI;
@@ -97,6 +99,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.servlets().setSessionHandler(sessionHandler);
 
         environment.jersey().register(IstioHeaderMapperFilter.class);
+        environment.jersey().register(ProxyNodeLoggingFilter.class);
     }
 
     private void registerExceptionMappers(
@@ -137,7 +140,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 espProxy,
                 vspProxy,
                 samlFormViewBuilder,
-                sessionStorage));
+                sessionStorage,
+                new ProxyNodeLogger()));
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,

@@ -27,6 +27,8 @@ import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
@@ -90,6 +92,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
         String x509EncryptionCert = getX509EncryptionCert(configuration);
 
         environment.jersey().register(IstioHeaderMapperFilter.class);
+        environment.jersey().register(ProxyNodeLoggingFilter.class);
 
         environment.jersey().register(
                 new EidasSamlResource(
@@ -99,8 +102,8 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
                         Metadata.getAssertionConsumerServiceLocation(
                                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                                 connectorMetadataResolverBundle.getMetadataResolver()
-                        )
-                )
+                        ),
+                        new ProxyNodeLogger())
         );
 
         registerMetadataHealthCheck(

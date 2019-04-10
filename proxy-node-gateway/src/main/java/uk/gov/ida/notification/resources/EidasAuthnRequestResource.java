@@ -2,18 +2,20 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
+import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
-import uk.gov.ida.notification.logging.CombinedAuthnRequestAttributesLogger;
-import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
-import uk.gov.ida.notification.session.storage.SessionStore;
-import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
+import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
+import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
-import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
+import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
+import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
@@ -26,6 +28,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 
+import static java.util.logging.Level.INFO;
+
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
 
@@ -34,16 +38,19 @@ public class EidasAuthnRequestResource {
     private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final SessionStore sessionStorage;
+    private final ProxyNodeLogger proxyNodeLogger;
 
     public EidasAuthnRequestResource(
             EidasSamlParserProxy eidasSamlParserService,
             VerifyServiceProviderProxy vspProxy,
             SamlFormViewBuilder samlFormViewBuilder,
-            SessionStore sessionStorage) {
+            SessionStore sessionStorage,
+            ProxyNodeLogger proxyNodeLogger) {
         this.eidasSamlParserService = eidasSamlParserService;
         this.vspProxy = vspProxy;
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.sessionStorage = sessionStorage;
+        this.proxyNodeLogger = proxyNodeLogger;
     }
 
 
@@ -79,7 +86,18 @@ public class EidasAuthnRequestResource {
             )
         );
 
-        CombinedAuthnRequestAttributesLogger.logAuthnRequestAttributes(sessionId, eidasSamlParserResponse, vspResponse);
+        String connectorEncryptonPublicCerrt = StringUtils.right(
+                eidasSamlParserResponse.getConnectorEncryptionPublicCertificate(),
+                10
+        );
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasRequestId, eidasSamlParserResponse.getRequestId());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasIssuer, eidasSamlParserResponse.getIssuer());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasDestination, eidasSamlParserResponse.getDestination());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.connectorPublicEncCertSuffix, connectorEncryptonPublicCerrt);
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.hubRequestId, vspResponse.getRequestId());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.hubUrl, vspResponse.getSsoLocation().toString());
+        proxyNodeLogger.log(INFO, "Authn requests received from ESP and VSP");
+
         return buildSamlFormView(vspResponse, eidasRelayState);
     }
 

@@ -16,10 +16,10 @@ import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
-import uk.gov.ida.notification.eidassaml.logging.EidasAuthnRequestAttributesLogger;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         request = new EidasAuthnRequestBuilder()
                 .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest");
-        samlObjectSigner = new SamlObjectSigner(X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
+        samlObjectSigner = new SamlObjectSigner(X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, new ProxyNodeLogger());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestNotSignedCorrectly() throws Exception {
         AuthnRequest requestWithIncorrectSigningKey = request.build();
-        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
+        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, new ProxyNodeLogger());
         samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey, "response-id");
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(requestWithIncorrectSigningKey),
@@ -238,7 +238,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldLogAuthnRequestAttributes() throws Exception {
         Appender<ILoggingEvent> appender = mock(Appender.class);
-        Logger logger = (Logger) LoggerFactory.getLogger(EidasAuthnRequestAttributesLogger.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
         AuthnRequest authnRequest = request.withRequestId("request_id").build();
         samlObjectSigner.sign(authnRequest, "response-id");

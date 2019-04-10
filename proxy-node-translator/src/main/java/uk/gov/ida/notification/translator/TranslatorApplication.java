@@ -18,6 +18,8 @@ import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
@@ -73,7 +75,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     @Override
     public void run(final TranslatorConfiguration configuration, final Environment environment) {
         environment.jersey().register(IstioHeaderMapperFilter.class);
-
+        environment.jersey().register(ProxyNodeLoggingFilter.class);
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
@@ -91,7 +93,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
         final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
         final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
-        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy);
+        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy, new ProxyNodeLogger());
 
         environment.jersey().register(hubResponseTranslatorResource);
     }
@@ -110,7 +112,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
 
         final CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
-        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm());
+        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm(), new ProxyNodeLogger());
 
         return new EidasResponseGenerator(hubResponseTranslator, failureResponseGenerator, samlObjectSigner);
     }
