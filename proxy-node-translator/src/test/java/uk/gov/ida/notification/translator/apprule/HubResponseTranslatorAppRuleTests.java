@@ -176,15 +176,15 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 
         // Resource method logs twice: once for Response Details and once for the Hash, so expect 2 invocations.
-        verify(appender, Mockito.times(1)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, Mockito.times(2)).doAppend(loggingEventArgumentCaptor.capture());
 
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
         Assertions.assertThat(loggingEvent.getMessage()).contains(EIDAS_RESPONSE_LOGGER_MESSAGE);
-        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.eidasDestination.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
-        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.eidasRequestId.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
-        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.eidasIssuer.name())).isEqualTo(eidasResponse.getIssuer().getValue());
+        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
+        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
+        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
     }
 
     @Test
@@ -201,9 +201,9 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
             // Proxy Node logs in json format
             String consoleOutoutString = consoleOutput.toString();
             Assertions.assertThat(consoleOutoutString).contains(EIDAS_RESPONSE_LOGGER_MESSAGE,
-                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.eidasDestination.name(), EIDAS_TEST_CONNECTOR_DESTINATION),
-                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.eidasRequestId.name(), ResponseBuilder.DEFAULT_REQUEST_ID),
-                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.eidasIssuer.name(), eidasResponse.getIssuer().getValue())
+                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.EIDAS_DESTINATION.name(), EIDAS_TEST_CONNECTOR_DESTINATION),
+                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.EIDAS_REQUEST_ID.name(), ResponseBuilder.DEFAULT_REQUEST_ID),
+                    String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.EIDAS_ISSUER.name(), eidasResponse.getIssuer().getValue())
             );
         }
         System.setOut(defaultConsolePrintStream);

@@ -90,12 +90,12 @@ public class EidasAuthnRequestResource {
                 eidasSamlParserResponse.getConnectorEncryptionPublicCertificate(),
                 10
         );
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasRequestId, eidasSamlParserResponse.getRequestId());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasIssuer, eidasSamlParserResponse.getIssuer());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasDestination, eidasSamlParserResponse.getDestination());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.connectorPublicEncCertSuffix, connectorEncryptonPublicCerrt);
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.hubRequestId, vspResponse.getRequestId());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.hubUrl, vspResponse.getSsoLocation().toString());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuer());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptonPublicCerrt);
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         proxyNodeLogger.log(INFO, "Authn requests received from ESP and VSP");
 
         return buildSamlFormView(vspResponse, eidasRelayState);

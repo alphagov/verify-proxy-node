@@ -22,9 +22,9 @@ public class ProxyNodeLogger {
     public void log(Level level, Supplier<String> message) {
         Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
         callingFrame.ifPresent(f -> {
-            addContext(ProxyNodeMDCKey.logLocation, String.format("%s.%s", f.getClassName(), f.getMethodName()));
+            addContext(ProxyNodeMDCKey.LOG_LOCATION, String.format("%s.%s", f.getClassName(), f.getMethodName()));
             LOG.log(level, message);
-            MDC.remove(ProxyNodeMDCKey.logLocation.name());
+            MDC.remove(ProxyNodeMDCKey.LOG_LOCATION.name());
         });
     }
 

@@ -54,10 +54,10 @@ public class EidasSamlResource {
         samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         eidasAuthnRequestValidator.validate(authnRequest);
 
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasRequestId, authnRequest.getID());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasDestination, authnRequest.getDestination());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasIssuer, authnRequest.getIssuer().getValue());
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasIssueInstant, authnRequest.getIssueInstant().toString());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, authnRequest.getID());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, authnRequest.getDestination());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, authnRequest.getIssuer().getValue());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT, authnRequest.getIssueInstant().toString());
         proxyNodeLogger.log(Level.INFO, "Authn request validated by ESP");
 
         return new EidasSamlParserResponse(

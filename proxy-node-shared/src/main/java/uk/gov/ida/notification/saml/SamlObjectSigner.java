@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
+import java.util.logging.Level;
+
 public class SamlObjectSigner {
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final SignatureSigningParameters signingParams;
     private ProxyNodeLogger proxyNodeLogger;
 
@@ -37,8 +38,8 @@ public class SamlObjectSigner {
     }
 
     private  void logSigningRequest(String responseId, String signingProvider) {
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.eidasRequestId, responseId);
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.signingProvider, signingProvider);
-        log.info("Signing eIDAS response");
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, responseId);
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.SIGNING_PROVIDER, signingProvider);
+        proxyNodeLogger.log(Level.INFO, "Signing eIDAS response");
     }
 }

@@ -106,12 +106,12 @@ public class EidasAuthnRequestResourceTest {
 
         verify(sessionStore).createOrUpdateSession(eq(sessionId), any(GatewaySessionData.class));
         verify(session).getId();
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.eidasRequestId, "eidas request id");
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.eidasIssuer, "issuer");
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.eidasDestination, "destination");
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.connectorPublicEncCertSuffix, StringUtils.right(UNCHAINED_PUBLIC_CERT, 10));
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.hubRequestId, "hub request id");
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.hubUrl, "http://hub.bub");
+        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, "eidas request id");
+        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_ISSUER, "issuer");
+        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, "destination");
+        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, StringUtils.right(UNCHAINED_PUBLIC_CERT, 10));
+        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, "hub request id");
+        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.HUB_URL, "http://hub.bub");
         verify(proxyNodeLogger).log(INFO, "Authn requests received from ESP and VSP");
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
