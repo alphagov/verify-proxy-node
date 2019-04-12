@@ -33,7 +33,7 @@ public class ProxyNodeLoggingFilterTest {
     }
 
     @Test
-    public void should_not_add_istio_header_to_mdc_before_request_when_not_in_request_headers() throws IOException {
+    public void shouldNotAddIstioHeaderToMdcBeforeRequestWhenNotInRequestHeaders() throws IOException {
         ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
         when(requestContext.getHeaderString(X_B3_TRACEID)).thenReturn(null);
         filter.filter(requestContext);
@@ -43,7 +43,7 @@ public class ProxyNodeLoggingFilterTest {
     }
 
     @Test
-    public void should_add_istio_header_to_mdc_before_request_when_in_request_headers() throws IOException {
+    public void shouldAddIstioHeaderToMdcBeforeRequestWhenInRequestHeaders() throws IOException {
         ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
         when(requestContext.getHeaderString(X_B3_TRACEID)).thenReturn("foo");
         filter.filter(requestContext);
@@ -53,7 +53,7 @@ public class ProxyNodeLoggingFilterTest {
     }
 
     @Test
-    public void should_only_remove_ProxyNodeMDCKeys_and_ISTO_header_after_reponse() throws IOException {
+    public void shouldOnlyRemoveProxynodemdckeysAndIstoHeaderAfterReponse() throws IOException {
         ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
         ContainerResponseContext responseContext = mock(ContainerResponseContext.class);
 
