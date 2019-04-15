@@ -53,3 +53,5 @@ spec:
           value: http://{{ .Release.Name }}-esp/
         - name: VERIFY_SERVICE_PROVIDER_URL
           value: http://{{ .Release.Name }}-vsp/
+        - name: PROXY_NODE_ERROR_PAGE_URI
+          value: {{ .Values.gateway.errorPageURL }}
