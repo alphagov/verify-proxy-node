@@ -89,9 +89,6 @@ public class HubResponseTranslatorResource {
     }
 
     private void logSamlResponse(org.opensaml.saml.saml2.core.Response samlResponse) {
-            // TODO: discuss removing this id
-            // MDC.put(HubResponseAttributesHashLogger.HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID, samlResponse.getID() != null ? samlResponse.getID() : "");
-
             proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, Objects.requireNonNullElse(samlResponse.getInResponseTo(), ""));
             proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, Objects.requireNonNullElse(samlResponse.getDestination(), ""));
             proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, samlResponse.getIssuer() != null ? samlResponse.getIssuer().getValue() : "");
