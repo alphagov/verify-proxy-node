@@ -15,7 +15,7 @@ import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
 public class ProxyNodeLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         String istioTraceId = requestContext.getHeaderString(X_B3_TRACEID);
         if (istioTraceId != null && ! istioTraceId.isBlank()) {
             MDC.put(X_B3_TRACEID, istioTraceId);
