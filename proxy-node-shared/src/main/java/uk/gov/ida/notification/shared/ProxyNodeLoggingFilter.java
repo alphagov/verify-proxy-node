@@ -17,7 +17,7 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
     @Override
     public void filter(ContainerRequestContext requestContext) {
         String istioTraceId = requestContext.getHeaderString(X_B3_TRACEID);
-        if (istioTraceId != null && ! istioTraceId.isBlank()) {
+        if (istioTraceId != null && !istioTraceId.isBlank()) {
             MDC.put(X_B3_TRACEID, istioTraceId);
         }
     }
