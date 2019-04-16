@@ -23,7 +23,7 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         MDC.remove(X_B3_TRACEID);
         for (ProxyNodeMDCKey key : ProxyNodeMDCKey.values()) {
             MDC.remove(key.name());
