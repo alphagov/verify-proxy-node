@@ -6,7 +6,7 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.saml.core.transformers.EidasResponseAttributesHashLogger;
 
-public class HubResponseTranslatorLogger {
+public class HubResponseAttributesHashLogger {
 
     public static void logResponseAttributesHash(HubResponseTranslatorRequest request, TranslatedHubResponse translatedHubResponse) {
         final EidasResponseAttributesHashLogger attributesHashLogger = EidasResponseAttributesHashLogger.instance();

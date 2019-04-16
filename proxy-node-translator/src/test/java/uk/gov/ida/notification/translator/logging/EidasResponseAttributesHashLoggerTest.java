@@ -148,7 +148,7 @@ public class EidasResponseAttributesHashLoggerTest {
         Method applyAttributesToLoggerMethod;
         try {
             applyAttributesToLoggerMethod =
-                    HubResponseTranslatorLogger.class.getDeclaredMethod("applyAttributesToHashLogger", EidasResponseAttributesHashLogger.class, Attributes.class, String.class);
+                    HubResponseAttributesHashLogger.class.getDeclaredMethod("applyAttributesToHashLogger", EidasResponseAttributesHashLogger.class, Attributes.class, String.class);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }

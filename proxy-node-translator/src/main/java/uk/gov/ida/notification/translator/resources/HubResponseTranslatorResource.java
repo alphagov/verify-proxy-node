@@ -23,7 +23,7 @@ import javax.ws.rs.core.Response;
 import java.util.Objects;
 import java.util.logging.Level;
 
-import static uk.gov.ida.notification.translator.logging.HubResponseTranslatorLogger.logResponseAttributesHash;
+import static uk.gov.ida.notification.translator.logging.HubResponseAttributesHashLogger.logResponseAttributesHash;
 
 @Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ public class HubResponseTranslatorResource {
 
     private void logSamlResponse(org.opensaml.saml.saml2.core.Response samlResponse) {
             // TODO: discuss removing this id
-            // MDC.put(HubResponseTranslatorLogger.HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID, samlResponse.getID() != null ? samlResponse.getID() : "");
+            // MDC.put(HubResponseAttributesHashLogger.HubResponseTranslatorLoggerAttributes.EIDAS_RESPONSE_ID, samlResponse.getID() != null ? samlResponse.getID() : "");
 
             proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, Objects.requireNonNullElse(samlResponse.getInResponseTo(), ""));
             proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, Objects.requireNonNullElse(samlResponse.getDestination(), ""));
