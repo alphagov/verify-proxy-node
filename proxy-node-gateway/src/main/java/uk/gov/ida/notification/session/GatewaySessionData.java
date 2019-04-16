@@ -43,9 +43,9 @@ public class GatewaySessionData {
 
     @JsonCreator
     public GatewaySessionData(
-        @JsonProperty("hubRequestId") String hubRequestId,
-        @JsonProperty("eidasRequestId") String eidasRequestId,
-        @JsonProperty("eidasDestination") String eidasDestination,
+        @JsonProperty("HUB_REQUEST_ID") String hubRequestId,
+        @JsonProperty("EIDAS_REQUEST_ID") String eidasRequestId,
+        @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
         @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
         @JsonProperty("eidasRelayState") String eidasRelayState
     ) {

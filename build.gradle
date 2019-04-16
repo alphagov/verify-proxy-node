@@ -63,6 +63,12 @@ subprojects {
 //    If any configurations are added/changed please ensure their dependencies are still being tested and monitored by
 //    Snyk. See the Snyk directory in the root of the project.
     dependencies {
+        configurations.all {
+            resolutionStrategy.dependencySubstitution {
+                substitute module("dom4j:dom4j:1.6.1") because "dom4j vulnerable to XML External Entity (XXE) Injection due to not validating the QName inputs, see CVE-2018-1000632" with module("org.dom4j:dom4j:2.1.1")
+            }
+        }
+
         common(
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
