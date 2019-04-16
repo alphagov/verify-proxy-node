@@ -4,7 +4,7 @@ jdk:
   - openjdk11
 
 install:
-  - npm install -g snyk
+  - npm install -g snyk@1.146.0
 
 script:
   - ./gradlew --no-daemon --quiet test
