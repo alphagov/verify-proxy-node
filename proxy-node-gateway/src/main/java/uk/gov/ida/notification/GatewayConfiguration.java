@@ -35,6 +35,7 @@ public class GatewayConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
+    @NotNull
     private URI errorPageRedirectUrl;
 
 
