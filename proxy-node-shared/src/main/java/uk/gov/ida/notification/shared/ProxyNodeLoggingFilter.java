@@ -7,7 +7,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
 
 import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
 
