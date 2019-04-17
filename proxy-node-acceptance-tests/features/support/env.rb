@@ -26,7 +26,7 @@ if ENV['TEST_ENV'] == 'local' || show_browser
     Capybara.javascript_driver = :firefox_driver
   end
 else
-  selenium_hub_url = ENV['HUB'] || 'http://selenium-hub:4444/wd/hub'
+  selenium_hub_url = ENV['SELENIUM_HUB_URL'] || 'http://selenium-hub:4444/wd/hub'
   Capybara.register_driver :selenium_remote_firefox do |app|
     Capybara::Selenium::Driver.new(app, browser: :remote, url: selenium_hub_url, desired_capabilities: :firefox)
   end
