@@ -17,7 +17,7 @@ Given("the proxy node is sent a LOA {string} request") do |load_type|
 end
 
 And('they progress through verify') do
-  find('label', :text => 'I’ve used Verify before').click
+  find('label', :text => 'I’ve used GOV.UK Verify before').click
   click_button('Continue')
   find('button', :text => 'Stub Idp Demo One').click
 end
@@ -53,8 +53,7 @@ Then("the user should be presented with an hub error page") do
   assert_text('You may have selected the wrong company. Check your emails and text messages for confirmation of who verified you.')
 end
 
-
-Then("the user should be presented with an {string} page") do |http_error_code|
+Then("the user should be presented with an error page") do
   assert_text('Sorry, something went wrong')
-  assert_text('HTTP ' + http_error_code)
+  assert_text('This may be because your session timed out or there was a system error.')
 end
