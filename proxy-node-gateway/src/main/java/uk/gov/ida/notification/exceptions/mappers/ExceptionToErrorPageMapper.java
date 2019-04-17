@@ -3,7 +3,6 @@ package uk.gov.ida.notification.exceptions.mappers;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.ida.notification.views.ErrorPageView;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -36,12 +35,7 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
     @Override
     public Response toResponse(TException exception) {
         logException(exception);
-
-        return errorPageRedirectUrl != null ?
-                Response.seeOther(errorPageRedirectUrl).build() :
-                Response.status(getResponseStatus(exception))
-                        .entity(new ErrorPageView())
-                        .build();
+        return Response.seeOther(errorPageRedirectUrl).build();
     }
 
     protected abstract Response.Status getResponseStatus(TException exception);

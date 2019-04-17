@@ -24,11 +24,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ida.notification.apprule.rules.GatewayAppRule.ERROR_PAGE_REDIRECT_URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
-
-    private static final String errorPageRedirectUrl = "https://proxy-node-error-page";
 
     @ClassRule
     public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
@@ -55,8 +54,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -64,8 +62,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -73,8 +70,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Rule
@@ -82,8 +78,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl)
     );
 
     @Test
@@ -96,7 +91,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspServerErrorAppRule, false);
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
-        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
     @Test
@@ -104,7 +99,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspClientErrorAppRule, false);
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
-        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
     @Test
@@ -112,7 +107,7 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeVspServerErrorAppRule, false);
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
-        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
     private void assertGoodRequest(AuthnRequest request) throws Throwable {

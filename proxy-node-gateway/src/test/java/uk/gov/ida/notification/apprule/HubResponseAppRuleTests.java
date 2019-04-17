@@ -154,28 +154,6 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void returnsErrorPageIfSessionMissingExceptionAndNoRedirectUrlConfigured() throws Exception {
-        Response response = proxyNodeAppRuleNoErrorPageUrl
-                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
-                .request()
-                .post(Entity.form(postForm));
-
-        assertThat(response.getStatus()).isEqualTo(400);
-
-        final String htmlString = response.readEntity(String.class);
-
-        HtmlHelpers.assertXPath(
-                htmlString,
-                "//div[@class='title'][text()='Sorry, something went wrong']"
-        );
-
-        HtmlHelpers.assertXPath(
-                htmlString,
-                "//div[@class='issues'][text()='This may be because your session timed out or there was a system error.']"
-        );
-    }
-
-    @Test
     public void serverErrorResponseFromTranslatorReturns200SamlErrorResponse() throws Exception {
         Response response = proxyNodeServerErrorAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)

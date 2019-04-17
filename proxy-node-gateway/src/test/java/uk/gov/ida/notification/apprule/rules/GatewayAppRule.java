@@ -19,6 +19,8 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
 public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
 
+    public static final String ERROR_PAGE_REDIRECT_URL = "https://proxy-node-error-page";
+
     private Client client;
     private Client noRedirectClient;
 
@@ -35,6 +37,7 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("errorPageRedirectUrl", ERROR_PAGE_REDIRECT_URL));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 
