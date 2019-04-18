@@ -16,12 +16,16 @@ public class ProxyNodeLogger {
     }
 
     public void log(Level level, String message) {
-        log(level, () -> message);
+        logWithCallingFrame(level, () -> message);
     }
 
     public void log(Level level, Supplier<String> message) {
+        logWithCallingFrame(level, message);
+    }
+
+    private void logWithCallingFrame(Level level, Supplier<String> message) {
         Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
-        callingFrame.ifPresent(f -> {
+         callingFrame.ifPresent(f -> {
             addContext(ProxyNodeMDCKey.LOG_LOCATION, String.format("%s.%s", f.getClassName(), f.getMethodName()));
             LOG.log(level, message);
             MDC.remove(ProxyNodeMDCKey.LOG_LOCATION.name());
@@ -29,6 +33,8 @@ public class ProxyNodeLogger {
     }
 
     private Optional<StackWalker.StackFrame> getCallingStackFrame() {
-        return StackWalker.getInstance().walk(s -> s.skip(1).findFirst());
+        return StackWalker.getInstance().walk(
+                s -> s.dropWhile(f -> f.getClassName().startsWith(ProxyNodeLogger.class.getName())).findFirst());
     }
+
 }
