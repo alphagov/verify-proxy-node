@@ -25,10 +25,6 @@ public class ProxyNodeLogger {
 
     private void logWithCallingFrame(Level level, Supplier<String> message) {
         Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
-        logWithCallingFrame(level, message, callingFrame);
-    }
-
-    private void logWithCallingFrame(Level level, Supplier<String> message, Optional<StackWalker.StackFrame> callingFrame) {
          callingFrame.ifPresent(f -> {
             addContext(ProxyNodeMDCKey.LOG_LOCATION, String.format("%s.%s", f.getClassName(), f.getMethodName()));
             LOG.log(level, message);

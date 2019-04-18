@@ -21,7 +21,6 @@ public class ProxyNodeLoggerTest {
     @Test
     public void shouldNotLogProxyNodeLoggerAsTheLogLocation() {
         proxyNodeLogger.log(Level.INFO, "stop your messing around");
-        verify(proxyNodeLogger).addContext(eq(ProxyNodeMDCKey.LOG_LOCATION), not(contains(ProxyNodeLogger.class.getName()))
-        );
+        verify(proxyNodeLogger).addContext(eq(ProxyNodeMDCKey.LOG_LOCATION), not(contains(ProxyNodeLogger.class.getName())));
     }
 }
