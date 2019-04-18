@@ -16,11 +16,14 @@ public class ProxyNodeLogger {
     }
 
     public void log(Level level, String message) {
-        Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
-        logWithCallingFrame(level, () -> message, callingFrame);
+        logWithCallingFrame(level, () -> message);
     }
 
     public void log(Level level, Supplier<String> message) {
+        logWithCallingFrame(level, message);
+    }
+
+    private void logWithCallingFrame(Level level, Supplier<String> message) {
         Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
         logWithCallingFrame(level, message, callingFrame);
     }
