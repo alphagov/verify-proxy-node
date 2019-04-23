@@ -12,7 +12,7 @@ Key to Diagram:
 | :----:       |    :---     |
 | a      | At startup, the `metadata-controller` connects to `CloudHSM` to produce a signing keypair. It publishes the public key on `metadata`
 | b   | At startup, `translator` stores a copy of the private signing key generated in the step above
-| c   | `eidas-saml-parser` reads and stores a copy of the EU country's public encryption certificate from EU country metadata
+| c   | At startup, `eidas-saml-parser` reads and stores a copy of the EU country's public encryption certificate from EU country metadata
 | 1   | The EU Country produces a signed eIDAS SAML Request, and sends to `gateway` via the browser
 | 2   | `gateway` sends the signed eIDAS SAML Request to `eidas-saml-parser`
 | 3   | `eidas-saml-parser` validates the signature of the SAML request using the public signing certificate obtained from EU country metadata
