@@ -15,20 +15,20 @@ Key:
 
 | Step      | Description |
 | :----:       |    :---     |
-| a   | At startup, `metadata-controller` connects to `CloudHSM` to produce a signing keypair. It publishes the public key on `Metadata`
-| b   | At startup, `translator` stores a copy of the private signing key generated in the step above
-| c   | At startup, `eidas-saml-parser` reads and stores a copy of the EU country's public encryption certificate from EU country metadata
+| a   |`metadata-controller` provisions a non-extractable signing keypair in a `CloudHSM` and publishes the public key to `metadata`. It also signs the generated metadata using a keypair it generates itself.
+| b   |`metadata-controller` distributes credentials to make use of the private signing key to the `translator`
+| c   | `eidas-saml-parser` stores a copy of the EU country's public encryption certificate from the EU country's metadata
 | 1   | The EU Country produces a signed eIDAS SAML Request, and sends to `gateway` via the browser
-| 2   | `gateway` sends the signed eIDAS SAML Request to `eidas-saml-parser`
-| 3   | `eidas-saml-parser` validates the signature of the SAML request using the public signing certificate obtained from EU country metadata. This metadata may be cached.
-| 4   | `gateway` calls `verify-service-provider` to produce a signed SAML Request for Hub
-| 5   | `gateway` builds SAML Request for Hub, and posts to `Hub` via browser
-| 6   | `gateway` receives response from Hub, and sends to `translator` to process
-| 7   | `translator` calls `verify-service-provider` to provide user attributes
-| 8   | `translator` builds an eiDAS SAML Response, and signs it using the private key (from step b)
-| 9   | `translator` encrypts the response for EU country using public encryption cert in step c. This cert is transmitted in step 6.
-| 10   | `gateway` sends the eIDAS SAML response to the country via the browser
-| 11   | The EU Country decrypts response using private encryption key
-| 12   | EU Country decrypts validates Proxy Node signature using public signing key in Proxy Node metadata
+| 2   | `gateway` sends the signed eIDAS SAML Request to `eidas-saml-parser` for validation and parsing
+| 3   | `eidas-saml-parser` validates the signature of the SAML request using the public signing certificate obtained from EU country metadata.
+| 4   | `gateway` calls `verify-service-provider` to produce a signed SAML Request for Hub.
+| 5   | `gateway` builds SAML Request for `Hub`, and posts to `Hub` via browser.
+| 6   | `gateway` receives response from `Hub`, and sends to `translator` to process. The country public encryption certificate is sent in this request.
+| 7   | `translator` calls `verify-service-provider` to provide user attributes.
+| 8   | `translator` builds an eiDAS SAML Response, and encrypts the user attribute assertions for the EU country.
+| 9   | `translator` signs the eiDAS SAML Response using the private key reference obtained in step b.
+| 10   | `gateway` sends the eIDAS SAML response to the country via the browser.
+| 11   | The EU Country decrypts the SAML response using its private encryption key.
+| 12   | The EU Country validates the signature of the Proxy Node signed attributes using public signing key in Proxy Node metadata.
 
 The PKI between `verify-service-provider` and `Hub` is [documented here](https://www.docs.verify.service.gov.uk/get-started/#get-started).
