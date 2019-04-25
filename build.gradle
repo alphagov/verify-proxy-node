@@ -99,6 +99,9 @@ subprojects {
             opensaml("com.google.guava:guava:24.1.1-jre") {
                 because "opensaml:3.4.0 has a dep on guava:20.0.0 which is vulnerable to CVE-2018-10237"
             }
+            dropwizard("org.eclipse.jetty:jetty-server:9.4.17.v20190418") {
+                because "org.eclipse.jetty:jetty-util:9.4.14.v20181114 is vulnerable to CVE-2019-10247"
+            }
         }
 
         eidas_saml(
