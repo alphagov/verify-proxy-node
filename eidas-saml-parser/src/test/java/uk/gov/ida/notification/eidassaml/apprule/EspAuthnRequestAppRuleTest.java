@@ -234,7 +234,9 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
     private void assertErrorResponseWithMessage(Response response, String errorMessageContains) {
         assertErrorResponse(response);
-        assertThat(response.readEntity(String.class)).contains(errorMessageContains);
+        Map errorMap = response.readEntity(Map.class);
+        assertThat(errorMap).containsKeys("code","message");
+        assertThat((String) errorMap.get("message")).contains(errorMessageContains);
     }
 
     @Test
