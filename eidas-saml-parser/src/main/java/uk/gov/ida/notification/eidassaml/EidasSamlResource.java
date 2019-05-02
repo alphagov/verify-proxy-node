@@ -35,7 +35,6 @@ public class EidasSamlResource {
 
     public EidasSamlResource(EidasAuthnRequestValidator eidasAuthnRequestValidator,
                              SamlRequestSignatureValidator samlRequestSignatureValidator,
-                             String x509EncryptionCertString,
                              String destination,
                              ProxyNodeLogger proxyNodeLogger) {
         this.eidasAuthnRequestValidator = eidasAuthnRequestValidator;
@@ -66,7 +65,7 @@ public class EidasSamlResource {
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
-                x509EncryptionCertString,
+                EidasSamlApplication.X509Task.getX509EncryptionCert(),
                 destination);
     }
 

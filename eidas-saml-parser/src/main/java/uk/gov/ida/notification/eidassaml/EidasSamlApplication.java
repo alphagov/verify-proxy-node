@@ -3,6 +3,7 @@ package uk.gov.ida.notification.eidassaml;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.lifecycle.setup.ScheduledExecutorServiceBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.opensaml.core.config.InitializationException;
@@ -22,6 +23,7 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestedAtt
 import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValidator;
 import uk.gov.ida.notification.exceptions.mappers.InvalidAuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.SamlTransformationErrorExceptionMapper;
+import uk.gov.ida.notification.exceptions.metadata.InvalidMetadataException;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
@@ -37,6 +39,8 @@ import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidat
 import java.security.cert.CertificateEncodingException;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static uk.gov.ida.notification.saml.SamlSignatureValidatorFactory.createSamlRequestSignatureValidator;
 
@@ -98,7 +102,6 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
                 new EidasSamlResource(
                         eidasAuthnRequestValidator,
                         samlRequestSignatureValidator,
-                        x509EncryptionCert,
                         Metadata.getAssertionConsumerServiceLocation(
                                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                                 connectorMetadataResolverBundle.getMetadataResolver()
@@ -112,6 +115,62 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
                 environment,
                 "connector-metadata");
         registerExceptionMappers(environment);
+        registerX509UpdateTask(environment, connectorMetadata, configuration);
+    }
+
+    private void registerX509UpdateTask(Environment environment, Metadata connectorMetadata, EidasSamlParserConfiguration configuration) {
+        String nameFormat = "x509 updater";
+        ScheduledExecutorServiceBuilder scheduledExecutorServiceBuilder = environment.lifecycle().scheduledExecutorService(nameFormat);
+        ScheduledExecutorService scheduledExecutorService = scheduledExecutorServiceBuilder.build();
+        X509Task.setConnectorMetadata(connectorMetadata);
+        X509Task.setConfiguration(configuration);
+        scheduledExecutorService.scheduleAtFixedRate(X509Task.getInstance(), 0, 30, TimeUnit.MINUTES);
+    }
+
+    public static final class X509Task implements Runnable {
+        private static String x509EncryptionCert;
+        private static EidasSamlParserConfiguration configuration;
+        private static Metadata connectorMetadata;
+        private static X509Task instance;
+
+        static {
+            X509Task.instance = new X509Task();
+        }
+
+        private X509Task() {}
+
+        public static X509Task getInstance() {
+            return X509Task.instance;
+        }
+
+        public static void setConfiguration(EidasSamlParserConfiguration configuration) {
+            X509Task.configuration = configuration;
+        }
+
+        public static void setConnectorMetadata(Metadata connectorMetadata) {
+            X509Task.connectorMetadata = connectorMetadata;
+        }
+
+        private static void updateX509EncryptionCert() throws CertificateEncodingException {
+            X509Credential credential = (X509Credential) connectorMetadata.getCredential(UsageType.ENCRYPTION,
+                                                                                         configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
+                                                                                         SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+
+            X509Task.x509EncryptionCert = Base64.getEncoder().encodeToString(credential.getEntityCertificate().getEncoded());
+        }
+
+        public static String getX509EncryptionCert() {
+            return X509Task.x509EncryptionCert;
+        }
+
+        public void run() {
+            try {
+                X509Task.updateX509EncryptionCert();
+            }
+            catch (CertificateEncodingException exception) {
+                throw new InvalidMetadataException("Whoops", exception);
+            }
+        }
     }
 
     private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
