@@ -1,9 +1,16 @@
 dependencies {
     compile configurations.dropwizard,
-            configurations.opensaml,
             configurations.common,
             configurations.ida_utils,
             project(':proxy-node-shared')
+        configurations.all {
+            exclude group: "se.litsec.eidas", module: "eidas-opensaml3"
+            exclude group: "org.opensaml", module: "opensaml-storage-impl"
+            exclude group: "org.springframework", module: "spring-context"
+            exclude group: "org.springframework", module: "spring-core"
+            exclude group: "org.springframework", module: "spring-beans"
+            exclude group: "uk.gov.ida", module: "verify-event-emitter"
+        }
 }
 
 group = 'uk.gov.ida.notification.gateway'
