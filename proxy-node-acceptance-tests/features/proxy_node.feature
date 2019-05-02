@@ -26,5 +26,4 @@ Feature: proxy-node feature
 
     Scenario: Show 405 if route is not accessible
         Given the user accesses a route they shouldn't
-        And they progress through verify
         Then the user should be presented with an error page
