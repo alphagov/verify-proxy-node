@@ -20,11 +20,10 @@ Feature: proxy-node feature
         Given the stub connector supplies a bad authn request
         Then the user should be presented with an error page
 
-    Scenario: Show 404 if page doesnt exist
+    Scenario: Show error page if page doesnt exist
         Given the user accesses a invalid page
         Then the user should be presented with an error page
 
-    Scenario: Show 405 if route is not accessible
-        Given the user accesses a route they shouldn't
-        And they progress through verify
+    Scenario: Show error page if route is not accessible
+        Given the user accesses the gateway response url directly
         Then the user should be presented with an error page

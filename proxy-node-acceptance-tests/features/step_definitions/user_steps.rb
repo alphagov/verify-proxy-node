@@ -37,7 +37,7 @@ Given("the user accesses a invalid page") do
   visit(ENV.fetch('PROXY_NODE_URL') + '/asdfasdfasfsaf')
 end
 
-Given("the user accesses a route they shouldn't") do
+Given("the user accesses the gateway response url directly") do
   visit(ENV.fetch('PROXY_NODE_URL') + '/SAML2/SSO/Response/POST')
 end
 

@@ -4,7 +4,7 @@ set -eu
 echo "Before Docker compose build"
 docker-compose build
 echo "Docker compose build"
-export PROXY_NODE_URL="https://test-connector.staging.verify.govsvc.uk"
+export PROXY_NODE_URL="https://test-proxy-node.staging.verify.govsvc.uk"
 export STUB_CONNECTOR_URL="https://test-connector.staging.verify.govsvc.uk"
 export STUB_IDP_USER="stub-idp-demo-one"
 docker-compose up --abort-on-container-exit | grep acceptance-tests_1 --colour=never
