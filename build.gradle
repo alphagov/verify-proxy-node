@@ -17,8 +17,8 @@ apply plugin: 'com.github.ben-manes.versions'
 ext {
     opensaml_version = '3.4.2'
     dropwizard_version = '1.3.9'
-    utils_version = '2.0.0-351'
-    saml_lib_version = "${opensaml_version}-188"
+    utils_version = '2.0.0-359'
+    saml_lib_version = "${opensaml_version}-190"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
