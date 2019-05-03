@@ -114,6 +114,17 @@ Returns `BAD_REQUEST` for `ExceptionType.CLIENT_ERROR` and `INTERNAL_SERVER_ERRO
     SessionRedisCodec#decodeValue(ByteBuffer bytes) as RedisSerializationException
     SessionRedisCodec#encodeValue(ByteBuffer bytes) as RedisSerializationException
         
+    Metadata#getAssertionConsumerServiceLocation(String entityId, MetadataResolver metadataResolver) as:
+        new ConnectorMetadataException("Unable to load 'Location' for 'AssertionConsumerService' from Connector Metadata for entityId: " + entityId);
+
+    Metadata#getCredential(UsageType, String entityId, QName) as:
+        new InvalidMetadataException(String.format("Unable to resolve metadata credentials from Connector Metadata with entityID %s", entityId), ex);
+        if metadataCredentialResolver.resolveSingle(criteria) throws a ResolverException.
+        
+    Metadata#getCredential(UsageType, String entityId, QName) as:
+        throw new MissingMetadataException(String.format("Missing %s certificate from Connector Metadata with entityID %s", usageType, entityId));
+
+    SamlObjectMarshaller
 
     Anything that isn't mapped by anything else.  This is for when something really did go wrong!   
 
@@ -574,11 +585,120 @@ If `samlObjectSigner.sign(Response, String eidasRequestId)` throws `MarshallingE
 
 #####Mapped exception thrown by:
 
+---
+What even is this?
+
 `ElementToOpenSamlXMLObjectTransformer#apply(Element input)` if `samlObjectParser.getSamleObject(input)` throws an `UnmarshallingException`. This will provide a log level.
 
 `OpenSamlXMLObjectUnmarshaller#fromString(String input)` if `samlObjectParser.getSamleObject(input)` throws an `UnmarshallingException` or `XMLParserException`. This will provide a log level.
 
 `SamlAssertionsSignatureValidator#validate(List<Assertion>, QName)` if the signature does not validate.
+---
 
+`AssertionAttributeStatementValidator#validate(Assertion)` if `personName.getLanguage()` is not equal to IdaConstants.IDA_LANGUAGE (en-GB)
 
+`AssertionAttributeStatementValidator#validateFraudEvent(Assertion)` but the method is never used.
 
+`AssertionAttributeStatementValidator#validate(AttributeStatement)` if fraudEventAttribute is null or `didNotDeserializeCorrectlyIntoFraudEventType` evaluates to true.
+
+`AssertionSubjectConfirmationValidator#validate(SubjectConfirmation, String requestId)` if the `requestId` does not match.
+
+`AssertionSubjectValidator#validate(Subject, String assertionId)`
+
+```java
+        if (subject == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingAssertionSubject(assertionId);
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+        if (subject.getNameID() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.assertionSubjectHasNoNameID(assertionId);
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+        if (subject.getNameID().getFormat() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingAssertionSubjectNameIDFormat(assertionId);
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+        boolean correctNameIdType = Stream
+                .of(NameIDType.PERSISTENT, NameIDType.TRANSIENT)
+                .anyMatch(type -> type.equals(subject.getNameID().getFormat()));
+
+        if (!correctNameIdType) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.illegalAssertionSubjectNameIDFormat(assertionId, subject.getNameID().getFormat());
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+```
+
+`AssertionValidator#validate(Assertion, String requestId, String expectedRecipientId)`
+
+```java
+        if (assertion.getID() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingId();
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (signature == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.assertionSignatureMissing(assertion.getID());
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (!SamlSignatureUtil.isSignaturePresent(signature)) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.assertionNotSigned(assertion.getID());
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (assertion.getIssueInstant() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingIssueInstant(assertion.getID());
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (assertion.getVersion() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingVersion(assertion.getID());
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (!assertion.getVersion().equals(SAMLVersion.VERSION_20)) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.illegalVersion(assertion.getID());
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+```
+
+`BasicAssertionSubjectConfirmationValidator#validate(SubjectConfirmation)`
+
+```java
+        if (subjectConfirmationData == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingSubjectConfirmationData();
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (subjectConfirmationData.getInResponseTo() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingBearerInResponseTo();
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+        if (subjectConfirmationData.getRecipient() == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingBearerRecipient();
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+        final DateTime notOnOrAfter = subjectConfirmationData.getNotOnOrAfter();
+        if (notOnOrAfter == null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.missingNotOnOrAfter();
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+
+        final DateTime now = DateTime.now();
+        if (notOnOrAfter.isEqual(now) || notOnOrAfter.isBefore(now)) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.exceededNotOnOrAfter(notOnOrAfter);
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+        if (subjectConfirmationData.getNotBefore() != null) {
+            SamlValidationSpecificationFailure failure = SamlTransformationErrorFactory.notBeforeExists();
+            throw new SamlTransformationErrorException(failure.getErrorMessage(), failure.getLogLevel());
+        }
+```
+
+`IdentityProviderAssertionValidator#ensurePidsMatch(List<Assertion>)` if the pids don't match
+
+`IdentityProviderAssertionValidator#ensureIssuersMatch(List<Assertion>)` if the issuers don't match
+
+`IdentityProviderAssertionValidator#ensurePresenceOfBearerSubjectConfirmation(Assertion)` if it doesn't have a subject confirmation with bearer method.
+
+`IPAddressValidator#validate(Assertion)` if there is no IPAdress or the IPAdress is empty or null
