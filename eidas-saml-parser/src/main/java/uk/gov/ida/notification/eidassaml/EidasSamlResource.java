@@ -63,12 +63,11 @@ public class EidasSamlResource {
         proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_LOA, getLevelsOfAssurance(authnRequest));
         proxyNodeLogger.log(Level.INFO, "Authn request validated by ESP");
 
-        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
+        return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
                 x509EncryptionCertString,
                 destination);
-        return eidasSamlParserResponse;
     }
 
     private String getLevelsOfAssurance(AuthnRequest authnRequest) {
