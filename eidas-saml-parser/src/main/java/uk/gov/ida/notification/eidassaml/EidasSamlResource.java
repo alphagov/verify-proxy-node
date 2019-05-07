@@ -2,6 +2,7 @@ package uk.gov.ida.notification.eidassaml;
 
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import se.litsec.opensaml.utils.ObjectUtils;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,12 +60,21 @@ public class EidasSamlResource {
         proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, authnRequest.getDestination());
         proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, authnRequest.getIssuer().getValue());
         proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT, authnRequest.getIssueInstant().toString());
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_LOA, getLevelsOfAssurance(authnRequest));
         proxyNodeLogger.log(Level.INFO, "Authn request validated by ESP");
 
-        return new EidasSamlParserResponse(
+        EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
                 x509EncryptionCertString,
                 destination);
+        return eidasSamlParserResponse;
+    }
+
+    private String getLevelsOfAssurance(AuthnRequest authnRequest) {
+        return authnRequest.getRequestedAuthnContext().getAuthnContextClassRefs()
+                .stream()
+                .map(AuthnContextClassRef::getAuthnContextClassRef)
+                .collect(Collectors.joining(","));
     }
 }
