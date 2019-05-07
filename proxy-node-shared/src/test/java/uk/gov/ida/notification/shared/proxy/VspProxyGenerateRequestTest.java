@@ -8,12 +8,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.MDC;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderRequestException;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -102,7 +104,7 @@ public class VspProxyGenerateRequestTest {
 
         assertThatThrownBy(() -> vspProxy.generateAuthnRequest("session-id"))
                 .isInstanceOfSatisfying(VerifyServiceProviderRequestException.class, e -> {
-                    assertThat(e.getSessionId()).isEqualTo("session-id");
+                    assertThat(MDC.get(ProxyNodeMDCKey.SESSION_ID.name())).isEqualTo("session-id");
                     assertThat(e.getCause()).hasMessageStartingWith(
                             String.format("Exception of type [REMOTE_SERVER_ERROR] whilst contacting uri: %s/generate-request",
                                     testVspServerErrorClientRule.baseUri().toString()));

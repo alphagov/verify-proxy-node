@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.shared;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.MDC;
 
 import java.util.Optional;
@@ -13,6 +14,16 @@ public class ProxyNodeLogger {
 
     public void addContext(ProxyNodeMDCKey key, String value) {
         MDC.put(key.name(), value);
+    }
+
+    public void addContext(Exception exception) {
+        Throwable cause = exception.getCause();
+        if (cause != null) {
+            addContext(ProxyNodeMDCKey.EXCEPTION_CAUSE, cause.getMessage());
+        }
+
+        addContext(ProxyNodeMDCKey.EXCEPTION_MESSAGE, exception.getMessage());
+        addContext(ProxyNodeMDCKey.EXCEPTION_STACKTRACE, ExceptionUtils.getStackTrace(exception));
     }
 
     public void log(Level level, String message) {
@@ -36,5 +47,4 @@ public class ProxyNodeLogger {
         return StackWalker.getInstance().walk(
                 s -> s.dropWhile(f -> f.getClassName().startsWith(ProxyNodeLogger.class.getName())).findFirst());
     }
-
 }

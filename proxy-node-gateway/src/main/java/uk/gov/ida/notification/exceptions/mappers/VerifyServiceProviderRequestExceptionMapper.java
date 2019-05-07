@@ -10,14 +10,4 @@ public class VerifyServiceProviderRequestExceptionMapper extends ExceptionToErro
     public VerifyServiceProviderRequestExceptionMapper(URI errorPageRedirectUrl) {
         super(errorPageRedirectUrl);
     }
-
-    @Override
-    protected Response.Status getResponseStatus(VerifyServiceProviderRequestException exception) {
-        return Response.Status.INTERNAL_SERVER_ERROR;
-    }
-
-    @Override
-    protected String getSessionId(VerifyServiceProviderRequestException exception) {
-        return exception.getSessionId();
-    }
 }

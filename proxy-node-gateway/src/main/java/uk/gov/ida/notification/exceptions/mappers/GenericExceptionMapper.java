@@ -8,9 +8,4 @@ public class GenericExceptionMapper extends ExceptionToErrorPageMapper<Exception
     public GenericExceptionMapper(URI errorPageRedirectUrl) {
         super(errorPageRedirectUrl);
     }
-
-    @Override
-    protected Response.Status getResponseStatus(Exception exception) {
-        return Response.Status.INTERNAL_SERVER_ERROR;
-    }
 }
