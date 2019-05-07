@@ -12,7 +12,6 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.exceptions.mappers.AuthnRequestExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
@@ -118,7 +117,6 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new HubResponseExceptionMapper());
-        environment.jersey().register(new AuthnRequestExceptionMapper());
     }
 
     private void registerResources(StubConnectorConfiguration configuration, Environment environment) {

@@ -10,14 +10,4 @@ public class FailureResponseGenerationExceptionMapper extends ExceptionToErrorPa
     public FailureResponseGenerationExceptionMapper(URI errorPageRedirectUrl) {
         super(errorPageRedirectUrl);
     }
-
-    @Override
-    protected Response.Status getResponseStatus(FailureResponseGenerationException exception) {
-        return Response.Status.INTERNAL_SERVER_ERROR;
-    }
-
-    @Override
-    protected String getAuthnRequestId(FailureResponseGenerationException exception) {
-        return exception.getRequestId();
-    }
 }

@@ -10,9 +10,4 @@ public class SessionMissingExceptionMapper extends ExceptionToErrorPageMapper<Se
     public SessionMissingExceptionMapper(URI errorPageRedirectUrl) {
         super(errorPageRedirectUrl);
     }
-
-    @Override
-    protected Response.Status getResponseStatus(SessionMissingException exception) {
-        return Response.Status.BAD_REQUEST;
-    }
 }
