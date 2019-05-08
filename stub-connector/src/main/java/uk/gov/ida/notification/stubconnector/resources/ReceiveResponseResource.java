@@ -10,6 +10,7 @@ import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.criterion.ProtocolCriterion;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
@@ -21,6 +22,8 @@ import se.litsec.opensaml.common.validation.CoreValidatorParameters;
 import se.litsec.opensaml.saml2.common.response.ResponseValidator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 import uk.gov.ida.notification.stubconnector.views.ResponseView;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
@@ -35,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Path("/SAML2/Response")
@@ -45,6 +49,8 @@ public class ReceiveResponseResource {
     private ResponseValidator responseValidator;
 
     private MetadataResolverBundle<StubConnectorConfiguration> connectorMetadataResolverBundle;
+
+    private ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
 
     public ReceiveResponseResource(
             StubConnectorConfiguration configuration,
@@ -91,7 +97,16 @@ public class ReceiveResponseResource {
                     .collect(Collectors.toList());
         }
 
-        return new ResponseView(attributes, validate.toString());
+        String eidasRequestId = response.getInResponseTo();
+        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasRequestId);
+        Issuer issuer = response.getIssuer();
+        if (issuer != null) {
+            proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasRequestId);
+        }
+        proxyNodeLogger.log(Level.INFO, String.format(
+                "Response from Proxy Node with decrypted attributes: %s",
+                attributes.stream().collect(Collectors.joining(","))));
+        return new ResponseView(attributes, validate.toString(), eidasRequestId);
     }
 
     private Map<String,Object> buildStaticParemeters(String authnRequestId) {
