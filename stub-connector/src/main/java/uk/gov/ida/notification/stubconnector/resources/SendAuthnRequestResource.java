@@ -8,6 +8,7 @@ import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
+import org.opensaml.saml.common.binding.SAMLBindingSupport;
 import org.opensaml.saml.common.messaging.context.SAMLMessageInfoContext;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -127,7 +128,7 @@ public class SendAuthnRequestResource {
             signingParameters);
 
         session.setAttribute("authn_id", context.getSubcontext(SAMLMessageInfoContext.class, true).getMessageId());
-
+        SAMLBindingSupport.setRelayState(context, session.getId());
         return context;
     }
 
