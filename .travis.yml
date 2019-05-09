@@ -1,5 +1,9 @@
 language: java
 
+env:
+  global:
+    - VERIFY_USE_PUBLIC_BINARIES=true
+
 jdk:
   - openjdk11
 
