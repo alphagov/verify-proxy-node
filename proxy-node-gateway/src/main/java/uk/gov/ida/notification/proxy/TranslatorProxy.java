@@ -29,7 +29,7 @@ public class TranslatorProxy {
         try {
             return translatorClient.post(translatorRequest, translateHubResponseUri, String.class);
         } catch (ApplicationException e) {
-            throw new TranslatorResponseException(e, sessionId);
+            throw new TranslatorResponseException(e, sessionId, translatorRequest.getRequestId(), translatorRequest.getEidasRequestId());
         }
     }
 

@@ -21,14 +21,4 @@ public class TranslatorResponseExceptionMapper extends ExceptionToSamlErrorRespo
         return cause.getExceptionType() == ExceptionType.CLIENT_ERROR ?
                 Response.Status.BAD_REQUEST : Response.Status.INTERNAL_SERVER_ERROR;
     }
-
-    @Override
-    protected String getErrorPageMessage(TranslatorResponseException exception) {
-        return "Something went wrong when contacting the Translator";
-    }
-
-    @Override
-    protected String getSessionId(TranslatorResponseException exception) {
-        return exception.getSessionId();
-    }
 }

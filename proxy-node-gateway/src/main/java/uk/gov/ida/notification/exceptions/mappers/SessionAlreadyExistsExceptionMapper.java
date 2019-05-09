@@ -17,9 +17,4 @@ public class SessionAlreadyExistsExceptionMapper extends ExceptionToSamlErrorRes
     protected Response.Status getResponseStatus(SessionAlreadyExistsException exception) {
         return Response.Status.BAD_REQUEST;
     }
-
-    @Override
-    protected String getErrorPageMessage(SessionAlreadyExistsException exception) {
-        return "Something went wrong; session already exists";
-    }
 }

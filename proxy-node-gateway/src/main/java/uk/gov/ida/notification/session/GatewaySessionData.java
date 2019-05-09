@@ -80,7 +80,7 @@ public class GatewaySessionData {
                     .sorted()
                     .collect(Collectors.toList());
 
-            throw new SessionAttributeException(String.join(", ", collect), this.getHubRequestId());
+            throw new SessionAttributeException(String.join(", ", collect), this.getHubRequestId(), getHubRequestId(), getEidasRequestId());
         }
     }
 

@@ -1,8 +1,6 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.exceptions.FailureResponseGenerationException;
@@ -18,7 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
 import static java.text.MessageFormat.format;
@@ -65,11 +62,6 @@ public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exce
                         sessionData.getEidasDestination()
                 ));
 
-        proxyNodeLogger.log(Level.INFO, format("[eIDAS Response] received SAML error response for session '{0}', hub authn request ID '{1}', eIDAS authn request ID '{2}'",
-                                         sessionId,
-                                         sessionData.getHubRequestId(),
-                                         sessionData.getEidasRequestId()));
-
         final SamlFormView samlFormView = samlFormViewBuilder.buildResponse(
                 sessionData.getEidasDestination(),
                 samlErrorResponse,
@@ -81,34 +73,13 @@ public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exce
 
     protected abstract Response.Status getResponseStatus(TException exception);
 
-    protected abstract String getErrorPageMessage(TException exception);
-
-    protected String getAuthnRequestId(TException exception) {
-        return null;
-    }
-
-    protected String getIssuerId(TException exception) {
-        return null;
-    }
-
-    protected String getSessionId(TException exception) {
-        return null;
-    }
-
-    protected DateTime getIssueInstant(TException exception) {
-        return null;
-    }
-
     private void logException(TException exception) {
         final String message = exception.getMessage();
         final String cause = Optional.ofNullable(exception.getCause()).map(Throwable::getMessage).orElse(null);
 
         proxyNodeLogger.addContext(exception);
 
-        proxyNodeLogger.log(Level.WARNING, format("Error whilst contacting uri [{0}]; requestId: {2}; sessionId: {3}, issuer: {4}; issueInstant: {5}; message: {6}, cause: {7}",
-                uriInfo.getPath(), getAuthnRequestId(exception), getSessionId(exception), getIssuerId(exception), getIssueInstant(exception), message, cause)
-
-        );
+        proxyNodeLogger.log(Level.WARNING, format("Error whilst contacting uri [{0}]", uriInfo.getPath()));
     }
 
     private GatewaySessionData getSessionData(String sessionId) {
