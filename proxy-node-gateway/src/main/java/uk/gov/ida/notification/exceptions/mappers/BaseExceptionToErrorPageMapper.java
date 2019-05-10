@@ -34,9 +34,10 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
         return Response.seeOther(errorPageRedirectUrl).build();
     }
 
+    public abstract Level getLogLevel(TException exception);
+
     private void logException(TException exception) {
         proxyNodeLogger.addContext(exception);
-        // This error level will be addressed in the next PR/Story concerning ExceptionToSamlErrorResponseMapper
-        proxyNodeLogger.log(Level.WARNING, format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
+        proxyNodeLogger.log(getLogLevel(exception), format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
     }
 }

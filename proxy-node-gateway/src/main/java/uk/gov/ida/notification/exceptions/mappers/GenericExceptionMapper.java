@@ -1,6 +1,7 @@
-package uk.gov.ida.notification.exceptions.mappers;
+package uk.gov.ida.notification.exceptions.mappers.errorpage;
 
-import javax.ws.rs.core.Response;
+import uk.gov.ida.notification.exceptions.mappers.errorpage.ExceptionToErrorPageMapper;
+
 import java.net.URI;
 
 public class GenericExceptionMapper extends ExceptionToErrorPageMapper<Exception> {

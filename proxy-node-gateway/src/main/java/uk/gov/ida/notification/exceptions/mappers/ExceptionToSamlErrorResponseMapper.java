@@ -1,9 +1,10 @@
-package uk.gov.ida.notification.exceptions.mappers;
+package uk.gov.ida.notification.exceptions.mappers.samlresponse;
 
 import org.joda.time.DateTime;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.exceptions.FailureResponseGenerationException;
+import uk.gov.ida.notification.exceptions.ProducesSamlResponseException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
@@ -20,7 +21,7 @@ import java.util.logging.Level;
 
 import static java.text.MessageFormat.format;
 
-public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exception> implements ExceptionMapper<TException> {
+public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<ProducesSamlResponseException> {
 
     private final ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
     private static final String SUBMIT_TEXT = "Continue";
@@ -32,7 +33,7 @@ public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exce
     private HttpServletRequest httpServletRequest;
     private UriInfo uriInfo;
 
-    ExceptionToSamlErrorResponseMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage) {
+    public ExceptionToSamlErrorResponseMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage) {
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.translatorProxy = translatorProxy;
         this.sessionStorage = sessionStorage;
@@ -49,7 +50,7 @@ public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exce
     }
 
     @Override
-    public Response toResponse(TException exception) {
+    public Response toResponse(ProducesSamlResponseException exception) {
         logException(exception);
 
         final String sessionId = httpServletRequest.getSession().getId();
@@ -71,9 +72,11 @@ public abstract class ExceptionToSamlErrorResponseMapper<TException extends Exce
         return Response.ok().entity(samlFormView).build();
     }
 
-    protected abstract Response.Status getResponseStatus(TException exception);
+    protected Response.Status getResponseStatus(ProducesSamlResponseException exception) {
+        return exception.getResponseStatus();
+    }
 
-    private void logException(TException exception) {
+    private void logException(ProducesSamlResponseException exception) {
         final String message = exception.getMessage();
         final String cause = Optional.ofNullable(exception.getCause()).map(Throwable::getMessage).orElse(null);
 
