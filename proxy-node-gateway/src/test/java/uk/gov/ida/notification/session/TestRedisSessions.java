@@ -4,7 +4,6 @@ import com.github.fppt.jedismock.RedisServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.exceptions.SessionAlreadyExistsException;
 import uk.gov.ida.notification.exceptions.SessionMissingException;
@@ -24,8 +23,8 @@ public class TestRedisSessions {
 
     private RedisServiceConfiguration redisServiceConfiguration;
 
-    @Mock
-    private GatewaySessionData testData;
+
+    private GatewaySessionData testData = populateTestData();
 
     private static final String TEST_KEY = "TEST_KEY";
 
@@ -51,7 +50,7 @@ public class TestRedisSessions {
 
         GatewaySessionData session = sessionStore.getSession(TEST_KEY);
 
-        assertThat(session).isEqualTo(testData);
+        assertThat(session).isEqualToComparingFieldByField(testData);
     }
 
     @Test
@@ -79,5 +78,13 @@ public class TestRedisSessions {
         sessionStore.stop();
         server.stop();
         server = null;
+    }
+
+    private GatewaySessionData populateTestData() {
+        return new GatewaySessionData("aHubRequestId",
+                                      "anEidasRequestId",
+                                      "anEidasDestination",
+                                      "anEidasConnectorPublicKey",
+                                      "anEidasRelayState");
     }
 }

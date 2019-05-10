@@ -17,9 +17,4 @@ public class SessionAttributeExceptionMapper extends ExceptionToSamlErrorRespons
     protected Response.Status getResponseStatus(SessionAttributeException exception) {
         return Response.Status.BAD_REQUEST;
     }
-
-    @Override
-    protected String getErrorPageMessage(SessionAttributeException exception) {
-        return "Something went wrong; invalid session attributes";
-    }
 }

@@ -12,7 +12,6 @@ import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.exceptions.mappers.HubResponseExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
@@ -100,7 +99,6 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
                 "proxy-node-metadata");
 
         registerProviders(environment);
-        registerExceptionMappers(environment);
         registerResources(configuration, environment);
     }
 
@@ -113,10 +111,6 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         SessionHandler sessionHandler = new SessionHandler();
         sessionHandler.setSessionCookie("stub-connector-session");
         environment.servlets().setSessionHandler(sessionHandler);
-    }
-
-    private void registerExceptionMappers(Environment environment) {
-        environment.jersey().register(new HubResponseExceptionMapper());
     }
 
     private void registerResources(StubConnectorConfiguration configuration, Environment environment) {
