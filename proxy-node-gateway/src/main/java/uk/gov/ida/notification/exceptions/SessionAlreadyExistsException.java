@@ -3,7 +3,9 @@ package uk.gov.ida.notification.exceptions;
 import org.slf4j.MDC;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
-public class SessionAlreadyExistsException extends RuntimeException {
+import javax.ws.rs.core.Response;
+
+public class SessionAlreadyExistsException extends FailureSamlResponseException {
 
     private String sessionId;
 
@@ -11,5 +13,11 @@ public class SessionAlreadyExistsException extends RuntimeException {
         super("Session already exists for session_id: " + sessionId);
         MDC.put(ProxyNodeMDCKey.SESSION_ID.name(), sessionId);
         MDC.put(ProxyNodeMDCKey.HUB_REQUEST_ID.name(), hubRequestId);
-        MDC.put(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name(), eidasRequestId);    }
+        MDC.put(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name(), eidasRequestId);
+    }
+
+    @Override
+    public Response.Status getResponseStatus() {
+        return Response.Status.BAD_REQUEST;
+    }
 }

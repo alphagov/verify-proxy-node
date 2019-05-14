@@ -3,7 +3,7 @@ package uk.gov.ida.notification.exceptions;
 import org.slf4j.MDC;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
-public class SessionMissingException extends RuntimeException {
+public class SessionMissingException extends ErrorPageException {
 
     public SessionMissingException(String sessionId) {
         super("Session should exist for session_id: " + sessionId);
