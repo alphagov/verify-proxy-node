@@ -9,14 +9,9 @@ import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.server.session.SessionHandler;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
-import uk.gov.ida.notification.exceptions.mappers.EidasSamlParserResponseExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.FailureResponseGenerationExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.SessionAlreadyExistsExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.SessionAttributeExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.SessionMissingExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.TranslatorResponseExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.VerifyServiceProviderRequestExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.ExceptionToSamlErrorResponseMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -108,15 +103,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             TranslatorProxy translatorProxy,
             SessionStore sessionStore,
             URI errorPageRedirectUrl) {
-        environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
-        environment.jersey().register(new SessionMissingExceptionMapper(errorPageRedirectUrl));
-        environment.jersey().register(new EidasSamlParserResponseExceptionMapper(errorPageRedirectUrl));
-        environment.jersey().register(new FailureResponseGenerationExceptionMapper(errorPageRedirectUrl));
-        environment.jersey().register(new VerifyServiceProviderRequestExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore));
 
-        environment.jersey().register(new SessionAttributeExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
-        environment.jersey().register(new TranslatorResponseExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
-        environment.jersey().register(new SessionAlreadyExistsExceptionMapper(samlFormViewBuilder, translatorProxy, sessionStore));
+        environment.jersey().register(new ErrorPageExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
     }
 
     private void registerResources(

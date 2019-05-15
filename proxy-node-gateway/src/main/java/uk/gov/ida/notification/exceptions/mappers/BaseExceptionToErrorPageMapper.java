@@ -11,7 +11,7 @@ import java.util.logging.Level;
 
 import static java.text.MessageFormat.format;
 
-public abstract class ExceptionToErrorPageMapper<TException extends Exception> implements ExceptionMapper<TException> {
+public abstract class BaseExceptionToErrorPageMapper<TException extends Exception> implements ExceptionMapper<TException> {
 
     private final ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
 
@@ -19,7 +19,7 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
 
     private UriInfo uriInfo;
 
-    ExceptionToErrorPageMapper(URI errorPageRedirectUrl) {
+    BaseExceptionToErrorPageMapper(URI errorPageRedirectUrl) {
         this.errorPageRedirectUrl = errorPageRedirectUrl;
     }
 
@@ -34,9 +34,10 @@ public abstract class ExceptionToErrorPageMapper<TException extends Exception> i
         return Response.seeOther(errorPageRedirectUrl).build();
     }
 
+    public abstract Level getLogLevel(TException exception);
+
     private void logException(TException exception) {
         proxyNodeLogger.addContext(exception);
-        // This error level will be addressed in the next PR/Story concerning ExceptionToSamlErrorResponseMapper
-        proxyNodeLogger.log(Level.WARNING, format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
+        proxyNodeLogger.log(getLogLevel(exception), format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
     }
 }

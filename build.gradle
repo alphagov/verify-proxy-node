@@ -160,6 +160,8 @@ subprojects {
                 "com.github.fppt:jedis-mock:0.1.9",
                 "it.ozimov:embedded-redis:0.7.2",
                 "uk.gov.ida:ida-dev-pki:1.1.0-37",
+                "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.25.1",
+                "org.glassfish.jersey.connectors:jersey-jetty-connector:2.25.1",
                 project(':proxy-node-test'),
         )
 
