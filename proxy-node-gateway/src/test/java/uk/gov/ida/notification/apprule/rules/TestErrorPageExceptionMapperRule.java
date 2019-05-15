@@ -27,7 +27,7 @@ public class TestErrorPageExceptionMapperRule {
                                     .build();
 
     @Test
-    public void shouldMapEidasSamlParserReponseExceptionToErrorPageExceptionMapper() {
+    public void shouldMapEidasSamlParserResponseExceptionToErrorPageExceptionMapper() {
         Response response = getResponse("/EidasSamlParserResponseException");
 
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.SEE_OTHER);
