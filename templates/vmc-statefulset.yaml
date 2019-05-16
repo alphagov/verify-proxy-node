@@ -30,17 +30,17 @@ spec:
         - name: HSM_IP
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-vmc
+              name: {{ .Values.vmc.secretName }}
               key: hsmIP
         - name: HSM_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-vmc
+              name: {{ .Values.vmc.secretName }}
               key: hsmUser
         - name: HSM_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-vmc
+              name: {{ .Values.vmc.secretName }}
               key: hsmPassword
         - name: POD_NAMESPACE
           valueFrom:
@@ -57,7 +57,7 @@ spec:
         - name: HSM_IP
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-vmc
+              name: {{ .Values.vmc.secretName }}
               key: hsmIP
         volumeMounts:
         - name: config
@@ -66,6 +66,6 @@ spec:
       volumes:
       - name: config
         secret:
-          secretName: {{ .Release.Name }}-vmc
+          secretName: {{ .Values.vmc.secretName }}
       terminationGracePeriodSeconds: 10
       serviceAccountName: {{ .Release.Name }}-vmc
