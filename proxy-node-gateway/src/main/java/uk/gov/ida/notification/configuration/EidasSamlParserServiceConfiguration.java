@@ -6,10 +6,10 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.setup.Environment;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
-import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.shared.Urls;
+import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -37,7 +37,7 @@ public class EidasSamlParserServiceConfiguration extends Configuration {
 
     public EidasSamlParserProxy buildEidasSamlParserService(Environment environment) {
         Client client = new JerseyClientBuilder(environment).using(clientConfig).build("eidas-saml-parser");
-        JsonClient jsonClient = new JsonClient(
+        ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
             new ErrorHandlingClient(client),
             new JsonResponseProcessor(environment.getObjectMapper())
         );

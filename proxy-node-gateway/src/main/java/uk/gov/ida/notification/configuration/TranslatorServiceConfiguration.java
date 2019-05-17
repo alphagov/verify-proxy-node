@@ -6,9 +6,9 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.setup.Environment;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
-import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
+import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -39,7 +39,7 @@ public class TranslatorServiceConfiguration extends Configuration {
 
     public TranslatorProxy buildTranslatorProxy(Environment environment) {
         Client client = new JerseyClientBuilder(environment).using(clientConfig).build("translator-client");
-        JsonClient jsonClient = new JsonClient(
+        ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
             new ErrorHandlingClient(client),
             new JsonResponseProcessor(environment.getObjectMapper())
         );
