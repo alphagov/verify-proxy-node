@@ -28,8 +28,6 @@ public class ProxyNodeLoggerTest {
     @Captor
     private ArgumentCaptor<ILoggingEvent> loggingEventCaptor;
 
-    private ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
-
     private final Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
 
     @Before
@@ -40,7 +38,7 @@ public class ProxyNodeLoggerTest {
 
     @Test
     public void shouldNotLogProxyNodeLoggerAsTheLogLocation() {
-        proxyNodeLogger.info("test");
+        ProxyNodeLogger.info("test");
 
         verify(appender).doAppend(loggingEventCaptor.capture());
 
@@ -54,7 +52,7 @@ public class ProxyNodeLoggerTest {
         Exception cause = new Exception("cause-message");
         Exception exception = new Exception("exception-message", cause);
 
-        proxyNodeLogger.logException(exception, java.util.logging.Level.SEVERE, "log-message");
+        ProxyNodeLogger.logException(exception, java.util.logging.Level.SEVERE, "log-message");
 
         verify(appender).doAppend(loggingEventCaptor.capture());
 
@@ -70,7 +68,7 @@ public class ProxyNodeLoggerTest {
 
     @Test
     public void shouldLogCorrectlyWithInfoLevel() {
-        proxyNodeLogger.info("test-info");
+        ProxyNodeLogger.info("test-info");
 
         verify(appender).doAppend(loggingEventCaptor.capture());
 
@@ -81,7 +79,7 @@ public class ProxyNodeLoggerTest {
 
     @Test
     public void shouldLogCorrectlyWithWarningLevel() {
-        proxyNodeLogger.warning("test-warn");
+        ProxyNodeLogger.warning("test-warn");
 
         verify(appender).doAppend(loggingEventCaptor.capture());
 
@@ -92,7 +90,7 @@ public class ProxyNodeLoggerTest {
 
     @Test
     public void shouldLogCorrectlyWithErrorLevel() {
-        proxyNodeLogger.error("test-error");
+        ProxyNodeLogger.error("test-error");
 
         verify(appender).doAppend(loggingEventCaptor.capture());
 

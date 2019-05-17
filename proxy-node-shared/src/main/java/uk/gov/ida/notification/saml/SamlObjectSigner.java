@@ -13,7 +13,6 @@ import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 public class SamlObjectSigner {
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     private final SignatureSigningParameters signingParams;
 
@@ -34,8 +33,8 @@ public class SamlObjectSigner {
     }
 
     private  void logSigningRequest(String responseId, String signingProvider) {
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, responseId);
-        LOG.addContext(ProxyNodeMDCKey.SIGNING_PROVIDER, signingProvider);
-        LOG.info("Signing eIDAS response");
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, responseId);
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.SIGNING_PROVIDER, signingProvider);
+        ProxyNodeLogger.info("Sending a request to the HSM to sign eIDAS SAML message");
     }
 }

@@ -14,15 +14,13 @@ import java.security.cert.X509Certificate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KeyFileCredentialConfiguration extends CredentialConfiguration {
 
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
-
     @JsonCreator
     public KeyFileCredentialConfiguration(
         @JsonProperty("publicKey") DeserializablePublicKeyConfiguration publicKey,
         @JsonProperty("privateKey") PrivateKeyConfiguration privateKey
     ) throws CredentialConfigurationException {
         try {
-            LOG.info("Signing eIDAS with KeyFileCredentialConfiguration");
+            ProxyNodeLogger.info("Signing eIDAS with KeyFileCredentialConfiguration");
             X509Certificate cert = X509Support.decodeCertificate(publicKey.getCert().getBytes());
             BasicX509Credential credential = new BasicX509Credential(cert, privateKey.getPrivateKey());
             credential.setEntityId("KeyFileCredentialConfiguration");

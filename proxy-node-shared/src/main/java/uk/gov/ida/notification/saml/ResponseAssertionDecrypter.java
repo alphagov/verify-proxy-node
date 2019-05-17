@@ -13,14 +13,13 @@ import uk.gov.ida.saml.security.DecrypterFactory;
 import java.util.Collections;
 
 public class ResponseAssertionDecrypter {
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     private final Decrypter decrypter;
 
     public ResponseAssertionDecrypter(Credential credential) {
         this.decrypter = new DecrypterFactory().createDecrypter(Collections.singletonList(credential));
         if (credential.getEntityId() != null && credential.getEntityId().equals(CloudHsmCredentialConfiguration.ID)) {
-            LOG.info("Using CloudHSM so set JCA provider to Cavium");
+            ProxyNodeLogger.info("Using CloudHSM so set JCA provider to Cavium");
             this.decrypter.setJCAProviderName("Cavium");
         }
     }

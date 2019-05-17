@@ -21,7 +21,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
-import java.util.logging.Level;
 
 import static uk.gov.ida.notification.translator.logging.HubResponseAttributesHashLogger.logResponseAttributesHash;
 
@@ -29,7 +28,7 @@ import static uk.gov.ida.notification.translator.logging.HubResponseAttributesHa
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class HubResponseTranslatorResource {
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
+
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
 
@@ -88,10 +87,10 @@ public class HubResponseTranslatorResource {
 
     // TODO: Remove once we set all the headers correctly
     private void logSamlResponse(org.opensaml.saml.saml2.core.Response samlResponse) {
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, Objects.requireNonNullElse(samlResponse.getInResponseTo(), ""));
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, Objects.requireNonNullElse(samlResponse.getDestination(), ""));
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, samlResponse.getIssuer() != null ? samlResponse.getIssuer().getValue() : "");
-        LOG.info("Received eIDAS Response Attributes from VSP");
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, Objects.requireNonNullElse(samlResponse.getInResponseTo(), ""));
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, Objects.requireNonNullElse(samlResponse.getDestination(), ""));
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, samlResponse.getIssuer() != null ? samlResponse.getIssuer().getValue() : "");
+        ProxyNodeLogger.info("Received eIDAS Response Attributes from VSP");
     }
 }
 

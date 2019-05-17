@@ -30,7 +30,6 @@ import java.net.URI;
 
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
     private final EidasSamlParserProxy eidasSamlParserService;
@@ -87,13 +86,13 @@ public class EidasAuthnRequestResource {
                 10
         );
 
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuer());
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
-        LOG.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptonPublicCerrt);
-        LOG.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
-        LOG.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
-        LOG.info("Authn requests received from ESP and VSP");
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuer());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptonPublicCerrt);
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
+        ProxyNodeLogger.info("Authn requests received from ESP and VSP");
 
         return buildSamlFormView(vspResponse, eidasRelayState);
     }
