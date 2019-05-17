@@ -16,7 +16,36 @@ public class ProxyNodeLogger {
         MDC.put(key.name(), value);
     }
 
-    public void addContext(Exception exception) {
+    public void info(String message) {
+        log(Level.INFO, message);
+    }
+
+    public void warning(String message) {
+        log(Level.WARNING, message);
+    }
+
+    public void error(String message) {
+        log(Level.SEVERE, message);
+    }
+
+    public void logException(Exception exception, Level level, String message) {
+        addExceptionContext(exception);
+        log(level, message);
+    }
+
+    private void log(Level level, String message) {
+        logWithCallingFrame(level, () -> message, null);
+    }
+
+    private void log(Level level, String message, Exception exception) {
+        logWithCallingFrame(level, () -> message, exception);
+    }
+
+    private void log(Level level, Supplier<String> message) {
+        logWithCallingFrame(level, message, null);
+    }
+
+    private void addExceptionContext(Exception exception) {
         Throwable cause = exception.getCause();
         if (cause != null) {
             addContext(ProxyNodeMDCKey.EXCEPTION_CAUSE, cause.getMessage());
@@ -26,19 +55,15 @@ public class ProxyNodeLogger {
         addContext(ProxyNodeMDCKey.EXCEPTION_STACKTRACE, ExceptionUtils.getStackTrace(exception));
     }
 
-    public void log(Level level, String message) {
-        logWithCallingFrame(level, () -> message);
-    }
-
-    public void log(Level level, Supplier<String> message) {
-        logWithCallingFrame(level, message);
-    }
-
-    private void logWithCallingFrame(Level level, Supplier<String> message) {
+    private void logWithCallingFrame(Level level, Supplier<String> message, Exception exception) {
         Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
-         callingFrame.ifPresent(f -> {
+        callingFrame.ifPresent(f -> {
             addContext(ProxyNodeMDCKey.LOG_LOCATION, String.format("%s.%s", f.getClassName(), f.getMethodName()));
-            LOG.log(level, message);
+            if (exception != null) {
+                LOG.log(level, message.get(), exception);
+            } else {
+                LOG.log(level, message);
+            }
             MDC.remove(ProxyNodeMDCKey.LOG_LOCATION.name());
         });
     }

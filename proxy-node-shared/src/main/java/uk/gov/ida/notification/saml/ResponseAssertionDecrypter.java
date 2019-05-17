@@ -6,21 +6,21 @@ import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.configuration.CloudHsmCredentialConfiguration;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.saml.security.DecrypterFactory;
 
 import java.util.Collections;
 
 public class ResponseAssertionDecrypter {
-    private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
+
     private final Decrypter decrypter;
 
     public ResponseAssertionDecrypter(Credential credential) {
         this.decrypter = new DecrypterFactory().createDecrypter(Collections.singletonList(credential));
         if (credential.getEntityId() != null && credential.getEntityId().equals(CloudHsmCredentialConfiguration.ID)) {
-            log.info("Using CloudHSM so set JCA provider to Cavium");
+            LOG.info("Using CloudHSM so set JCA provider to Cavium");
             this.decrypter.setJCAProviderName("Cavium");
         }
     }

@@ -49,7 +49,8 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
 
     @Override
     public Response toResponse(FailureSamlResponseException exception) {
-        logException(exception);
+        proxyNodeLogger.logException(exception, Level.WARNING,
+                format("Error whilst contacting uri [{0}]", uriInfo.getPath()));
 
         final String sessionId = httpServletRequest.getSession().getId();
         final GatewaySessionData sessionData = getSessionData(sessionId);
@@ -68,12 +69,6 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
                 sessionData.getEidasRelayState());
 
         return Response.ok().entity(samlFormView).build();
-    }
-
-    private void logException(FailureSamlResponseException exception) {
-        proxyNodeLogger.addContext(exception);
-
-        proxyNodeLogger.log(Level.WARNING, format("Error whilst contacting uri [{0}]", uriInfo.getPath()));
     }
 
     private GatewaySessionData getSessionData(String sessionId) {
