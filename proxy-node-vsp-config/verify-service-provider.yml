@@ -1,0 +1,34 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: ${PORT:-50400}
+
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  appenders:
+    - type: logstash-console
+    - type: file
+      currentLogFilename: logs/verify-service-provider.log
+      archivedLogFilenamePattern: logs/verify-service-provider.log.%d.gz
+
+clockSkew: ${CLOCK_SKEW:-PT30s}
+
+serviceEntityIds: ${SERVICE_ENTITY_IDS:-[]}
+
+hashingEntityId: ${HASHING_ENTITY_ID:-}
+
+verifyHubConfiguration:
+  environment: ${VERIFY_ENVIRONMENT:-}
+
+samlSigningKey: ${SAML_SIGNING_KEY:-}
+
+samlPrimaryEncryptionKey: ${SAML_PRIMARY_ENCRYPTION_KEY:-}
+
+samlSecondaryEncryptionKey: ${SAML_SECONDARY_ENCRYPTION_KEY:-}
+
+europeanIdentity:
+  enabled: ${EUROPEAN_IDENTITY_ENABLED:-false}
+
