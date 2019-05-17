@@ -27,7 +27,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
-import java.util.UUID;
 
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
@@ -70,8 +69,6 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, String sessionId) {
-        setJourneyId();
-
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 
@@ -98,10 +95,6 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
 
         return buildSamlFormView(vspResponse, eidasRelayState);
-    }
-
-    private void setJourneyId() {
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID, UUID.randomUUID().toString());
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {

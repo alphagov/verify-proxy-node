@@ -3,26 +3,19 @@ package uk.gov.ida.notification.shared;
 import org.apache.http.HttpHeaders;
 import org.slf4j.MDC;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
-import java.util.UUID;
+import java.util.Objects;
 
 import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
 
 @Provider
 public class ProxyNodeLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private HttpServletRequest httpServletRequest;
-
-    @Context
-    public void setHttpServletRequest(HttpServletRequest httpServletRequest) {
-        this.httpServletRequest = httpServletRequest;
-    }
+    public static final String JOURNEY_ID_KEY = ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name();
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -46,8 +39,7 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
         ProxyNodeLogger.info("Egress");
 
         final String journeyId = getJourneyId(requestContext);
-        responseContext.getHeaders().add(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), journeyId);
-        httpServletRequest.getSession().setAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), journeyId);
+        responseContext.getHeaders().add(JOURNEY_ID_KEY, journeyId);
 
         MDC.remove(X_B3_TRACEID);
         for (ProxyNodeMDCKey key : ProxyNodeMDCKey.values()) {
@@ -60,18 +52,9 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
     }
 
     private String getJourneyId(ContainerRequestContext requestContext) {
-        final String journeyIdKey = ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name();
-        String journeyId;
-
-        journeyId = requestContext.getHeaderString(journeyIdKey);
-        if (journeyId != null) return journeyId;
-
-        journeyId = (String) httpServletRequest.getSession().getAttribute(journeyIdKey);
-        if (journeyId != null) return journeyId;
-
-        journeyId = MDC.get(journeyIdKey);
-        if (journeyId != null) return journeyId;
-
-        return "journey-id-unknown-" + UUID.randomUUID().toString();
+        String journeyId = requestContext.getHeaderString(JOURNEY_ID_KEY);
+        return Objects.requireNonNullElse(
+                journeyId,
+                MDC.get(JOURNEY_ID_KEY));
     }
 }
