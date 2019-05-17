@@ -11,14 +11,18 @@ import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static java.text.MessageFormat.format;
+
 public class AssertionConsumerServiceValidator {
-    private static final Logger LOG = Logger.getLogger(AssertionConsumerServiceValidator.class.getName());
+
+    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     private final MetadataResolver metadataResolver;
 
@@ -62,7 +66,7 @@ public class AssertionConsumerServiceValidator {
 
             return spssoDescriptor.getAssertionConsumerServices();
         } catch (ResolverException e) {
-            LOG.warning("Unable to resolve metadata for entity " + entityId);
+            LOG.logException(e, Level.WARNING, format("Unable to resolve metadata for entity {0}", entityId));
             return List.of();
         }
     }

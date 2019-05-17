@@ -18,9 +18,7 @@ import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -68,7 +66,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     }
 
 
-    private String getAuthnRequestIdFromSession() throws URISyntaxException, IOException, ParserConfigurationException {
+    private String getAuthnRequestIdFromSession() throws URISyntaxException, IOException {
         String html = getEidasRequest();
         String decodedSaml = HtmlHelpers.getValueFromForm(html, "SAMLRequest");
         AuthnRequest request = new SamlParser().parseSamlString(decodedSaml);
@@ -77,7 +75,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
     private void hasValidity(String samlMessage, String validity) throws URISyntaxException {
         String html = postEidasResponse(samlMessage);
-        assertThat(html).contains("Saml Validity: "+validity);
+        assertThat(html).contains("Saml Validity: " + validity);
     }
 
     private Response getEidasSamlMessage(String authid) {
@@ -110,9 +108,8 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
     private Response signResponse(Response response) throws Exception {
         SamlObjectSigner signer = new SamlObjectSigner(X509CredentialFactory.build(
-                    TEST_RP_PUBLIC_SIGNING_CERT,
-                    TEST_RP_PRIVATE_SIGNING_KEY
-                ), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, new ProxyNodeLogger());
+                TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY),
+                SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
 
         signer.sign(response, "response-id");
 

@@ -23,9 +23,9 @@ import java.util.UUID;
 @Path("/")
 public class TestExceptionMapperResource {
 
-    public final static String SESSION_ID = "aSessionId";
-    public final static String HUB_REQUEST_ID = "aHubRequestId";
-    public final static String EIDAS_REQUEST_ID = "anEidasRequestId";
+    public static final String SESSION_ID = "aSessionId";
+    public static final String HUB_REQUEST_ID = "aHubRequestId";
+    public static final String EIDAS_REQUEST_ID = "anEidasRequestId";
 
     @GET
     @Path("/SessionAlreadyExistsException")

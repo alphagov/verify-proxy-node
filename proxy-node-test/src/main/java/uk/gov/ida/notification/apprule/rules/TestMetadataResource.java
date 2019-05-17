@@ -24,8 +24,9 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SI
 
 @Path("/")
 public class TestMetadataResource {
-    public final static String CONNECTOR_ENTITY_ID = "http://connector-node/Metadata";
-    public final static String PROXY_NODE_ENTITY_ID = "http://proxy-node/Metadata";
+    public static final String CONNECTOR_ENTITY_ID = "http://connector-node/Metadata";
+    public static final String PROXY_NODE_ENTITY_ID = "http://proxy-node/Metadata";
+
     private String connectorMetadataXml;
     private String proxyNodeMetadataXml;
     private String hubMetadata;

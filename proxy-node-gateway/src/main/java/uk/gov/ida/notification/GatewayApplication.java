@@ -10,8 +10,8 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.ExceptionToSamlErrorResponseMapper;
+import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -21,7 +21,6 @@ import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
@@ -130,8 +129,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 espProxy,
                 vspProxy,
                 samlFormViewBuilder,
-                sessionStorage,
-                new ProxyNodeLogger()));
+                sessionStorage));
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,

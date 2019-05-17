@@ -9,7 +9,6 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +23,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
     @Test
     public void shouldSignAuthRequest() throws Throwable {
         BasicX509Credential signingCredential = testKeyPair.getX509Credential();
-        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, new ProxyNodeLogger());
+        SamlObjectSigner samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         samlObjectSigner.sign(authnRequest, "response-id");
         Signature signature = authnRequest.getSignature();

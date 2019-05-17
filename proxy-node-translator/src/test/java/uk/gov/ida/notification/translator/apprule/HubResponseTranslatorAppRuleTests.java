@@ -3,7 +3,6 @@ package uk.gov.ida.notification.translator.apprule;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.assertj.core.api.Assertions;
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +49,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.verify;
-import static uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource.EIDAS_RESPONSE_LOGGER_MESSAGE;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_SIGNING_CERT;
@@ -62,11 +60,11 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_P
 @RunWith(MockitoJUnitRunner.class)
 public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
 
+    private static final String EIDAS_RESPONSE_LOGGER_MESSAGE = "Received eIDAS Response Attributes from VSP";
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
     private static final String EIDAS_TEST_CONNECTOR_DESTINATION = "http://proxy-node/SAML2/SSO/Response";
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
-
     private static final String publicBuild = System.getenv("VERIFY_USE_PUBLIC_BINARIES");
 
     private BasicCredential hubSigningCredential;
@@ -181,10 +179,10 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        Assertions.assertThat(loggingEvent.getMessage()).contains(EIDAS_RESPONSE_LOGGER_MESSAGE);
-        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
-        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
-        Assertions.assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
+        assertThat(loggingEvent.getMessage()).contains(EIDAS_RESPONSE_LOGGER_MESSAGE);
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
     }
 
     @Test
@@ -200,12 +198,13 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         if (!"true".equals(publicBuild)) {
             // Proxy Node logs in json format
             String consoleOutoutString = consoleOutput.toString();
-            Assertions.assertThat(consoleOutoutString).contains(EIDAS_RESPONSE_LOGGER_MESSAGE,
+            assertThat(consoleOutoutString).contains(EIDAS_RESPONSE_LOGGER_MESSAGE,
                     String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.EIDAS_DESTINATION.name(), EIDAS_TEST_CONNECTOR_DESTINATION),
                     String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.EIDAS_REQUEST_ID.name(), ResponseBuilder.DEFAULT_REQUEST_ID),
                     String.format("\"%s\":\"%s\"", ProxyNodeMDCKey.EIDAS_ISSUER.name(), eidasResponse.getIssuer().getValue())
             );
         }
+
         System.setOut(defaultConsolePrintStream);
     }
 

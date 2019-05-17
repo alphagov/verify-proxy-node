@@ -37,7 +37,7 @@ public abstract class BaseExceptionToErrorPageMapper<TException extends Exceptio
     public abstract Level getLogLevel(TException exception);
 
     private void logException(TException exception) {
-        proxyNodeLogger.addContext(exception);
-        proxyNodeLogger.log(getLogLevel(exception), format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
+        proxyNodeLogger.logException(exception, getLogLevel(exception),
+                format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
     }
 }

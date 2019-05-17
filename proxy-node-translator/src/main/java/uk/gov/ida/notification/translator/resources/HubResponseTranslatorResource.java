@@ -29,19 +29,17 @@ import static uk.gov.ida.notification.translator.logging.HubResponseAttributesHa
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class HubResponseTranslatorResource {
-
+    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
-    public static final String EIDAS_RESPONSE_LOGGER_MESSAGE = "eIDAS Response Attributes";
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
-    private ProxyNodeLogger proxyNodeLogger;
 
-    public HubResponseTranslatorResource(EidasResponseGenerator eidasResponseGenerator, VerifyServiceProviderProxy verifyServiceProviderProxy, ProxyNodeLogger proxyNodeLogger) {
+    public HubResponseTranslatorResource(EidasResponseGenerator eidasResponseGenerator,
+                                         VerifyServiceProviderProxy verifyServiceProviderProxy) {
         this.eidasResponseGenerator = eidasResponseGenerator;
         this.verifyServiceProviderProxy = verifyServiceProviderProxy;
-        this.proxyNodeLogger = proxyNodeLogger;
     }
 
     @POST
@@ -88,11 +86,12 @@ public class HubResponseTranslatorResource {
         return Response.ok().entity(samlMessage).build();
     }
 
+    // TODO: Remove once we set all the headers correctly
     private void logSamlResponse(org.opensaml.saml.saml2.core.Response samlResponse) {
-            proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, Objects.requireNonNullElse(samlResponse.getInResponseTo(), ""));
-            proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, Objects.requireNonNullElse(samlResponse.getDestination(), ""));
-            proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, samlResponse.getIssuer() != null ? samlResponse.getIssuer().getValue() : "");
-            proxyNodeLogger.log(Level.INFO, EIDAS_RESPONSE_LOGGER_MESSAGE);
-
-        }
+        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, Objects.requireNonNullElse(samlResponse.getInResponseTo(), ""));
+        LOG.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, Objects.requireNonNullElse(samlResponse.getDestination(), ""));
+        LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, samlResponse.getIssuer() != null ? samlResponse.getIssuer().getValue() : "");
+        LOG.info("Received eIDAS Response Attributes from VSP");
     }
+}
+

@@ -38,19 +38,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import static java.text.MessageFormat.format;
 
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
+    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
+
     private final StubConnectorConfiguration configuration;
     private final ResponseAssertionDecrypter decrypter;
-
-    private ResponseValidator responseValidator;
-
-    private MetadataResolverBundle<StubConnectorConfiguration> connectorMetadataResolverBundle;
-
-    private ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
+    private final MetadataResolverBundle<StubConnectorConfiguration> connectorMetadataResolverBundle;
 
     public ReceiveResponseResource(
             StubConnectorConfiguration configuration,
@@ -70,7 +68,7 @@ public class ReceiveResponseResource {
             @FormParam("RelayState") String relayState) throws DecryptionException {
 
         SAMLSignatureProfileValidator samlSignatureProfileValidator = new SAMLSignatureProfileValidator();
-        responseValidator = new ResponseValidator(connectorMetadataResolverBundle.getSignatureTrustEngine(), samlSignatureProfileValidator);
+        ResponseValidator responseValidator = new ResponseValidator(connectorMetadataResolverBundle.getSignatureTrustEngine(), samlSignatureProfileValidator);
 
         String authnRequestId = (String) session.getAttribute("authn_id");
 
@@ -98,18 +96,21 @@ public class ReceiveResponseResource {
         }
 
         String eidasRequestId = response.getInResponseTo();
-        proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasRequestId);
+        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasRequestId);
+
         Issuer issuer = response.getIssuer();
         if (issuer != null) {
-            proxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasRequestId);
+            LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasRequestId);
         }
-        proxyNodeLogger.log(Level.INFO, String.format(
-                "Response from Proxy Node with decrypted attributes: %s",
-                attributes.stream().collect(Collectors.joining(","))));
+
+        LOG.info(format(
+                "Response from Proxy Node with decrypted attributes: {0}",
+                String.join(",", attributes)));
+
         return new ResponseView(attributes, validate.toString(), eidasRequestId);
     }
 
-    private Map<String,Object> buildStaticParemeters(String authnRequestId) {
+    private Map<String, Object> buildStaticParemeters(String authnRequestId) {
         String responseDestination = configuration.getConnectorNodeBaseUrl() + "/SAML2/Response/POST";
 
         HashMap<String, Object> params = new HashMap<>();
@@ -125,7 +126,6 @@ public class ReceiveResponseResource {
         criteria.add(new ProtocolCriterion(SAMLConstants.SAML20P_NS));
 
         params.put(CoreValidatorParameters.SIGNATURE_VALIDATION_CRITERIA_SET, criteria);
-
 
         return params;
     }

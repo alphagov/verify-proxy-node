@@ -18,7 +18,6 @@ import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
@@ -93,7 +92,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
         final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
         final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
-        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy, new ProxyNodeLogger());
+        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy);
 
         environment.jersey().register(hubResponseTranslatorResource);
     }
@@ -112,7 +111,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
 
         final CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
-        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm(), new ProxyNodeLogger());
+        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm());
 
         return new EidasResponseGenerator(hubResponseTranslator, failureResponseGenerator, samlObjectSigner);
     }

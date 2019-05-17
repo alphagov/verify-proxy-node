@@ -8,6 +8,7 @@ import io.dropwizard.setup.Environment;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
@@ -27,7 +28,6 @@ import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
@@ -88,7 +88,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
 
         connectorMetadata = new Metadata(connectorMetadataResolverBundle.getMetadataCredentialResolver());
         EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, connectorMetadataResolverBundle);
-        SamlRequestSignatureValidator samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
+        SamlRequestSignatureValidator<AuthnRequest> samlRequestSignatureValidator = createSamlRequestSignatureValidator(connectorMetadataResolverBundle);
         String x509EncryptionCert = getX509EncryptionCert(configuration);
 
         environment.jersey().register(IstioHeaderMapperFilter.class);
@@ -102,8 +102,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
                         Metadata.getAssertionConsumerServiceLocation(
                                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                                 connectorMetadataResolverBundle.getMetadataResolver()
-                        ),
-                        new ProxyNodeLogger())
+                        ))
         );
 
         registerMetadataHealthCheck(

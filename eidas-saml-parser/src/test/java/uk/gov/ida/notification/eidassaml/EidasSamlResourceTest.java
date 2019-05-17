@@ -6,20 +6,21 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
@@ -27,23 +28,23 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
 
+@SuppressWarnings("unchecked")
+@RunWith(MockitoJUnitRunner.class)
 public class EidasSamlResourceTest {
 
     private final static String TEST_CONNECTOR_DESTINATION = "https://stub_country.acme.eu/stub-country-one/destination";
 
-    private static EidasAuthnRequestValidator eidasAuthnRequestValidator = Mockito.mock(EidasAuthnRequestValidator.class);
+    private static EidasAuthnRequestValidator eidasAuthnRequestValidator = mock(EidasAuthnRequestValidator.class);
 
-    private static SamlRequestSignatureValidator samlRequestSignatureValidator = Mockito.mock(SamlRequestSignatureValidator.class);
-
-    private static ProxyNodeLogger proxyNodeLogger = Mockito.mock(ProxyNodeLogger.class);
+    private static SamlRequestSignatureValidator<AuthnRequest> samlRequestSignatureValidator = mock(SamlRequestSignatureValidator.class);
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-            .addResource(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_CONNECTOR_DESTINATION, proxyNodeLogger))
+            .addResource(new EidasSamlResource(eidasAuthnRequestValidator, samlRequestSignatureValidator, TEST_RP_PUBLIC_ENCRYPTION_CERT, TEST_CONNECTOR_DESTINATION))
             .build();
 
     @Before
@@ -67,6 +68,7 @@ public class EidasSamlResourceTest {
                 .build();
         setLevelOfAssurance(authnRequest, EidasLoaEnum.LOA_SUBSTANTIAL);
         EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(ObjectUtils.toString(authnRequest)));
+
         EidasSamlParserResponse response = resources.target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE))
@@ -77,11 +79,11 @@ public class EidasSamlResourceTest {
         assertThat(response.getConnectorEncryptionPublicCertificate()).isEqualTo(TEST_RP_PUBLIC_ENCRYPTION_CERT);
         assertThat(response.getDestination()).isEqualTo(TEST_CONNECTOR_DESTINATION);
 
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, requestId);
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, destination);
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_ISSUER, issuerAsString);
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT, issueInstant.toString());
-        verify(proxyNodeLogger).addContext(ProxyNodeMDCKey.EIDAS_LOA, EidasLoaEnum.LOA_SUBSTANTIAL.getUri());
+        assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(requestId);
+        assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(destination);
+        assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(issuerAsString);
+        assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo(issueInstant.toString());
+        assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_LOA.name())).isEqualTo(EidasLoaEnum.LOA_SUBSTANTIAL.getUri());
     }
 
     private void setLevelOfAssurance(AuthnRequest authnRequest, EidasLoaEnum eidasLOA) {
