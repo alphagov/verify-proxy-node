@@ -20,7 +20,6 @@ import static java.text.MessageFormat.format;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
     public static final String ID = "CloudHsmCredentialConfiguration";
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     @JsonCreator
     public CloudHsmCredentialConfiguration(
@@ -28,7 +27,7 @@ public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
             @JsonProperty("hsmKeyLabel") String hsmKeyLabel
     ) throws CredentialConfigurationException {
         try {
-            LOG.info(format("Using CloudHsmCredentialConfiguration to sign eIDAS responses with HSM Key Label {0}", hsmKeyLabel));
+            ProxyNodeLogger.info(format("Using CloudHsmCredentialConfiguration to sign eIDAS responses with HSM Key Label {0}", hsmKeyLabel));
             X509Certificate certificate = X509Support.decodeCertificate(publicKey.getCert().getBytes());
             Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
                     .loadClass("com.cavium.provider.CaviumProvider")

@@ -44,7 +44,6 @@ import static java.text.MessageFormat.format;
 
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     private final StubConnectorConfiguration configuration;
     private final ResponseAssertionDecrypter decrypter;
@@ -96,14 +95,14 @@ public class ReceiveResponseResource {
         }
 
         String eidasRequestId = response.getInResponseTo();
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasRequestId);
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasRequestId);
 
         Issuer issuer = response.getIssuer();
         if (issuer != null) {
-            LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasRequestId);
+            ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasRequestId);
         }
 
-        LOG.info(format(
+        ProxyNodeLogger.info(format(
                 "Response from Proxy Node with decrypted attributes: {0}",
                 String.join(",", attributes)));
 

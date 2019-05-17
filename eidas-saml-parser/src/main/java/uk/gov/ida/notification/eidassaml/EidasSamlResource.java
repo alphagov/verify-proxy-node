@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class EidasSamlResource {
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
 
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
     private SamlRequestSignatureValidator<AuthnRequest> samlRequestSignatureValidator;
@@ -54,12 +53,12 @@ public class EidasSamlResource {
         samlRequestSignatureValidator.validate(authnRequest, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
         eidasAuthnRequestValidator.validate(authnRequest);
 
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, authnRequest.getID());
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, authnRequest.getDestination());
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, authnRequest.getIssuer().getValue());
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT, authnRequest.getIssueInstant().toString());
-        LOG.addContext(ProxyNodeMDCKey.EIDAS_LOA, getLevelsOfAssurance(authnRequest));
-        LOG.info("Authn request validated by ESP");
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, authnRequest.getID());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, authnRequest.getDestination());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, authnRequest.getIssuer().getValue());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT, authnRequest.getIssueInstant().toString());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_LOA, getLevelsOfAssurance(authnRequest));
+        ProxyNodeLogger.info("Authn request validated by ESP");
 
         return new EidasSamlParserResponse(
                 authnRequest.getID(),

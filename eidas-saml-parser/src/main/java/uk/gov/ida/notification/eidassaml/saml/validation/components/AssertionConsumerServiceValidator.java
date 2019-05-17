@@ -22,8 +22,6 @@ import static java.text.MessageFormat.format;
 
 public class AssertionConsumerServiceValidator {
 
-    private static final ProxyNodeLogger LOG = new ProxyNodeLogger();
-
     private final MetadataResolver metadataResolver;
 
     public AssertionConsumerServiceValidator(MetadataResolver metadataResolver) {
@@ -66,7 +64,7 @@ public class AssertionConsumerServiceValidator {
 
             return spssoDescriptor.getAssertionConsumerServices();
         } catch (ResolverException e) {
-            LOG.logException(e, Level.WARNING, format("Unable to resolve metadata for entity {0}", entityId));
+            ProxyNodeLogger.logException(e, Level.WARNING, format("Unable to resolve metadata for entity {0}", entityId));
             return List.of();
         }
     }

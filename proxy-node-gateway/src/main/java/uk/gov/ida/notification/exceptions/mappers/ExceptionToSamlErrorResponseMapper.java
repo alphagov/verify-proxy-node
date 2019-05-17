@@ -21,7 +21,6 @@ import static java.text.MessageFormat.format;
 
 public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<FailureSamlResponseException> {
 
-    private final ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
     private static final String SUBMIT_TEXT = "Continue";
 
     private final SamlFormViewBuilder samlFormViewBuilder;
@@ -49,8 +48,8 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
 
     @Override
     public Response toResponse(FailureSamlResponseException exception) {
-        proxyNodeLogger.logException(exception, Level.WARNING,
-                format("Error whilst contacting uri [{0}]", uriInfo.getPath()));
+        ProxyNodeLogger.logException(exception, Level.WARNING,
+                                     format("Error whilst contacting uri [{0}]", uriInfo.getPath()));
 
         final String sessionId = httpServletRequest.getSession().getId();
         final GatewaySessionData sessionData = getSessionData(sessionId);

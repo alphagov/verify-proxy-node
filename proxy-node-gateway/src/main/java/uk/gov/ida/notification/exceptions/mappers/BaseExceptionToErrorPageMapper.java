@@ -13,8 +13,6 @@ import static java.text.MessageFormat.format;
 
 public abstract class BaseExceptionToErrorPageMapper<TException extends Exception> implements ExceptionMapper<TException> {
 
-    private final ProxyNodeLogger proxyNodeLogger = new ProxyNodeLogger();
-
     private final URI errorPageRedirectUrl;
 
     private UriInfo uriInfo;
@@ -37,7 +35,7 @@ public abstract class BaseExceptionToErrorPageMapper<TException extends Exceptio
     public abstract Level getLogLevel(TException exception);
 
     private void logException(TException exception) {
-        proxyNodeLogger.logException(exception, getLogLevel(exception),
-                format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
+        ProxyNodeLogger.logException(exception, getLogLevel(exception),
+                                     format("Error whilst contacting uri [{0}]", this.uriInfo.getPath()));
     }
 }
