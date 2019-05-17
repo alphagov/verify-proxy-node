@@ -1,8 +1,17 @@
 package uk.gov.ida.notification.exceptions.hubresponse;
 
-public class HubResponseTranslationException extends RuntimeException {
+import uk.gov.ida.notification.exceptions.mappers.ErrorJsonResponseException;
+
+import javax.ws.rs.core.Response;
+
+public class HubResponseTranslationException extends ErrorJsonResponseException {
 
     public HubResponseTranslationException(String message) {
-        super("Bad SAML Response from Hub: " + message);
+        super("Error whilst handling Hub response. " + message);
+    }
+
+    @Override
+    public Response.Status getResponseStatus() {
+        return Response.Status.BAD_REQUEST;
     }
 }

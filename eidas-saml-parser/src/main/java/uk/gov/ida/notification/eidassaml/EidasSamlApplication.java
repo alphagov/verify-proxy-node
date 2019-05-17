@@ -21,7 +21,7 @@ import uk.gov.ida.notification.eidassaml.saml.validation.components.ComparisonVa
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestIssuerValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.RequestedAttributesValidator;
 import uk.gov.ida.notification.eidassaml.saml.validation.components.SpTypeValidator;
-import uk.gov.ida.notification.exceptions.mappers.InvalidAuthnRequestExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.JsonErrorResponseExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.SamlTransformationErrorExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
@@ -125,7 +125,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new SamlTransformationErrorExceptionMapper());
-        environment.jersey().register(new InvalidAuthnRequestExceptionMapper());
+        environment.jersey().register(new JsonErrorResponseExceptionMapper());
     }
 
     private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlParserConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {

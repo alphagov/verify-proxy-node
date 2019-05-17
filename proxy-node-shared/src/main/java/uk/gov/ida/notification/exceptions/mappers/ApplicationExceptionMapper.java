@@ -6,11 +6,11 @@ import javax.ws.rs.core.Response;
 
 import static java.text.MessageFormat.format;
 
-public class ApplicationExceptionMapper extends BaseExceptionMapper<ApplicationException> {
+public class ApplicationExceptionMapper extends BaseJsonErrorResponseExceptionMapper<ApplicationException> {
 
     @Override
-    protected Response.Status getResponseStatus() {
-        return Response.Status.INTERNAL_SERVER_ERROR;
+    protected Response.Status getResponseStatus(ApplicationException exception) {
+        return Response.Status.BAD_REQUEST;
     }
 
     @Override

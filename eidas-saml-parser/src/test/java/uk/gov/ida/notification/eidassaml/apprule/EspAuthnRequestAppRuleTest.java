@@ -57,6 +57,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         AuthnRequest requestWithIncorrectSigningKey = request.build();
         SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
         samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey, "response-id");
+
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(requestWithIncorrectSigningKey),
                 "Error during AuthnRequest Signature Validation: SAML Validation Specification: Signature was not valid."
@@ -66,6 +67,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestUnsigned() throws Exception {
         AuthnRequest unsignedRequest = request.withRandomRequestId().build();
+
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(unsignedRequest),
                 "Error during AuthnRequest Signature Validation: SAML Validation Specification: Message has no signature."
@@ -84,9 +86,10 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestMissingRequestId() throws Exception {
         AuthnRequest requestWithoutId = request.withoutRequestId().build();
         samlObjectSigner.sign(requestWithoutId, null);
+
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(requestWithoutId),
-                "Bad Authn Request from Connector Node: Missing Request ID."
+                "Bad Authn Request from Connector Node: Missing Request ID"
         );
     }
 
@@ -94,7 +97,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestForceAuthnFalse() throws Exception {
         assertBadRequestWithMessage(
                 request.withForceAuthn(false),
-                "Bad Authn Request from Connector Node: Request should require fresh authentication (forceAuthn should be true)."
+                "Bad Authn Request from Connector Node: Request should require fresh authentication (forceAuthn should be true)"
         );
     }
 
@@ -102,7 +105,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestIsPassiveTrue() throws Exception {
         assertBadRequestWithMessage(
                 request.withIsPassive(true),
-                "Bad Authn Request from Connector Node: Request should not require zero user interaction (isPassive should be missing or false)."
+                "Bad Authn Request from Connector Node: Request should not require zero user interaction (isPassive should be missing or false)"
         );
     }
 
@@ -115,7 +118,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestHasIncorrectDestination() throws Exception {
         assertBadRequestWithMessage(
                 request.withDestination("https://bogus.eu/"),
-                "Bad Authn Request from Connector Node: SAML Validation Specification: Destination is incorrect."
+                "Bad Authn Request from Connector Node: SAML Validation Specification: Destination is incorrect"
         );
     }
 
@@ -123,7 +126,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestHasIncorrectComparison() throws Exception {
         assertBadRequestWithMessage(
                 request.withComparison(AuthnContextComparisonTypeEnumeration.MAXIMUM),
-                "Bad Authn Request from Connector Node: Comparison type, if present, must be minimum."
+                "Bad Authn Request from Connector Node: Comparison type, if present, must be minimum"
         );
     }
 
@@ -131,14 +134,14 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestExtensionsMissing() throws Exception {
         assertBadRequestWithMessage(
                 request.withoutExtensions(),
-                "Bad Authn Request from Connector Node: Missing Extensions.");
+                "Bad Authn Request from Connector Node: Missing Extensions");
     }
 
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestHasProtocolBinding() throws Exception {
         assertBadRequestWithMessage(
                 request.withProtocolBinding("protocol-binding-attribute"),
-                "Bad Authn Request from Connector Node: Request should not specify protocol binding."
+                "Bad Authn Request from Connector Node: Request should not specify protocol binding"
         );
     }
 
@@ -180,7 +183,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void authnRequestShouldHaveRequestedAttributes() throws Exception {
         assertBadRequestWithMessage(
                 request.withoutRequestedAttributes(),
-                "Bad Authn Request from Connector Node: Missing RequestedAttributes."
+                "Bad Authn Request from Connector Node: Missing RequestedAttributes"
         );
     }
 
@@ -196,6 +199,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void authnRequestShouldNotBeNotDuplicated() throws Exception {
         AuthnRequest duplicatedRequest = request.build();
         samlObjectSigner.sign(duplicatedRequest, "response-id");
+
         assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(duplicatedRequest));
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(duplicatedRequest),
@@ -206,24 +210,28 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
         samlObjectSigner.sign(postedRequest, "response-id");
+
         assertGoodResponse(postedRequest, postEidasAuthnRequest(postedRequest));
     }
 
     private void assertBadRequest(EidasAuthnRequestBuilder builder) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
         samlObjectSigner.sign(postedRequest, "response-id");
+
         assertErrorResponse(postEidasAuthnRequest(postedRequest));
     }
 
     private void assertBadRequestWithMessage(EidasAuthnRequestBuilder builder, String errorMessageContains) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
         samlObjectSigner.sign(postedRequest, "response-id");
+
         assertErrorResponseWithMessage(postEidasAuthnRequest(postedRequest), errorMessageContains);
     }
 
     private void assertGoodResponse(AuthnRequest eidasAuthnRequest, Response response) {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
         EidasSamlParserResponse espResponse = response.readEntity(EidasSamlParserResponse.class);
+
         assertThat(espResponse.getRequestId()).isEqualTo(eidasAuthnRequest.getID());
         assertThat(espResponse.getIssuer()).isEqualTo(TestMetadataResource.CONNECTOR_ENTITY_ID);
     }
@@ -242,6 +250,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         Appender<ILoggingEvent> appender = mock(Appender.class);
         Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
+
         AuthnRequest authnRequest = request.withRequestId("request_id").build();
         samlObjectSigner.sign(authnRequest, "response-id");
 
@@ -252,9 +261,10 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
-        assertThat("request_id").isEqualTo(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name()));
-        assertThat("http://proxy-node/eidasAuthnRequest").isEqualTo(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name()));
-        assertThat("2015-04-30T19:25:14.273Z").isEqualTo(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name()));
-        assertThat("http://connector-node/Metadata").isEqualTo(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name()));
+
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo("request_id");
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo("http://proxy-node/eidasAuthnRequest");
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo("2015-04-30T19:25:14.273Z");
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo("http://connector-node/Metadata");
     }
 }
