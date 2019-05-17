@@ -27,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
+import java.util.UUID;
 
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
@@ -69,6 +70,8 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, String sessionId) {
+        setJourneyId();
+
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 
@@ -81,7 +84,7 @@ public class EidasAuthnRequestResource {
             )
         );
 
-        String connectorEncryptonPublicCerrt = StringUtils.right(
+        String connectorEncryptionPublicCert = StringUtils.right(
                 eidasSamlParserResponse.getConnectorEncryptionPublicCertificate(),
                 10
         );
@@ -89,12 +92,16 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuer());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptonPublicCerrt);
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptionPublicCert);
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
 
         return buildSamlFormView(vspResponse, eidasRelayState);
+    }
+
+    private void setJourneyId() {
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID, UUID.randomUUID().toString());
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {

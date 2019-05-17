@@ -7,8 +7,6 @@ import org.slf4j.MDC;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
-
-import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +31,7 @@ public class ProxyNodeLoggingFilterTest {
     }
 
     @Test
-    public void shouldNotAddIstioHeaderToMdcBeforeRequestWhenNotInRequestHeaders() throws IOException {
+    public void shouldNotAddIstioHeaderToMdcBeforeRequestWhenNotInRequestHeaders() {
         ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
         when(requestContext.getHeaderString(X_B3_TRACEID)).thenReturn(null);
         filter.filter(requestContext);
@@ -43,7 +41,7 @@ public class ProxyNodeLoggingFilterTest {
     }
 
     @Test
-    public void shouldAddIstioHeaderToMdcBeforeRequestWhenInRequestHeaders() throws IOException {
+    public void shouldAddIstioHeaderToMdcBeforeRequestWhenInRequestHeaders() {
         ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
         when(requestContext.getHeaderString(X_B3_TRACEID)).thenReturn("foo");
         filter.filter(requestContext);
@@ -53,7 +51,7 @@ public class ProxyNodeLoggingFilterTest {
     }
 
     @Test
-    public void shouldOnlyRemoveProxynodemdckeysAndIstoHeaderAfterReponse() throws IOException {
+    public void shouldOnlyRemoveProxyNodeMdcKeysAndIstioHeaderAfterResponse() {
         ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
         ContainerResponseContext responseContext = mock(ContainerResponseContext.class);
 
@@ -67,5 +65,4 @@ public class ProxyNodeLoggingFilterTest {
         assertThat(mdcMap.get("some_other_key")).isEqualTo("some value");
         verifyZeroInteractions(requestContext);
     }
-
 }
