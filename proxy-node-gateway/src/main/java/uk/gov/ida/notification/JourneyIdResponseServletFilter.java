@@ -1,7 +1,5 @@
 package uk.gov.ida.notification;
 
-import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -13,19 +11,12 @@ import java.io.IOException;
 
 import static uk.gov.ida.notification.shared.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
-public class JourneyIdServletFilter implements Filter {
-
-    private final SecureRandomIdentifierGenerationStrategy idGenerationStrategy;
-
-    public JourneyIdServletFilter(SecureRandomIdentifierGenerationStrategy idGenerationStrategy) {
-        this.idGenerationStrategy = idGenerationStrategy;
-    }
+public class JourneyIdResponseServletFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        String journeyId = idGenerationStrategy.generateIdentifier();
-        request.getSession().setAttribute(JOURNEY_ID_KEY, journeyId);
+        final String journeyId = (String) request.getSession().getAttribute(JOURNEY_ID_KEY);
         servletRequest.setAttribute(JOURNEY_ID_KEY, journeyId);
         chain.doFilter(servletRequest, servletResponse);
     }

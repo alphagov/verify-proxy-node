@@ -6,6 +6,7 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.eclipse.jetty.server.session.SessionHandler;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
@@ -22,6 +23,7 @@ import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.DispatcherType;
@@ -93,10 +95,31 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         SessionHandler sessionHandler = new SessionHandler();
         sessionHandler.setSessionCookie("gateway-session");
         environment.servlets().setSessionHandler(sessionHandler);
-        environment.servlets().addFilter("JourneyIdServletFilter", new JourneyIdServletFilter())
-                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
+        setRequestServletFilter(environment);
+        setResponseServletFilter(environment);
         environment.jersey().register(IstioHeaderMapperFilter.class);
         environment.jersey().register(ProxyNodeLoggingFilter.class);
+    }
+
+    private void setRequestServletFilter(Environment environment) {
+        JourneyIdServletFilter requestFilter = new JourneyIdServletFilter(new SecureRandomIdentifierGenerationStrategy());
+        environment.servlets()
+                .addFilter(requestFilter.getClass().getSimpleName(), requestFilter)
+                .addMappingForUrlPatterns(
+                        EnumSet.of(DispatcherType.REQUEST),
+                        true,
+                        Urls.GatewayUrls.GATEWAY_ROOT + Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH,
+                        Urls.GatewayUrls.GATEWAY_ROOT + Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH);
+    }
+
+    private void setResponseServletFilter(Environment environment) {
+        JourneyIdResponseServletFilter responseFilter = new JourneyIdResponseServletFilter();
+        environment.servlets()
+                .addFilter(responseFilter.getClass().getSimpleName(), responseFilter)
+                .addMappingForUrlPatterns(
+                        EnumSet.of(DispatcherType.REQUEST),
+                        true,
+                        Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE);
     }
 
     private void registerExceptionMappers(

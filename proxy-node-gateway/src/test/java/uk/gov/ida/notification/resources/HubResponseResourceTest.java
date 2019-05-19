@@ -1,8 +1,5 @@
 package uk.gov.ida.notification.resources;
 
-import com.google.common.collect.Lists;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -22,16 +19,9 @@ import uk.gov.ida.notification.views.SamlFormView;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.UriBuilder;
 
-import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -48,26 +38,8 @@ public class HubResponseResourceTest {
     @Mock
     private SessionStore sessionStore;
 
-    @Mock
-    private Handler logHandler;
-
-    @Captor
-    private ArgumentCaptor<LogRecord> captorLoggingEvent;
-
     @Captor
     private ArgumentCaptor<HubResponseTranslatorRequest> requestCaptor;
-
-    @Before
-    public void setup() {
-        Logger logger = Logger.getLogger(HubResponseResource.class.getName());
-        logger.addHandler(logHandler);
-    }
-
-    @After
-    public void teardown() {
-        Logger logger = Logger.getLogger(HubResponseResource.class.getName());
-        logger.removeHandler(logHandler);
-    }
 
     @Test
     public void testsHappyPath() {
@@ -118,20 +90,6 @@ public class HubResponseResourceTest {
         assertThat(HubResponseResource.SUBMIT_TEXT).isEqualTo(response.getSubmitText());
         assertThat("eidas_relay_state_in_session").isEqualTo(response.getRelayState());
 
-        verify(logHandler, times(2)).publish(captorLoggingEvent.capture());
-        List<String> allLogRecords = captorLoggingEvent
-            .getAllValues()
-            .stream()
-            .map(m -> m.getMessage())
-            .sorted()
-            .collect(Collectors.toList());
-
-        List<String> expectedLogOutput = Lists.newArrayList(
-            "[HUB Response] received for session 'session-id', hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'",
-            "[eIDAS Response] received for session 'session-id', hub authn request ID 'hub_request_id_in_session', eIDAS authn request ID 'eidas_request_id_in_session'"
-        );
-
-        assertThat(expectedLogOutput).isEqualTo(allLogRecords);
     }
 
     @Test(expected = SessionMissingException.class)

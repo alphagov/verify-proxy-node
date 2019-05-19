@@ -8,6 +8,7 @@ import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
+import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.servlet.http.HttpSession;
@@ -49,14 +50,7 @@ public class HubResponseResource {
 
         GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
 
-        LOG.info(
-            String.format(
-                "[HUB Response] received for session '%s', hub authn request ID '%s', eIDAS authn request ID '%s'",
-                session.getId(),
-                sessionData.getHubRequestId(),
-                sessionData.getEidasRequestId()
-            )
-        );
+        ProxyNodeLogger.info("Retrieved GatewaySessionData");
 
         HubResponseTranslatorRequest translatorRequest = new HubResponseTranslatorRequest(
             hubResponse,
@@ -68,15 +62,7 @@ public class HubResponseResource {
         );
 
         String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, session.getId());
-
-        LOG.info(
-            String.format(
-                "[eIDAS Response] received for session '%s', hub authn request ID '%s', eIDAS authn request ID '%s'",
-                session.getId(),
-                sessionData.getHubRequestId(),
-                sessionData.getEidasRequestId()
-            )
-        );
+        ProxyNodeLogger.info("Received eIDAS response from Translator");
 
         return samlFormViewBuilder.buildResponse(
             sessionData.getEidasDestination(),

@@ -173,13 +173,11 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 
-        // Resource method logs twice: once for Response Details and once for the Hash, so expect 2 invocations.
-        verify(appender, Mockito.times(2)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, Mockito.times(4)).doAppend(loggingEventArgumentCaptor.capture());
 
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        assertThat(loggingEvent.getMessage()).contains(EIDAS_RESPONSE_LOGGER_MESSAGE);
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
