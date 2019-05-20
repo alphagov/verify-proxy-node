@@ -13,19 +13,15 @@ import java.util.Map;
 
 public class ProxyNodeJsonClient {
 
-    private final JsonResponseProcessor responseProcessor;
-    private final ErrorHandlingClient errorHandlingClient;
     private final JsonClient jsonClient;
 
     @Inject
     public ProxyNodeJsonClient(ErrorHandlingClient errorHandlingClient, JsonResponseProcessor responseProcessor) {
-        this.errorHandlingClient = errorHandlingClient;
-        this.responseProcessor = responseProcessor;
-        this.jsonClient = new JsonClient(this.errorHandlingClient, this.responseProcessor);
+        this.jsonClient = new JsonClient(errorHandlingClient, responseProcessor);
     }
 
     public <T> T post(Object postBody, URI uri, Class<T> clazz) {
-        return responseProcessor.getJsonEntity(uri, null, clazz, errorHandlingClient.post(uri, getJourneyIdHeader(), postBody));
+        return jsonClient.post(postBody, uri, clazz, getJourneyIdHeader());
     }
 
     private Map<String, String> getJourneyIdHeader() {
