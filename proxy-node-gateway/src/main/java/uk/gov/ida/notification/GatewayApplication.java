@@ -102,7 +102,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void setRequestServletFilter(Environment environment) {
-        JourneyIdServletFilter requestFilter = new JourneyIdServletFilter(new SecureRandomIdentifierGenerationStrategy());
+        JourneyIdGeneratingServletFilter requestFilter = new JourneyIdGeneratingServletFilter(new SecureRandomIdentifierGenerationStrategy());
         environment.servlets()
                 .addFilter(requestFilter.getClass().getSimpleName(), requestFilter)
                 .addMappingForUrlPatterns(
@@ -113,7 +113,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void setResponseServletFilter(Environment environment) {
-        JourneyIdResponseServletFilter responseFilter = new JourneyIdResponseServletFilter();
+        JourneyIdHubResponseServletFilter responseFilter = new JourneyIdHubResponseServletFilter();
         environment.servlets()
                 .addFilter(responseFilter.getClass().getSimpleName(), responseFilter)
                 .addMappingForUrlPatterns(

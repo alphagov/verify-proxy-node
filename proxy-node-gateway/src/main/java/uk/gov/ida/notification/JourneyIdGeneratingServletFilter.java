@@ -1,6 +1,7 @@
 package uk.gov.ida.notification;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -11,13 +12,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static uk.gov.ida.notification.shared.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
+public class JourneyIdGeneratingServletFilter implements Filter {
 
-public class JourneyIdServletFilter implements Filter {
+    private static final String JOURNEY_ID_KEY = ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name();
 
     private final SecureRandomIdentifierGenerationStrategy idGenerationStrategy;
 
-    public JourneyIdServletFilter(SecureRandomIdentifierGenerationStrategy idGenerationStrategy) {
+    JourneyIdGeneratingServletFilter(SecureRandomIdentifierGenerationStrategy idGenerationStrategy) {
         this.idGenerationStrategy = idGenerationStrategy;
     }
 
@@ -31,12 +32,8 @@ public class JourneyIdServletFilter implements Filter {
     }
 
     @Override
-    public void destroy() {
-
-    }
+    public void destroy() { }
 
     @Override
-    public void init(FilterConfig filterConfig) {
-
-    }
+    public void init(FilterConfig filterConfig) { }
 }

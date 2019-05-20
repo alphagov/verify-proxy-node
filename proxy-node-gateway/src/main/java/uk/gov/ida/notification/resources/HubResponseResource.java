@@ -3,11 +3,11 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import uk.gov.ida.notification.SamlFormViewBuilder;
-import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
-import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
+import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.Urls;
 
@@ -18,11 +18,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import java.util.logging.Logger;
 
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class HubResponseResource {
-    private static final Logger LOG = Logger.getLogger(HubResponseResource.class.getName());
 
     static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
     static final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";

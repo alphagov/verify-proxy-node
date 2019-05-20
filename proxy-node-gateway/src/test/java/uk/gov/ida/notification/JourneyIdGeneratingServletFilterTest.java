@@ -20,10 +20,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.shared.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JourneyIdServletFilterTest {
+public class JourneyIdGeneratingServletFilterTest {
 
     @InjectMocks
-    private JourneyIdServletFilter filter;
+    private JourneyIdGeneratingServletFilter filter;
 
     @Mock
     private SecureRandomIdentifierGenerationStrategy idGenerationStrategy;
@@ -41,7 +41,7 @@ public class JourneyIdServletFilterTest {
     private FilterChain chain;
 
     @Test
-    public void setAJounrneyIdInSessionAndRequest() throws Exception {
+    public void setAJourneyIdInSessionAndRequest() throws Exception {
         String journeyId = UUID.randomUUID().toString();
         when(idGenerationStrategy.generateIdentifier()).thenReturn(journeyId);
         when(request.getSession()).thenReturn(session);

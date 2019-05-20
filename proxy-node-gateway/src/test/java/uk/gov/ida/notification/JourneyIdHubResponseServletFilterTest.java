@@ -18,10 +18,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.shared.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JourneyIdResponseServletFilterTest {
+public class JourneyIdHubResponseServletFilterTest {
 
     @InjectMocks
-    private JourneyIdResponseServletFilter filter;
+    private JourneyIdHubResponseServletFilter filter;
 
     @Mock
     private HttpServletRequest request;
