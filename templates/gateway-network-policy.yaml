@@ -13,11 +13,10 @@ spec:
     - from:
       - podSelector:
           matchLabels:
-            app: nginx-ingress
-            release: ingress-system
+            istio: ingressgateway
         namespaceSelector:
           matchLabels:
-            namespace: ingress-system
+            namespace: istio-system
       ports:
       - protocol: TCP
         port: 80
