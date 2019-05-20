@@ -1,19 +1,19 @@
 package uk.gov.ida.notification.proxy;
 
 import uk.gov.ida.exceptions.ApplicationException;
-import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
+import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import java.net.URI;
 
 public class EidasSamlParserProxy {
-    private final JsonClient eidasSamlParserClient;
+    private final ProxyNodeJsonClient eidasSamlParserClient;
     private final URI eidasSamlParserURI;
 
     public EidasSamlParserProxy(
-            JsonClient eidasSamlParserClient,
+            ProxyNodeJsonClient eidasSamlParserClient,
             URI eidasSamlParserURI) {
         this.eidasSamlParserClient = eidasSamlParserClient;
         this.eidasSamlParserURI = eidasSamlParserURI;

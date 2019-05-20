@@ -4,19 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.slf4j.MDC;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
-import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.validation.Valid;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -49,7 +54,17 @@ public class EidasSamlParserProxyTest {
         public Response testClientError(EidasSamlParserRequest eidasSamlParserRequest) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+
+        public static MultivaluedMap<String, String> headers;
+        @POST
+        @Path("/test-journey-id-header")
+        public EidasSamlParserResponse testJourneyIdHeader(EidasSamlParserRequest eidasSamlParserRequest, @Context HttpHeaders headers) {
+            TestESPResource.headers = headers.getRequestHeaders();
+            return new EidasSamlParserResponse("request_id", "issuer", UNCHAINED_PUBLIC_CERT, "destination");
+        }
     }
+
+    private static final String JOURNEY_ID = "this_is_not_a_uuid";
 
     private final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest("authn_request");
 
@@ -98,9 +113,17 @@ public class EidasSamlParserProxyTest {
             );
     }
 
+    @Test
+    public void shouldSendJourneyIdInHeaders() {
+        MDC.put(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), JOURNEY_ID);
+        EidasSamlParserProxy eidasSamlParserService = setUpEidasSamlParserService("/parse/test-journey-id-header");
+        eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
+        assertThat(TestESPResource.headers.getFirst(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())).isEqualTo(JOURNEY_ID);
+    }
+
     private EidasSamlParserProxy setUpEidasSamlParserService(String url) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonClient jsonClient = new JsonClient(
+        ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
                 new ErrorHandlingClient(ClientBuilder.newClient()),
                 new JsonResponseProcessor(objectMapper)
         );
