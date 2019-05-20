@@ -248,7 +248,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         postEidasAuthnRequest(authnRequest);
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(appender, times(2)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, times(4)).doAppend(loggingEventArgumentCaptor.capture());
 
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();

@@ -8,6 +8,7 @@ import org.opensaml.saml.saml2.core.Issuer;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -46,6 +47,7 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
                 .header(X_B3_SAMPLED, X_B3_SAMPLED)
                 .header(X_B3_FLAGS, X_B3_FLAGS)
                 .header(X_OT_SPAN_CONTEXT, X_OT_SPAN_CONTEXT)
+                .header(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
                 .header(SOME_RANDOM_HEADER, SOME_RANDOM_HEADER)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
 
