@@ -45,9 +45,9 @@ public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
                     (PrivateKey) key);
 
             this.keyHandle = (Long) ClassLoader.getSystemClassLoader()
-                                                     .loadClass("com.cavium.key.CaviumKey")
-                                                     .getMethod("getHandle")
-                                                     .invoke(key);
+                    .loadClass("com.cavium.key.CaviumKey")
+                    .getMethod("getHandle")
+                    .invoke(key);
 
             credential.setEntityId(ID);
             setCredential(credential);

@@ -30,7 +30,7 @@ public class ProxyNodeLogger {
         log(Level.SEVERE, message);
     }
 
-    public static void logException(Exception exception, Level level, String message) {
+    public static void logException(Throwable exception, Level level, String message) {
         addExceptionContext(exception);
         log(level, message);
     }
@@ -47,7 +47,7 @@ public class ProxyNodeLogger {
         logWithCallingFrame(level, message, null);
     }
 
-    private static void addExceptionContext(Exception exception) {
+    private static void addExceptionContext(Throwable exception) {
         Throwable cause = exception.getCause();
         if (cause != null) {
             addContext(ProxyNodeMDCKey.EXCEPTION_CAUSE, cause.getMessage());

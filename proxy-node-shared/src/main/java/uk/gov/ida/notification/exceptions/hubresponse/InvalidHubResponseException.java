@@ -1,11 +1,11 @@
 package uk.gov.ida.notification.exceptions.hubresponse;
 
-import uk.gov.ida.notification.exceptions.mappers.ErrorJsonResponseException;
+import uk.gov.ida.notification.exceptions.mappers.BaseJsonErrorResponseRuntimeException;
 import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 
 import javax.ws.rs.core.Response;
 
-public class InvalidHubResponseException extends ErrorJsonResponseException {
+public class InvalidHubResponseException extends BaseJsonErrorResponseRuntimeException {
 
     private static final String EXCEPTION_PREFIX = "Bad IDP Response from Hub: ";
 

@@ -129,7 +129,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             SessionStore sessionStore,
             URI errorPageRedirectUrl) {
         environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore));
-
         environment.jersey().register(new ErrorPageExceptionMapper(errorPageRedirectUrl));
         environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
     }
