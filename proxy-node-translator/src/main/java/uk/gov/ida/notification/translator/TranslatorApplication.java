@@ -111,7 +111,9 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
 
         final CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
-        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(), credentialConfiguration.getAlgorithm());
+        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(),
+                                                                       credentialConfiguration.getAlgorithm(),
+                                                                       credentialConfiguration.getKeyHandle());
 
         return new EidasResponseGenerator(hubResponseTranslator, failureResponseGenerator, samlObjectSigner);
     }

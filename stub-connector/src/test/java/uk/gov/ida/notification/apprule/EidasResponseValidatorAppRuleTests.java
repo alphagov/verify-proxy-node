@@ -109,7 +109,8 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     private Response signResponse(Response response) throws Exception {
         SamlObjectSigner signer = new SamlObjectSigner(X509CredentialFactory.build(
                 TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY),
-                SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
+                SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
+                Long.valueOf(1));
 
         signer.sign(response, "response-id");
 
