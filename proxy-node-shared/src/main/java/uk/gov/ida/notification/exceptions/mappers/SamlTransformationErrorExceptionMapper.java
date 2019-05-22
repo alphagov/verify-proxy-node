@@ -6,10 +6,10 @@ import javax.ws.rs.core.Response;
 
 import static java.text.MessageFormat.format;
 
-public class SamlTransformationErrorExceptionMapper extends BaseExceptionMapper<SamlTransformationErrorException> {
+public class SamlTransformationErrorExceptionMapper extends BaseJsonErrorResponseExceptionMapper<SamlTransformationErrorException> {
 
     @Override
-    protected Response.Status getResponseStatus() {
+    protected Response.Status getResponseStatus(SamlTransformationErrorException exception) {
         return Response.Status.BAD_REQUEST;
     }
 

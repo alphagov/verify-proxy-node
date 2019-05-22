@@ -29,13 +29,15 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
         Optional.ofNullable(requestContext.getUriInfo()).ifPresent(u -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.RESOURCE_PATH, u.getAbsolutePath().toString()));
         Optional.ofNullable(requestContext.getMediaType()).ifPresent(m -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.INGRESS_MEDIA_TYPE, m.toString()));
         ProxyNodeLogger.info("Ingress");
+
+        MDC.remove(ProxyNodeMDCKey.INGRESS_MEDIA_TYPE.name());
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         Optional.ofNullable(responseContext.getLocation()).ifPresent(uri -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.EGRESS_LOCATION, uri.toString()));
         Optional.ofNullable(responseContext.getStatus()).ifPresent(code -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.RESPONSE_STATUS, String.valueOf(code)));
-        Optional.ofNullable(responseContext.getMediaType()).ifPresent(m -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.EGRESS_MEDIA_TYPE, m.toString()));
+        Optional.ofNullable(responseContext.getMediaType()).ifPresent(mt -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.EGRESS_MEDIA_TYPE, mt.toString()));
         ProxyNodeLogger.info("Egress");
 
         responseContext.getHeaders().add(JOURNEY_ID_KEY, getJourneyId(requestContext));

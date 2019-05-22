@@ -15,7 +15,6 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +61,10 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getHeaderString(X_B3_TRACEID)).thenReturn(null);
         when(requestContext.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
         when(requestContext.getUriInfo()).thenReturn(uriInfo);
+
         filter.filter(requestContext);
+
+        assertThat(MDC.getCopyOfContextMap()).doesNotContainKey(X_B3_TRACEID);
         verify(requestContext).getHeaderString(X_B3_TRACEID);
         verify(uriInfo).getAbsolutePath();
     }
@@ -103,6 +105,7 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getProperty(JOURNEY_ID_KEY)).thenReturn("a journey id");
         when(responseContext.getHeaders()).thenReturn(headers);
         filter.filter(requestContext, responseContext);
+        assertThat(responseContext.getHeaders().getFirst(JOURNEY_ID_KEY)).isEqualTo("a journey id");
         verify(requestContext).getHeaderString(JOURNEY_ID_KEY);
         verify(requestContext).getProperty(JOURNEY_ID_KEY);
     }
@@ -112,8 +115,6 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getProperty(JOURNEY_ID_KEY)).thenReturn("a journey id");
         when(responseContext.getHeaders()).thenReturn(headers);
         filter.filter(requestContext, responseContext);
-        List<Object> values = headers.get(JOURNEY_ID_KEY);
-        values.iterator().next();
-        assertThat(values.iterator().next()).isEqualTo("a journey id");
+        assertThat(responseContext.getHeaders().getFirst(JOURNEY_ID_KEY)).isEqualTo("a journey id");
     }
 }
