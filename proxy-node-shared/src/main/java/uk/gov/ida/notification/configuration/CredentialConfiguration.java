@@ -18,6 +18,7 @@ import java.security.interfaces.ECPublicKey;
 public abstract class CredentialConfiguration {
     protected BasicX509Credential credential;
     protected String algorithm;
+    protected Long keyHandle;
 
     public BasicX509Credential getCredential() { return credential; }
     public String getAlgorithm() { return algorithm; }
@@ -28,5 +29,9 @@ public abstract class CredentialConfiguration {
             this.algorithm = SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA256;
         }
         this.credential = credential;
+    }
+
+    public Long getKeyHandle() {
+        return this.keyHandle;
     }
 }

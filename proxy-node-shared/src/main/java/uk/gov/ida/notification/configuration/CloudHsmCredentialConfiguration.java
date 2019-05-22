@@ -9,6 +9,7 @@ import org.opensaml.security.x509.X509Support;
 import uk.gov.ida.common.shared.configuration.DeserializablePublicKeyConfiguration;
 import uk.gov.ida.notification.shared.ProxyNodeLogger;
 
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -37,9 +38,17 @@ public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
             JCEMapper.setProviderId("Cavium");
             KeyStore cloudHsmStore = KeyStore.getInstance("Cavium");
             cloudHsmStore.load(null, null);
+
+            final Key key = cloudHsmStore.getKey(hsmKeyLabel, null);
             BasicX509Credential credential = new BasicX509Credential(
                     certificate,
-                    (PrivateKey) cloudHsmStore.getKey(hsmKeyLabel, null));
+                    (PrivateKey) key);
+
+            this.keyHandle = (Long) ClassLoader.getSystemClassLoader()
+                                                     .loadClass("com.cavium.key.CaviumKey")
+                                                     .getMethod("getHandle")
+                                                     .invoke(key);
+
             credential.setEntityId(ID);
             setCredential(credential);
         } catch (Exception e) {
