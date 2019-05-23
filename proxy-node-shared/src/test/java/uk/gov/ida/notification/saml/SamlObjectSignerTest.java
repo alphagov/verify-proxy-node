@@ -99,7 +99,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
         ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
-        assertThat(mdcPropertyMap.containsKey(ProxyNodeMDCKey.HSM_KEY_HANDLE.name())).isFalse();
+        assertThat(mdcPropertyMap).doesNotContainKey(ProxyNodeMDCKey.HSM_KEY_HANDLE.name());
 
     }
 }

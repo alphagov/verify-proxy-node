@@ -1,10 +1,10 @@
 package uk.gov.ida.notification.exceptions.authnrequest;
 
-import uk.gov.ida.notification.exceptions.mappers.ErrorJsonResponseException;
+import uk.gov.ida.notification.exceptions.mappers.BaseJsonErrorResponseRuntimeException;
 
 import javax.ws.rs.core.Response;
 
-public class InvalidAuthnRequestException extends ErrorJsonResponseException {
+public class InvalidAuthnRequestException extends BaseJsonErrorResponseRuntimeException {
 
     private static final String EXCEPTION_PREFIX = "Bad Authn Request from Connector Node: ";
 

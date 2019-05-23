@@ -12,7 +12,7 @@ import java.util.logging.Level;
 
 import static java.text.MessageFormat.format;
 
-public abstract class BaseJsonErrorResponseExceptionMapper<TException extends RuntimeException> implements ExceptionMapper<TException> {
+public abstract class BaseJsonErrorResponseExceptionMapper<TException extends Throwable> implements ExceptionMapper<TException> {
 
     private UriInfo uriInfo;
 
