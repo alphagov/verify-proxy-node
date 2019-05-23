@@ -5,7 +5,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      deployment: {{ .Release.Name }}-proxy-metadata-deployment
+      deployment: {{ .Release.Name }}-proxy-metadata
   policyTypes:
   - Ingress
   ingress:
@@ -22,6 +22,3 @@ spec:
             app.kubernetes.io/name: connector
             app.kubernetes.io/instance: {{ .Release.Name }}
 {{ end }}
-      ports:
-      - protocol: TCP
-        port: 80
