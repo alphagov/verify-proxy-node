@@ -93,4 +93,3 @@ public class HubResponseTranslatorResource {
         ProxyNodeLogger.info("Received eIDAS Response Attributes from VSP");
     }
 }
-
