@@ -17,7 +17,7 @@ FROM openjdk:11-jre-slim
 
 WORKDIR /verify-service-provider
 
-RUN apt-get update && apt-get install curl
+RUN apt-get update && apt-get install -y curl
 
 RUN curl -sSLO https://raw.githubusercontent.com/alphagov/verify-proxy-node/master/proxy-node-vsp-config/verify-service-provider.yml
 
