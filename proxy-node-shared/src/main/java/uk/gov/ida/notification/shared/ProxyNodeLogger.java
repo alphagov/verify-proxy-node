@@ -48,11 +48,6 @@ public class ProxyNodeLogger {
     }
 
     private static void addExceptionContext(Throwable exception) {
-        Throwable cause = exception.getCause();
-        if (cause != null) {
-            addContext(ProxyNodeMDCKey.EXCEPTION_CAUSE, cause.getMessage());
-        }
-
         addContext(ProxyNodeMDCKey.EXCEPTION_MESSAGE, exception.getMessage());
         addContext(ProxyNodeMDCKey.EXCEPTION_STACKTRACE, ExceptionUtils.getStackTrace(exception));
     }
