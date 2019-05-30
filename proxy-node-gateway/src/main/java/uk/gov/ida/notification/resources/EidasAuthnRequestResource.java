@@ -28,6 +28,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 
+import static uk.gov.ida.notification.shared.ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID;
+
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
 
@@ -55,7 +57,7 @@ public class EidasAuthnRequestResource {
             @QueryParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
             @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session.getId());
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
     }
 
     @POST
@@ -65,36 +67,23 @@ public class EidasAuthnRequestResource {
             @FormParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
             @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session.getId());
+        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session);
     }
 
-    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, String sessionId) {
+    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession httpSession) {
+        final String sessionId = httpSession.getId();
+        final String journeyId = httpSession.getAttribute(PROXY_NODE_JOURNEY_ID.name()).toString();
+
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 
-        sessionStorage.createOrUpdateSession(
-            sessionId,
-            new GatewaySessionData(
-                eidasSamlParserResponse,
-                vspResponse,
-                eidasRelayState
-            )
-        );
+        sessionStorage.createOrUpdateSession(sessionId,
+                new GatewaySessionData(eidasSamlParserResponse, vspResponse, eidasRelayState));
 
-        String connectorEncryptionPublicCert = StringUtils.right(
-                eidasSamlParserResponse.getConnectorEncryptionPublicCertificate(),
-                10
-        );
-
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuer());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptionPublicCert);
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
+        addLoggerContext(eidasSamlParserResponse, vspResponse);
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
 
-        return buildSamlFormView(vspResponse, eidasRelayState);
+        return buildSamlFormView(vspResponse, journeyId);
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {
@@ -105,9 +94,21 @@ public class EidasAuthnRequestResource {
         return vspProxy.generateAuthnRequest(sessionId);
     }
 
-    private SamlFormView buildSamlFormView(AuthnRequestResponse vspResponse, String relayState) {
+    private SamlFormView buildSamlFormView(AuthnRequestResponse vspResponse, String hubRequestRelayState) {
         URI hubUrl = vspResponse.getSsoLocation();
         String samlRequest = vspResponse.getSamlRequest();
-        return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, SUBMIT_BUTTON_TEXT, relayState);
+        return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, SUBMIT_BUTTON_TEXT, hubRequestRelayState);
+    }
+
+    private void addLoggerContext(EidasSamlParserResponse eidasSamlParserResponse, AuthnRequestResponse vspResponse) {
+        final String connectorEncryptionPublicCert = StringUtils.right(
+                eidasSamlParserResponse.getConnectorEncryptionPublicCertificate(), 10);
+
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuer());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptionPublicCert);
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
     }
 }

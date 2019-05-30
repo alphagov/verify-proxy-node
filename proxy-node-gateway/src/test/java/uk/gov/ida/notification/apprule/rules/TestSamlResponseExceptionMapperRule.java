@@ -13,8 +13,6 @@ import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,30 +29,30 @@ public class TestSamlResponseExceptionMapperRule {
 
     @Before
     public void before() {
-        when(sessionStore.getSession(any(String.class))).thenReturn(new GatewaySessionData("HubRequestId","EidasRequestId","EidasDestination","EidasConnectorPublicKey","EidasRelayState"));
+        when(sessionStore.getSession(any(String.class))).thenReturn(new GatewaySessionData("HubRequestId", "EidasRequestId", "EidasDestination", "EidasConnectorPublicKey", "EidasRelayState"));
         String nullString = null;
         when(samlFormViewBuilder.buildResponse("EidasDestination", nullString, "Continue", "EidasRelayState"))
                 .thenReturn(
-                new SamlFormView("postUrl",
-                                 "samlMessageType",
-                                 "encodedSamlMessage",
-                                 "submitText"));
+                        new SamlFormView("postUrl",
+                                "samlMessageType",
+                                "encodedSamlMessage",
+                                "submitText"));
     }
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-                                    .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-                                    .addProvider(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore))
-                                    .addResource(new TestExceptionMapperResource())
-                                    .build();
+            .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
+            .addProvider(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore))
+            .addResource(new TestExceptionMapperResource())
+            .build();
 
     @Test
     public void shouldMapSessionAlreadyExistsExceptionToExceptionToSamlErrorResponseMapper() {
 
         Response response = resources.getJerseyTest()
-                                .target("SessionAlreadyExistsException")
-                                .request()
-                                .get();
+                .target("SessionAlreadyExistsException")
+                .request()
+                .get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(checkResponseEntityIsSamlFormResponse(response.readEntity(String.class))).isTrue();
     }
@@ -62,9 +60,9 @@ public class TestSamlResponseExceptionMapperRule {
     @Test
     public void shouldMapSessionAttributeExceptionToExceptionToSamlErrorResponseMapper() {
         Response response = resources.getJerseyTest()
-                                .target("/SessionAttributeException")
-                                .request()
-                                .get();
+                .target("/SessionAttributeException")
+                .request()
+                .get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(checkResponseEntityIsSamlFormResponse(response.readEntity(String.class))).isTrue();
     }
@@ -72,9 +70,9 @@ public class TestSamlResponseExceptionMapperRule {
     @Test
     public void shouldMapTranslatorResponseExceptionToExceptionToSamlErrorResponseMapper() {
         Response response = resources.getJerseyTest()
-                                .target("/TranslatorResponseException")
-                                .request()
-                                .get();
+                .target("/TranslatorResponseException")
+                .request()
+                .get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(checkResponseEntityIsSamlFormResponse(response.readEntity(String.class))).isTrue();
     }

@@ -44,22 +44,22 @@ public class HubResponseResourceTest {
     @Test
     public void testsHappyPath() {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
-            "eidas_request_id_in_session",
-            "issuer",
-            "connector_public_cert_in_session",
-            "http://conector.node"
+                "eidas_request_id_in_session",
+                "issuer",
+                "connector_public_cert_in_session",
+                "http://conector.node"
         );
 
         AuthnRequestResponse vspResponse = new AuthnRequestResponse(
-            "saml-request",
-            "hub_request_id_in_session",
-            UriBuilder.fromUri("http://conector.node").build()
+                "saml-request",
+                "hub_request_id_in_session",
+                UriBuilder.fromUri("http://conector.node").build()
         );
 
         GatewaySessionData sessionData = new GatewaySessionData(
-            eidasSamlParserResponse,
-            vspResponse,
-            "eidas_relay_state_in_session"
+                eidasSamlParserResponse,
+                vspResponse,
+                "eidas_relay_state_in_session"
         );
 
         when(sessionStore.getSession(eq("session-id"))).thenReturn(sessionData);
@@ -67,8 +67,8 @@ public class HubResponseResourceTest {
         when(translatorProxy.getTranslatedHubResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
 
         HubResponseResource resource = new HubResponseResource(
-            new SamlFormViewBuilder(),
-            translatorProxy,
+                new SamlFormViewBuilder(),
+                translatorProxy,
                 sessionStore
         );
 
@@ -97,8 +97,8 @@ public class HubResponseResourceTest {
         when(sessionStore.getSession(eq(session.getId()))).thenThrow(SessionMissingException.class);
 
         HubResponseResource resource = new HubResponseResource(
-            new SamlFormViewBuilder(),
-            translatorProxy,
+                new SamlFormViewBuilder(),
+                translatorProxy,
                 sessionStore
         );
 

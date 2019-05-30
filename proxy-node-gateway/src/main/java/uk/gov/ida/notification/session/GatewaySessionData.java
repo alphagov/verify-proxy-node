@@ -43,29 +43,27 @@ public class GatewaySessionData {
 
     @JsonCreator
     public GatewaySessionData(
-        @JsonProperty("HUB_REQUEST_ID") String hubRequestId,
-        @JsonProperty("EIDAS_REQUEST_ID") String eidasRequestId,
-        @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
-        @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
-        @JsonProperty("eidasRelayState") String eidasRelayState
-    ) {
-       this.hubRequestId = hubRequestId;
-       this.eidasRequestId = eidasRequestId;
-       this.eidasDestination = eidasDestination;
-       this.eidasConnectorPublicKey = eidasConnectorPublicKey;
-       this.eidasRelayState = eidasRelayState;
+            @JsonProperty("HUB_REQUEST_ID") String hubRequestId,
+            @JsonProperty("EIDAS_REQUEST_ID") String eidasRequestId,
+            @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
+            @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
+            @JsonProperty("eidasRelayState") String eidasRelayState) {
+        this.hubRequestId = hubRequestId;
+        this.eidasRequestId = eidasRequestId;
+        this.eidasDestination = eidasDestination;
+        this.eidasConnectorPublicKey = eidasConnectorPublicKey;
+        this.eidasRelayState = eidasRelayState;
     }
 
     public GatewaySessionData(
-        EidasSamlParserResponse eidasSamlParserResponse,
-        AuthnRequestResponse vspResponse,
-        String eidasRelayState
-    ) {
+            EidasSamlParserResponse eidasSamlParserResponse,
+            AuthnRequestResponse vspResponse,
+            String eidasRelayState) {
         this.hubRequestId = vspResponse.getRequestId();
         this.eidasRequestId = eidasSamlParserResponse.getRequestId();
         this.eidasDestination = eidasSamlParserResponse.getDestination();
-        this.eidasRelayState = eidasRelayState;
         this.eidasConnectorPublicKey = eidasSamlParserResponse.getConnectorEncryptionPublicCertificate();
+        this.eidasRelayState = eidasRelayState;
         validate();
     }
 
@@ -88,13 +86,23 @@ public class GatewaySessionData {
         return String.format("%s field %s", violation.getPropertyPath().toString(), violation.getMessage());
     }
 
-    public String getHubRequestId() { return this.hubRequestId; }
+    public String getHubRequestId() {
+        return this.hubRequestId;
+    }
 
-    public String getEidasRequestId() { return this.eidasRequestId; }
+    public String getEidasRequestId() {
+        return this.eidasRequestId;
+    }
 
-    public String getEidasDestination() { return this.eidasDestination; }
+    public String getEidasDestination() {
+        return this.eidasDestination;
+    }
 
-    public String getEidasRelayState() { return this.eidasRelayState; }
+    public String getEidasRelayState() {
+        return this.eidasRelayState;
+    }
 
-    public String getEidasConnectorPublicKey() { return this.eidasConnectorPublicKey; }
+    public String getEidasConnectorPublicKey() {
+        return this.eidasConnectorPublicKey;
+    }
 }

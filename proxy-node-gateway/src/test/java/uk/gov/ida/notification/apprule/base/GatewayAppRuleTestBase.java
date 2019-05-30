@@ -54,9 +54,9 @@ public class GatewayAppRuleTestBase {
 
     protected AuthnRequest buildAuthnRequest() throws Exception {
         return new EidasAuthnRequestBuilder()
-            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
-            .withRandomRequestId()
-            .build();
+                .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+                .withRandomRequestId()
+                .build();
     }
 
     protected String setupTestRedis() {

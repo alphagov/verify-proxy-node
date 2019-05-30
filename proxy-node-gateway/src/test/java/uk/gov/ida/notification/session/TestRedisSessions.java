@@ -81,10 +81,11 @@ public class TestRedisSessions {
     }
 
     private GatewaySessionData populateTestData() {
-        return new GatewaySessionData("aHubRequestId",
-                                      "anEidasRequestId",
-                                      "anEidasDestination",
-                                      "anEidasConnectorPublicKey",
-                                      "anEidasRelayState");
+        return new GatewaySessionData(
+                "aHubRequestId",
+                "anEidasRequestId",
+                "anEidasDestination",
+                "anEidasConnectorPublicKey",
+                "anEidasRelayState");
     }
 }

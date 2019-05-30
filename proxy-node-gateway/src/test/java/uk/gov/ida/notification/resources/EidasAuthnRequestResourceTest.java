@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
+import static uk.gov.ida.notification.shared.ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
 
 
@@ -109,13 +110,18 @@ public class EidasAuthnRequestResourceTest {
         when(vspResponse.getSsoLocation()).thenReturn(new URI("http://hub.bub"));
         when(vspResponse.getSamlRequest()).thenReturn("hub blob");
         when(session.getId()).thenReturn("some session id");
+        when(session.getAttribute(PROXY_NODE_JOURNEY_ID.name())).thenReturn("journey id");
     }
 
     private void verifyHappyPath() {
         final String sessionId = "some session id";
+        final GatewaySessionData gatewaySessionData = new GatewaySessionData(
+                eidasSamlParserResponse, vspResponse, "eidas relay state");
 
-        verify(sessionStore).createOrUpdateSession(eq(sessionId), any(GatewaySessionData.class));
         verify(session).getId();
+
+        verify(sessionStore).createOrUpdateSession(eq(sessionId), captorGatewaySessionData.capture());
+        assertThat(captorGatewaySessionData.getValue()).isEqualToComparingFieldByField(gatewaySessionData);
 
         verify(appender).doAppend(captorILoggingEvent.capture());
         final ILoggingEvent logEvent = captorILoggingEvent.getValue();
@@ -130,9 +136,10 @@ public class EidasAuthnRequestResourceTest {
         assertThat(logEvent.getLevel().toString()).isEqualTo(Level.INFO.toString());
         assertThat(logEvent.getMessage()).isEqualTo("Authn requests received from ESP and VSP");
 
-        verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
-        verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
+        verify(session).getAttribute(PROXY_NODE_JOURNEY_ID.name());
+        verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
+        verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "journey id");
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder, session);
         verifyNoMoreInteractions(sessionStore);
 
