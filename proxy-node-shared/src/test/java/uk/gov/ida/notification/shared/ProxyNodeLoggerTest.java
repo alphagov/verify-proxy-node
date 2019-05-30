@@ -61,7 +61,6 @@ public class ProxyNodeLoggerTest {
         assertThat(logEvent.getMessage()).isEqualTo("log-message");
 
         final Map<String, String> mdc = logEvent.getMDCPropertyMap();
-        assertThat(mdc.get(ProxyNodeMDCKey.EXCEPTION_CAUSE.name())).isEqualTo("cause-message");
         assertThat(mdc.get(ProxyNodeMDCKey.EXCEPTION_MESSAGE.name())).isEqualTo("exception-message");
         assertThat(mdc.get(ProxyNodeMDCKey.EXCEPTION_STACKTRACE.name())).contains("java.lang.Exception: exception-message");
     }

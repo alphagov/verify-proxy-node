@@ -80,6 +80,8 @@ subprojects {
                 substitute module("dom4j:dom4j:1.6.1") because "dom4j vulnerable to XML External Entity (XXE) Injection due to not validating the QName inputs, see CVE-2018-1000632" with module("org.dom4j:dom4j:2.1.1")
                 substitute module("org.eclipse.jetty:jetty-server") because "jetty-server dependency org.eclipse.jetty:jetty-util:9.4.14.v20181114 is vulnerable to CVE-2019-10247" with module("org.eclipse.jetty:jetty-server:9.4.17.v20190418")
                 substitute module("com.fasterxml.jackson.core:jackson-databind") because "https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-174736" with module("com.fasterxml.jackson.core:jackson-databind:2.9.9")
+
+                exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
 
@@ -131,7 +133,7 @@ subprojects {
 
         verify_saml(
                 "uk.gov.ida:saml-lib:${saml_lib_version}",
-                "uk.gov.ida:security-utils:${utils_version}",
+                "uk.gov.ida:security-utils:${utils_version}"
         )
 
         constraints {
