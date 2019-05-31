@@ -12,7 +12,7 @@ import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
-import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.CatchAllExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.JsonErrorResponseRuntimeExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
@@ -86,7 +86,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private void registerExceptionMappers(Environment environment) {
         environment.jersey().register(new ApplicationExceptionMapper());
         environment.jersey().register(new JsonErrorResponseRuntimeExceptionMapper());
-        environment.jersey().register(new GenericExceptionMapper());
+        environment.jersey().register(new CatchAllExceptionMapper());
     }
 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
