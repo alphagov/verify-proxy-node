@@ -55,7 +55,7 @@ public class EidasAuthnRequestResource {
             @QueryParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
             @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session.getId());
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
     }
 
     @POST
@@ -65,10 +65,11 @@ public class EidasAuthnRequestResource {
             @FormParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
             @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session.getId());
+        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session);
     }
 
-    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, String sessionId) {
+    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
+        final String sessionId = session.getId();
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 
@@ -94,7 +95,7 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
 
-        return buildSamlFormView(vspResponse, eidasRelayState);
+        return buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {
