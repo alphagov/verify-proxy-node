@@ -109,6 +109,7 @@ public class EidasAuthnRequestResourceTest {
         when(vspResponse.getSsoLocation()).thenReturn(new URI("http://hub.bub"));
         when(vspResponse.getSamlRequest()).thenReturn("hub blob");
         when(session.getId()).thenReturn("some session id");
+        when(session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())).thenReturn("journey id");
     }
 
     private void verifyHappyPath() {
@@ -132,7 +133,8 @@ public class EidasAuthnRequestResourceTest {
 
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
-        verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "eidas relay state");
+        verify(samlFormViewBuilder).buildRequest("http://hub.bub", "hub blob", SUBMIT_BUTTON_TEXT, "journey id");
+        verify(session).getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name());
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder, session);
         verifyNoMoreInteractions(sessionStore);
 

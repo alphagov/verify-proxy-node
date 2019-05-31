@@ -18,6 +18,7 @@ import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
@@ -124,7 +125,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         );
         HtmlHelpers.assertXPath(
                 htmlString,
-                "//form[@action='http://www.hub.com']/input[@name='RelayState'][@value='relay-state']"
+                String.format("//form[@action='http://www.hub.com']/input[@name='RelayState'][@value='%s']",
+                              response.getHeaders().getFirst(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
+                              )
         );
     }
 
