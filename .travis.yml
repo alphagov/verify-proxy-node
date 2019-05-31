@@ -3,9 +3,15 @@ language: java
 env:
   global:
     - VERIFY_USE_PUBLIC_BINARIES=true
+    - secure: "uNn96syCzMmn/AkH/CUmHHABmQdLHdKje1pFM2+VR+1dgrd1UavKe+ICMCX1uJGZdcpuDUzkhYB46IVwIA1YalG7ZLFr0WdkLeK+mwdFb9LnpOTWFhOvvNYTQXCplDJl07AzP8aqgCqx3q2oHtKCKGA35G+5EK1dI86rQr/Wp27cKTfojY08KXHRImtYqFrYaUvSxfRDyJFfPipJA7ktNkE8uZVYU4TLY1v6VGkcLfme+NI4dSMI5CV8Nr2aYavdowC/HedfQg8tO/zPEV+TJqdXuXNac23xmCI2I2QUM6T1dZr1QFTaGZ3tB1PVx4aUKeli0uOARtBmmZWuGfHEG/T9PaG7Zv+cjQJ0FdqE7BwvwBLWFGDlIU+fzuIH5+O4Qz0fobQBp9SMZW6uXPNon1rXg5qMypLeI5I6yqQql1UpExhwtytbicIs1k1+k4K9T+ADNcJ6e6kTU0pGu8PmnETkBm5CPgMnHmKmObeaNk2K0tw25Kbi5fmb3xaNi6iYxFz3QjBDxcZTy3OkH7jAMOlNylzokpqCDhV1adBZisVzOZ5eA/CZ1aUHizVL5wzj27jQ4WCiL/X0zHHDYr+JT1Huv3G4azZOVq7Hfc4Hd93BCg9ixC6ZYZ6NOI5Ue7DEESwKctFKJLQ2W3/h2yyOw068mASqXlA8TRbnEP8Q1Oo="
+    - secure: "E/Ui52SP8jC9kvP9RxYcvrP2Q3BPyKdi/almVWEfWetBKDH7g9M1bl6pgTLTrI31CZGS0O2MtOC05vTp7KkksveBwhbvXLOcb934bLpeOP0son3gXDH5ANTwOq98amFlyKbqzZre0BUMeIPtHc1ZoGc5s6q5a+nZ78zgyjiDVc9StlRx38QcF0rM7S9zzcIqu0eNoLTI4pDI/cP0STpIG68rsGKQSVUI5dFAGC0ZdVIEH7rSP/G5rPbX4scvwiQ2iBaPuaOkPvgfAW7Th4reQK3/97C+ShfC3aNfPfCYZoSYBROHSrgFqvSsEOGjiKnuqaz07RcGsh1tAXLrzcYVey3YExxiPVIYEY8q5P5nCjE0pT65AJqnnXT0gJ/+zLV9I5x4DPEBRcgURDAhVgMRTlOobE0VLb2rvsTdUZpiopVoAQUQEH1s8rD1LA1EqethRI3IHBv9jK63ca0gwwQcKh6KxZE8YxjsiVTXPjRu64XFz0OlH4PBn7ZNja/b0aGeaQt/qoxGHTQ3/xkuiVArg1WfVKo1ZW9jOG5R2vOiV6Lbxkmcb+pkMUF9X8JvzUYNUjNFqHA2119lXbamVKG2gAzi6dlmFldpyyU8rdJONdrRmdAlAKq10Cre2QEPFzh1ehHIMrRVlxT0pi7BQM7aH2sKZzFeifhpL5+0J698emo="
 
 jdk:
   - openjdk11
+
+before_install:
+  - sudo apt-get install jq
+  - curl -u ida-codacy-bot:$GITHUB_PAT -LSs $(curl -u ida-codacy-bot:$GITHUB_PAT -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({content_type, browser_download_url} | select(.content_type | contains("java-archive"))) | .[0].browser_download_url') -o codacy-coverage-reporter-assembly.jar
 
 install:
   - npm install -g snyk@1.146.0
@@ -20,6 +26,9 @@ before_cache:
 
 after_success:
   - snyk/monitor.sh
+  - ./gradlew jacocoTestReport
+  - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+
 
 cache:
   directories:
