@@ -26,7 +26,7 @@ before_cache:
 
 after_success:
   - snyk/monitor.sh
-  - ./gradlew jacocoTestReport
+  - ./gradlew jacocoRootReport
   - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
 
 
