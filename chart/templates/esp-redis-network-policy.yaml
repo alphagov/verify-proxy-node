@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: esp-redis-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: esp-redis
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: esp
+            app.kubernetes.io/instance: {{ .Release.Name }}
+      ports:
+      - protocol: TCP
+        port: 6379

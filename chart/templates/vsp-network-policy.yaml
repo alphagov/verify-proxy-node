@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vsp-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: vsp
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: gateway
+            app.kubernetes.io/instance: {{ .Release.Name }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: translator
+            app.kubernetes.io/instance: {{ .Release.Name }}
+      ports:
+      - protocol: TCP
+        port: 50400
