@@ -7,7 +7,7 @@
 {{- if .Values.stubConnector.enabled -}}
 {{- printf "%s-%s.%s" .Release.Name "connector" (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- else -}}
-{{- required "connector.host or stubConnector.enabled required" .Values.connector.host -}}
+{{- printf "%s" .Values.connector.host -}}
 {{- end -}}
 {{- end -}}
 

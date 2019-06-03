@@ -7,6 +7,8 @@ connector:
   host:
   entityID:
   metadataURL:
+  metadataSigningTruststoreBase64:
+  metadataSigningTruststorePassword: marshmallow
 
 esp:
   replicaCount: 1
@@ -50,4 +52,4 @@ vsp:
     repository: registry.tools.verify.govsvc.uk/eidas/verify-service-provider@sha256
     tag: 632143dcb87423ff000b9fcd53a14b101eacfa4d1a19a14f611ee6a6c2ee0e97
     pullPolicy: IfNotPresent
-  secretName: test-vsp
+  secretName: vsp

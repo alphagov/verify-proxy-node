@@ -1,3 +1,4 @@
+{{- if .Values.stubConnector.enabled -}}
 apiVersion: verify.gov.uk/v1beta1
 kind: Metadata
 metadata:
@@ -19,3 +20,4 @@ spec:
     contactSurname: jefferson
     contactEmail: jeff@example.local
   enabled: true
+{{- end -}}
