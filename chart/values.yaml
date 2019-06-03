@@ -7,6 +7,8 @@ connector:
   host:
   entityID:
   metadataURL:
+  metadataSigningTruststoreBase64:
+  metadataSigningTruststorePassword: marshmallow
 
 esp:
   replicaCount: 1
