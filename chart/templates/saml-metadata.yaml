@@ -17,5 +17,5 @@ spec:
     contactCompany: GOV.UK Verify
     contactGivenName: eidas-support
     contactSurname: eidas-support
-    contactEmail: eidas-support@digital.cabinet-office.gov.uk
+    contactEmail: idasupport@digital.cabinet-office.gov.uk
   enabled: true
