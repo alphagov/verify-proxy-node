@@ -13,9 +13,9 @@ spec:
     redirectURL: https://{{ include "gateway.host" . }}/Redirect
     orgName: {{ .Release.Name }}
     orgDisplayName: {{ .Release.Name }}
-    orgURL: example.com
-    contactCompany: example
-    contactGivenName: jeff
-    contactSurname: jefferson
-    contactEmail: jeff@example.local
+    orgURL: https://www.gov.uk/verify
+    contactCompany: GOV.UK Verify
+    contactGivenName: GOV.UK Verify
+    contactSurname: Support
+    contactEmail: idasupport@digital.cabinet-office.gov.uk
   enabled: true
