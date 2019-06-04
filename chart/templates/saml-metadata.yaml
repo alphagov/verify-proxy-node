@@ -15,7 +15,7 @@ spec:
     orgDisplayName: {{ .Release.Name }}
     orgURL: https://www.gov.uk/verify
     contactCompany: GOV.UK Verify
-    contactGivenName: eidas-support
+    contactGivenName: GOV.UK Verify
     contactSurname: eidas-support
     contactEmail: idasupport@digital.cabinet-office.gov.uk
   enabled: true
