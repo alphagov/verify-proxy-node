@@ -27,3 +27,27 @@ Feature: proxy-node feature
     Scenario: Show error page if route is not accessible
         Given the user accesses the gateway response url directly
         Then the user should be presented with an error page
+
+    Scenario: Show IDP error page if No Authn Context Event
+        Given the proxy node is sent a LOA 'Substantial' request
+        And they progress through verify
+        And they login to stub idp with error event 'No Authn Context Event'
+        Then the user should be presented with a Hub error page indicating IDP could not sign you in
+
+    Scenario: Show IDP error page if Authn Failure Event
+        Given the proxy node is sent a LOA 'Substantial' request
+        And they progress through verify
+        And they login to stub idp with error event 'Authn Failure'
+        Then the user should be presented with a Hub error page indicating IDP could not sign you in
+
+    Scenario: Show IDP error page if Submit Requester Error Event
+        Given the proxy node is sent a LOA 'Substantial' request
+        And they progress through verify
+        And they login to stub idp with error event 'Submit Requester Error'
+        Then the user should be presented with a Hub error page indicating IDP could not sign you in
+
+    Scenario: Show IDP error page if Submit Fraud Event
+        Given the proxy node is sent a LOA 'Substantial' request
+        And they progress through verify
+        And they login to stub idp with error event 'Submit Fraud Event'
+        Then the user should be presented with a Hub error page indicating IDP could not sign you in

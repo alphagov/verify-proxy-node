@@ -33,6 +33,12 @@ Given('they login to stub idp') do
   click_on('I Agree')
 end
 
+Given('they login to stub idp with error event {string}') do |error_button_text|
+  fill_in('username', with: ENV.fetch('STUB_IDP_USER'))
+  fill_in('password', with: 'bar')
+  click_on(error_button_text)
+end
+
 Given("the user accesses a invalid page") do
   visit(ENV.fetch('PROXY_NODE_URL') + '/asdfasdfasfsaf')
 end
@@ -48,7 +54,7 @@ Then('they should arrive at the success page') do
   assert_text('1984-02-29')
 end
 
-Then("the user should be presented with an hub error page") do
+Then("the user should be presented with a Hub error page indicating IDP could not sign you in") do
   assert_text('Stub Idp Demo One couldn’t sign you in')
   assert_text('You may have selected the wrong company. Check your emails and text messages for confirmation of who verified you.')
 end
