@@ -12,6 +12,7 @@ import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -20,12 +21,13 @@ import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,6 +43,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
     @Before
     public void setup() throws Exception {
+        MDC.clear();
         request = new EidasAuthnRequestBuilder()
                 .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest");
@@ -257,14 +260,17 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         postEidasAuthnRequest(authnRequest);
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(appender, times(4)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, times(5)).doAppend(loggingEventArgumentCaptor.capture());
 
-        ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
-        Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
-
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo("request_id");
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo("http://proxy-node/eidasAuthnRequest");
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo("2015-04-30T19:25:14.273Z");
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo("http://connector-node/Metadata");
+        loggingEventArgumentCaptor.getAllValues().stream()
+                .filter(e -> ProxyNodeLoggingFilter.MESSAGE_EGRESS.equals(e.getMessage()))
+                .findFirst()
+                .map(ILoggingEvent::getMDCPropertyMap)
+                .ifPresentOrElse( mdcPropertyMap -> {
+            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo("request_id");
+            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo("http://proxy-node/eidasAuthnRequest");
+            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo("2015-04-30T19:25:14.273Z");
+            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo("http://connector-node/Metadata");
+        }, () -> fail("Could not find Logging Event"));
     }
 }

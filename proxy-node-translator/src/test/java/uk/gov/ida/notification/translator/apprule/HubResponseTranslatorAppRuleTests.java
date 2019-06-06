@@ -31,6 +31,7 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.translator.apprule.base.TranslatorAppRuleTestBase;
@@ -45,9 +46,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PUBLIC_ENCRYPTION_CERT;
@@ -173,14 +174,17 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 
-        verify(appender, Mockito.times(4)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, Mockito.times(5)).doAppend(loggingEventArgumentCaptor.capture());
 
-        ILoggingEvent loggingEvent = loggingEventArgumentCaptor.getValue();
-        Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
-
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
+        loggingEventArgumentCaptor.getAllValues().stream()
+                .filter(e -> ProxyNodeLoggingFilter.MESSAGE_EGRESS.equals(e.getMessage()))
+                .findFirst()
+                .map(ILoggingEvent::getMDCPropertyMap)
+                .ifPresentOrElse( mdcPropertyMap -> {
+                    assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
+                    assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
+                    assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
+                }, () -> fail("Could not find Logging Event"));
     }
 
     @Test
