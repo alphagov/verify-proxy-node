@@ -3,9 +3,9 @@ set -e
 
 ./gradlew clean test
 
-if ! git diff -s --exit-code */pom.xml; then
-  echo '⚠️ Remember to commit and push updated project dependencies file (pom.xml) ⚠️'
-  git add */pom.xml
+if ! git diff -s --exit-code snyk/dependencies/*/pom.xml; then
+  echo '⚠️ Remember to commit and push updated project dependencies files (pom.xml) ⚠️'
+  git add snyk/dependencies/*/pom.xml
 fi
 
 ./startup.sh --build
