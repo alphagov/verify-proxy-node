@@ -39,6 +39,7 @@ ext {
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'maven'
 
     group = "uk.gov.ida"
     version = "0.1.$version"
@@ -49,6 +50,21 @@ subprojects {
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
+
+    task createPom {
+        doLast {
+            pom {
+                project {
+                    groupId project.group
+                    artifactId project.name
+                    version project.version
+                }
+            }.writeTo("pom.xml")
+        }
+    }
+
+    build.dependsOn createPom
+    test.dependsOn createPom
 
     repositories {
         if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {

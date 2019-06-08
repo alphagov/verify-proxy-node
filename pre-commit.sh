@@ -3,6 +3,11 @@ set -e
 
 ./gradlew clean test
 
+if ! git diff -s --exit-code */pom.xml; then
+  echo '⚠️ Remember to commit and push updated project dependencies file (pom.xml) ⚠️'
+  git add */pom.xml
+fi
+
 ./startup.sh --build
 
 
