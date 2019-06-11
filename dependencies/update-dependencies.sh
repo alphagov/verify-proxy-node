@@ -17,7 +17,7 @@ open_pull_request() {
     -X POST --data "$(pull_request_data $1)" "https://api.github.com/repos/alphagov/verify-proxy-node/pulls"
 }
 
-if git branch | grep -q "\* master"; then
+if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   if ! git diff -s --exit-code dependencies/*/pom.xml; then
     branch_name=bau-update-project-pom-$(date +%Y%m%d-%H%M%S)
     git checkout -b $branch_name
