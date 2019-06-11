@@ -18,10 +18,10 @@ open_pull_request() {
 }
 
 if git branch | grep -q "\* master"; then
-  if ! git diff -s --exit-code snyk/dependencies/*/pom.xml; then
+  if ! git diff -s --exit-code dependencies/*/pom.xml; then
     branch_name=bau-update-project-pom-$(date +%Y%m%d-%H%M%S)
     git checkout -b $branch_name
-    git add snyk/dependencies/*/pom.xml
+    git add dependencies/*/pom.xml
     git commit -m "Update project dependencies POM files"
     git push
     open_pull_request $branch_name
