@@ -19,6 +19,7 @@ install:
 script:
   - ./gradlew --no-daemon --quiet test
   - snyk/test.sh
+  - dependencies/update-dependencies.sh
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
