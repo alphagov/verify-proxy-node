@@ -59,7 +59,7 @@ subprojects {
                     artifactId project.name
                     version project.version
                 }
-            }.writeTo("$rootDir/dependencies/$project.name/pom.xml")
+            }.writeTo("$rootDir/libs/$project.name/pom.xml")
         }
     }
 

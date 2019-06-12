@@ -18,10 +18,10 @@ open_pull_request() {
 }
 
 if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-  if ! git diff -s --exit-code dependencies/*/pom.xml; then
+  if ! git diff -s --exit-code libs/*/pom.xml; then
     branch_name=bau-update-project-pom-$(date +%Y%m%d-%H%M%S)
     git checkout -b $branch_name
-    git add dependencies/*/pom.xml
+    git add libs/*/pom.xml
     git commit -m "Update project dependencies POM files"
     git push
     open_pull_request $branch_name
