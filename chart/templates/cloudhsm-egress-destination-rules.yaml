@@ -1,0 +1,117 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-egressgateway-for-cloudhsm-2223
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+  - name: {{ .Release.Name }}-cloudhsm-2223-egress
+    trafficPolicy:
+      portLevelSettings:
+      - port:
+          number: 443
+        tls:
+          mode: ISTIO_MUTUAL
+          sni: cloudhsm-2223.tcp.svc
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-cloudhsm-2223-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: cloudhsm-2223.tcp.svc
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-egressgateway-for-cloudhsm-2224
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+  - name: {{ .Release.Name }}-cloudhsm-2224-egress
+    trafficPolicy:
+      portLevelSettings:
+      - port:
+          number: 443
+        tls:
+          mode: ISTIO_MUTUAL
+          sni: cloudhsm-2224.tcp.svc
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-cloudhsm-2224-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: cloudhsm-2224.tcp.svc
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-egressgateway-for-cloudhsm-2225
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+  - name: {{ .Release.Name }}-cloudhsm-2225-egress
+    trafficPolicy:
+      portLevelSettings:
+      - port:
+          number: 443
+        tls:
+          mode: ISTIO_MUTUAL
+          sni: cloudhsm-2225.tcp.svc
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-cloudhsm-2225-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: cloudhsm-2223.tcp.svc
+  exportTo:
+  - "."
+---

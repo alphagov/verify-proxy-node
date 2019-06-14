@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-gateway-redis
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: gateway-redis
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -24,4 +25,7 @@ spec:
       containers:
       - name: redis
         image: redis:5.0.3-alpine
+        ports:
+        - name: tcp-redis
+          containerPort: 6379
       restartPolicy: Always

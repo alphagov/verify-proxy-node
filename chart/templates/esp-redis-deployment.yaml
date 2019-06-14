@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-esp-redis
+  namespace: {{ .Release.Namespace }}
   labels:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/name: esp-redis
@@ -25,4 +26,7 @@ spec:
       - name: redis
         image: redis:5.0.3-alpine
         imagePullPolicy: IfNotPresent
+        ports:
+        - name: tcp-redis
+          containerPort: 6379
       restartPolicy: Always

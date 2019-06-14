@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-esp
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: esp
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -63,7 +64,7 @@ spec:
         - name: CONNECTOR_NODE_ENTITY_ID
           value: {{ include "connector.entityID" . }}
         - name: CONNECTOR_NODE_METADATA_URL
-          value: {{ include "connector.metadataURL" . }}
+          value: {{ include "connector.metadata.url" . }}
 {{- if .Values.stubConnector.enabled }}
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           valueFrom:

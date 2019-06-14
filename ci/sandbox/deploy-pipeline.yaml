@@ -1,0 +1,155 @@
+---
+apiVersion: concourse.k8s.io/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: deploy
+spec:
+  exposed: true
+  pipelineString: |
+
+    github_source: &github_source
+      uri: https://github.com/alphagov/verify-proxy-node.git
+      organization: alphagov
+      owner: alphagov
+      repository: verify-proxy-node
+      github_api_token: ((github.api-token))
+      access_token: ((github.api-token))
+      approvers: ((trusted-developers.github-accounts))
+      required_approval_count: "0"
+      commit_verification_keys: ((trusted-developers.gpg-keys))
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: govsvc/task-toolbox
+        tag: "1.2.0"
+
+    resource_types:
+
+    - name: github
+      type: registry-image
+      source:
+        repository: "govsvc/concourse-github-resource"
+        tag: "v0.0.3"
+
+    resources:
+
+    - name: release
+      type: github-release
+      source:
+        <<: *github_source
+
+    - name: daily
+      type: time
+      icon: update
+      source:
+        interval: 12h
+        start: 8:00 AM
+        stop: 8:00 PM
+
+    jobs:
+
+    - name: deploy-nl-integration
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: daily
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            RELEASE_NAME: nl-integration
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "stubConnector.enabled=true" \
+                --set "esp.image.repository=registry.london.verify.govsvc.uk/eidas/parser" \
+                --set "esp.image.tag=latest" \
+                --set "esp.image.pullPolicy=Always" \
+                --set "gateway.image.repository=registry.london.verify.govsvc.uk/eidas/gateway" \
+                --set "gateway.image.tag=latest" \
+                --set "gateway.image.pullPolicy=Always" \
+                --set "hsm.image.repository=registry.london.verify.govsvc.uk/eidas/cloudhsm" \
+                --set "hsm.image.tag=latest" \
+                --set "hsm.image.pullPolicy=Always" \
+                --set "translator.image.repository=registry.london.verify.govsvc.uk/eidas/translator" \
+                --set "translator.image.tag=latest" \
+                --set "translator.image.pullPolicy=Always" \
+                --set "stubConnector.image.repository=registry.london.verify.govsvc.uk/eidas/stub-connector" \
+                --set "stubConnector.image.tag=latest" \
+                --set "stubConnector.image.pullPolicy=Always" \
+                --set "vsp.image.repository=registry.london.verify.govsvc.uk/eidas/verify-service-provider" \
+                --set "vsp.image.pullPolicy=Always" \
+                --set "vsp.image.tag=latest" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
+      - task: deploy-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAME: nl-integration
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${APP_NAME}" \
+                --diff-changes \
+                --labels "app=${APP_NAME}" \
+                -f ./manifests/

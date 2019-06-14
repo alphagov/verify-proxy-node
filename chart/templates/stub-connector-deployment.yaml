@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-connector
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: connector
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -21,7 +22,7 @@ spec:
       labels:
         app.kubernetes.io/name: connector
         app.kubernetes.io/instance: {{ .Release.Name }}
-        talksToHsm: ""
+        talksToHsm: "true"
     spec:
       restartPolicy: Always
       volumes:
