@@ -1,0 +1,140 @@
+---
+apiVersion: concourse.k8s.io/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: deploy
+spec:
+  exposed: true
+  pipelineString: |
+
+    github_source: &github_source
+      uri: https://github.com/alphagov/verify-proxy-node.git
+      organization: alphagov
+      owner: alphagov
+      repository: verify-proxy-node
+      github_api_token: ((github.api-token))
+      access_token: ((github.api-token))
+      approvers: ((trusted-developers.github-accounts))
+      required_approval_count: 2
+      commit_verification_keys: ((trusted-developers.gpg-keys))
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: govsvc/task-toolbox
+        tag: "1.2.0"
+
+    resource_types:
+
+    - name: github
+      type: registry-image
+      source:
+        repository: "govsvc/concourse-github-resource"
+        tag: "v0.0.1"
+
+    resources:
+
+    - name: release
+      type: github-release
+      source:
+        <<: *github_source
+
+    - name: daily
+      type: time
+      icon: update
+      source:
+        interval: 12h
+        start: 8:00 AM
+        stop: 8:00 PM
+
+    jobs:
+
+    - name: deploy-nl-integration
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: daily
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            RELEASE_NAME: nl-integration
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CONNECTOR_ENTITY_ID: https://acc-eidas.minez.nl/EidasNodeC/ConnectorMetadata
+            CONNECTOR_METADATA_URL: https://acc-eidas.minez.nl/EidasNodeC/ConnectorMetadata
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                --set "connector.metadataURL=${CONNECTOR_METADATA_URL}" \
+                --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
+      - task: deploy-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAME: nl-integration
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${APP_NAME}" \
+                --diff-changes \
+                --labels "app=${APP_NAME}" \
+                -f ./manifests/
