@@ -24,6 +24,7 @@ buildNumber.properties
 
 # Gradle
 .gradle
+build/
 eidas-saml-parser/build/
 proxy-node-gateway/build/
 proxy-node-shared/build/

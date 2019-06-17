@@ -51,7 +51,7 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
-    task createPom {
+    task createPoms {
         doLast {
             pom {
                 project {
@@ -63,8 +63,8 @@ subprojects {
         }
     }
 
-    build.dependsOn createPom
-    test.dependsOn createPom
+    build.dependsOn createPoms
+    test.dependsOn createPoms
 
     repositories {
         if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {
