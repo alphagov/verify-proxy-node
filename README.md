@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/alphagov/verify-proxy-node.svg?branch=master)](https://travis-ci.com/alphagov/verify-proxy-node)
+
 # eIDAS Proxy Node
 
 This repository contains the eIDAS Proxy Node implementation, which consists of the following services:
