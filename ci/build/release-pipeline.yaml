@@ -1,0 +1,481 @@
+---
+apiVersion: concourse.k8s.io/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: release
+spec:
+  exposed: true
+  pipelineString: |
+
+    github_source: &github_source
+      uri: https://github.com/alphagov/verify-proxy-node.git
+      organization: alphagov
+      owner: alphagov
+      repository: verify-proxy-node
+      github_api_token: ((github.api-token))
+      access_token: ((github.api-token))
+      approvers: ((trusted-developers.github-accounts))
+      required_approval_count: 2
+      commit_verification_keys: ((trusted-developers.gpg-keys))
+
+    harbor_source: &harbor_source
+      username: ((harbor.harbor_username))
+      password: ((harbor.harbor_password))
+      harbor:
+        url: ((harbor.harbor_url))
+        prevent_vul: "false"
+      notary:
+        url: ((harbor.notary_url))
+        root_key: ((harbor.root_key))
+        delegate_key: ((harbor.ci_key))
+        passphrase:
+          root: ((harbor.notary_root_passphrase))
+          snapshot: ((harbor.notary_snapshot_passphrase))
+          targets: ((harbor.notary_targets_passphrase))
+          delegation: ((harbor.notary_delegation_passphrase))
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: govsvc/task-toolbox
+        tag: "1.2.0"
+
+    resource_types:
+
+    - name: github
+      type: registry-image
+      source:
+        repository: "govsvc/concourse-github-resource"
+        tag: "v0.0.1"
+
+    - name: harbor
+      type: docker-image
+      privileged: true
+      source:
+        repository: govsvc/gsp-harbor-docker-image-resource
+        tag: "0.0.1553882420"
+
+    resources:
+
+    - name: src
+      type: github
+      icon: github-circle
+      source:
+        <<: *github_source
+        branch: master
+
+    - name: vsp-src
+      icon: github-circle
+      type: git
+      source:
+        uri: https://github.com/alphagov/verify-service-provider.git
+        branch: master
+
+    - name: chart
+      type: github-release
+      icon: file-document
+      source:
+        <<: *github_source
+        drafts: true
+        
+    - name: release
+      type: github-release
+      icon: tag
+      source:
+        <<: *github_source
+
+    - name: tests-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/acceptance-tests
+
+    - name: gateway-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/gateway
+
+    - name: translator-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/translator
+
+    - name: parser-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/parser
+
+    - name: stub-connector-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/stub-connector
+
+    - name: cloudhsm-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/cloudhsm
+
+    - name: verify-service-provider-image
+      type: harbor
+      icon: layers
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/verify-service-provider
+
+    jobs:
+
+    - name: build
+      serial: true
+      plan:
+      - in_parallel:
+        - get: src
+          trigger: true
+        - get: vsp-src
+          trigger: true
+      - in_parallel:
+          limit: 3
+          fail_fast: true
+          steps:
+          - put: gateway-image
+            params:
+              build: src
+              build_args:
+                component: proxy-node-gateway
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: translator-image
+            params:
+              build: src
+              dockerfile: src/proxy-node-translator/Dockerfile
+              build_args:
+                component: proxy-node-translator
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: parser-image
+            params:
+              build: src
+              build_args:
+                component: eidas-saml-parser
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: stub-connector-image
+            params:
+              build: src
+              dockerfile: src/stub-connector/Dockerfile
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: cloudhsm-image
+            params:
+              build: src/cloudhsm
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: verify-service-provider-image
+            params:
+              build: vsp-src
+              build_args:
+                VERIFY_USE_PUBLIC_BINARIES: "false"
+              dockerfile: src/proxy-node-vsp-config/Dockerfile.internal
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: tests-image
+            params:
+              build: src/proxy-node-acceptance-tests
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+
+    - name: package
+      serial: true
+      serial_groups: ["package"]
+      plan:
+      - in_parallel:
+        - get: src
+          passed: ["build"]
+          trigger: true
+        - get: gateway-image
+          passed: ["build"]
+          trigger: true
+        - get: translator-image
+          passed: ["build"]
+          trigger: true
+        - get: parser-image
+          passed: ["build"]
+          trigger: true
+        - get: stub-connector-image
+          passed: ["build"]
+          trigger: true
+        - get: cloudhsm-image
+          passed: ["build"]
+          trigger: true
+        - get: verify-service-provider-image
+          passed: ["build"]
+          trigger: true
+        - get: tests-image
+          passed: ["build"]
+          trigger: true
+
+      - task: generate-chart-values
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: src
+          - name: gateway-image
+          - name: translator-image
+          - name: parser-image
+          - name: stub-connector-image
+          - name: cloudhsm-image
+          - name: verify-service-provider-image
+          outputs:
+          - name: chart-values
+          run:
+            path: /bin/bash
+            args:
+              - -eu
+              - -c
+              - |
+                echo "generating helm values for latest image versions..."
+                mkdir -p chart-values
+                cat << EOF > ./overrides.yaml
+                esp:
+                  image:
+                    repository: $(cat parser-image/repository)@$(cat parser-image/digest | cut -d ':' -f 1)
+                    tag: $(cat parser-image/digest | cut -d ':' -f 2)
+                gateway:
+                  image:
+                    repository: $(cat gateway-image/repository)@$(cat gateway-image/digest | cut -d ':' -f 1)
+                    tag: $(cat gateway-image/digest | cut -d ':' -f 2)
+                translator:
+                  image:
+                    repository: $(cat translator-image/repository)@$(cat translator-image/digest | cut -d ':' -f 1)
+                    tag: $(cat translator-image/digest | cut -d ':' -f 2)
+                hsm:
+                  image:
+                    repository: $(cat cloudhsm-image/repository)@$(cat cloudhsm-image/digest | cut -d ':' -f 1)
+                    tag: $(cat cloudhsm-image/digest | cut -d ':' -f 2)
+                vsp:
+                  image:
+                    repository: $(cat verify-service-provider-image/repository)@$(cat verify-service-provider-image/digest | cut -d ':' -f 1)
+                    tag: $(cat verify-service-provider-image/digest | cut -d ':' -f 2)
+                stubConnector:
+                  image:
+                    repository: $(cat stub-connector-image/repository)@$(cat stub-connector-image/digest | cut -d ':' -f 1)
+                    tag: $(cat stub-connector-image/digest | cut -d ':' -f 2)
+                EOF
+                echo "merging with chart values..."
+                spruce merge ./src/chart/values.yaml ./overrides.yaml | tee -a chart-values/values.yaml
+
+      - get: release
+
+      - task: generate-chart-version
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: chart-version
+          params:
+            CLUSTER_DOMAIN: ((cluster.domain))
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "bumping release number..."
+              CURRENT_TAG=$(cat release/tag)
+              awk -F. '/[0-9]+\./{$NF++;print}' OFS=. <<< "${CURRENT_TAG}" > chart-version/tag
+              NEW_TAG=$(cat chart-version/tag)
+              echo "${NEW_TAG}" > chart-version/name
+              cat chart-version/name
+
+      - task: generate-chart-package
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: src
+          - name: chart-version
+          - name: chart-values
+          outputs:
+          - name: chart-package
+          params:
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "building chart with release values..."
+              CHART_NAME=$(yq . < ./src/chart/Chart.yaml | jq -r .name)
+              cp -r "./src/chart" "./${CHART_NAME}"
+              cp "./chart-values/values.yaml" "./${CHART_NAME}/values.yaml"
+              mkdir -p chart-package
+              APP_VERSION=$(cat ./src/.git/short_ref)
+              CHART_VERSION=$(cat ./chart-version/tag)
+              echo "generating signed (${KEY_ID}) helm package for ${CHART_NAME} at app-version: '${APP_VERSION}' chart-version: '${CHART_VERSION}'..."
+              helm package \
+                --app-version "${APP_VERSION}" \
+                --version "${CHART_VERSION}" \
+                --destination "./chart-package/" \
+                --save=false \
+                --sign \
+                --key "${KEY_ID}" \
+                "./${CHART_NAME}"
+
+      - put: chart
+        params:
+          name: chart-version/name
+          tag: chart-version/tag
+          globs:
+          - chart-package/*
+
+    - name: test
+      serial: true
+      serial_groups: ["package"]
+      plan:
+
+      - get: chart
+        passed: ["package"]
+        trigger: true
+
+      - task: render-chart-package
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: chart
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            RELEASE_NAME: test
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package signature..."
+              helm verify ./chart/*.tgz
+              echo "OK!"
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "stubConnector.enabled=true" \
+                --set "vsp.secretName=vsp" \
+                --output-dir "./manifests/" \
+                ./chart/*.tgz
+
+      - task: deploy-chart-package
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAME: test
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${RELEASE_NAME}-${APP_NAME}" \
+                --diff-changes \
+                -f ./manifests/
+              # kubectl -n "${RELEASE_NAMESPACE}" apply -R -f ./manifests
+
+      - get: tests-image
+        passed: ["package"]
+
+      - task: test-chart-package
+        image: tests-image
+        attempts: 2
+        timeout: 15m
+        config:
+          platform: linux
+          params:
+            PROXY_NODE_URL: "https://test-proxy-node.((cluster.domain))"
+            STUB_CONNECTOR_URL: "https://test-connector.((cluster.domain))"
+            STUB_IDP_USER: "stub-idp-demo-one"
+            SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
+          run:
+            path: /bin/bash
+            args:
+            - -c
+            - |
+              set -euo pipefail
+              cd /
+              bundle exec cucumber --strict --tags "not @ignore"
+
+    - name: release
+      serial: true
+      serial_groups: ["package"]
+      plan:
+
+      - get: chart
+        passed: ["test"]
+        trigger: true
+
+      - put: release
+        params:
+          name: chart/tag
+          tag: chart/tag
+          globs:
+          - chart/*.tgz*
+
