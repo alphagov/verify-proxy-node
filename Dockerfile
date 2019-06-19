@@ -13,7 +13,7 @@ ARG component=proxy-node-gateway
 COPY ${component}/src ${component}/src
 COPY ${component}/build.gradle ${component}/build.gradle
 
-RUN gradle --no-daemon --quiet -p ${component} --parallel installDist -x test -x createPom
+RUN gradle --no-daemon --quiet -p ${component} --parallel installDist -x test -x createPoms
 ENTRYPOINT ["gradle", "--no-daemon"]
 
 FROM openjdk:11-jre-slim

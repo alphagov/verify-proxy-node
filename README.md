@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.com/alphagov/verify-proxy-node.svg?branch=master)](https://travis-ci.com/alphagov/verify-proxy-node)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a24b4d2c6a834006a3c06fb8d7c47164)](https://www.codacy.com/app/alphagov/verify-proxy-node?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=alphagov/verify-proxy-node&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/a24b4d2c6a834006a3c06fb8d7c47164)](https://www.codacy.com/app/alphagov/verify-proxy-node?utm_source=github.com&utm_medium=referral&utm_content=alphagov/verify-proxy-node&utm_campaign=Badge_Coverage)
+
 # eIDAS Proxy Node
 
 This repository contains the eIDAS Proxy Node implementation, which consists of the following services:
