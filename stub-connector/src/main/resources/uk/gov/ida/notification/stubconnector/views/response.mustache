@@ -2,12 +2,26 @@
 
 <h2>Saml Validity: {{validity}}</h2>
 <h2>eIDAS Request Id: {{eidasRequestId}}</h2>
+<h2>LOA: {{loa}}</h2>
 
 <h2>Attributes</h2>
-<ul>
-    {{#attributes}}
-    <li>{{.}}</li>
-    {{/attributes}}
+<ul style="list-style: none;">
+  {{#attributes}}
+    {{#.}}
+      <li>
+        <label style="display: block; float: left; text-align: right; width: 120px; padding-right: .75em;">
+          <b>{{key}}:</b>
+        </label>
+        <span>{{value}}</span>
+      </li>
+    {{/.}}
+  {{/attributes}}
 </ul>
 
-<a href="/">Start Again</a>
+<h3>SAML Message</h3>
+<details>
+  <summary><i>Click to expand</i></summary>
+  <textarea readonly style="width: 750px; height: 500px;">{{samlMessage}}</textarea>
+</details>
+
+<p><a href="/">Start Again</a></p>

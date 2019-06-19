@@ -51,8 +51,9 @@ public class EidasAssertionBuilder {
         assertion.setConditions(createConditions(audienceUri));
         return this;
     }
-    public EidasAssertionBuilder addAuthnStatement(String loa, DateTime authnIssueInstant) {
-        assertion.getAuthnStatements().add(createAuthnStatement(loa, authnIssueInstant));
+
+    public EidasAssertionBuilder addAuthnStatement(String authnStatement, DateTime authnIssueInstant) {
+        assertion.getAuthnStatements().add(createAuthnStatement(authnStatement, authnIssueInstant));
         return this;
     }
 
@@ -95,11 +96,11 @@ public class EidasAssertionBuilder {
         return attributeStatement;
     }
 
-    private AuthnStatement createAuthnStatement(String loa, DateTime authnStatementAuthnInstant) {
+    private AuthnStatement createAuthnStatement(String authnStatementValue, DateTime authnStatementAuthnInstant) {
         AuthnStatement authnStatement = SamlBuilder.build(AuthnStatement.DEFAULT_ELEMENT_NAME);
         AuthnContext authnContext = SamlBuilder.build(AuthnContext.DEFAULT_ELEMENT_NAME);
         AuthnContextClassRef authnContextClassRef = SamlBuilder.build(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
-        authnContextClassRef.setAuthnContextClassRef(loa);
+        authnContextClassRef.setAuthnContextClassRef(authnStatementValue);
         authnContext.setAuthnContextClassRef(authnContextClassRef);
         authnStatement.setAuthnContext(authnContext);
         authnStatement.setAuthnInstant(authnStatementAuthnInstant);

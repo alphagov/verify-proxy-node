@@ -36,10 +36,9 @@ import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequ
 @RunWith(MockitoJUnitRunner.class)
 public class EidasSamlResourceTest {
 
-    private final static String TEST_CONNECTOR_DESTINATION = "https://stub_country.acme.eu/stub-country-one/destination";
+    private static final String TEST_CONNECTOR_DESTINATION = "https://stub_country.acme.eu/stub-country-one/destination";
 
     private static EidasAuthnRequestValidator eidasAuthnRequestValidator = mock(EidasAuthnRequestValidator.class);
-
     private static SamlRequestSignatureValidator<AuthnRequest> samlRequestSignatureValidator = mock(SamlRequestSignatureValidator.class);
 
     @ClassRule

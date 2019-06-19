@@ -40,7 +40,7 @@ public class HubResponseTranslatorTest {
         }
     }
 
-    private static HubResponseTranslator TRANSLATOR =
+    private static final HubResponseTranslator TRANSLATOR =
             new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
 
     private AttributesBuilder attributesBuilder;

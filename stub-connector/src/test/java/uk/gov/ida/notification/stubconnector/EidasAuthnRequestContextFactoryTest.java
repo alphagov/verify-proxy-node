@@ -39,7 +39,7 @@ public class EidasAuthnRequestContextFactoryTest {
         try {
             factory.generate(
                     destinationEndpoint,
-                    "a connecter entity id",
+                    "connector-entity-id",
                     SPTypeEnumeration.PUBLIC,
                     Collections.emptyList(),
                     EidasLoaEnum.LOA_SUBSTANTIAL,
