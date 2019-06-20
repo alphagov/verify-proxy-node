@@ -81,9 +81,9 @@ public class HubResponseTranslator {
                 .withIssueInstant(now)
                 .withDestination(hubResponseContainer.getDestinationURL())
                 .withAssertionSubject(hubResponseContainer.getPid())
-                .addAssertionAuthnStatement(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
-                .addAssertionAttributeStatement(eidasAttributes)
                 .withAssertionConditions(connectorNodeIssuerId)
+                .withLoa(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
+                .addAssertionAttributeStatement(eidasAttributes)
                 .build();
     }
 

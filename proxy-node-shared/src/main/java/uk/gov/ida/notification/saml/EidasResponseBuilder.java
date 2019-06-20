@@ -65,14 +65,18 @@ public class EidasResponseBuilder {
         return this;
     }
 
+    public EidasResponseBuilder addAssertionAttributeStatement(List<Attribute> attributes) {
+        assertionBuilder.addAttributeStatement(attributes);
+        return this;
+    }
+
     public EidasResponseBuilder addAssertionAuthnStatement(String authnStatement, DateTime authnIssueInstant) {
         assertionBuilder.addAuthnStatement(authnStatement, authnIssueInstant);
         return this;
     }
 
-    public EidasResponseBuilder addAssertionAttributeStatement(List<Attribute> attributes) {
-        assertionBuilder.addAttributeStatement(attributes);
-        return this;
+    public EidasResponseBuilder withLoa(String loa, DateTime authnIssueInstant) {
+        return addAssertionAuthnStatement(loa, authnIssueInstant);
     }
 
     public EidasResponseBuilder withAssertionConditions(String assertionConditions) {

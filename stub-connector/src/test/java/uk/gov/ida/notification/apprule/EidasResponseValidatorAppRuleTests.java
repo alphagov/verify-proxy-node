@@ -1,20 +1,24 @@
 package uk.gov.ida.notification.apprule;
 
 import org.joda.time.DateTime;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
+import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
@@ -25,20 +29,29 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
-
 public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
+
+    private static BasicX509Credential encryptionCredential;
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        encryptionCredential = X509CredentialFactory.build(TEST_PUBLIC_CERT, TEST_PRIVATE_KEY);
+    }
 
     @Test
     public void shouldReturnValidSamlResponse() throws Exception {
         String authnId = getAuthnRequestIdFromSession();
 
-        Response unsignedSamlResponse = getEidasSamlMessage(authnId);
-        Response signedSamlResponse = signResponse(unsignedSamlResponse);
+        Response response = getEidasSamlMessage(authnId);
+        encryptAssertions(response);
+        signResponse(response);
 
-        String validSamlMessage = responseToString(signedSamlResponse);
+        String validSamlMessage = responseToString(response);
 
         hasValidity(validSamlMessage, "VALID");
     }
@@ -57,10 +70,10 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     public void shouldBeInvalidAsNoneSeenAuthId() throws Exception {
         String authnId = UUID.randomUUID().toString();
 
-        Response unsignedSamlResponse = getEidasSamlMessage(authnId);
-        Response signedSamlResponse = signResponse(unsignedSamlResponse);
+        Response response = getEidasSamlMessage(authnId);
+        signResponse(response);
 
-        String validSamlMessage = responseToString(signedSamlResponse);
+        String validSamlMessage = responseToString(response);
 
         hasValidity(validSamlMessage, "INDETERMINATE");
     }
@@ -80,41 +93,52 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
     private Response getEidasSamlMessage(String authid) {
 
-        Attribute firstname = new EidasAttributeBuilder(
+        Attribute firstName = new EidasAttributeBuilder(
                 AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME,
                 AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME,
                 CurrentGivenNameType.TYPE_NAME,
-                "Jazzy Harrold"
+                "Jazzy"
+        ).build();
+
+        Attribute lastName = new EidasAttributeBuilder(
+                AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME,
+                AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME,
+                CurrentFamilyNameType.TYPE_NAME,
+                "Harrold"
         ).build();
 
         ArrayList<Attribute> eidasAttributes = new ArrayList<>();
 
-        eidasAttributes.add(firstname);
+        eidasAttributes.add(firstName);
+        eidasAttributes.add(lastName);
 
         DateTime now = DateTime.now();
 
         return EidasResponseBuilder.instance()
                 .withIssuer("http://stub-connector/")
                 .withStatus(StatusCode.SUCCESS)
-                .withAssertionSubject(UUID.randomUUID().toString())
-                .addAssertionAuthnStatement(EidasConstants.EIDAS_LOA_SUBSTANTIAL, now)
-                .addAssertionAttributeStatement(eidasAttributes)
                 .withInResponseTo(authid)
                 .withIssueInstant(now)
                 .withDestination("http://stub-connector/SAML2/Response/POST")
+                .withAssertionSubject(UUID.randomUUID().toString())
+                .addAssertionAuthnStatement(EidasConstants.EIDAS_LOA_SUBSTANTIAL, now)
+                .addAssertionAttributeStatement(eidasAttributes)
                 .withAssertionConditions("http://localhost:5000/Metadata")
                 .build();
     }
 
-    private Response signResponse(Response response) throws Exception {
+    private void signResponse(Response response) throws Exception {
         SamlObjectSigner signer = new SamlObjectSigner(X509CredentialFactory.build(
                 TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY),
                 SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
-                Long.valueOf(1));
+                1L);
 
         signer.sign(response, "response-id");
+    }
 
-        return response;
+    private void encryptAssertions(Response response) {
+        final ResponseAssertionEncrypter encrypter = new ResponseAssertionEncrypter(new BasicX509Credential(encryptionCredential.getEntityCertificate()));
+        encrypter.encrypt(response);
     }
 
     private String responseToString(Response response) {

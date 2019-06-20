@@ -3,21 +3,30 @@ package uk.gov.ida.notification.stubconnector.views;
 import io.dropwizard.views.View;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 public class ResponseView extends View {
-    private final List<String> attributes;
+    private final List<Entry<String, String>> attributes;
+    private final String loa;
     private final String validity;
     private final String eidasRequestId;
+    private String samlMessage;
 
-    public ResponseView(List<String> attributes, String validity, String eidasRequestId) {
+    public ResponseView(List<Entry<String, String>> attributes, String loa, String validity, String eidasRequestId, String samlMessage) {
         super("response.mustache");
         this.attributes = attributes;
+        this.loa = loa;
         this.validity = validity;
         this.eidasRequestId = eidasRequestId;
+        this.samlMessage = samlMessage;
     }
 
-    public List<String> getAttributes() {
+    public List<Entry<String, String>> getAttributes() {
         return attributes;
+    }
+
+    public String getLoa() {
+        return loa;
     }
 
     public String getValidity() {
@@ -26,5 +35,9 @@ public class ResponseView extends View {
 
     public String getEidasRequestId() {
         return eidasRequestId;
+    }
+
+    public String getSamlMessage() {
+        return samlMessage;
     }
 }

@@ -27,8 +27,8 @@ import static org.mockito.Mockito.when;
 @RunWith(Parameterized.class)
 public class EidasResponseAttributesHashLoggerParameterizedTest {
 
-    private final static String REQUEST_ID = "request-id";
-    private final static String DESTINATION_URL = "http://connnector.eu";
+    private static final String REQUEST_ID = "request-id";
+    private static final String DESTINATION_URL = "http://connnector.eu";
 
     @Mock
     private Appender<ILoggingEvent> appender;

@@ -22,6 +22,7 @@ import se.litsec.opensaml.common.validation.CoreValidatorParameters;
 import se.litsec.opensaml.saml2.common.response.ResponseValidator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
+import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
@@ -34,16 +35,20 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
+
+    private static final SamlObjectMarshaller SAML_OBJECT_MARSHALLER = new SamlObjectMarshaller();
 
     private final StubConnectorConfiguration configuration;
     private final ResponseAssertionDecrypter decrypter;
@@ -77,21 +82,22 @@ public class ReceiveResponseResource {
 
         // The eIDAS Response should only contain one Assertion with one AttributeStatement which contains
         // the user's requested attributes
-
-        List<String> attributes = new ArrayList<>();
-
         Response decrypted = decrypter.decrypt(response);
         List<Assertion> assertions = decrypted.getAssertions();
+
+        List<Entry<String, String>> attributesByName = new ArrayList<>();
+        String loa = "";
 
         if (assertions.size() > 0) {
             Assertion assertion = assertions.get(0);
             AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
 
-            attributes = attributeStatement
-                    .getAttributes()
+            attributesByName = attributeStatement.getAttributes()
                     .stream()
-                    .map(attr -> ((EidasAttributeValueType) attr.getAttributeValues().get(0)).toStringValue())
+                    .map(a -> new SimpleEntry<>(a.getFriendlyName(), ((EidasAttributeValueType) a.getAttributeValues().get(0)).toStringValue()))
                     .collect(Collectors.toList());
+
+            loa = assertion.getAuthnStatements().get(0).getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef();
         }
 
         String eidasRequestId = response.getInResponseTo();
@@ -104,9 +110,9 @@ public class ReceiveResponseResource {
 
         ProxyNodeLogger.info(format(
                 "Response from Proxy Node with decrypted attributes: {0}",
-                String.join(",", attributes)));
+                String.join(",", attributesByName.toString())));
 
-        return new ResponseView(attributes, validate.toString(), eidasRequestId);
+        return new ResponseView(attributesByName, loa, validate.toString(), eidasRequestId, SAML_OBJECT_MARSHALLER.transformToString(decrypted));
     }
 
     private Map<String, Object> buildStaticParemeters(String authnRequestId) {
