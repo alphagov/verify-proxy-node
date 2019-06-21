@@ -5,6 +5,9 @@ server:
   adminConnectors:
     - type: http
       port: ${ADMIN_PORT:-6601}
+  requestLog:
+    appenders:
+      - type: logstash-console
 
 logging:
   level: ${LOG_LEVEL:-INFO}
