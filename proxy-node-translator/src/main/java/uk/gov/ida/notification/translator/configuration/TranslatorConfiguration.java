@@ -31,6 +31,11 @@ public class TranslatorConfiguration extends Configuration {
     @JsonProperty
     private String connectorNodeIssuerId;
 
+    @Valid
+    @NotNull
+    @JsonProperty
+    private String connectorNodeNationalityCode;
+
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
         return proxyNodeMetadataForConnectorNodeUrl;
     }
@@ -39,11 +44,11 @@ public class TranslatorConfiguration extends Configuration {
         return vspConfiguration;
     }
 
-    public String getConnectorNodeIssuerId() {
-        return connectorNodeIssuerId;
-    }
+    public String getConnectorNodeIssuerId() { return connectorNodeIssuerId; }
 
     public CredentialConfiguration getCredentialConfiguration() {
         return credentialConfiguration;
     }
+
+    public String getConnectorNodeNationalityCode() { return connectorNodeNationalityCode; }
 }

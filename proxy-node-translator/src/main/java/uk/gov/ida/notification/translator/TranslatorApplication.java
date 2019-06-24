@@ -101,7 +101,8 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         final HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 EidasResponseBuilder::instance,
                 configuration.getConnectorNodeIssuerId(),
-                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
+                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString(),
+                configuration.getConnectorNodeNationalityCode()
         );
 
         final EidasFailureResponseGenerator failureResponseGenerator = new EidasFailureResponseGenerator(

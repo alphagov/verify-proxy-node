@@ -37,6 +37,7 @@ translator:
     repository: registry.tools.verify.govsvc.uk/eidas/translator@sha256
     tag: fd6ada0159c1cc5415cd51ffcdd41fc3f19c4cb827cafdecf9134a372024bc4a
     pullPolicy: IfNotPresent
+  connectorNodeNationalityCode: EU
 
 stubConnector:
   enabled: false

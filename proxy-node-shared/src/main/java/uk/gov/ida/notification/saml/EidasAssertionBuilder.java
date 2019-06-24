@@ -19,8 +19,6 @@ import java.util.List;
 
 public class EidasAssertionBuilder {
 
-    public static final String TEMPORARY_PID_TRANSLATION = "UK/EU/";
-
     private final Assertion assertion;
 
     public EidasAssertionBuilder() {
@@ -69,7 +67,7 @@ public class EidasAssertionBuilder {
     private Subject createSubject(String pid) {
         Subject subject = SamlBuilder.build(Subject.DEFAULT_ELEMENT_NAME);
         NameID nameID = SamlBuilder.build(NameID.DEFAULT_ELEMENT_NAME);
-        nameID.setValue(TEMPORARY_PID_TRANSLATION + pid);
+        nameID.setValue(pid);
         nameID.setFormat(NameIDType.PERSISTENT);
         subject.setNameID(nameID);
         return subject;

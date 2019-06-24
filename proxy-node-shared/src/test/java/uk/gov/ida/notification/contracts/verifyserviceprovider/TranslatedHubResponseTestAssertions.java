@@ -46,7 +46,7 @@ public class TranslatedHubResponseTestAssertions {
         final Attribute PidAttribute = attributes.get(3);
         assertThat(PidAttribute.getName()).isEqualTo(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME);
         assertThat(PidAttribute.getFriendlyName()).isEqualTo(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME);
-        assertThat(getAttributeValue(PidAttribute)).isEqualTo("UK/EU/123456");
+        assertThat(getAttributeValue(PidAttribute)).isEqualTo("UK/NATIONALITY_CODE/123456");
     }
 
     public static void checkAssertionStatementsValid(Response decryptedEidasResponse) {
