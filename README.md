@@ -54,6 +54,26 @@ The latter will rebuild all services and possibly reassign the minikube ip addre
 1. To run the tests manually, execute: `./gradlew clean test`.
 1. Test results are output to `./build/test-results`.  
 
+## Snyk
+Snyk is run by our Travis builds and does two things, test and monitor. We use the CLI rather than the GitHub integration as the integration has big problems with multi project Gradle builds like we have.
+
+#### Test
+* After the tests are run in the build Travis checks all our dependencies against a database for known vulnerabilities.
+* If any are found it exists with a non-zero code and the build fails. The build logs tell you what happened.
+* If no vulnerabilities are found then we move on to monitoring.
+
+#### Monitor
+* Snyk sends a list of all our dependencies to their server, and will alert us via email if any new vulnerabilities are found for them.
+* The vulnerabilities can be found in [our Snyk dashboard](https://app.snyk.io/org/verify-eidas)
+* You can be added to the Snyk verify-eidas organisation by an existing member.
+
+#### Troubleshooting Snyk
+* The most common issue is a build failing due to a new vulnerability. Follow the link in the logs, or visit the dashboard and see what's up.
+* Most issues will have a resolution strategy. Most often you'll need to bump a library verion. This can also be a transitive dependency. Good luck.
+* If there is currently no solution, you can temporarily ignore the vulnerability. You'll need the Snyk ID of the issue which you can grab from the last segment of the URL of the issue - find it in the Travis build logs where the vulnerability is reported.
+* Run `snyk ignore --id=<IssueID> --reason='The reason you're ignoring it'` and commit the `.snyk` file generated. Push.
+
+
 ## License
 
 [MIT](https://github.com/alphagov/verify-proxy-node/blob/master/LICENCE)
