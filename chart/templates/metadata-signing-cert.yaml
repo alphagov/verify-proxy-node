@@ -1,4 +1,3 @@
----
 apiVersion: verify.gov.uk/v1beta1
 kind: CertificateRequest
 metadata:
