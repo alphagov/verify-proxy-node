@@ -5,9 +5,6 @@ server:
   connector:
     type: http
     port: ${PORT:-50400}
-  requestLog:
-    appenders:
-      - type: logstash-console
 
 logging:
   level: ${LOG_LEVEL:-INFO}
