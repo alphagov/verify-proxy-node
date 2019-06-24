@@ -19,3 +19,13 @@ spec:
     contactSurname: Support
     contactEmail: idasupport@digital.cabinet-office.gov.uk
   enabled: true
+  samlSigningCertRequest:
+    countryCode: GB
+    commonName: Verify Proxy Node SAML Signing
+    expiryMonths: 4
+    organization: Cabinet Office
+    organizationUnit: GDS
+    location: London
+  certificateAuthority:
+    secretName: {{ .Release.Name }}-metadata-cert
+    namespace: {{ .Release.Namespace }}

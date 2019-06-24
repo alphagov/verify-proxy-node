@@ -1,0 +1,19 @@
+---
+apiVersion: verify.gov.uk/v1beta1
+kind: CertificateRequest
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+    name: {{ .Release.Name }}-metadata-cert
+    namespace: {{ .Release.Namespace }}
+  spec:
+    countryCode: GB
+    commonName: Verify Proxy Node Metadata Signing
+    expiryMonths: 3
+    organization: Cabinet Office
+    organizationUnit: GDS
+    location: London
+    CACert: false
+    certificateAuthority:
+      secretName: proxy-node-ca
+      namespace: {{ .Release.Namespace }}
