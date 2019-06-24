@@ -6,4 +6,8 @@ ignore:
     - '*':
         reason: Fix not yet available
         expires: 2019-07-21T15:05:11.857Z
+  SNYK-JAVA-COMGOOGLEGUAVA-32236:
+    - '*':
+        reason: Fix not yet available
+        expires: 2019-07-24T13:00:48.365Z
 patch: {}
