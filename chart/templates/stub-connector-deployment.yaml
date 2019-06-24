@@ -62,7 +62,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-proxy-metadata
-              key: metadataInternalURL
+              key: entityID
         - name: PROXY_NODE_METADATA_TRUSTSTORE
           valueFrom:
             secretKeyRef:
