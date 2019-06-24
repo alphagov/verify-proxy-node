@@ -41,7 +41,7 @@ public class HubResponseTranslatorTest {
     }
 
     private static final HubResponseTranslator TRANSLATOR =
-            new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL");
+            new HubResponseTranslator(EidasResponseBuilder::instance, "Issuer", "connectorMetadataURL", "NATIONALITY_CODE");
 
     private AttributesBuilder attributesBuilder;
 

@@ -15,7 +15,6 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
-import uk.gov.ida.notification.saml.EidasAssertionBuilder;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 
@@ -34,18 +33,24 @@ public class HubResponseTranslator {
     private String connectorNodeIssuerId;
     private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
+    private String pidPrefix;
 
     public HubResponseTranslator(
             Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
             String connectorNodeIssuerId,
-            String proxyNodeMetadataForConnectorNodeUrl) {
+            String proxyNodeMetadataForConnectorNodeUrl,
+            String nationalityCode) {
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
         this.connectorNodeIssuerId = connectorNodeIssuerId;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
+        this.pidPrefix = String.format("UK/%s/", nationalityCode);
+
     }
 
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
+
+        final String pid = pidPrefix + hubResponseContainer.getPid();
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
@@ -63,8 +68,10 @@ public class HubResponseTranslator {
                     getLatestValidDateOfBirth(hubResponseContainer)
             ));
 
-            eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME, AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME, PersonIdentifierType.TYPE_NAME,
-                    EidasAssertionBuilder.TEMPORARY_PID_TRANSLATION + hubResponseContainer.getPid()
+            eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
+                AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME,
+                PersonIdentifierType.TYPE_NAME,
+                pid
             ));
         }
 
@@ -80,7 +87,7 @@ public class HubResponseTranslator {
                 .withInResponseTo(hubResponseContainer.getEidasRequestId())
                 .withIssueInstant(now)
                 .withDestination(hubResponseContainer.getDestinationURL())
-                .withAssertionSubject(hubResponseContainer.getPid())
+                .withAssertionSubject(pid)
                 .withAssertionConditions(connectorNodeIssuerId)
                 .withLoa(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
                 .addAssertionAttributeStatement(eidasAttributes)
