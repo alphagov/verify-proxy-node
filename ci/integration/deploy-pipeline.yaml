@@ -73,6 +73,7 @@ spec:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
             RELEASE_NAME: nl-integration
+            CONNECTOR_NODE_NATIONALITY_CODE: NL
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
             CONNECTOR_ENTITY_ID: https://acc-eidas.minez.nl/EidasNodeC/ConnectorMetadata
@@ -100,6 +101,7 @@ spec:
                 --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
                 --set "connector.metadataURL=${CONNECTOR_METADATA_URL}" \
                 --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --set "translator.connectorNodeNationalityCode"=${CONNECTOR_NODE_NATIONALITY_CODE} \
                 --output-dir "./manifests/" \
                 ./release/*.tgz
 
