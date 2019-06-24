@@ -20,4 +20,14 @@ spec:
     contactSurname: jefferson
     contactEmail: jeff@example.local
   enabled: true
+  samlSigningCertRequest:
+    countryCode: GB
+    commonName: Stub Country SAML Signing
+    expiryMonths: 4
+    organization: Stub Country
+    organizationUnit: STUB
+    location: London
+  certificateAuthority:
+    secretName: {{ .Release.Name }}-metadata-cert
+    namespace: {{ .Release.Namespace }}
 {{- end -}}
