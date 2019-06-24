@@ -52,6 +52,8 @@ spec:
           value: "80"
         - name: CONNECTOR_NODE_ISSUER_ID
           value: {{ include "connector.entityID" . }}
+        - name: CONNECTOR_NODE_NATIONALITY_CODE
+          value: "{{ .Values.translator.connectorNodeNationalityCode }}"
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           valueFrom:
             secretKeyRef:
