@@ -145,6 +145,7 @@ spec:
           trigger: true
         - get: vsp-src
           trigger: true
+        - get: release
       - in_parallel:
           limit: 3
           fail_fast: true
@@ -232,6 +233,8 @@ spec:
         - get: tests-image
           passed: ["build"]
           trigger: true
+        - get: release
+          passed: ["build"]
 
       - task: generate-chart-values
         config:
@@ -283,8 +286,6 @@ spec:
                 EOF
                 echo "merging with chart values..."
                 spruce merge ./src/chart/values.yaml ./overrides.yaml | tee -a chart-values/values.yaml
-
-      - get: release
 
       - task: generate-chart-version
         config:
