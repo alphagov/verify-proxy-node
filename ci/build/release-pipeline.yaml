@@ -155,7 +155,7 @@ spec:
               build_args:
                 component: proxy-node-gateway
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
           - put: translator-image
             params:
@@ -164,7 +164,7 @@ spec:
               build_args:
                 component: proxy-node-translator
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
           - put: parser-image
             params:
@@ -172,20 +172,20 @@ spec:
               build_args:
                 component: eidas-saml-parser
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
           - put: stub-connector-image
             params:
               build: src
               dockerfile: src/stub-connector/Dockerfile
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
           - put: cloudhsm-image
             params:
               build: src/cloudhsm
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
           - put: verify-service-provider-image
             params:
@@ -194,13 +194,13 @@ spec:
                 VERIFY_USE_PUBLIC_BINARIES: "false"
               dockerfile: src/proxy-node-vsp-config/Dockerfile.internal
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
           - put: tests-image
             params:
               build: src/proxy-node-acceptance-tests
               tag_file: src/.git/short_ref
-              tag_as_latest: true
+              tag_as_latest: false
               tag_prefix: v
 
     - name: package
