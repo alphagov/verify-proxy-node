@@ -8,6 +8,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.eclipse.jetty.server.session.SessionHandler;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
@@ -22,6 +23,7 @@ import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
@@ -86,9 +88,11 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 .getTranslatorServiceConfiguration()
                 .buildTranslatorProxy(environment);
 
+
         registerProviders(environment);
         registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage);
         registerExceptionMappers(environment, samlFormViewBuilder, translatorProxy, sessionStorage, configuration.getErrorPageRedirectUrl());
+        registerInjections(environment);
     }
 
     private void registerProviders(Environment environment) {
@@ -161,5 +165,14 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 translatorProxy,
                 sessionStorage
         ));
+    }
+
+    private void registerInjections(Environment environment) {
+        environment.jersey().register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
+            }
+        });
     }
 }

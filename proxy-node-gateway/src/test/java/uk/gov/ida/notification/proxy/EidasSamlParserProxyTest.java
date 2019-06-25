@@ -10,6 +10,7 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
+import uk.gov.ida.notification.shared.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
@@ -125,7 +126,8 @@ public class EidasSamlParserProxyTest {
         ObjectMapper objectMapper = new ObjectMapper();
         ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
                 new ErrorHandlingClient(ClientBuilder.newClient()),
-                new JsonResponseProcessor(objectMapper)
+                new JsonResponseProcessor(objectMapper),
+                new IstioHeaderStorage()
         );
 
         return new EidasSamlParserProxy(

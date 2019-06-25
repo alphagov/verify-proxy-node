@@ -13,6 +13,7 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.exceptions.TranslatorResponseException;
+import uk.gov.ida.notification.shared.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
@@ -70,7 +71,8 @@ public class TranslatorProxyTest {
     @Spy
     ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
             new ErrorHandlingClient(ClientBuilder.newClient()),
-            new JsonResponseProcessor(new ObjectMapper())
+            new JsonResponseProcessor(new ObjectMapper()),
+            new IstioHeaderStorage()
     );
 
     @Test
