@@ -5,6 +5,11 @@ server:
   connector:
     type: http
     port: ${PORT:-50400}
+  requestLog:
+    appenders:
+      - type: console
+        layout:
+          type: access-json
 
 logging:
   level: ${LOG_LEVEL:-INFO}

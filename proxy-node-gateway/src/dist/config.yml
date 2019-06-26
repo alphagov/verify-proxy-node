@@ -9,7 +9,7 @@ server:
     appenders:
       - type: console
         layout:
-          type: json
+          type: access-json
 
 logging:
   level: ${LOG_LEVEL:-INFO}
