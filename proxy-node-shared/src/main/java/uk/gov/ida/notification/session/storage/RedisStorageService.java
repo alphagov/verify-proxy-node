@@ -1,13 +1,5 @@
 package uk.gov.ida.notification.session.storage;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.opensaml.storage.AbstractStorageService;
-import org.opensaml.storage.StorageRecord;
-import org.opensaml.storage.VersionMismatchException;
-
 import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.KeyValue;
 import io.lettuce.core.ScanArgs;
@@ -15,6 +7,13 @@ import io.lettuce.core.ScanCursor;
 import io.lettuce.core.TransactionResult;
 import io.lettuce.core.api.sync.RedisCommands;
 import net.shibboleth.utilities.java.support.collection.Pair;
+import org.opensaml.storage.AbstractStorageService;
+import org.opensaml.storage.StorageRecord;
+import org.opensaml.storage.VersionMismatchException;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public class RedisStorageService extends AbstractStorageService {
 

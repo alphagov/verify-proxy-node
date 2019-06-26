@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.apprule.rules;
 
 import uk.gov.ida.common.ExceptionType;
+import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
 import uk.gov.ida.notification.exceptions.FailureResponseGenerationException;
 import uk.gov.ida.notification.exceptions.RedisSerializationException;
@@ -9,7 +10,6 @@ import uk.gov.ida.notification.exceptions.SessionAttributeException;
 import uk.gov.ida.notification.exceptions.SessionMissingException;
 import uk.gov.ida.notification.exceptions.TranslatorResponseException;
 import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderRequestException;
-import uk.gov.ida.exceptions.ApplicationException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

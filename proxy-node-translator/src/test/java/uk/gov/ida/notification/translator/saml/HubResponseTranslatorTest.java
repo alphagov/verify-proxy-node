@@ -186,7 +186,7 @@ public class HubResponseTranslatorTest {
     private HubResponseTranslatorRequest buildHubResponseTranslatorRequest() {
         return new HubResponseTranslatorRequest(
                 "",
-                "_1234",
+                "_request-id_of-20-chars-or-more",
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create("http://localhost:8081/bob"),

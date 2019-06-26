@@ -1,9 +1,9 @@
 package uk.gov.ida.notification.saml.validation.components;
 
-import java.util.concurrent.ConcurrentSkipListSet;
-
-import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.Response;
+
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class RequestIdWatcher {
     private final ConcurrentSkipListSet<String> seenAuthnRequestIds = new ConcurrentSkipListSet<>();

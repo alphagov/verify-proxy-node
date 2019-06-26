@@ -10,7 +10,6 @@ import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.AttributeValue;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.hubresponse.InvalidHubResponseException;
-import uk.gov.ida.saml.core.test.builders.AddressAttributeValueBuilder_1_1;
 import uk.gov.ida.saml.core.test.builders.AttributeStatementBuilder;
 import uk.gov.ida.saml.core.test.builders.DateAttributeBuilder_1_1;
 import uk.gov.ida.saml.core.test.builders.DateAttributeValueBuilder;

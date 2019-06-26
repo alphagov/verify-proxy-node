@@ -1,11 +1,10 @@
 package uk.gov.ida.notification.saml.validation.components;
 
+import io.lettuce.core.api.sync.RedisCommands;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import org.opensaml.storage.ReplayCache;
 import org.opensaml.storage.StorageService;
 import org.opensaml.storage.impl.MemoryStorageService;
-
-import io.lettuce.core.api.sync.RedisCommands;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayCheckerImpl;
 import uk.gov.ida.notification.session.storage.RedisStorageService;

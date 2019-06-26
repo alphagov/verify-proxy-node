@@ -1,10 +1,9 @@
 package uk.gov.ida.notification.session.storage;
 
-import java.util.Map;
-
 import com.google.common.collect.ImmutableMap;
-
 import org.opensaml.storage.StorageRecord;
+
+import java.util.Map;
 
 
 public class RedisStorageRecord extends StorageRecord {

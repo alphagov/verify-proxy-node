@@ -2,10 +2,10 @@ package uk.gov.ida.notification.shared.proxy;
 
 import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.jerseyclient.JsonClient;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderRequestException;
 
