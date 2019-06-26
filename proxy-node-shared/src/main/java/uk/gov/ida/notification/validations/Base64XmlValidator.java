@@ -14,7 +14,7 @@ import java.io.InputStream;
 public class Base64XmlValidator implements ConstraintValidator<ValidBase64Xml, String> {
 
     @Override
-    public void initialize(ValidBase64Xml constraint) { }
+    public void initialize(ValidBase64Xml constraint) { /* intentionally blank */ }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {

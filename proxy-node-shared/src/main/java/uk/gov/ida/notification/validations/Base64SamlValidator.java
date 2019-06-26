@@ -14,7 +14,7 @@ public class Base64SamlValidator implements ConstraintValidator<ValidBase64Saml,
     public static final int MaxLength = 64000;
 
     @Override
-    public void initialize(ValidBase64Saml constraint) { }
+    public void initialize(ValidBase64Saml constraint) { /* intentionally blank */ }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {

@@ -9,8 +9,7 @@ import java.net.URI;
 public class DestinationUriStringValidator implements ConstraintValidator<ValidDestinationUriString, String> {
 
     @Override
-    public void initialize(ValidDestinationUriString constraint) {
-    }
+    public void initialize(ValidDestinationUriString constraint) { /* intentionally blank */ }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -19,8 +18,8 @@ public class DestinationUriStringValidator implements ConstraintValidator<ValidD
         try {
             URI uri = URI.create(value);
             return
-                uri.getScheme().toLowerCase().equals("http") ||
-                uri.getScheme().toLowerCase().equals("https");
+                uri.getScheme().equalsIgnoreCase("http") ||
+                uri.getScheme().equalsIgnoreCase("https");
 
         } catch (Exception e) {
             return false; // could not create a URI from the String

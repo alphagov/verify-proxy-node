@@ -15,8 +15,7 @@ public class PEMCertificateValidator implements ConstraintValidator<ValidPEM, St
     public static final int MaxLength = 2048;
 
     @Override
-    public void initialize(ValidPEM constraint) {
-    }
+    public void initialize(ValidPEM constraint) { /* intentionally blank */ }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
