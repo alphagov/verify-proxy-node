@@ -119,7 +119,7 @@ subprojects {
                 "io.dropwizard:dropwizard-core:${dropwizard_version}",
                 "io.dropwizard:dropwizard-client:${dropwizard_version}",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
-                "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
+                "io.dropwizard:dropwizard-json-logging:${dropwizard_version}",
                 "uk.gov.ida:dropwizard-logstash:1.3.5-68"
         )
 

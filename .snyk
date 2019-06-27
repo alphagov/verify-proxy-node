@@ -12,8 +12,6 @@ ignore:
         expires: 2019-07-24T13:00:48.365Z
   SNYK-JAVA-COMFASTERXMLJACKSONCORE-450917:
     - '*':
-        reason: >-
-          ¯\_(ツ)_/¯ until jackson next updates, then we should update the
-          version in gradle to latest
-        expires: 2019-07-04T00:00:00.000Z
+        reason: Fix not available yet
+        expires: 2019-07-26T16:07:31.690Z
 patch: {}
