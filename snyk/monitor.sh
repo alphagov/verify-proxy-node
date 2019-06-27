@@ -17,6 +17,9 @@ function monitor_configuration() {
     snyk monitor --gradle-sub-project=proxy-node-translator --project-name="$config"-config -- --configuration="$config"
 }
 
+# any special cases where snyk should ignore a known vulnerability
+source snyk/special-cases.sh
+
 source snyk/configurations.sh
 
 for configuration in $CONFIGURATIONS; do

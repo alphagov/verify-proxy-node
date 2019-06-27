@@ -22,6 +22,9 @@ function test_configuration() {
     fi
 }
 
+# any special cases where snyk should ignore a known vulnerability
+source snyk/special-cases.sh
+
 source snyk/configurations.sh
 
 for configuration in $CONFIGURATIONS; do
