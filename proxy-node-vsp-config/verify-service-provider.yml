@@ -7,7 +7,9 @@ server:
     port: ${PORT:-50400}
   requestLog:
     appenders:
-      - type: logstash-console
+      - type: console
+        layout:
+          type: access-json
 
 logging:
   level: ${LOG_LEVEL:-INFO}
