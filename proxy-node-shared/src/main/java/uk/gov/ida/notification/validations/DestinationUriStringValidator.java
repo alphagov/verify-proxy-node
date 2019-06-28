@@ -12,11 +12,13 @@ public class DestinationUriStringValidator implements ConstraintValidator<ValidD
     public void initialize(ValidDestinationUriString constraint) { /* intentionally blank */ }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
+    public boolean isValid(String potentialUri, ConstraintValidatorContext context) {
+        // Detecting nulls, empties and whitespace is the responsibility of other validations.
+        // Responding true here indicates that this validator does not have an opinion about empty values.
+        if (StringUtils.isBlank(potentialUri)) { return true; }
 
         try {
-            URI uri = URI.create(value);
+            URI uri = URI.create(potentialUri);
             if (uri.getScheme().equalsIgnoreCase("http") ||
                 uri.getScheme().equalsIgnoreCase("https")) {
                 return true;
@@ -26,7 +28,9 @@ public class DestinationUriStringValidator implements ConstraintValidator<ValidD
             }
 
         } catch (Exception e) {
-            context.buildConstraintViolationWithTemplate("This is not a URI.").addConstraintViolation();
+            // none of the code above throws explicit exceptions, however if there's a problem that means the String
+            // can't be resolved into a URI object, we should catch it and fail it in this validator.
+            context.buildConstraintViolationWithTemplate("Exception: " + e.getMessage()).addConstraintViolation();
             return false; // could not create a URI from the String
         }
     }

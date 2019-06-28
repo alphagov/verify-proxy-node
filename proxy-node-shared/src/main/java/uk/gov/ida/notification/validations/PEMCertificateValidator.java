@@ -20,12 +20,14 @@ public class PEMCertificateValidator implements ConstraintValidator<ValidPEM, St
     public void initialize(ValidPEM constraint) { /* intentionally blank */ }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
+    public boolean isValid(String potentialPEM, ConstraintValidatorContext context) {
+        // Detecting nulls, empties and whitespace is the responsibility of other validations.
+        // Responding true here indicates that this validator does not have an opinion about empty values.
+        if (StringUtils.isBlank(potentialPEM)) { return true; }
 
         try {
             X509CertificateFactory factory = new X509CertificateFactory();
-            X509Certificate cert = factory.createCertificate(value);
+            X509Certificate cert = factory.createCertificate(potentialPEM);
             cert.checkValidity(new Date()); // throws if invalid right now
             return true;
 
@@ -40,6 +42,7 @@ public class PEMCertificateValidator implements ConstraintValidator<ValidPEM, St
             return false;
 
         } catch (Exception e) {
+            context.buildConstraintViolationWithTemplate("Exception: " + e.getMessage()).addConstraintViolation();
             return false;
         }
     }

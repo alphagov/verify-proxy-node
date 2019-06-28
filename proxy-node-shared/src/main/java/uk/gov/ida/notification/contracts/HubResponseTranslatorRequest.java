@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.ida.notification.validations.ValidBase64Saml;
+import uk.gov.ida.notification.validations.ValidBase64SamlResponse;
 import uk.gov.ida.notification.validations.ValidDestinationUri;
 import uk.gov.ida.notification.validations.ValidLOA;
 import uk.gov.ida.notification.validations.ValidPEM;
@@ -13,7 +13,7 @@ import java.net.URI;
 public class HubResponseTranslatorRequest {
 
     @NotNull
-    @ValidBase64Saml
+    @ValidBase64SamlResponse
     @JsonProperty
     private String samlResponse;
 

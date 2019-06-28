@@ -12,11 +12,11 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Documented
-@Constraint(validatedBy = { Base64SamlValidator.class })
-@Size(min = Base64SamlValidator.MinLength, max = Base64SamlValidator.MaxLength)
+@Constraint(validatedBy = { Base64SamlResponseValidator.class })
+@Size(min = Base64SamlResponseValidator.MinLength, max = Base64SamlResponseValidator.MaxLength)
 @Target({ FIELD, PARAMETER })
 @Retention(RUNTIME)
-public @interface ValidBase64Saml {
+public @interface ValidBase64SamlResponse {
 
     String message() default "does not seem to be valid SAML encoded in Base64";
 

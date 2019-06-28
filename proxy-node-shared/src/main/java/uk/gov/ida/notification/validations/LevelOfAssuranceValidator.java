@@ -23,11 +23,13 @@ public class LevelOfAssuranceValidator implements ConstraintValidator<ValidLOA, 
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
+    public boolean isValid(String potentialLOA, ConstraintValidatorContext context) {
+        // Detecting nulls, empties and whitespace is the responsibility of other validations.
+        // Responding true here indicates that this validator does not have an opinion about empty values.
+        if (StringUtils.isBlank(potentialLOA)) { return true; }
 
         return
-                (acceptVerifyLOA && EnumUtils.isValidEnum(VspLevelOfAssurance.class, value)) ||
-                (acceptEidasLOA && EnumUtils.isValidEnum(EidasLoaEnum.class, value));
+            (acceptVerifyLOA && EnumUtils.isValidEnum(VspLevelOfAssurance.class, potentialLOA)) ||
+            (acceptEidasLOA && EnumUtils.isValidEnum(EidasLoaEnum.class, potentialLOA));
     }
 }

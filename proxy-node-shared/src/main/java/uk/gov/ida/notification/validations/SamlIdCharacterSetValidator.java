@@ -19,15 +19,17 @@ public class SamlIdCharacterSetValidator implements ConstraintValidator<ValidSam
      * spaces, and should have 160 bits of "randomness". This validation also rejects new lines.
      */
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
+    public boolean isValid(String potentialId, ConstraintValidatorContext context) {
+        // Detecting nulls, empties and whitespace is the responsibility of other validations.
+        // Responding true here indicates that this validator does not have an opinion about empty values.
+        if (StringUtils.isBlank(potentialId)) { return true; }
 
         boolean pass = true;
-        if (Character.isDigit(value.charAt(0))) {
+        if (Character.isDigit(potentialId.charAt(0))) {
             context.buildConstraintViolationWithTemplate("An id cannot start with a digit.").addConstraintViolation();
             pass = false;
         }
-        if (value.contains(" ") || value.contains("\n")) {
+        if (potentialId.contains(" ") || potentialId.contains("\n")) {
             context.buildConstraintViolationWithTemplate("An id should not contain whitespace.").addConstraintViolation();
             pass = false;
         }
