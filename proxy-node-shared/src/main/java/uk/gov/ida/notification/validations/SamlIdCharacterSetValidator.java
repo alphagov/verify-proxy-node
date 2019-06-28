@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class SamlIdValidator implements ConstraintValidator<ValidSamlId, String> {
+public class SamlIdCharacterSetValidator implements ConstraintValidator<ValidSamlId, String> {
 
     public static final int MinLength = 20; // 160 bits
     public static final int MaxLength = 256; // a reasonable limit, UUIDs are 40 characters
@@ -21,8 +21,21 @@ public class SamlIdValidator implements ConstraintValidator<ValidSamlId, String>
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
-        if (Character.isDigit(value.charAt(0))) { return false; }
-        if (value.length() < MinLength || value.length() > MaxLength) { return false; }
-        return !value.contains(" ") && !value.contains("\n");
+
+        boolean pass = true;
+        if (Character.isDigit(value.charAt(0))) {
+            context.buildConstraintViolationWithTemplate("An id cannot start with a digit.").addConstraintViolation();
+            pass = false;
+        }
+        if (value.contains(" ") || value.contains("\n")) {
+            context.buildConstraintViolationWithTemplate("An id should not contain whitespace.").addConstraintViolation();
+            pass = false;
+        }
+
+        if (!pass) {
+            context.disableDefaultConstraintViolation();
+        }
+
+        return pass;
     }
 }

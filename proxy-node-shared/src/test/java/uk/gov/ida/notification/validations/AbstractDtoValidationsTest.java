@@ -24,10 +24,8 @@ public abstract class AbstractDtoValidationsTest<DTO> {
         Map<String, List<ConstraintViolation<DTO>>> violationMap = new HashMap<>();
         for (ConstraintViolation<DTO> violation : violations) {
             String path = violation.getPropertyPath().toString();
-            if (violationMap.get(path) == null) {
-                violationMap.put(path, new LinkedList<>());
-                violationMap.get(path).add(violation);
-            }
+            violationMap.computeIfAbsent(path, k -> new LinkedList<>());
+            violationMap.get(path).add(violation);
         }
         return violationMap;
     }

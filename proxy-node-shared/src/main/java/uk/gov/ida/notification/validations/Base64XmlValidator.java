@@ -18,7 +18,7 @@ public class Base64XmlValidator implements ConstraintValidator<ValidBase64Xml, S
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null || StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
+        if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
 
         String xml = Base64.decodeAsString(value);
         if (StringUtils.isEmpty(xml)) { return false; }

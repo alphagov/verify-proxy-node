@@ -18,7 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface ValidPEM {
 
-    String message() default "is not a valid PEM certificate, or has expired";
+    String message() default "is not a valid PEM certificate";
 
     Class<?>[] groups() default { };
     Class<? extends Payload>[] payload() default { };

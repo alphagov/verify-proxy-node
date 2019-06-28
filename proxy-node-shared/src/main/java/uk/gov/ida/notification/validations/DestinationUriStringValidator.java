@@ -17,11 +17,16 @@ public class DestinationUriStringValidator implements ConstraintValidator<ValidD
 
         try {
             URI uri = URI.create(value);
-            return
-                uri.getScheme().equalsIgnoreCase("http") ||
-                uri.getScheme().equalsIgnoreCase("https");
+            if (uri.getScheme().equalsIgnoreCase("http") ||
+                uri.getScheme().equalsIgnoreCase("https")) {
+                return true;
+            } else {
+                context.buildConstraintViolationWithTemplate("Destination url should use either http or https protocol.").addConstraintViolation();
+                return false;
+            }
 
         } catch (Exception e) {
+            context.buildConstraintViolationWithTemplate("This is not a URI.").addConstraintViolation();
             return false; // could not create a URI from the String
         }
     }

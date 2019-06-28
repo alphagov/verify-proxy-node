@@ -18,7 +18,7 @@ public class Base64SamlValidator implements ConstraintValidator<ValidBase64Saml,
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null || StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
+        if (StringUtils.isBlank(value)) { return true; } // @NotNull should detect nulls
 
         try {
             String decoded = Base64.decodeAsString(value);

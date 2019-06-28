@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_connectorEncryptionCertificate;
 import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_destinationUrl;
 import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_eidasRequestId;
@@ -31,7 +31,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
     }
 
     @Test
-    public void allNullParametersShouldFailValidation() {
+    public void shouldFailValidationWithAllNullParameters() {
         HubResponseTranslatorRequest nullRequest = new HubResponseTranslatorRequest(
                 null,
                 null,
@@ -41,11 +41,12 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
                 null);
 
         Map<String,List<ConstraintViolation<HubResponseTranslatorRequest>>> nullViolationsMap = validateAndMap(nullRequest);
-        assertEquals("Null parameters in request should all fail.", 6, nullViolationsMap.size());
+
+        assertThat(nullViolationsMap.size()).isEqualTo(6);
     }
 
     @Test
-    public void allValidParametersShouldPassValidation() {
+    public void shouldPassValidationWithValidParameters() {
         HubResponseTranslatorRequest goodRequest = new HubResponseTranslatorRequest(
                 sample_samlResponse,
                 sample_requestId,
@@ -56,11 +57,11 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
 
         Map<String, List<ConstraintViolation<HubResponseTranslatorRequest>>> goodViolationsMap = validateAndMap(goodRequest);
 
-        assertEquals("Good parameters should all pass validation.", 0, goodViolationsMap.size());
+        assertThat(goodViolationsMap.size()).isEqualTo(0);
     }
 
     @Test
-    public void allInvalidParametersShouldFailValidation() {
+    public void shouldFailValidationWithInvalidParameters() {
         HubResponseTranslatorRequest badRequest = new HubResponseTranslatorRequest(
                 "not base 64 SAML",
                 "1_should_fail_because_of_the_first_numeric_character",
@@ -71,7 +72,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
 
         Map<String,List<ConstraintViolation<HubResponseTranslatorRequest>>> badViolationsMap = validateAndMap(badRequest);
 
-        assertEquals("Invalid parameters should fail validation.", 6, badViolationsMap.size());
+        assertThat(badViolationsMap.size()).isEqualTo(6);
     }
 
 }

@@ -13,8 +13,13 @@ public class DestinationUriValidator implements ConstraintValidator<ValidDestina
     public boolean isValid(URI value, ConstraintValidatorContext context) {
         if (value == null) { return true; } // @NotNull should detect nulls
 
-        return
-            value.getScheme().equalsIgnoreCase("http") ||
-            value.getScheme().equalsIgnoreCase("https");
+        if (value.getScheme().equalsIgnoreCase("http") ||
+            value.getScheme().equalsIgnoreCase("https")) {
+            return true;
+        } else {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Destination url should use either http or https protocol.").addConstraintViolation();
+            return false;
+        }
     }
 }
