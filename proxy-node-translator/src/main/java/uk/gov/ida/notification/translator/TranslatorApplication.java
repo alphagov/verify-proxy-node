@@ -6,7 +6,6 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
@@ -19,7 +18,6 @@ import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
@@ -82,7 +80,6 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
         registerExceptionMappers(environment);
         registerResources(configuration, environment);
-        registerInjections(environment);
 
     }
 
@@ -120,14 +117,5 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                                                                        credentialConfiguration.getKeyHandle());
 
         return new EidasResponseGenerator(hubResponseTranslator, failureResponseGenerator, samlObjectSigner);
-    }
-
-    private void registerInjections(Environment environment) {
-        environment.jersey().register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
-            }
-        });
     }
 }

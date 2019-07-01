@@ -7,7 +7,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.server.session.SessionHandler;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
@@ -20,7 +19,6 @@ import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
@@ -105,7 +103,6 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
         registerProviders(environment);
         registerResources(configuration, environment);
-        registerInjections(environment);
     }
 
     private void registerProviders(Environment environment) {
@@ -144,14 +141,4 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
-
-    private void registerInjections(Environment environment) {
-        environment.jersey().register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
-            }
-        });
-    }
-
 }
