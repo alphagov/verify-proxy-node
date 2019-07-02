@@ -32,12 +32,11 @@ public class Base64XmlValidator implements ConstraintValidator<ValidBase64Xml, S
         DocumentBuilder parser = null;
         try {
             parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = null;
-            document = parser.parse(stream);
+            Document document = parser.parse(stream);
             return document != null;
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            context.buildConstraintViolationWithTemplate("Unexpected exception: " + e.getMessage()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Unable to read XML: " + e.getMessage()).addConstraintViolation();
             return false;
         }
     }

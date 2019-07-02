@@ -7,7 +7,6 @@ import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import javax.validation.ValidationException;
 
 public class Base64SamlResponseValidator implements ConstraintValidator<ValidBase64SamlResponse, String> {
 
