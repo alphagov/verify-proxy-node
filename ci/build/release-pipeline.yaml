@@ -88,49 +88,49 @@ spec:
 
     - name: tests-image
       type: harbor
-      icon: layers
+      icon: code-tags-check
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/acceptance-tests
 
     - name: gateway-image
       type: harbor
-      icon: layers
+      icon: gate
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/gateway
 
     - name: translator-image
       type: harbor
-      icon: layers
+      icon: file-xml
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/translator
 
     - name: parser-image
       type: harbor
-      icon: layers
+      icon: page-next
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/parser
 
     - name: stub-connector-image
       type: harbor
-      icon: layers
+      icon: power-plug
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/stub-connector
 
     - name: cloudhsm-image
       type: harbor
-      icon: layers
+      icon: folder-key-network
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/cloudhsm
 
     - name: verify-service-provider-image
       type: harbor
-      icon: layers
+      icon: marker-check
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/verify-service-provider
