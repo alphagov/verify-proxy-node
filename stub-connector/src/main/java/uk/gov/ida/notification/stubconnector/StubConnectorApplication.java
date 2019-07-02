@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.stubconnector;
 
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -79,7 +80,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
-
+        bootstrap.addBundle(new AssetsBundle("/favicon.ico"));
 
         // Metadata
         proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getProxyNodeMetadataConfiguration()));
