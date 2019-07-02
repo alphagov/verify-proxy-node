@@ -13,6 +13,14 @@ spec:
   gateways:
   - gsp-gsp-cluster.gsp-system
   http:
+    - match:
+      - uri:
+          exact: /ServiceMetadata
+      route:
+        - destination:
+            host: /etc/metadata/metadata.xml
+            port:
+              number: 80
     - route:
       - destination:
           host: {{ .Release.Name }}-gateway
