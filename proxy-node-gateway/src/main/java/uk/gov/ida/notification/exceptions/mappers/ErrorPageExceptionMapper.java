@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import uk.gov.ida.notification.exceptions.ErrorPageException;
 
 public class ErrorPageExceptionMapper extends BaseExceptionToErrorPageMapper<ErrorPageException> {
+
     public ErrorPageExceptionMapper(URI errorPageRedirectUrl) {
         super(errorPageRedirectUrl);
     }

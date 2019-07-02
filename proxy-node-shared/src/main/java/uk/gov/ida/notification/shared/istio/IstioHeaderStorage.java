@@ -7,6 +7,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.ida.notification.shared.istio.IstioHeaders.ISTIO_HEADERS;
 
@@ -17,9 +18,9 @@ public class IstioHeaderStorage {
 
     public Map<String, String> getIstioHeaders() {
         Map<String, String> firstIstioHeaders = new HashMap<>();
-        if (this.getMultiMapIstioHeaders() != null) {
-            this.getMultiMapIstioHeaders().forEach((k, v) -> firstIstioHeaders.put(k, v.get(0).toString()));
-        }
+        this.getMultiMapIstioHeaders().ifPresent(m ->
+                m.forEach((k, v) -> firstIstioHeaders.put(k, v.get(0).toString()))
+        );
 
         return firstIstioHeaders;
     }
@@ -40,23 +41,26 @@ public class IstioHeaderStorage {
     }
 
     void appendIstioHeadersToResponseContextHeaders(ContainerResponseContext responseContext) {
-        if (storage.get() != null) {
-            storage.get().forEach((k, v) -> responseContext.getHeaders().addAll(k, v));
-        }
+        this.getMultiMapIstioHeaders().ifPresent(m ->
+                m.forEach((k, v) -> responseContext.getHeaders().addAll(k, v))
+        );
     }
 
     void clear() {
         storage.remove();
     }
 
-    private MultivaluedMap<String, Object> getMultiMapIstioHeaders() {
-        return storage.get();
+    private Optional<MultivaluedMap<String, Object>> getMultiMapIstioHeaders() {
+        return Optional.ofNullable(storage.get());
     }
 
     @Override
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer("Istio headers: ");
-        this.getMultiMapIstioHeaders().forEach((k, v) -> stringBuffer.append(String.format("%s=%s |", k, v)));
+        this.getMultiMapIstioHeaders().ifPresent(m ->
+                m.forEach((k, v) -> stringBuffer.append(String.format("%s=%s |", k, v)))
+        );
+
         return stringBuffer.toString();
     }
 }

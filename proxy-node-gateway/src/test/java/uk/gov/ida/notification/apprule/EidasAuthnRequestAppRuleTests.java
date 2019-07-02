@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import java.net.URISyntaxException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.notification.apprule.rules.GatewayAppRule.ERROR_PAGE_REDIRECT_URL;
 
@@ -84,12 +86,23 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void bindingsReturnHubAuthnRequestForm() throws Throwable {
+        assertGoodRequest(buildAuthnRequest());
+    }
 
-        final Response response = proxyNodeAppRule.target("/hello", true).request().get();
+    @Test
+    public void accessingWrongPathRedirectsToErrorPage() throws URISyntaxException {
+        final Response response = proxyNodeAppRule.target("/invalid-path", false).request().get();
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
         assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
-//        assertGoodRequest(buildAuthnRequest());
+    }
+
+    @Test
+    public void accessingProxyNodeDirectlyRedirectsToErrorPage() throws URISyntaxException {
+        final Response response = proxyNodeAppRule.target("/SAML2/SSO/POST", false).request().get();
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
     @Test

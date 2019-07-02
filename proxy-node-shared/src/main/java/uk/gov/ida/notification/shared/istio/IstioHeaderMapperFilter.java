@@ -23,7 +23,7 @@ public class IstioHeaderMapperFilter implements ContainerResponseFilter, Contain
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         istioHeaderStorage.appendIstioHeadersToResponseContextHeaders(responseContext);
-        // TODO remove once istio tracing works
+        // TODO: remove once istio tracing works
         ProxyNodeLogger.info(istioHeaderStorage.toString());
         istioHeaderStorage.clear();
     }
