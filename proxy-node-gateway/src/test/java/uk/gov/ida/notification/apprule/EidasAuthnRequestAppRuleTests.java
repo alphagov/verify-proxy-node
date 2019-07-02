@@ -18,7 +18,7 @@ import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
@@ -84,7 +84,12 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void bindingsReturnHubAuthnRequestForm() throws Throwable {
-        assertGoodRequest(buildAuthnRequest());
+
+        final Response response = proxyNodeAppRule.target("/hello", true).request().get();
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+//        assertGoodRequest(buildAuthnRequest());
     }
 
     @Test

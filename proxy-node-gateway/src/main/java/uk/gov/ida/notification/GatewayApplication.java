@@ -22,9 +22,9 @@ import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
-import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
@@ -171,7 +171,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.jersey().register(new AbstractBinder() {
             @Override
             protected void configure() {
-                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
+                bindAsContract(IstioHeaderStorage.class);
             }
         });
     }

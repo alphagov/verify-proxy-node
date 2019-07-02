@@ -1,7 +1,12 @@
 package uk.gov.ida.notification.configuration;
 
-public class CredentialConfigurationException extends Throwable {
-    public CredentialConfigurationException(Exception e) {
+class CredentialConfigurationException extends Throwable {
+
+    CredentialConfigurationException(String msg) {
+        super("Failed to load CredentialConfiguration: " + msg);
+    }
+
+    CredentialConfigurationException(Exception e) {
         super("Failed to load CredentialConfiguration", e);
     }
 }

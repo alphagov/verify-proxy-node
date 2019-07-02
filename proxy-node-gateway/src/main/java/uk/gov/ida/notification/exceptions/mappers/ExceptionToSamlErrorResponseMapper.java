@@ -7,7 +7,7 @@ import uk.gov.ida.notification.exceptions.FailureSamlResponseException;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpServletRequest;

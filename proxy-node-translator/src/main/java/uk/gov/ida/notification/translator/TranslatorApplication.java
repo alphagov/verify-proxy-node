@@ -18,9 +18,9 @@ import uk.gov.ida.notification.exceptions.mappers.JsonErrorResponseRuntimeExcept
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
-import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
@@ -126,7 +126,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         environment.jersey().register(new AbstractBinder() {
             @Override
             protected void configure() {
-                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
+                bindAsContract(IstioHeaderStorage.class);
             }
         });
     }

@@ -3,7 +3,7 @@ package uk.gov.ida.notification.exceptions;
 import org.slf4j.MDC;
 import uk.gov.ida.common.ExceptionType;
 import uk.gov.ida.exceptions.ApplicationException;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
 

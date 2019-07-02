@@ -20,14 +20,14 @@ import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTest
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,7 +58,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestNotSignedCorrectly() throws Exception {
         AuthnRequest requestWithIncorrectSigningKey = request.build();
-        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,  Long.valueOf(1));
+        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, Long.valueOf(1));
         samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey, "response-id");
 
         assertErrorResponseWithMessage(
@@ -262,15 +262,15 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender, times(5)).doAppend(loggingEventArgumentCaptor.capture());
 
-        loggingEventArgumentCaptor.getAllValues().stream()
-                .filter(e -> ProxyNodeLoggingFilter.MESSAGE_EGRESS.equals(e.getMessage()))
+        final Map<String, String> mdcPropertyMap = loggingEventArgumentCaptor.getAllValues().stream()
+                .filter(e -> e.getMessage().equals(ProxyNodeLoggingFilter.MESSAGE_EGRESS))
                 .findFirst()
                 .map(ILoggingEvent::getMDCPropertyMap)
-                .ifPresentOrElse( mdcPropertyMap -> {
-            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo("request_id");
-            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo("http://proxy-node/eidasAuthnRequest");
-            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo("2015-04-30T19:25:14.273Z");
-            assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo("http://connector-node/Metadata");
-        }, () -> fail("Could not find Logging Event"));
+                .orElseThrow();
+
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo("request_id");
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo("http://proxy-node/eidasAuthnRequest");
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo("2015-04-30T19:25:14.273Z");
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo("http://connector-node/Metadata");
     }
 }

@@ -10,11 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.exceptions.TranslatorResponseException;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.ws.rs.POST;

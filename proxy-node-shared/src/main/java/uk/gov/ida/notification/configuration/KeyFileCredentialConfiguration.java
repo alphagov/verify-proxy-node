@@ -7,7 +7,7 @@ import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Support;
 import uk.gov.ida.common.shared.configuration.DeserializablePublicKeyConfiguration;
 import uk.gov.ida.common.shared.configuration.PrivateKeyConfiguration;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import java.security.cert.X509Certificate;
 

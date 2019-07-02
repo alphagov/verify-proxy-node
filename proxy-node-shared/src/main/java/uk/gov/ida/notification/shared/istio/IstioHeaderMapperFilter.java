@@ -1,4 +1,6 @@
-package uk.gov.ida.notification.shared;
+package uk.gov.ida.notification.shared.istio;
+
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -6,7 +8,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
 
 @Provider
 public class IstioHeaderMapperFilter implements ContainerResponseFilter, ContainerRequestFilter {
@@ -15,7 +16,7 @@ public class IstioHeaderMapperFilter implements ContainerResponseFilter, Contain
     private IstioHeaderStorage istioHeaderStorage;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         istioHeaderStorage.captureHeaders(requestContext.getHeaders());
     }
 

@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;

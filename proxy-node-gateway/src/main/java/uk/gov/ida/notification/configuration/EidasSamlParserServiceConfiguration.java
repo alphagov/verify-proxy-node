@@ -8,7 +8,7 @@ import io.dropwizard.setup.Environment;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 

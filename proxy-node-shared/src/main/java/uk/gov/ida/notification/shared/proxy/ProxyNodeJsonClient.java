@@ -4,11 +4,10 @@ import org.slf4j.MDC;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ProxyNodeJsonClient {
@@ -26,7 +25,7 @@ public class ProxyNodeJsonClient {
     }
 
     private Map<String, String> getHeaders() {
-        Map<String, String> headers = this.istioHeaderStorage.getIstioHeaders().orElse(new HashMap<>());
+        Map<String, String> headers = this.istioHeaderStorage.getIstioHeaders();
         headers.put(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), MDC.get(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
         return headers;
     }

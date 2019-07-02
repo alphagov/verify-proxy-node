@@ -21,7 +21,7 @@ import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.saml.SamlBuilder;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 import javax.ws.rs.client.Entity;

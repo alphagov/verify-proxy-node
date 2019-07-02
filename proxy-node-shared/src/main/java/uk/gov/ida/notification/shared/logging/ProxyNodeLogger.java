@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.shared;
+package uk.gov.ida.notification.shared.logging;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.MDC;

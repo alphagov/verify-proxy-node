@@ -10,8 +10,8 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.validation.Valid;

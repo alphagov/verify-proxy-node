@@ -8,20 +8,20 @@ import org.opensaml.saml.saml2.core.Issuer;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_FLAGS;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_PARENTSPANID;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_SAMPLED;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_SPANID;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_OT_SPAN_CONTEXT;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_REQUEST_ID;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_FLAGS;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_PARENTSPANID;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_SAMPLED;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_SPANID;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_TRACEID;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_OT_SPAN_CONTEXT;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_REQUEST_ID;
 
 public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
 

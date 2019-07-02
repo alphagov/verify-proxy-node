@@ -15,8 +15,8 @@ import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.SamlInitializedTest;
 import uk.gov.ida.notification.helpers.TestKeyPair;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import java.util.Map;
 
@@ -34,9 +34,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
     public void setup() throws Throwable {
         testKeyPair = new TestKeyPair();
         signingCredential = testKeyPair.getX509Credential();
-        samlObjectSigner = new SamlObjectSigner(signingCredential,
-                                                SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
-                                                Long.valueOf(99));
+        samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, 99L);
     }
 
     @Test
@@ -75,15 +73,11 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.HSM_KEY_HANDLE.name())).isEqualTo("99");
-
     }
 
     @Test
     public void shouldNotLogKeyHandleWhenKeyHandleIsNull() throws Exception {
-
-        samlObjectSigner = new SamlObjectSigner(signingCredential,
-                                                SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
-                                                null);
+        samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, null);
         LoggingUtil.hijackJDKLogging();
 
         Appender<ILoggingEvent> appender = mock(Appender.class);
@@ -100,6 +94,5 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
         assertThat(mdcPropertyMap).doesNotContainKey(ProxyNodeMDCKey.HSM_KEY_HANDLE.name());
-
     }
 }

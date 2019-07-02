@@ -2,7 +2,7 @@ package uk.gov.ida.notification.exceptions.proxy;
 
 import org.slf4j.MDC;
 import uk.gov.ida.notification.exceptions.ErrorPageException;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 public class VerifyServiceProviderRequestException extends ErrorPageException {
 
