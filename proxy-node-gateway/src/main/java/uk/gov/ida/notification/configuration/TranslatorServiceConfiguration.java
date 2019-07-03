@@ -8,7 +8,7 @@ import io.dropwizard.setup.Environment;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.validation.Valid;
@@ -45,6 +45,7 @@ public class TranslatorServiceConfiguration extends Configuration {
             new JsonResponseProcessor(environment.getObjectMapper()),
             new IstioHeaderStorage()
         );
+
         return new TranslatorProxy(
             jsonClient,
             UriBuilder.fromUri(url).path(TRANSLATOR_ROOT).build()

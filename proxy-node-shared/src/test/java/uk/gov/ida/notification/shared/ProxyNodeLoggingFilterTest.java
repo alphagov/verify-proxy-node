@@ -7,6 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -21,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
-import static uk.gov.ida.notification.shared.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_TRACEID;
+import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyNodeLoggingFilterTest {

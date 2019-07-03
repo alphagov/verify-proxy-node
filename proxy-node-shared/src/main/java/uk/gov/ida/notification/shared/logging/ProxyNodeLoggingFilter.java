@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.shared;
+package uk.gov.ida.notification.shared.logging;
 
 import org.apache.http.HttpHeaders;
 import org.slf4j.MDC;
@@ -10,7 +10,7 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
 import java.util.Optional;
 
-import static uk.gov.ida.notification.shared.IstioHeaders.X_B3_TRACEID;
+import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_B3_TRACEID;
 
 @Provider
 public class ProxyNodeLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -38,7 +38,7 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         Optional.ofNullable(responseContext.getLocation()).ifPresent(uri -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.EGRESS_LOCATION, uri.toString()));
-        Optional.ofNullable(responseContext.getStatus()).ifPresent(code -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.RESPONSE_STATUS, String.valueOf(code)));
+        Optional.of(responseContext.getStatus()).ifPresent(code -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.RESPONSE_STATUS, String.valueOf(code)));
         Optional.ofNullable(responseContext.getMediaType()).ifPresent(mt -> ProxyNodeLogger.addContext(ProxyNodeMDCKey.EGRESS_MEDIA_TYPE, mt.toString()));
         ProxyNodeLogger.info(MESSAGE_EGRESS);
 

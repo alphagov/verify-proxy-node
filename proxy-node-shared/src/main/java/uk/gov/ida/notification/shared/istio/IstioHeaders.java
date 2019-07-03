@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.shared;
+package uk.gov.ida.notification.shared.istio;
 
 public interface IstioHeaders {
     String X_REQUEST_ID = "x-request-id";

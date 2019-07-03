@@ -7,7 +7,7 @@ import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
 import uk.gov.ida.notification.configuration.CloudHsmCredentialConfiguration;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.saml.security.DecrypterFactory;
 
 import java.util.Collections;

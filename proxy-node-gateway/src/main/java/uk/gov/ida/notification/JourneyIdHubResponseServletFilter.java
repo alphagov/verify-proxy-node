@@ -1,6 +1,6 @@
 package uk.gov.ida.notification;
 
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

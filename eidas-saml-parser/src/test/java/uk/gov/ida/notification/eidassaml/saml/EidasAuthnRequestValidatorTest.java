@@ -175,16 +175,9 @@ public class EidasAuthnRequestValidatorTest {
     public void shouldThrowIfAuthnRequestHasUnsupportedSamlVersion() {
         final String expectedMessage = "Bad Authn Request from Connector Node: SAML Version should be " + SAMLVersion.VERSION_20.toString();
 
-        assertThatThrownBy(
-                () -> eidasAuthnRequestValidator
-                        .validate(
-                                eidasAuthnRequestBuilder
-                                        .withSamlVersion(SAMLVersion.VERSION_10)
-                                        .build()
-                        )
-        )
-        .isInstanceOf(InvalidAuthnRequestException.class)
-        .hasMessageContaining(expectedMessage);
+        assertThatThrownBy(() -> eidasAuthnRequestValidator.validate(eidasAuthnRequestBuilder.withSamlVersion(SAMLVersion.VERSION_10).build()))
+                .isInstanceOf(InvalidAuthnRequestException.class)
+                .hasMessageContaining(expectedMessage);
     }
 
     @Test

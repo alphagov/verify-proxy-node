@@ -29,9 +29,9 @@ import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
-import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
 import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
@@ -151,21 +151,18 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
     }
 
     private String getX509EncryptionCert(EidasSamlParserConfiguration configuration) throws CertificateEncodingException {
-
         X509Credential credential = (X509Credential) connectorMetadata.getCredential(UsageType.ENCRYPTION,
                 configuration.getConnectorMetadataConfiguration().getExpectedEntityId(),
                 SPSSODescriptor.DEFAULT_ELEMENT_NAME);
-        String x509EncryptionCert = Base64.getEncoder().encodeToString(
-                credential.getEntityCertificate().getEncoded());
 
-        return x509EncryptionCert;
+        return Base64.getEncoder().encodeToString(credential.getEntityCertificate().getEncoded());
     }
 
     private void registerInjections(Environment environment) {
         environment.jersey().register(new AbstractBinder() {
             @Override
             protected void configure() {
-                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
+                bindAsContract(IstioHeaderStorage.class);
             }
         });
     }

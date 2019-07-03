@@ -20,8 +20,8 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestRespo
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;

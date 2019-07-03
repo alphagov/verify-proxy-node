@@ -8,13 +8,12 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -22,10 +21,13 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyNodeJsonClientTest {
+
     @Mock
-    ErrorHandlingClient errorHandlingClient; // Sends request and provides response
+    ErrorHandlingClient errorHandlingClient;
+
     @Mock
     JsonResponseProcessor responseProcessor;
+
     @Mock
     IstioHeaderStorage istioHeaderStorage;
 
@@ -35,18 +37,16 @@ public class ProxyNodeJsonClientTest {
 
     @Test
     public void shouldSendIstioHeadersInPostRequest() throws URISyntaxException {
-
         Map<String, String> headers = new HashMap<>();
 
         headers.put("header-1", "value1");
         headers.put("header-2", "value2");
 
-        when(istioHeaderStorage.getIstioHeaders()).thenReturn(Optional.of(headers));
+        when(istioHeaderStorage.getIstioHeaders()).thenReturn(headers);
 
         URI uri = new URI("http://foo.bar");
         Object postBody = new Object();
         proxyNodeJsonClient.post(postBody, uri, Object.class);
         verify(errorHandlingClient).post(eq(uri), eq(headers), eq(postBody));
     }
-
 }

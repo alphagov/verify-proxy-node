@@ -11,7 +11,7 @@ import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestException;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import java.util.Collection;
 import java.util.List;

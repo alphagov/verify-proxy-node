@@ -15,7 +15,7 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.exceptions.proxy.VerifyServiceProviderRequestException;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;

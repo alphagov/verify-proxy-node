@@ -7,7 +7,7 @@ import org.apache.xml.security.algorithms.JCEMapper;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Support;
 import uk.gov.ida.common.shared.configuration.DeserializablePublicKeyConfiguration;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import java.security.Key;
 import java.security.KeyStore;
@@ -15,6 +15,7 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 import static java.text.MessageFormat.format;
 
@@ -29,7 +30,11 @@ public class CloudHsmCredentialConfiguration extends CredentialConfiguration {
     ) throws CredentialConfigurationException {
         try {
             ProxyNodeLogger.info(format("Using CloudHsmCredentialConfiguration to sign eIDAS responses with HSM Key Label {0}", hsmKeyLabel));
-            X509Certificate certificate = X509Support.decodeCertificate(publicKey.getCert().getBytes());
+
+            X509Certificate certificate = Optional
+                    .ofNullable(X509Support.decodeCertificate(publicKey.getCert().getBytes()))
+                    .orElseThrow(() -> new CredentialConfigurationException("Could not decode public certificate"));
+
             Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
                     .loadClass("com.cavium.provider.CaviumProvider")
                     .getConstructor()

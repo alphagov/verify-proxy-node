@@ -13,6 +13,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import java.util.Map;
 
@@ -44,7 +46,7 @@ public class ProxyNodeLoggerTest {
 
         final ILoggingEvent logEvent = loggingEventCaptor.getValue();
         assertThat(logEvent.getMDCPropertyMap().get(ProxyNodeMDCKey.LOG_LOCATION.name())).doesNotContain(ProxyNodeLogger.class.getName());
-        assertThat(logEvent.getMDCPropertyMap().get(ProxyNodeMDCKey.LOG_LOCATION.name())).contains("junit.runners");
+        assertThat(logEvent.getMDCPropertyMap().get(ProxyNodeMDCKey.LOG_LOCATION.name())).contains("ProxyNodeLoggerTest.shouldNotLogProxyNodeLoggerAsTheLogLocation");
     }
 
     @Test

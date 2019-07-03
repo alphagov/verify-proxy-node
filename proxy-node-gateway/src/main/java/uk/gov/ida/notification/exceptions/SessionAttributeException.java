@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.exceptions;
 
 import org.slf4j.MDC;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
 

@@ -9,8 +9,8 @@ import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 

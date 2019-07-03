@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.shared;
+package uk.gov.ida.notification.shared.logging;
 
 public enum ProxyNodeMDCKey {
     LOG_LOCATION,

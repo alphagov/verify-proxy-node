@@ -10,8 +10,8 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.slf4j.MDC;
-import uk.gov.ida.notification.shared.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.ProxyNodeMDCKey;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
+import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 public class SamlObjectSigner {
 

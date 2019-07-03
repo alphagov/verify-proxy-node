@@ -19,9 +19,9 @@ import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
 import uk.gov.ida.notification.saml.converters.ResponseParameterProvider;
 import uk.gov.ida.notification.saml.metadata.Metadata;
-import uk.gov.ida.notification.shared.IstioHeaderMapperFilter;
-import uk.gov.ida.notification.shared.IstioHeaderStorage;
-import uk.gov.ida.notification.shared.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
@@ -149,9 +149,8 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         environment.jersey().register(new AbstractBinder() {
             @Override
             protected void configure() {
-                bind(IstioHeaderStorage.class).to(IstioHeaderStorage.class);
+                bindAsContract(IstioHeaderStorage.class);
             }
         });
     }
-
 }
