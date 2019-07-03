@@ -62,9 +62,9 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
     public void initialize(final Bootstrap<StubConnectorConfiguration> bootstrap) {
         // Needed to correctly interpolate environment variables in config file
         bootstrap.setConfigurationSourceProvider(
-            new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
-                new EnvironmentVariableSubstitutor(false)
-            )
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
+                        new EnvironmentVariableSubstitutor(false)
+                )
         );
 
         // Needed to initialise OpenSAML libraries
@@ -72,7 +72,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         // by the InitializationService
         try {
             InitializationService.initialize();
-        } catch(InitializationException e) {
+        } catch (InitializationException e) {
             throw new RuntimeException(e);
         }
 
@@ -80,7 +80,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
-        bootstrap.addBundle(new AssetsBundle("/favicon.ico"));
+        bootstrap.addBundle(new AssetsBundle("/assets/favicon.ico", "/favicon.ico"));
 
         // Metadata
         proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getProxyNodeMetadataConfiguration()));
@@ -88,9 +88,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
     }
 
     @Override
-    public void run(final StubConnectorConfiguration configuration,
-                    final Environment environment) throws Exception {
-
+    public void run(final StubConnectorConfiguration configuration, final Environment environment) {
         proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
@@ -138,9 +136,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
     private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
         MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
-                metadataResolver,
-                name,
-                connectorMetadataConfiguration.getExpectedEntityId()
+                metadataResolver, name, connectorMetadataConfiguration.getExpectedEntityId()
         );
 
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
