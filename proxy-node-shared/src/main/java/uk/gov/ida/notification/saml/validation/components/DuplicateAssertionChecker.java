@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.saml.validation.components;
 
 import org.opensaml.saml.saml2.core.Assertion;
-
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
 import se.litsec.opensaml.saml2.common.response.MessageReplayException;
 import uk.gov.ida.notification.saml.deprecate.DuplicateAssertionValidator;

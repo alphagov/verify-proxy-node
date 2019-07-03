@@ -14,6 +14,7 @@ import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseContainer;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -43,7 +44,7 @@ public class HubResponseTranslatorResource {
 
     @POST
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
-    public Response hubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
+    public Response hubResponse(@Valid HubResponseTranslatorRequest hubResponseTranslatorRequest) {
 
         final TranslatedHubResponse translatedHubResponse =
                 verifyServiceProviderProxy.getTranslatedHubResponse(

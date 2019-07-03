@@ -211,7 +211,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     private Response extractEidasResponseFromTranslator(Response hubResponse) throws Exception {
-        return new SamlParser().parseSamlString(Base64.decodeAsString(postHubResponseToTranslator(hubResponse).readEntity(String.class)));
+        String translatorResponse = postHubResponseToTranslator(hubResponse).readEntity(String.class);
+        return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
     }
 
     private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
@@ -220,7 +221,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
                 new HubResponseTranslatorRequest(
                         encodedResponse,
-                        "_1234",
+                        "_request-id_of-20-characters-or-more",
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
                         URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),

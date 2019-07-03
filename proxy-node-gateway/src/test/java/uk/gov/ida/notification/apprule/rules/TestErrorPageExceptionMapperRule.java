@@ -2,7 +2,6 @@ package uk.gov.ida.notification.apprule.rules;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.glassfish.jersey.client.ClientProperties;
-
 import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;

@@ -1,12 +1,5 @@
 package uk.gov.ida.notification.saml.validation.components;
 
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ida.notification.helpers.HubResponseBuilder.aHubResponse;
-import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
-
-import java.util.stream.Stream;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationException;
@@ -15,8 +8,14 @@ import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.xmlsec.signature.support.SignatureException;
-
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
+
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ida.notification.helpers.HubResponseBuilder.aHubResponse;
+import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
 
 public class RequestIdWatcherTest {
   private RequestIdWatcher requestIdWatcher;

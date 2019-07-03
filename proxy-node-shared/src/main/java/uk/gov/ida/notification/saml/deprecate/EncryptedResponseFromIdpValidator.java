@@ -9,7 +9,6 @@ import org.opensaml.xmlsec.signature.Signature;
 import uk.gov.ida.saml.core.validation.SamlValidationSpecificationFailure;
 
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.ida.notification.saml.deprecate.SamlTransformationErrorFactory.invalidStatusCode;
 import static uk.gov.ida.notification.saml.deprecate.SamlTransformationErrorFactory.invalidSubStatusCode;
