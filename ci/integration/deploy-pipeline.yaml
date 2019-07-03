@@ -1,13 +1,13 @@
----
-apiVersion: concourse.k8s.io/v1beta1
-kind: Pipeline
-metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: deploy
-spec:
-  exposed: true
-  pipelineString: |
+#---
+#apiVersion: concourse.k8s.io/v1beta1
+#kind: Pipeline
+#metadata:
+#  labels:
+#    controller-tools.k8s.io: "1.0"
+#  name: deploy
+#spec:
+#  exposed: true
+#  pipelineString: |
 
     github_source: &github_source
       uri: https://github.com/alphagov/verify-proxy-node.git
@@ -238,3 +238,86 @@ spec:
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
                 -f ./manifests/
+
+    - name: deploy-test-integration
+      serial: true
+      plan:
+
+        - get: release
+          trigger: true
+
+        - get: daily
+          trigger: true
+
+        - task: render-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: release
+            outputs:
+              - name: manifests
+            params:
+              CLUSTER_NAME: ((cluster.name))
+              CLUSTER_DOMAIN: ((cluster.domain))
+              RELEASE_NAME: test-integration
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            run:
+              path: /bin/bash
+              args:
+                - -eu
+                - -c
+                - |
+                  echo "preparing keyring..."
+                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  gpg --import key
+                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  echo "verifying package"
+                  helm verify ./release/*.tgz
+                  echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                  helm template \
+                    --name "${RELEASE_NAME}" \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --set "global.cluster.name=${CLUSTER_NAME}" \
+                    --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "stubConnector.enabled=true" \
+                    --output-dir "./manifests/" \
+                    ./release/*.tgz
+
+        - task: deploy-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAME: test-integration
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -eu
+                - -c
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                  kapp deploy \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --allow-ns "${RELEASE_NAMESPACE}" \
+                    --app "${APP_NAME}" \
+                    --diff-changes \
+                    --labels "app=${APP_NAME}" \
+                    -f ./manifests/
