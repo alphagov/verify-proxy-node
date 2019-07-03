@@ -1,13 +1,13 @@
-#---
-#apiVersion: concourse.k8s.io/v1beta1
-#kind: Pipeline
-#metadata:
-#  labels:
-#    controller-tools.k8s.io: "1.0"
-#  name: deploy
-#spec:
-#  exposed: true
-#  pipelineString: |
+---
+apiVersion: concourse.k8s.io/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: deploy
+spec:
+  exposed: true
+  pipelineString: |
 
     github_source: &github_source
       uri: https://github.com/alphagov/verify-proxy-node.git
@@ -263,6 +263,7 @@
               RELEASE_NAME: test-integration
               RELEASE_NAMESPACE: ((namespace-deployer.namespace))
               CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
             run:
               path: /bin/bash
               args:
@@ -283,6 +284,7 @@
                     --set "global.cluster.name=${CLUSTER_NAME}" \
                     --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
                     --set "stubConnector.enabled=true" \
+                    --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                     --output-dir "./manifests/" \
                     ./release/*.tgz
 
