@@ -14,6 +14,7 @@ import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.ExceptionToSamlErrorResponseMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.MissingMetadataExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -22,10 +23,11 @@ import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
-import uk.gov.ida.notification.shared.Urls;
+import uk.gov.ida.notification.shared.metadata.MetadataPublishingBundle;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.DispatcherType;
@@ -68,6 +70,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
+        bootstrap.addBundle(new MetadataPublishingBundle<>(GatewayConfiguration::getMetadataPublishingConfiguration));
     }
 
     @Override
@@ -132,6 +135,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             TranslatorProxy translatorProxy,
             SessionStore sessionStore,
             URI errorPageRedirectUrl) {
+
+        environment.jersey().register(new MissingMetadataExceptionMapper());
         environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore));
         environment.jersey().register(new ErrorPageExceptionMapper(errorPageRedirectUrl));
         environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));

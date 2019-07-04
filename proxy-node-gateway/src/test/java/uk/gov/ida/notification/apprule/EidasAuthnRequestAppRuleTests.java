@@ -57,7 +57,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -65,7 +67,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -73,7 +77,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -81,7 +87,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl)
+            ConfigOverride.config("redisService.url", mockedRedisUrl),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Test

@@ -29,6 +29,8 @@ import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate
 
 public class StubConnectorAppRuleTestBase {
 
+    protected static final String METADATA_PUBLISH_PATH = "/stub-connector-md-publish-path";
+
     private Map<String, NewCookie> cookies;
 
     @ClassRule
@@ -72,7 +74,10 @@ public class StubConnectorAppRuleTestBase {
             ConfigOverride.config("credentialConfiguration.type", "file"),
             ConfigOverride.config("credentialConfiguration.publicKey.type", "x509"),
             ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY)
+            ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY),
+
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", "metadata/test-stub-connector-metadata.xml"),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH)
     );
 
     protected String getEidasRequest() throws URISyntaxException {
@@ -94,8 +99,9 @@ public class StubConnectorAppRuleTestBase {
         Invocation.Builder request = stubConnectorAppRule.target("/SAML2/Response/POST")
                 .request();
 
-        if (cookies != null)
+        if (cookies != null) {
             request.cookie(cookies.get("stub-connector-session"));
+        }
 
         Response response = request.post(Entity.form(postForm));
         return response.readEntity(String.class);

@@ -66,7 +66,9 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
             ConfigOverride.config("redisService.url", redisMockURI),
-            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl)
+            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -74,7 +76,9 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI)
+            ConfigOverride.config("redisService.url", redisMockURI),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -82,7 +86,9 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", "redis://localhost:" + EMBEDDED_REDIS_PORT)
+            ConfigOverride.config("redisService.url", "redis://localhost:" + EMBEDDED_REDIS_PORT),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -90,7 +96,9 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientServerErrorRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI)
+            ConfigOverride.config("redisService.url", redisMockURI),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Rule
@@ -98,7 +106,9 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientClientErrorRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI)
+            ConfigOverride.config("redisService.url", redisMockURI),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataResourceFilePath", ""),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     private final Form postForm = new Form()

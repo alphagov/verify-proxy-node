@@ -16,6 +16,10 @@ logging:
   appenders:
     - type: logstash-console
 
+metadataPublishingConfiguration:
+  metadataResourceFilePath: ${CONNECTOR_METADATA_FILE_PATH}
+  metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH}
+
 eidasSamlParserService:
   url: ${EIDAS_SAML_PARSER_URL}
   clientConfig:
