@@ -1,4 +1,4 @@
-FROM amazonlinux:2.0.20190212
+FROM amazonlinux:2.0.20190508
 WORKDIR /cloudhsm
 
 # Install AWS CloudHSM client

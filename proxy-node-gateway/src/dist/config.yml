@@ -17,8 +17,8 @@ logging:
     - type: logstash-console
 
 metadataPublishingConfiguration:
-  metadataResourceFilePath: ${CONNECTOR_METADATA_FILE_PATH}
-  metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH}
+  metadataResourceFilePath: ${PROXY_NODE_METADATA_RESOURCE_FILE_PATH:-metadata/metadata.xml}
+  metadataPublishPath: ${PROXY_NODE_METADATA_PUBLISH_PATH:-/ServiceMetadata}
 
 eidasSamlParserService:
   url: ${EIDAS_SAML_PARSER_URL}

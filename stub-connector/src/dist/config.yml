@@ -14,8 +14,8 @@ logging:
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
 
 metadataPublishingConfiguration:
-  metadataResourceFilePath: ${CONNECTOR_METADATA_FILE_PATH}
-  metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH}
+  metadataResourceFilePath: ${CONNECTOR_METADATA_RESOURCE_FILE_PATH:-metadata/metadata.xml}
+  metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH:-/ConnectorMetadata}
 
 proxyNodeMetadataConfiguration:
   url: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}

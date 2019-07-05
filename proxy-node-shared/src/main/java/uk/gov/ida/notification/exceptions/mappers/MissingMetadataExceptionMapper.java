@@ -9,6 +9,6 @@ public class MissingMetadataExceptionMapper implements ExceptionMapper<MissingMe
 
     @Override
     public Response toResponse(MissingMetadataException exception) {
-        return Response.status(Response.Status.NOT_FOUND).entity("Metadata temporarily unavailable").build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Metadata temporarily unavailable").build();
     }
 }

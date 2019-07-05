@@ -81,7 +81,7 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
     public void shouldReturnNotFoundWhenProxyNodeMetadataMissing() throws URISyntaxException {
         final Response response = proxyNodeAppRuleMissingMetadata.target(METADATA_PUBLISH_PATH).request().get();
 
-        assertThat(response.getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
+        assertThat(response.getStatus()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     private String readResource(String resourcePath) throws IOException {

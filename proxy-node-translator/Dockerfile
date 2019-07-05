@@ -1,4 +1,4 @@
-FROM amazonlinux:2.0.20190212
+FROM amazonlinux:2.0.20190508
 
 # Install AWS CloudHSM client and libs
 RUN yum install -y wget tar gzip \
