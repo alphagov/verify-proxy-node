@@ -16,6 +16,10 @@ logging:
   appenders:
     - type: logstash-console
 
+metadataPublishingConfiguration:
+  metadataResourceFilePath: ${PROXY_NODE_METADATA_RESOURCE_FILE_PATH:-metadata/metadata.xml}
+  metadataPublishPath: ${PROXY_NODE_METADATA_PUBLISH_PATH:-/ServiceMetadata}
+
 eidasSamlParserService:
   url: ${EIDAS_SAML_PARSER_URL}
   clientConfig:

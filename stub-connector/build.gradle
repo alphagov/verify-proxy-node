@@ -7,6 +7,7 @@ repositories {
 
 dependencies {
     compile configurations.dropwizard,
+            configurations.dropwizard_assets,
             configurations.opensaml,
             configurations.eidas_saml,
             configurations.common,

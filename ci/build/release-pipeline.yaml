@@ -145,6 +145,7 @@ spec:
           trigger: true
         - get: vsp-src
           trigger: true
+        - get: release
       - in_parallel:
           limit: 3
           fail_fast: true
@@ -232,6 +233,8 @@ spec:
         - get: tests-image
           passed: ["build"]
           trigger: true
+        - get: release
+          passed: ["build"]
 
       - task: generate-chart-values
         config:
@@ -283,8 +286,6 @@ spec:
                 EOF
                 echo "merging with chart values..."
                 spruce merge ./src/chart/values.yaml ./overrides.yaml | tee -a chart-values/values.yaml
-
-      - get: release
 
       - task: generate-chart-version
         config:
@@ -379,6 +380,7 @@ spec:
             RELEASE_NAME: test
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
           run:
             path: /bin/bash
             args:
@@ -399,6 +401,7 @@ spec:
                 --namespace "${RELEASE_NAMESPACE}" \
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                 --set "stubConnector.enabled=true" \
                 --set "vsp.secretName=vsp" \
                 --output-dir "./manifests/" \

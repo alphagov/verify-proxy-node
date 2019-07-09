@@ -28,7 +28,18 @@ spec:
       - name: hsm-client-crt
         secret:
           secretName: {{ .Release.Name }}-connector-metadata
+      - name: connector-metadata-volume
+        secret:
+          secretName: {{ .Release.Name }}-connector-metadata
+          items:
+          - key: metadata.xml
+            path: metadata.xml
       containers:
+      - name: connector-metadata
+        volumeMounts:
+        - name: connector-metadata-volume
+          mountPath: /app/stub-connector/build/resources/main/metadata
+          readOnly: true
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
         imagePullPolicy: {{ .Values.stubConnector.image.pullPolicy }}

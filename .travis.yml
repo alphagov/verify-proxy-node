@@ -3,8 +3,10 @@ language: java
 env:
   global:
     - VERIFY_USE_PUBLIC_BINARIES=true
+  # CODACY_PROJECT_TOKEN
     - secure: "lQ0rlJwFtLRbk8aAexwXLKZUp6LNuC9TGhHUsYD92WGTT03QDTGDbpbpQXStLEPthMzbrX1qPp+GmcTqRKHgSISP6LAXOeAuI6AZtuc0NKzLd/425JiaksytDv0m4rfuozRveUyZRMq/geqTRvtEuRiW6qDKRT8l0emtkT2olM584gTp2fJZw9k6TgTPebrj70N9Ec7T3DSYBqaFnNduHHRBVlbqmrnGF6tfMGQZ0rcOZFiMYpIuwaX9b5+rfTR5ZjbuWzyjK0MQdfH8stFGSiAYcwu3+Wfp7w416SnwQh/J2plFcA8I2pKZ9Gl63eQBGeGAyh+4fqYZz7XiqFkoaBCKOyHDHtPeqdbNZCU0fgzbfdCBjULUiI51ItF1SFDg21WxxS3gJBkh1wBMU14CvYpcQOwe5rKc1emdfuRndmTrpheOehXjdF3eYfQlqAnIeyzMlpYf3PzNWJojjSLy0be/Q97pA6S44+RVWVJEz57BiEV+Hxy9rp9S/JFR2TSCCHEF7g9flGeX6ImTcz274eKtRAIU2Tx9MqbBcDkY/CfevrO1usaV6qQ4uheZxhjxzj5WkZ/p21+r2GZNHffgQylYlIqiG4ZJHlFBU4fpdD+Tb6y/sPyjMJdgIxMU1q4YSu5nux21LQ3bmKp7WvcJx+NzfQmQ2E4QSW21LvYrOpA="
-    - secure: "RWxtPrNRQkNZB4pW6FTXti9WdNntvaevSvk6V/E37XLoXJlqn7GxPcNSU2WBKY0kC7nq0QEkR44vPJwQ5zJvr5LFpwRjI5zw6WVeFV8N2n7zNDxIAD4zfUzJOzWmEK6ZJhtL5ISqjf/9L++VcbOys4pJX/2IIeqIVlivNCaOou5cj1owPaG80otzfcpH+aX2voSxpAtc2pyzWfN30O64NCJIdmo1fuaoQuNK2lqp+5NQhCqWDgWVnrGmw06Brwcw4XodvMGzNqbASq+o2mc8+vFQHI9wLScrRA4X3JfvHho5icUQoeKN7/ohRzBs+BoU/uURUfKfIam6cObJbFlcn9UlXS9l9LbpRaiUxvnRaXoas5OE3mSnCD+UfgzFf7cFYBSLcsQNOO5pzxvGGc8NzMN3XVo13vDAf6SOCfiR4cjKx9YdXvK10aHOA72zY9giFcmWieocT8Yth+EbXi7jshSuYKEB5ig8tqH4Os4vXVKNGqow4vxZf4f9AxeAK8mBAlD5Mbd00JU2euzkOF3DSgzEb1uxg4BzM7YBrm74b7F3X2GO0mDsKsP8ZsLy0p+cLORXSrcPt3wQTkDMo7jGaVkalxKCmTUU48q4v/5VLGMMVTbU861/5flC/CLGU19ABFnCG46AorcDagVcsTA9EOqllHVi2KwJPVxLr+CFx88="
+  # GITHUB_PAT
+    - secure: "Dsn7MKMlv02wwErdmmiZm0C9d0kRu9dJmvtoj0P0egi2EO7p6hWK6/mjYT+8kqnHq8k1TAJusdNJKYSYtbPdkGT93S9Ka9/cgpYs5qJZDSvXhVs08Pxc4DTdZWR8zzbLr0qNal110s2xmdFPNUbBTss6w9E2uHUJXtIlqFJGJCG0esjni/jldAw7w/Nilvv+8D71sADFCoelF7FbkRexa6+EnodT+aU4KL4/c+F+tPLc3ZtadTMVqT+0ly2uStkRvTByOTgxT0pOGY09MS6jop5ru8kXQCHI8VxhZEGh0e+neWFgO99y6hP9KhaHTk3ZVFhdSDZfsRjTDIn+/ajgRGHb0uIA+SQUoUWvjQNPfDiedKTptU6Qn1U0Iax/81YQIRwBCHTDwS15iZKKeDKzctlwdgj+y60Jr+IU0yQLFDzI4hBbpIYBfHhp8MJmLvtRouBM+KmKHa3oBROlXYOiExM7r7SG2HetLeLzL3uPBu2fef/ZcpP6Dsn+3BCTRq4oM6w7D5naMN8P08Ii7YvWPU/PAVyhbfY61/tncmJdDNiFkLbEueTd3/5M4XbqhUNFWdH5DUjJ/625QkUPy+XriQXwNsQrjyKqfP+Euct/IIIzx0iwhpV/hqDLv9kLSTnk0xeB8wwj4PVu4TP+p3kVFiUykHCNW2wPkzy9dE0ZqdU="
 
 jdk:
   - openjdk11
@@ -17,7 +19,7 @@ install:
   - npm install -g snyk@1.146.0
 
 script:
-  - ./gradlew --no-daemon --quiet test
+  - ./gradlew --no-daemon test
   - snyk/test.sh
   - libs/check-dependencies.sh
 
@@ -29,7 +31,6 @@ after_success:
   - snyk/monitor.sh
   - ./gradlew jacocoRootReport
   - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
-
 
 cache:
   directories:

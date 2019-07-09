@@ -6,10 +6,10 @@ import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
-import org.opensaml.saml.metadata.resolver.RoleDescriptorResolver;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 import org.opensaml.security.credential.Credential;
@@ -22,6 +22,7 @@ import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Metadata {
@@ -31,7 +32,7 @@ public class Metadata {
         this.metadataCredentialResolver = metadataCredentialResolver;
     }
 
-    public Credential getCredential(UsageType usageType, String entityId, QName descriptorQname) throws MissingMetadataException {
+    public Credential getCredential(UsageType usageType, String entityId, QName descriptorQname) throws InvalidMetadataException, MissingMetadataException {
         CriteriaSet criteria = new CriteriaSet();
         criteria.add(new EntityIdCriterion(entityId));
         criteria.add(new EntityRoleCriterion(descriptorQname));
@@ -40,11 +41,11 @@ public class Metadata {
         try {
             Credential credential = metadataCredentialResolver.resolveSingle(criteria);
             if (credential == null) {
-                throw new MissingMetadataException(String.format("Missing %s certificate from Connector Metadata with entityID %s", usageType, entityId));
+                throw new InvalidMetadataException(String.format("Missing %s certificate from Connector Metadata with entityID %s", usageType, entityId));
             }
             return credential;
         } catch (ResolverException ex) {
-            throw new InvalidMetadataException(String.format("Unable to resolve metadata credentials from Connector Metadata with entityID %s", entityId), ex);
+            throw new MissingMetadataException(String.format("Unable to resolve metadata credentials from Connector Metadata with entityID %s", entityId), ex);
         }
     }
 
@@ -53,9 +54,14 @@ public class Metadata {
         criteria.add(new EntityIdCriterion(entityId));
         criteria.add(new EntityRoleCriterion(role));
 
-        RoleDescriptorResolver roleDescriptorResolver = metadataCredentialResolver.getRoleDescriptorResolver();
+        final RoleDescriptor roleDescriptor = Optional.ofNullable(metadataCredentialResolver.getRoleDescriptorResolver())
+                .orElseThrow()
+                .resolveSingle(criteria);
 
-        return roleDescriptorResolver.resolveSingle(criteria).getEndpoints().stream()
+        return Optional.ofNullable(roleDescriptor)
+                .map(RoleDescriptor::getEndpoints)
+                .orElseThrow()
+                .stream()
                 .filter(sso -> sso.getBinding().equals(SAMLConstants.SAML2_POST_BINDING_URI))
                 .findFirst()
                 .orElseThrow();

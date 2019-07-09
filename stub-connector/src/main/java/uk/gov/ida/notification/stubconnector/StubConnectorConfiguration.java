@@ -3,6 +3,7 @@ package uk.gov.ida.notification.stubconnector;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
+import uk.gov.ida.notification.shared.metadata.MetadataPublishingConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
@@ -10,9 +11,10 @@ import javax.validation.constraints.NotNull;
 import java.net.URI;
 
 public class StubConnectorConfiguration extends Configuration {
-    @JsonProperty
+
     @Valid
     @NotNull
+    @JsonProperty
     private URI connectorNodeBaseUrl;
 
     @Valid
@@ -20,9 +22,14 @@ public class StubConnectorConfiguration extends Configuration {
     @JsonProperty
     private CredentialConfiguration credentialConfiguration;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
+    private MetadataPublishingConfiguration metadataPublishingConfiguration;
+
+    @Valid
+    @NotNull
+    @JsonProperty
     private TrustStoreBackedMetadataConfiguration proxyNodeMetadataConfiguration;
 
     public URI getConnectorNodeBaseUrl() {
@@ -35,6 +42,10 @@ public class StubConnectorConfiguration extends Configuration {
 
     public TrustStoreBackedMetadataConfiguration getProxyNodeMetadataConfiguration() {
         return proxyNodeMetadataConfiguration;
+    }
+
+    public MetadataPublishingConfiguration getMetadataPublishingConfiguration() {
+        return metadataPublishingConfiguration;
     }
 
     public CredentialConfiguration getCredentialConfiguration() {

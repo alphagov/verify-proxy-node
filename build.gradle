@@ -88,6 +88,7 @@ subprojects {
     configurations {
         common
         dropwizard
+        dropwizard_assets
         opensaml
         eidas_saml
         ida_utils
@@ -121,6 +122,10 @@ subprojects {
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
                 "io.dropwizard:dropwizard-json-logging:${dropwizard_version}",
                 "uk.gov.ida:dropwizard-logstash:1.3.5-68"
+        )
+
+        dropwizard_assets(
+                "io.dropwizard:dropwizard-assets:${dropwizard_version}",
         )
 
         opensaml(
