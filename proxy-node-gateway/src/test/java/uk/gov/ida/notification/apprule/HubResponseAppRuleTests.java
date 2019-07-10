@@ -2,7 +2,6 @@ package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
-import org.glassfish.jersey.internal.util.Base64;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +16,7 @@ import uk.gov.ida.notification.apprule.rules.TestTranslatorServerErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
+import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.shared.Urls;
 
@@ -31,6 +31,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.notification.apprule.rules.TestTranslatorClientErrorResource.SAML_ERROR_BLOB;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
@@ -102,15 +103,16 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     );
 
     private final Form postForm = new Form()
-            .param(SamlFormMessageType.SAML_RESPONSE, Base64.encodeAsString("I'm going to be a SAML blob"))
+            .param(SamlFormMessageType.SAML_RESPONSE, ValidationTestDataUtils.sample_hubSamlResponse)
             .param("RelayState", "relay-state");
 
     @Test
     public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception {
+        NewCookie sessionCookie = getSessionCookie(proxyNodeAppRule);
         Response response = proxyNodeAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
-                .cookie(getSessionCookie(proxyNodeAppRule))
+                .cookie(sessionCookie)
                 .post(Entity.form(postForm));
 
         assertThat(response.getStatus()).isEqualTo(200);
@@ -119,12 +121,15 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         HtmlHelpers.assertXPath(
                 htmlString,
                 String.format(
-                        "//form[@action='http://connector-node.com']/input[@name='SAMLResponse'][@value='%s']",
+                        "//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']",
+                        sample_destinationUrl,
                         TestTranslatorResource.SAML_SUCCESS_BLOB));
 
         HtmlHelpers.assertXPath(
                 htmlString,
-                "//form[@action='http://connector-node.com']/input[@name='RelayState'][@value='relay-state']");
+                String.format(
+                        "//form[@action='%s']/input[@name='RelayState'][@value='relay-state']",
+                        sample_destinationUrl));
     }
 
     @Test
@@ -186,12 +191,12 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
         HtmlHelpers.assertXPath(
                 htmlString,
-                String.format("//form[@action='http://connector-node.com']/input[@name='SAMLResponse'][@value='%s']", SAML_ERROR_BLOB)
+                String.format("//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']", sample_destinationUrl, SAML_ERROR_BLOB)
         );
 
         HtmlHelpers.assertXPath(
                 htmlString,
-                "//form[@action='http://connector-node.com']/input[@name='RelayState'][@value='relay-state']"
+                String.format("//form[@action='%s']/input[@name='RelayState'][@value='relay-state']", sample_destinationUrl)
         );
     }
 

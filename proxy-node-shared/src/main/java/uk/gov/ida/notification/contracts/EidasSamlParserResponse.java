@@ -2,6 +2,9 @@ package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
+import uk.gov.ida.notification.validations.ValidDestinationUriString;
+import uk.gov.ida.notification.validations.ValidPEM;
+import uk.gov.ida.notification.validations.ValidSamlId;
 
 import javax.validation.constraints.NotNull;
 
@@ -9,18 +12,21 @@ public class EidasSamlParserResponse {
 
     @JsonProperty
     @NotBlank
+    @ValidSamlId
     private String requestId;
 
     @JsonProperty
     @NotBlank
     private String issuer;
 
-    @NotNull
     @JsonProperty
+    @NotBlank
+    @ValidPEM
     private String connectorEncryptionPublicCertificate;
 
     @JsonProperty
     @NotBlank
+    @ValidDestinationUriString
     private String destination;
 
     @SuppressWarnings("Needed for serialisaiton")

@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_connectorEncryptionCertificate;
-import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_destinationUrl;
-import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_eidasRequestId;
-import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_levelofAssurance;
-import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_requestId;
-import static uk.gov.ida.notification.validations.ValidationTestDataUtils.sample_samlResponse;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_connectorEncryptionCertificate;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasRequestId;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_levelofAssurance;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_requestId;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlResponse;
 
 public class HubResponseTranslatorRequestValidationTests extends AbstractDtoValidationsTest<HubResponseTranslatorRequest> {
 
@@ -48,7 +48,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
     @Test
     public void shouldPassValidationWithValidParameters() {
         HubResponseTranslatorRequest goodRequest = new HubResponseTranslatorRequest(
-                sample_samlResponse,
+                sample_hubSamlResponse,
                 sample_requestId,
                 sample_eidasRequestId,
                 sample_levelofAssurance,

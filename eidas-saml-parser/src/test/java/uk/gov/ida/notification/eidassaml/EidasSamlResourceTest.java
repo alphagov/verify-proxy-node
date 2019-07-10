@@ -26,11 +26,14 @@ import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidat
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
+
+import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
 
 @SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
@@ -54,8 +57,8 @@ public class EidasSamlResourceTest {
     @Test
     public void shouldReturnRequestIdAndIssuer() throws Exception {
         String issuerAsString = "issuer";
-        String requestId = "request_id";
-        String destination = "destination";
+        String requestId = ValidationTestDataUtils.sample_requestId;
+        String destination = ValidationTestDataUtils.sample_destinationUrl;
         DateTime issueInstant = new DateTime(2019, 02, 28, 9, 54);
         Issuer issuer = ObjectUtils.createSamlObject(Issuer.class);
         issuer.setValue(issuerAsString);

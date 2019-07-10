@@ -4,7 +4,8 @@ dependencies {
             configurations.eidas_saml,
             configurations.ida_utils,
             configurations.verify_saml,
-            configurations.common
+            configurations.common,
+            configurations.proxy_node_shared
 }
 
 group = 'uk.gov.ida.notification.shared'

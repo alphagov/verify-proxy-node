@@ -12,9 +12,10 @@ import java.util.Date;
 
 public class PEMCertificateValidator implements ConstraintValidator<ValidPEM, String> {
 
-    // self-signed test cert is ~900-1000 chars
+    // Self-signed test cert is ~900-1000 chars.
+    // NL cert comes in at just over 2070 chars.
     public static final int MinLength = 512;
-    public static final int MaxLength = 2048;
+    public static final int MaxLength = 4096;
 
     @Override
     public void initialize(ValidPEM constraint) { /* intentionally blank */ }
@@ -42,7 +43,7 @@ public class PEMCertificateValidator implements ConstraintValidator<ValidPEM, St
             return false;
 
         } catch (Exception e) {
-            context.buildConstraintViolationWithTemplate("Exception: " + e.getMessage()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Unexpected exception: " + e.getMessage()).addConstraintViolation();
             return false;
         }
     }
