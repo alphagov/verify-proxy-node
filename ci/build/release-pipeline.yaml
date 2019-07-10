@@ -481,4 +481,3 @@ spec:
           tag: chart/tag
           globs:
           - chart/*.tgz*
-
