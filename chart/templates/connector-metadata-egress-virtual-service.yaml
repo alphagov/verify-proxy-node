@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-connector-metadata-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  hosts:
+  - {{ include "connector.metadata.host" . }}
+  gateways:
+  - {{ .Release.Name }}-connector-metadata-egress
+  - mesh
+  tls:
+  - match:
+    - gateways:
+      - {{ .Release.Name }}-connector-metadata-egress
+      port: {{ .Values.connector.metadata.port }}
+      sniHosts:
+      - {{ include "connector.metadata.host" . }}
+    route:
+    - destination:
+        host: {{ include "connector.metadata.host" . }}
+        port:
+          number: {{ .Values.connector.metadata.port }}
+      weight: 100
+  - match:
+    - gateways:
+      - mesh
+      port: {{ .Values.connector.metadata.port }}
+      sniHosts:
+      - {{ include "connector.metadata.host" . }}
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        subset: {{ .Release.Name }}-connector-metadata-egress
+        port:
+          number: {{ .Values.connector.metadata.port }}
+      weight: 100

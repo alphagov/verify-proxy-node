@@ -4,6 +4,7 @@ metadata:
   labels:
     controller-tools.k8s.io: "1.0"
   name: {{ .Release.Name }}-proxy-metadata
+  namespace: {{ .Release.Namespace }}
 spec:
   id: _entities
   type: proxy

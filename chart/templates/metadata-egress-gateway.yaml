@@ -1,0 +1,24 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Release.Name }}-metadata-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 443
+      name: tls-nl-metadata-443
+      protocol: TLS
+    hosts:
+    - {{ include "metadata.host" . }}
+    tls:
+      mode: PASSTHROUGH
+{{- end }}

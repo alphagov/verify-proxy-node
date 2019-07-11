@@ -1,20 +1,21 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.Name }}-metadata
+  name: {{ .Release.Name }}-gateway-ingress
+  namespace: {{ .Release.Namespace }}
   labels:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    app.kubernetes.io/name: {{ .Release.Name }}-metadata
+    app.kubernetes.io/name: {{ .Release.Name }}-gateway
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   hosts:
-  - {{ include "metadata.host" . }}
+  - {{ include "gateway.host" . }}
   gateways:
   - gsp-gsp-cluster.gsp-system
   http:
     - route:
       - destination:
-          host: {{ .Release.Name }}-proxy-metadata
+          host: {{ .Release.Name }}-gateway
           port:
             number: 80

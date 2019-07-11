@@ -23,10 +23,14 @@ https://{{ include "connector.host" . }}
 {{- end -}}
 {{- end -}}
 
-{{- define "connector.metadataURL" -}}
+{{- define "connector.metadata.host" -}}
 {{- if .Values.stubConnector.enabled -}}
-http://{{ .Release.Name }}-connector-metadata/metadata.xml
+{{- printf "%s-%s.%s" .Release.Name "connector-metadata" (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- else -}}
-{{ printf "%s" (required "connector.metadataURL or stubConnector.enabled required" .Values.connector.metadataURL) }}
+{{ printf "%s" (required "connector.metadata.fqdn or stubConnector.enabled required" .Values.connector.metadata.fqdn) }}
 {{- end -}}
+{{- end -}}
+
+{{- define "connector.metadata.url" -}}
+{{ printf "%s://%s%s" .Values.connector.metadata.scheme (include "connector.metadata.host" .) .Values.connector.metadata.path }}
 {{- end -}}

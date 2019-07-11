@@ -2,11 +2,25 @@ global:
   cluster:
     name:
     domain:
+  cloudHsm:
+    enabled: true
+    ip: 127.0.0.1
+
+hubFqdn: www.integration.signin.service.gov.uk
 
 connector:
   host:
   entityID:
-  metadataURL:
+  metadata:
+    # FIXME: Something for the future...
+    # This implies the scheme and port are configurable; they're not really.
+    # Baked into the istio ServiceEntry and VirtualService resources associated
+    # with the metadata endpoints is a structural assumption that it's TLS-based
+    # with routing being done by SNI.
+    fqdn:
+    scheme: https
+    port: 443
+    path: /metadata.xml
   metadataSigningTruststoreBase64:
   metadataSigningTruststorePassword: marshmallow
 
