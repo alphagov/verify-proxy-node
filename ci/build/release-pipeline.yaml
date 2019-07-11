@@ -145,7 +145,7 @@ spec:
           trigger: true
         - get: vsp-src
           trigger: true
-        - get: release
+        - get: chart
       - in_parallel:
           limit: 3
           fail_fast: true
@@ -233,7 +233,7 @@ spec:
         - get: tests-image
           passed: ["build"]
           trigger: true
-        - get: release
+        - get: chart
           passed: ["build"]
 
       - task: generate-chart-values
@@ -292,7 +292,7 @@ spec:
           platform: linux
           image_resource: *task_toolbox
           inputs:
-          - name: release
+          - name: chart
           outputs:
           - name: chart-version
           params:
