@@ -75,6 +75,7 @@ spec:
             RELEASE_NAME: nl-integration
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
             CLOUDHSM_IP: ((cluster.cloudHsmIp))
           run:
             path: /bin/bash
@@ -96,6 +97,7 @@ spec:
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
                 --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                 --set "stubConnector.enabled=true" \
                 --set "esp.image.repository=registry.london.verify.govsvc.uk/eidas/parser" \
                 --set "esp.image.tag=latest" \
