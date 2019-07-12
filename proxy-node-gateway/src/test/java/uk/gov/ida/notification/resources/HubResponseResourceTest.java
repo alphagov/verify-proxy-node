@@ -47,13 +47,13 @@ public class HubResponseResourceTest {
             "eidas_request_id_in_session",
             "issuer",
             "connector_public_cert_in_session",
-            "http://conector.node"
+            "http://connector.node"
         );
 
         AuthnRequestResponse vspResponse = new AuthnRequestResponse(
             "saml-request",
             "hub_request_id_in_session",
-            UriBuilder.fromUri("http://conector.node").build()
+            UriBuilder.fromUri("http://connector.node").build()
         );
 
         GatewaySessionData sessionData = new GatewaySessionData(
@@ -84,7 +84,7 @@ public class HubResponseResourceTest {
         assertThat("eidas_request_id_in_session").isEqualTo(request.getEidasRequestId());
         assertThat("connector_public_cert_in_session").isEqualTo(request.getConnectorEncryptionCertificate());
 
-        assertThat("http://conector.node").isEqualTo(response.getPostUrl());
+        assertThat("http://connector.node").isEqualTo(response.getPostUrl());
         assertThat("SAMLResponse").isEqualTo(response.getSamlMessageType());
         assertThat("translated_eidas_response").isEqualTo(response.getEncodedSamlMessage());
         assertThat(HubResponseResource.SUBMIT_TEXT).isEqualTo(response.getSubmitText());

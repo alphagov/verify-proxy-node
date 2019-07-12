@@ -84,8 +84,10 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(response.getStatus()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
-    private String readResource(String resourcePath) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(
-                getClass().getClassLoader().getResource(resourcePath).getPath())));
+    @Test
+    public void shouldReturnGoodResponseForFavicon() throws URISyntaxException {
+        final Response response = proxyNodeAppRule.target("/favicon.ico").request().get();
+        assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEmpty();
     }
 }

@@ -18,6 +18,7 @@ import uk.gov.ida.notification.exceptions.mappers.MissingMetadataExceptionMapper
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
+import uk.gov.ida.notification.resources.AssetsResource;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
 import uk.gov.ida.notification.session.storage.InMemoryStorage;
@@ -74,8 +75,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     @Override
-    public void run(final GatewayConfiguration configuration,
-                    final Environment environment) {
+    public void run(final GatewayConfiguration configuration, final Environment environment) {
 
         final ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("gateway");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
@@ -90,7 +90,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         final TranslatorProxy translatorProxy = configuration
                 .getTranslatorServiceConfiguration()
                 .buildTranslatorProxy(environment);
-
 
         registerProviders(environment);
         registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage);
@@ -159,6 +158,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         environment.lifecycle().manage(sessionStorage);
 
+        environment.jersey().register(AssetsResource.class);
         environment.jersey().register(new EidasAuthnRequestResource(
                 espProxy,
                 vspProxy,
