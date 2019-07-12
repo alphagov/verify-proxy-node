@@ -78,7 +78,7 @@ spec:
       icon: file-document
       source:
         <<: *github_source
-        drafts: true
+        pre_release: true
         
     - name: release
       type: github-release
