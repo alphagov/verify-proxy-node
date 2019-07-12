@@ -2,11 +2,11 @@ package uk.gov.ida.notification.exceptions.metadata;
 
 public class MissingMetadataException extends RuntimeException {
 
-    public MissingMetadataException(String metadataLocation) {
-        super("Metadata missing from " + metadataLocation);
+    public MissingMetadataException(String metadataFileLocation) {
+        this(metadataFileLocation, null);
     }
 
-    public MissingMetadataException(String message, Throwable cause) {
-        super(message, cause);
+    public MissingMetadataException(String metadataFileLocation, Throwable cause) {
+        super("Failed to read metadata from file: " + metadataFileLocation, cause);
     }
 }

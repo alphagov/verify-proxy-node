@@ -4,8 +4,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -21,15 +21,14 @@ public class MetadataPublishingResourceTest {
 
     @Test
     public void shouldReturnExistingMetadataResource() throws URISyntaxException, IOException {
-        final String metadataFilePath = "metadata/test-metadata.xml";
-        final String expectedMetadata = new String(Files.readAllBytes(Paths.get(
-                getClass().getClassLoader().getResource(metadataFilePath).getPath())));
+        final String metadataResourcePath = "metadata/test-metadata.xml";
+        final String metadataFilePath = getClass().getClassLoader().getResource(metadataResourcePath).getPath();
+        final String expectedMetadata = new String(Files.readAllBytes(Paths.get(metadataFilePath)));
 
-        URI metadataResourcePath = new URI(metadataFilePath);
-        metadataPublishingResource = new MetadataPublishingResource(metadataResourcePath);
+        metadataPublishingResource = new MetadataPublishingResource(new URI(metadataFilePath));
 
         final String metadata = IOUtils.toString(
-                (BufferedInputStream) metadataPublishingResource.getMetadata().getEntity(), StandardCharsets.UTF_8);
+                (InputStream) metadataPublishingResource.getMetadata().getEntity(), StandardCharsets.UTF_8);
 
         assertThat(metadata).isEqualTo(expectedMetadata);
     }

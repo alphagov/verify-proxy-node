@@ -66,7 +66,6 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private static final String EIDAS_TEST_CONNECTOR_DESTINATION = "http://proxy-node/SAML2/SSO/Response";
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
-    private static final String PUBLIC_BUILD = System.getenv("VERIFY_USE_PUBLIC_BINARIES");
 
     private BasicCredential hubSigningCredential;
     private EncryptedAssertion authnAssertion;

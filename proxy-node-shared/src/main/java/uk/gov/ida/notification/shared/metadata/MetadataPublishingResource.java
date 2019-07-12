@@ -5,38 +5,38 @@ import uk.gov.ida.notification.exceptions.metadata.MissingMetadataException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
-import java.util.Optional;
 
 public class MetadataPublishingResource {
 
-    private final String metadataResourcePath;
+    private final String metadataFilePath;
 
     @Inject
-    public MetadataPublishingResource(@Named("metadataResourceFilePath") URI metadataResourcePath) {
-        this.metadataResourcePath = metadataResourcePath.toString();
+    public MetadataPublishingResource(@Named("metadataFilePath") URI metadataFilePath) {
+        this.metadataFilePath = metadataFilePath.toString();
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
     public Response getMetadata() {
-        final Optional<File> metadataResourceFile = Optional.of(getClass())
-                .map(Class::getClassLoader)
-                .map(l -> l.getResource(metadataResourcePath))
-                .map(URL::getPath)
-                .map(File::new);
 
-        if (metadataResourceFile.isEmpty() || !metadataResourceFile.get().exists()) {
-            throw new MissingMetadataException(metadataResourcePath);
+        final File metadataFile = new File(metadataFilePath);
+        if (!metadataFile.exists()) {
+            throw new MissingMetadataException(metadataFilePath);
         }
 
-        final InputStream metadataResource = getClass().getClassLoader().getResourceAsStream(metadataResourcePath);
-        return Response.ok(metadataResource, MediaType.APPLICATION_XML).build();
+        final InputStream metadataFileInputStream;
+        try {
+            metadataFileInputStream = new FileInputStream(metadataFile);
+        } catch (FileNotFoundException e) {
+            throw new MissingMetadataException(metadataFilePath, e);
+        }
+
+        return Response.ok(metadataFileInputStream, MediaType.APPLICATION_XML).build();
     }
 }

@@ -42,7 +42,7 @@ public class MetadataPublishingBundle<T extends Configuration> implements Config
         return new AbstractBinder() {
             @Override
             protected void configure() {
-                bind(configuration.getMetadataResourceFilePath()).to(URI.class).named("metadataResourceFilePath");
+                bind(configuration.getMetadataFilePath()).to(URI.class).named("metadataFilePath");
             }
         };
     }

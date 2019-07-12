@@ -41,7 +41,7 @@ spec:
         imagePullPolicy: {{ .Values.stubConnector.image.pullPolicy }}
         volumeMounts:
         - name: connector-metadata-volume
-          mountPath: /app/stub-connector/build/resources/main/metadata
+          mountPath: /app/metadata
           readOnly: true
         ports:
         - name: http
