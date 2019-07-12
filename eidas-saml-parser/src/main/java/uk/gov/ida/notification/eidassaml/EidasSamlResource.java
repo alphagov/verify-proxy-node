@@ -9,6 +9,7 @@ import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
@@ -23,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
+@IngressEgressLogging
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class EidasSamlResource {

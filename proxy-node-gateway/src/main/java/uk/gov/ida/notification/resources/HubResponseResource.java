@@ -8,6 +8,7 @@ import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.Urls;
 
@@ -19,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+@IngressEgressLogging
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class HubResponseResource {
 
