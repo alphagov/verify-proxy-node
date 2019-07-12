@@ -304,7 +304,7 @@ spec:
             - -c
             - |
               echo "bumping release number..."
-              CURRENT_TAG=$(cat release/tag)
+              CURRENT_TAG=$(cat chart/tag)
               awk -F. '/[0-9]+\./{$NF++;print}' OFS=. <<< "${CURRENT_TAG}" > chart-version/tag
               NEW_TAG=$(cat chart-version/tag)
               echo "${NEW_TAG}" > chart-version/name
