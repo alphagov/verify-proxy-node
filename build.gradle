@@ -87,6 +87,7 @@ subprojects {
 
     configurations {
         common
+        dev_pki
         dropwizard
         dropwizard_assets
         opensaml
@@ -169,6 +170,10 @@ subprojects {
                 because "saml_lib_version 185 has a dep on bcprov-jdk15on:1.59 which is vulnerable to CVE-2018-1000180"
             }
         }
+
+        dev_pki(
+                "uk.gov.ida:ida-dev-pki:1.1.0-38"
+        )
 
         verify_saml_test(
                 "uk.gov.ida:saml-test:${saml_lib_version}",
