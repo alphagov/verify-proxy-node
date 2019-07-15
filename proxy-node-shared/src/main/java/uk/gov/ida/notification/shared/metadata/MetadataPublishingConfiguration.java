@@ -11,18 +11,18 @@ public class MetadataPublishingConfiguration {
     @Valid
     @NotNull
     @JsonProperty
-    private URI metadataResourceFilePath;
+    private URI metadataFilePath;
 
     @Valid
     @NotNull
     @JsonProperty
     private URI metadataPublishPath;
 
-    public URI getMetadataResourceFilePath() {
-        return metadataResourceFilePath;
+    URI getMetadataFilePath() {
+        return metadataFilePath;
     }
 
-    public URI getMetadataPublishPath() {
+    URI getMetadataPublishPath() {
         return metadataPublishPath;
     }
 }

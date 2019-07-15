@@ -36,7 +36,7 @@ spec:
         imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
         volumeMounts:
         - name: proxy-node-metadata-volume
-          mountPath: /app/proxy-node-gateway/build/resources/main/metadata
+          mountPath: /app/metadata
           readOnly: true
         ports:
         - name: http

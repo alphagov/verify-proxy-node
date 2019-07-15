@@ -12,6 +12,7 @@ import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
@@ -28,6 +29,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 
+@IngressEgressLogging
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
 
@@ -47,7 +49,6 @@ public class EidasAuthnRequestResource {
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.sessionStorage = sessionStorage;
     }
-
 
     @GET
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH)

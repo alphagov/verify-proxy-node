@@ -23,6 +23,7 @@ import se.litsec.opensaml.saml2.common.response.ResponseValidator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
+@IngressEgressLogging
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
 

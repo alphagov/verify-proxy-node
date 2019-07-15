@@ -49,7 +49,7 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
     @Override
     public Response toResponse(FailureSamlResponseException exception) {
         ProxyNodeLogger.logException(exception, Level.WARNING,
-                                     format("Error whilst contacting uri [{0}]", uriInfo.getPath()));
+                                     format("Error whilst contacting URI [{0}]", uriInfo.getAbsolutePath()));
 
         final String sessionId = httpServletRequest.getSession().getId();
         final GatewaySessionData sessionData = getSessionData(sessionId);

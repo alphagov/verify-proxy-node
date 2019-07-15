@@ -21,6 +21,7 @@ import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.saml.SignatureSigningParametersHelper;
 import uk.gov.ida.notification.saml.metadata.Metadata;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.stubconnector.EidasAuthnRequestContextFactory;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 import uk.gov.ida.notification.stubconnector.views.StartPageView;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Path("/")
+@IngressEgressLogging
 public class SendAuthnRequestResource {
     private final StubConnectorConfiguration configuration;
     private final Metadata proxyNodeMetadata;

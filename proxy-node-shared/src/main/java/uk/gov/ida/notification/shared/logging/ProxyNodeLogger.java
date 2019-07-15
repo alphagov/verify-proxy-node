@@ -30,16 +30,20 @@ public class ProxyNodeLogger {
         log(Level.SEVERE, message);
     }
 
+    public static void logException(Throwable exception, String message) {
+        logException(exception, Level.SEVERE, message);
+    }
+
     public static void logException(Throwable exception, Level level, String message) {
         addExceptionContext(exception);
-        log(level, message);
+        log(level, message, exception);
     }
 
     private static void log(Level level, String message) {
         logWithCallingFrame(level, () -> message, null);
     }
 
-    private static void log(Level level, String message, Exception exception) {
+    private static void log(Level level, String message, Throwable exception) {
         logWithCallingFrame(level, () -> message, exception);
     }
 
@@ -52,7 +56,7 @@ public class ProxyNodeLogger {
         addContext(ProxyNodeMDCKey.EXCEPTION_STACKTRACE, ExceptionUtils.getStackTrace(exception));
     }
 
-    private static void logWithCallingFrame(Level level, Supplier<String> message, Exception exception) {
+    private static void logWithCallingFrame(Level level, Supplier<String> message, Throwable exception) {
         Optional<StackWalker.StackFrame> callingFrame = getCallingStackFrame();
         callingFrame.ifPresent(f -> {
             addContext(ProxyNodeMDCKey.LOG_LOCATION, String.format("%s.%s", f.getClassName(), f.getMethodName()));

@@ -11,11 +11,10 @@ public class MetadataAppRuleTests extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldConsumeMetadata() throws Exception {
         Response response = eidasSamlParserAppRule.target("healthcheck", eidasSamlParserAppRule.getAdminPort())
-            .request()
-            .get();
+                .request()
+                .get();
 
-        String healthcheck = response.readEntity(String.class);
-
-        assertThat(healthcheck).contains("\"connector-metadata\":{\"healthy\":true}");
+        final String healthCheck = response.readEntity(String.class);
+        assertThat(healthCheck).contains("\"connector-metadata\":{\"healthy\":true}");
     }
 }
