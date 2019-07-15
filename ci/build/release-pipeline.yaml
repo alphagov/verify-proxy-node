@@ -377,6 +377,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
             RELEASE_NAME: test
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
@@ -401,6 +402,7 @@ spec:
                 --namespace "${RELEASE_NAMESPACE}" \
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
                 --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                 --set "stubConnector.enabled=true" \
                 --set "vsp.secretName=vsp" \
