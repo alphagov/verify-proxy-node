@@ -25,7 +25,7 @@ spec:
         host: istio-egressgateway.istio-system.svc.cluster.local
         subset: {{ .Release.Name }}-connector-metadata-egress
         port:
-          number: {{ .Values.connector.metadata.port }}
+          number: 443
       weight: 100
   exportTo:
   - "."
