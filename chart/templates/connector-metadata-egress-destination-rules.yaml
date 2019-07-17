@@ -12,5 +12,12 @@ spec:
   host: istio-egressgateway.istio-system.svc.cluster.local
   subsets:
   - name: {{ .Release.Name }}-connector-metadata-egress
+    trafficPolicy:
+      portLevelSettings:
+      - port:
+          number: 443
+        tls:
+          mode: ISTIO_MUTUAL
+          sni: {{ include "connector.metadata.host" . }}
   exportTo:
   - "."
