@@ -12,21 +12,8 @@ spec:
   hosts:
   - {{ include "connector.metadata.host" . }}
   gateways:
-  - {{ .Release.Name }}-connector-metadata-egress
   - mesh
   tls:
-  - match:
-    - gateways:
-      - {{ .Release.Name }}-connector-metadata-egress
-      port: {{ .Values.connector.metadata.port }}
-      sniHosts:
-      - {{ include "connector.metadata.host" . }}
-    route:
-    - destination:
-        host: {{ include "connector.metadata.host" . }}
-        port:
-          number: {{ .Values.connector.metadata.port }}
-      weight: 100
   - match:
     - gateways:
       - mesh
@@ -40,3 +27,5 @@ spec:
         port:
           number: {{ .Values.connector.metadata.port }}
       weight: 100
+  exportTo:
+  - "."

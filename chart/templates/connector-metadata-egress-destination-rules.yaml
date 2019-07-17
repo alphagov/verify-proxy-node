@@ -12,3 +12,5 @@ spec:
   host: istio-egressgateway.istio-system.svc.cluster.local
   subsets:
   - name: {{ .Release.Name }}-connector-metadata-egress
+  exportTo:
+  - "."
