@@ -59,7 +59,7 @@ spec:
         - name: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: postURL
         - name: CONNECTOR_NODE_ENTITY_ID
           value: {{ include "connector.entityID" . }}

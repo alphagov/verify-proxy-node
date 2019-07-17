@@ -3,15 +3,15 @@ kind: CertificateRequest
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: {{ .Release.Name }}-proxy-node-metadata-signing-cert
+  name: {{ .Release.Name }}-connector-metadata-signing-cert
   namespace: {{ .Release.Namespace }}
 spec:
   countryCode: GB
-  commonName: Verify Proxy Node Metadata Signing
+  commonName: Stub Connector Metadata Signing
   expiryMonths: 9
-  organization: Cabinet Office
-  organizationUnit: GDS
-  location: London
+  organization: EU Member State
+  organizationUnit: Test
+  location: EU
   CACert: false
   certificateAuthority:
     secretName: proxy-node-metadata-ca

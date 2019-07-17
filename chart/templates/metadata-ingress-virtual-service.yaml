@@ -16,6 +16,6 @@ spec:
   http:
     - route:
       - destination:
-          host: {{ .Release.Name }}-proxy-metadata
+          host: {{ .Release.Name }}-proxy-node-metadata
           port:
             number: 80

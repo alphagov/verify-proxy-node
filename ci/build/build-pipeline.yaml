@@ -4,7 +4,7 @@ kind: Pipeline
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: release
+  name: build-release
 spec:
   exposed: true
   pipelineString: |

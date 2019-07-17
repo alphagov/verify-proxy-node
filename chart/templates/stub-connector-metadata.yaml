@@ -10,25 +10,25 @@ spec:
   id: _entities
   type: connector
   data:
-    entityID: https://{{ include "connector.host" . }}
+    entityID: https://{{ include "connector.host" . }}/ConnectorMetadata
     postURL: https://{{ include "connector.host" . }}/SAML2/Response/POST
     redirectURL: https://{{ include "connector.host" . }}/Redirect
     orgName: {{ .Release.Name }}
     orgDisplayName: {{ .Release.Name }}
-    orgURL: example.com
-    contactCompany: example
-    contactGivenName: jeff
-    contactSurname: jefferson
+    orgURL: https://{{ include "connector.host" . }}
+    contactCompany: Stub Connector
+    contactGivenName: Jeff
+    contactSurname: Jefferson
     contactEmail: jeff@example.local
   enabled: true
   samlSigningCertRequest:
-    countryCode: GB
-    commonName: Stub Country SAML Signing
-    expiryMonths: 4
-    organization: Stub Country
-    organizationUnit: STUB
-    location: London
+    countryCode: EU
+    commonName: Stub Connector SAML Signing
+    expiryMonths: 2
+    organization: EU Member State
+    organizationUnit: Test
+    location: EU
   certificateAuthority:
-    secretName: {{ .Release.Name }}-metadata-cert
+    secretName: {{ .Release.Name }}-connector-metadata-signing-cert
     namespace: {{ .Release.Namespace }}
 {{- end -}}
