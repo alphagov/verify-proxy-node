@@ -2,7 +2,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ .Release.Name }}-metadata-egress
+  name: {{ .Release.Name }}-stub-connector-gateway-egress
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: proxy-node
@@ -18,7 +18,7 @@ spec:
       name: tls-nl-metadata-443
       protocol: TLS
     hosts:
-    - {{ include "metadata.host" . }}
+    - {{ include "gateway.host" . }}
     tls:
       mode: PASSTHROUGH
 {{- end }}

@@ -10,12 +10,12 @@ spec:
   id: _entities
   type: connector
   data:
-    entityID: https://{{ include "connector.host" . }}/ConnectorMetadata
-    postURL: https://{{ include "connector.host" . }}/SAML2/Response/POST
-    redirectURL: https://{{ include "connector.host" . }}/Redirect
+    entityID: {{ include "connector.entityID" . }}
+    postURL: https://{{ include "stubConnector.host" . }}/SAML2/Response/POST
+    redirectURL: https://{{ include "stubConnector.host" . }}/Redirect
     orgName: {{ .Release.Name }}
     orgDisplayName: {{ .Release.Name }}
-    orgURL: https://{{ include "connector.host" . }}
+    orgURL: https://{{ include "stubConnector.host" . }}
     contactCompany: Stub Connector
     contactGivenName: Jeff
     contactSurname: Jefferson
