@@ -27,7 +27,7 @@ spec:
       volumes:
       - name: hsm-client-crt
         secret:
-          secretName: {{ .Release.Name }}-proxy-metadata
+          secretName: {{ .Release.Name }}-proxy-node-metadata
       containers:
       - name: translator
         image: "{{ .Values.translator.image.repository }}:{{ .Values.translator.image.tag }}"
@@ -58,32 +58,32 @@ spec:
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: entityID
         - name: SIGNER_CONFIG_TYPE
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: samlSigningKeyType
         - name: HSM_SIGNING_KEY_LABEL
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: samlSigningKeyLabel
         - name: SIGNING_CERT
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: samlSigningCertBase64
         - name: HSM_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: hsmUser
         - name: HSM_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: hsmPassword
         - name: VERIFY_SERVICE_PROVIDER_URL
           value: http://{{ .Release.Name }}-vsp/
@@ -94,7 +94,7 @@ spec:
         - name: HSM_IP
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: hsmIP
         volumeMounts:
         - name: hsm-client-crt

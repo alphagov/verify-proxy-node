@@ -63,26 +63,26 @@ spec:
         - name: PORT
           value: "80"
         - name: CONNECTOR_NODE_BASE_URL
-          value: https://{{ include "connector.host" . }}
+          value: https://{{ include "stubConnector.host" . }}
         - name: PROXY_NODE_ENTITY_ID
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: entityID
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: entityID
         - name: PROXY_NODE_METADATA_TRUSTSTORE
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: metadataSigningTruststoreBase64
         - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: metadataSigningTruststorePassword
         - name: SIGNER_CONFIG_TYPE
           valueFrom:

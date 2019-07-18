@@ -9,7 +9,6 @@ global:
 hubFqdn: www.integration.signin.service.gov.uk
 
 connector:
-  host:
   entityID:
   metadata:
     # FIXME: Something for the future...
@@ -20,7 +19,7 @@ connector:
     fqdn:
     scheme: https
     port: 443
-    path: /metadata.xml
+    path: /ConnectorMetadata
   metadataSigningTruststoreBase64:
   metadataSigningTruststorePassword: marshmallow
 
@@ -54,6 +53,7 @@ translator:
   connectorNodeNationalityCode: EU
 
 stubConnector:
+  host:
   enabled: false
   replicaCount: 1
   image:

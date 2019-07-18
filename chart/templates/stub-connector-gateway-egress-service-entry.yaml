@@ -1,8 +1,8 @@
 {{- if .Values.stubConnector.enabled -}}
 apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
+kind: ServiceEntry
 metadata:
-  name: {{ .Release.Name }}-egressgateway-for-metadata
+  name: {{ .Release.Name }}-stub-connector-gateway-egress
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: proxy-node
@@ -10,7 +10,12 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
-  host: istio-egressgateway.istio-system.svc.cluster.local
-  subsets:
-    - name: {{ .Release.Name }}-metadata-egress
+  hosts:
+  - {{ include "gateway.host" . }}
+  ports:
+  - name: https
+    number: 443
+    protocol: TLS
+  location: MESH_EXTERNAL
+  resolution: DNS
 {{- end }}

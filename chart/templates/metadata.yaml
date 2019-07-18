@@ -3,19 +3,19 @@ kind: Metadata
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: {{ .Release.Name }}-proxy-metadata
+  name: {{ .Release.Name }}-proxy-node-metadata
   namespace: {{ .Release.Namespace }}
 spec:
   id: _entities
   type: proxy
   data:
-    entityID: https://{{ include "metadata.host" . }}/metadata.xml
+    entityID: https://{{ include "gateway.host" . }}/ServiceMetadata
     postURL: https://{{ include "gateway.host" . }}/SAML2/SSO/POST
     redirectURL: https://{{ include "gateway.host" . }}/Redirect
-    orgName: {{ .Release.Name }}
-    orgDisplayName: {{ .Release.Name }}
+    orgName: Government Digital Service
+    orgDisplayName: GDS
     orgURL: https://www.gov.uk/verify
-    contactCompany: GOV.UK Verify
+    contactCompany: GDS
     contactGivenName: GOV.UK Verify
     contactSurname: Support
     contactEmail: idasupport@digital.cabinet-office.gov.uk
@@ -23,10 +23,10 @@ spec:
   samlSigningCertRequest:
     countryCode: GB
     commonName: Verify Proxy Node SAML Signing
-    expiryMonths: 4
+    expiryMonths: 2
     organization: Cabinet Office
     organizationUnit: GDS
     location: London
   certificateAuthority:
-    secretName: {{ .Release.Name }}-metadata-cert
+    secretName: {{ .Release.Name }}-proxy-node-metadata-signing-cert
     namespace: {{ .Release.Namespace }}
