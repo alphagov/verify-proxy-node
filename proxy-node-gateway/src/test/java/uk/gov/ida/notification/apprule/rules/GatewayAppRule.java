@@ -37,6 +37,7 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("logging.appenders[0].type", "console"));
         configOverridesList.add(ConfigOverride.config("errorPageRedirectUrl", ERROR_PAGE_REDIRECT_URL));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
