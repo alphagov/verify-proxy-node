@@ -64,6 +64,7 @@ spec:
       icon: github-circle
       source:
         <<: *github_source
+        ignore_paths: [cloudhsm, proxy-node-vsp-config]
         branch: master
 
     - name: vsp-src
@@ -71,6 +72,22 @@ spec:
       type: git
       source:
         uri: https://github.com/alphagov/verify-service-provider.git
+        branch: master
+
+    - name: vsp-config
+      icon: file-document-box-check-outline
+      type: git
+      source:
+        <<: *github_source
+        paths: [proxy-node-vsp-config]
+        branch: master
+
+    - name: cloudhsm-config
+      type: github
+      icon: folder-key-network-outline
+      source:
+        <<: *github_source
+        paths: [cloudhsm]
         branch: master
 
     - name: chart
@@ -122,12 +139,19 @@ spec:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/stub-connector
 
-    - name: cloudhsm-image
+    - name: cloudhsm-client-image
       type: harbor
       icon: folder-key-network
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/cloudhsm
+        repository: registry.((cluster.domain))/eidas/cloudhsm-client
+
+    - name: cloudhsm-jce-image
+      type: harbor
+      icon: puzzle
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/cloudhsm-jce-gradle
 
     - name: verify-service-provider-image
       type: harbor
@@ -136,22 +160,72 @@ spec:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/verify-service-provider
 
+    groups:
+      - name: proxy-node
+        jobs: [build]
+      - name: base-images
+        jobs: [build-base-images]
+      - name: all
+        jobs: [build-base-images, build]
+
     jobs:
+
+    - name: build-base-images
+      serial: true
+      serial_groups: [build-base-images]
+      plan:
+      - in_parallel:
+        - get: src
+        - get: vsp-src
+          trigger: true
+        - get: cloudhsm-config
+          trigger: true
+        - get: vsp-config
+          trigger: true
+      - in_parallel:
+          - put: cloudhsm-client-image
+            get_params: {skip_download: true}
+            params:
+              build: src/cloudhsm
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: cloudhsm-jce-image
+            get_params: {skip_download: true}
+            params:
+              build: src/cloudhsm/base-images/jdk11-jce-gradle
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
+          - put: verify-service-provider-image
+            get_params: {skip_download: true}
+            params:
+              build: vsp-src
+              build_args: {VERIFY_USE_PUBLIC_BINARIES: "false"}
+              dockerfile: src/proxy-node-vsp-config/Dockerfile
+              tag_file: src/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
 
     - name: build
       serial: true
+      serial_groups: [build-base-images]
       plan:
       - in_parallel:
         - get: src
           trigger: true
-        - get: vsp-src
+        - get: cloudhsm-jce-image
+          passed: ["build-base-images"]
           trigger: true
+          params: {skip_download: true}
       - in_parallel:
           limit: 3
           fail_fast: true
           steps:
           - put: gateway-image
+            get_params: {skip_download: true}
             params:
+              cache: true
               build: src
               build_args:
                 component: proxy-node-gateway
@@ -159,16 +233,20 @@ spec:
               tag_as_latest: true
               tag_prefix: v
           - put: translator-image
+            get_params: {skip_download: true}
             params:
+              cache: true
               build: src
-              dockerfile: src/proxy-node-translator/Dockerfile
+              dockerfile: src/cloudhsm/base-images/jdk11-jre/Dockerfile
               build_args:
                 component: proxy-node-translator
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
           - put: parser-image
+            get_params: {skip_download: true}
             params:
+              cache: true
               build: src
               build_args:
                 component: eidas-saml-parser
@@ -176,29 +254,20 @@ spec:
               tag_as_latest: true
               tag_prefix: v
           - put: stub-connector-image
+            get_params: {skip_download: true}
             params:
+              cache: true
               build: src
-              dockerfile: src/stub-connector/Dockerfile
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
-          - put: cloudhsm-image
-            params:
-              build: src/cloudhsm
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
-          - put: verify-service-provider-image
-            params:
-              build: vsp-src
+              dockerfile: src/cloudhsm/base-images/jdk11-jre/Dockerfile
               build_args:
-                VERIFY_USE_PUBLIC_BINARIES: "false"
-              dockerfile: src/proxy-node-vsp-config/Dockerfile.internal
+                component: stub-connector
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
           - put: tests-image
+            get_params: {skip_download: true}
             params:
+              cache: true
               build: src/proxy-node-acceptance-tests
               tag_file: src/.git/short_ref
               tag_as_latest: true
@@ -215,24 +284,27 @@ spec:
         - get: gateway-image
           passed: ["build"]
           trigger: true
+          params: {skip_download: true}
         - get: translator-image
           passed: ["build"]
           trigger: true
+          params: {skip_download: true}
         - get: parser-image
           passed: ["build"]
           trigger: true
+          params: {skip_download: true}
         - get: stub-connector-image
           passed: ["build"]
           trigger: true
-        - get: cloudhsm-image
-          passed: ["build"]
+          params: {skip_download: true}
+        - get: cloudhsm-client-image
+          passed: ["build-base-images"]
           trigger: true
+          params: {skip_download: true}
         - get: verify-service-provider-image
-          passed: ["build"]
+          passed: ["build-base-images"]
           trigger: true
-        - get: tests-image
-          passed: ["build"]
-          trigger: true
+          params: {skip_download: true}
         - get: release
 
       - task: generate-chart-values
@@ -245,7 +317,7 @@ spec:
           - name: translator-image
           - name: parser-image
           - name: stub-connector-image
-          - name: cloudhsm-image
+          - name: cloudhsm-client-image
           - name: verify-service-provider-image
           outputs:
           - name: chart-values
@@ -272,8 +344,8 @@ spec:
                     tag: $(cat translator-image/digest | cut -d ':' -f 2)
                 hsm:
                   image:
-                    repository: $(cat cloudhsm-image/repository)@$(cat cloudhsm-image/digest | cut -d ':' -f 1)
-                    tag: $(cat cloudhsm-image/digest | cut -d ':' -f 2)
+                    repository: $(cat cloudhsm-client-image/repository)@$(cat cloudhsm-client-image/digest | cut -d ':' -f 1)
+                    tag: $(cat cloudhsm-client-image/digest | cut -d ':' -f 2)
                 vsp:
                   image:
                     repository: $(cat verify-service-provider-image/repository)@$(cat verify-service-provider-image/digest | cut -d ':' -f 1)
@@ -442,7 +514,7 @@ spec:
                 -f ./manifests/
 
       - get: tests-image
-        passed: ["package"]
+        passed: ["build"]
 
       - task: test-chart-package
         image: tests-image
