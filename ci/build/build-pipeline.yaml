@@ -79,6 +79,7 @@ spec:
       source:
         <<: *github_source
         pre_release: true
+        release: false
         
     - name: release
       type: github-release
