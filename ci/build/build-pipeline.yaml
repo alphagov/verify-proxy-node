@@ -146,7 +146,6 @@ spec:
           trigger: true
         - get: vsp-src
           trigger: true
-        - get: chart
       - in_parallel:
           limit: 3
           fail_fast: true
@@ -234,8 +233,7 @@ spec:
         - get: tests-image
           passed: ["build"]
           trigger: true
-        - get: chart
-          passed: ["build"]
+        - get: release
 
       - task: generate-chart-values
         config:
@@ -293,7 +291,7 @@ spec:
           platform: linux
           image_resource: *task_toolbox
           inputs:
-          - name: chart
+          - name: release
           outputs:
           - name: chart-version
           params:
@@ -305,7 +303,7 @@ spec:
             - -c
             - |
               echo "bumping release number..."
-              CURRENT_TAG=$(cat chart/tag)
+              CURRENT_TAG=$(cat release/tag)
               awk -F. '/[0-9]+\./{$NF++;print}' OFS=. <<< "${CURRENT_TAG}" > chart-version/tag
               NEW_TAG=$(cat chart-version/tag)
               echo "${NEW_TAG}" > chart-version/name
