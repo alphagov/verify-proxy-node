@@ -72,7 +72,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            RELEASE_NAME: prod
+            RELEASE_NAME: nl-production
             CONNECTOR_NODE_NATIONALITY_CODE: NL
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
