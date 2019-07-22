@@ -30,7 +30,9 @@ import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate
 public class StubConnectorAppRuleTestBase {
 
     protected static final String METADATA_PUBLISH_PATH = "/stub-connector-md-publish-path";
-    protected static final String METADATA_FILE_PATH =
+    protected static final String ENTITY_ID = "http://stub-connector/Connector";
+
+    private static final String METADATA_FILE_PATH =
             StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/test-stub-connector-metadata.xml").getPath();
 
     private Map<String, NewCookie> cookies;
@@ -66,6 +68,7 @@ public class StubConnectorAppRuleTestBase {
     @Rule
     public StubConnectorAppRule stubConnectorAppRule = new StubConnectorAppRule(
             ConfigOverride.config("connectorNodeBaseUrl", "http://stub-connector"),
+            ConfigOverride.config("connectorNodeEntityId", ENTITY_ID),
 
             ConfigOverride.config("proxyNodeMetadataConfiguration.url", metadataClientRule.baseUri() + "/proxy-node/metadata"), //
             ConfigOverride.config("proxyNodeMetadataConfiguration.expectedEntityId", "http://proxy-node/Metadata"),

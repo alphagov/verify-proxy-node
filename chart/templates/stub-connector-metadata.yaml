@@ -27,7 +27,7 @@ spec:
     expiryMonths: 2
     organization: EU Member State
     organizationUnit: Test
-    location: EU
+    location: European Union
   certificateAuthority:
     secretName: {{ .Release.Name }}-connector-metadata-signing-cert
     namespace: {{ .Release.Namespace }}

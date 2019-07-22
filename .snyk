@@ -2,16 +2,8 @@
 version: v1.13.5
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JAVA-COMFASTERXMLJACKSONCORE-450207:
+  SNYK-JAVA-CAJULIUSDAVIES-30073:
     - '*':
-        reason: Fix not yet available
-        expires: 2019-07-21T15:05:11.857Z
-  SNYK-JAVA-COMGOOGLEGUAVA-32236:
-    - '*':
-        reason: Fix not yet available
-        expires: 2019-07-24T13:00:48.365Z
-  SNYK-JAVA-COMFASTERXMLJACKSONCORE-450917:
-    - '*':
-        reason: Fix not available yet
-        expires: 2019-07-26T16:07:31.690Z
+        reason: Fix not available
+        expires: 2019-11-30T19:21:05.816Z
 patch: {}

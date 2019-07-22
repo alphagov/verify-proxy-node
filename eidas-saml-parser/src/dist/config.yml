@@ -24,7 +24,7 @@ connectorMetadataConfiguration:
   trustStore:
     type: ${TRUSTSTORE_TYPES:-encoded}
     store: ${CONNECTOR_NODE_METADATA_TRUSTSTORE:-DefaultNotUsed}
-    password: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD:-DefaultNotUsed}
+    password: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
 replayChecker:
   redisUrl: ${REDIS_SERVER_URI:-http://DefaultNotUsed}

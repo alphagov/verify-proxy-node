@@ -44,6 +44,13 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     }
 
     @Test
+    public void shouldUseCorrectEntityIdInAuthnRequest() throws IOException, URISyntaxException {
+        final AuthnRequest authnRequest = getEidasAuthnRequest();
+
+        assertThat(authnRequest.getIssuer().getValue()).isEqualTo(ENTITY_ID);
+    }
+
+    @Test
     public void shouldReturnValidSamlResponse() throws Exception {
         String authnId = getAuthnRequestIdFromSession();
 
@@ -78,12 +85,14 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
         hasValidity(validSamlMessage, "INDETERMINATE");
     }
 
-
-    private String getAuthnRequestIdFromSession() throws URISyntaxException, IOException {
+    private AuthnRequest getEidasAuthnRequest() throws IOException, URISyntaxException {
         String html = getEidasRequest();
         String decodedSaml = HtmlHelpers.getValueFromForm(html, "SAMLRequest");
-        AuthnRequest request = new SamlParser().parseSamlString(decodedSaml);
-        return request.getID();
+        return new SamlParser().parseSamlString(decodedSaml);
+    }
+
+    private String getAuthnRequestIdFromSession() throws IOException, URISyntaxException {
+        return getEidasAuthnRequest().getID();
     }
 
     private void hasValidity(String samlMessage, String validity) throws URISyntaxException {

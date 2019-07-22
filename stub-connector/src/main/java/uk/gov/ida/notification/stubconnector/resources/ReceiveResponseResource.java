@@ -78,7 +78,7 @@ public class ReceiveResponseResource {
 
         String authnRequestId = (String) session.getAttribute("authn_id");
 
-        ValidationContext validationContext = new ValidationContext(buildStaticParemeters(authnRequestId));
+        ValidationContext validationContext = new ValidationContext(buildStaticParameters(authnRequestId));
 
         ValidationResult validate = responseValidator.validate(response, validationContext);
 
@@ -117,7 +117,7 @@ public class ReceiveResponseResource {
         return new ResponseView(attributesByName, loa, validate.toString(), eidasRequestId, SAML_OBJECT_MARSHALLER.transformToString(decrypted));
     }
 
-    private Map<String, Object> buildStaticParemeters(String authnRequestId) {
+    private Map<String, Object> buildStaticParameters(String authnRequestId) {
         String responseDestination = configuration.getConnectorNodeBaseUrl() + "/SAML2/Response/POST";
 
         HashMap<String, Object> params = new HashMap<>();

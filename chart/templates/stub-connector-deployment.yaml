@@ -64,6 +64,8 @@ spec:
           value: "80"
         - name: CONNECTOR_NODE_BASE_URL
           value: https://{{ include "stubConnector.host" . }}
+        - name: CONNECTOR_NODE_ENTITY_ID
+          value: {{ include "connector.entityID" . }}
         - name: PROXY_NODE_ENTITY_ID
           valueFrom:
             secretKeyRef:

@@ -20,6 +20,11 @@ public class StubConnectorConfiguration extends Configuration {
     @Valid
     @NotNull
     @JsonProperty
+    private URI connectorNodeEntityId;
+
+    @Valid
+    @NotNull
+    @JsonProperty
     private CredentialConfiguration credentialConfiguration;
 
     @Valid
@@ -34,6 +39,10 @@ public class StubConnectorConfiguration extends Configuration {
 
     public URI getConnectorNodeBaseUrl() {
         return connectorNodeBaseUrl;
+    }
+
+    public URI getConnectorNodeEntityId() {
+        return connectorNodeEntityId;
     }
 
     public String getProxyNodeEntityId() {
