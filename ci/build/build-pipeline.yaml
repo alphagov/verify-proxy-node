@@ -138,6 +138,34 @@ spec:
 
     jobs:
 
+    - name: delete-old-pipeline
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAME: test
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+              echo "deleting `release` pipeline..."
+              kubectl delete -n "${RELEASE_NAMESPACE}" pipeline/release
+
     - name: build
       serial: true
       plan:
