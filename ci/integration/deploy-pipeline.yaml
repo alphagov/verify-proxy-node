@@ -38,6 +38,7 @@ spec:
 
     - name: release
       type: github-release
+      icon: file-document
       source:
         <<: *github_source
 
@@ -72,11 +73,10 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: dk-integration
             CONNECTOR_NODE_NATIONALITY_CODE: DK
-            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
-            ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
             CONNECTOR_ENTITY_ID: https://eidasconnector.test.eid.digst.dk/Metadata
             CONNECTOR_METADATA_FQDN: eidasconnector.test.eid.digst.dk
             CONNECTOR_METADATA_PATH: /metadata
@@ -102,7 +102,6 @@ spec:
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
                 --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
-                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                 --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
                 --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
                 --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
@@ -168,11 +167,10 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: nl-integration
             CONNECTOR_NODE_NATIONALITY_CODE: NL
-            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
-            ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
             CONNECTOR_ENTITY_ID: https://acc-eidas.minez.nl/EidasNodeC/ConnectorMetadata
             CONNECTOR_METADATA_FQDN: acc-eidas.minez.nl
             CONNECTOR_METADATA_PATH: /EidasNodeC/ConnectorMetadata
@@ -198,7 +196,6 @@ spec:
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
                 --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
-                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                 --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
                 --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
                 --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
@@ -217,8 +214,8 @@ spec:
             KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
             KUBERNETES_TOKEN: ((namespace-deployer.token))
             KUBERNETES_API: kubernetes.default.svc
-            RELEASE_NAME: nl-integration
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: nl-integration
             APP_NAME: proxy-node
           run:
             path: /bin/bash
