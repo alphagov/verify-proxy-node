@@ -14,34 +14,34 @@ import java.net.URI;
 
 public class GatewayConfiguration extends Configuration {
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private TranslatorServiceConfiguration translatorService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private EidasSamlParserServiceConfiguration eidasSamlParserService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private VerifyServiceProviderConfiguration verifyServiceProviderService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private RedisServiceConfiguration redisService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private URI errorPageRedirectUrl;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private MetadataPublishingConfiguration metadataPublishingConfiguration;
 
 

@@ -30,6 +30,8 @@ spec:
           items:
           - key: metadata.xml
             path: metadata.xml
+          - key: metadataCACerts
+            path: metadataCACerts
       containers:
       - name: gateway
         image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
@@ -67,3 +69,8 @@ spec:
           value: http://{{ .Release.Name }}-vsp/
         - name: PROXY_NODE_ERROR_PAGE_URI
           value: {{ .Values.gateway.errorPageURL }}
+        - name : PROXY_NODE_METADATA_SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-node-metadata
+              key: metadataSigningCertBase64
