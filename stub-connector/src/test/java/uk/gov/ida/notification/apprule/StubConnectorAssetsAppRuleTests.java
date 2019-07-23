@@ -36,8 +36,14 @@ public class StubConnectorAssetsAppRuleTests extends StubConnectorAppRuleTestBas
     @Test
     public void shouldPublishMetadataSigningCertificates() throws URISyntaxException {
         final Response response = stubConnectorAppRule.target(METADATA_CERTS_PUBLISH_PATH).request().get();
-
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+
+        final String html = response.readEntity(String.class);
+        assertThat(html).contains(METADATA_PUBLISH_PATH);
+        assertThat(html).contains("Issuer");
+        assertThat(html).contains("Validity");
+        assertThat(html).contains("Not Before");
+        assertThat(html).contains("Not After");
     }
 
     private String readResource(String resourcePath) throws IOException {

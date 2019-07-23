@@ -67,23 +67,22 @@ public class MetadataCertsPublishingResource {
                     uriInfo.getBaseUri(), metadataPublishPath), e);
         }
 
-        final File concatenatedCertsFile = new File(metadataCACertsFilePath.toString());
-        if (!concatenatedCertsFile.exists()) {
+        final File concatenatedPemCertsFile = new File(metadataCACertsFilePath.toString());
+        if (!concatenatedPemCertsFile.exists()) {
             throw new InvalidMetadataException(format(
                     "No file containing metadata signing certs found at {0}", metadataCACertsFilePath));
         }
 
-        String concatenatedPemCertsBase64String;
+        String concatenatedPemCerts;
         try {
-            concatenatedPemCertsBase64String = Files.readString(concatenatedCertsFile.toPath())
-                    .replace("\n", "").trim();
+            concatenatedPemCerts = Files.readString(concatenatedPemCertsFile.toPath());
         } catch (IOException e) {
             throw new InvalidMetadataException(format(
                     "Couldn't read metadata certs file from {0}", metadataCACertsFilePath), e);
         }
 
         final List<Cert> certificates = Arrays
-                .stream(new String(Base64.getDecoder().decode(concatenatedPemCertsBase64String)).split(BEGIN_LINE))
+                .stream(concatenatedPemCerts.split(BEGIN_LINE))
                 .filter(s -> !s.isBlank())
                 .map(c -> c.substring(0, c.indexOf(END_LINE)))
                 .map(c -> c.replace("\n", ""))
@@ -94,7 +93,7 @@ public class MetadataCertsPublishingResource {
 
         if (certificates.isEmpty()) {
             throw new InvalidMetadataException(format(
-                    "No valid metadata signing certs extracted from {0}", metadataCACertsFilePath));
+                    "No valid metadata signing certs extracted from \n{0}", concatenatedPemCerts));
         }
 
         return new MetadataSigningCertsView(metadataPublishUrl, certificates);
