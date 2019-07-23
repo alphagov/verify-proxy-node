@@ -29,11 +29,15 @@ import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate
 
 public class StubConnectorAppRuleTestBase {
 
+    protected static final String METADATA_CERTS_PUBLISH_PATH = "/proxy-node-md-certs-publish-path";
     protected static final String METADATA_PUBLISH_PATH = "/stub-connector-md-publish-path";
     protected static final String ENTITY_ID = "http://stub-connector/Connector";
 
     private static final String METADATA_FILE_PATH =
             StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/test-stub-connector-metadata.xml").getPath();
+
+    private static final String METADATA_CA_CERTS_FILE_PATH =
+            StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/metadataCACerts").getPath();
 
     private Map<String, NewCookie> cookies;
 
@@ -82,7 +86,9 @@ public class StubConnectorAppRuleTestBase {
             ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY),
 
             ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", METADATA_FILE_PATH),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH)
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataCACertsFilePath", METADATA_CA_CERTS_FILE_PATH)
     );
 
     protected String getEidasRequest() throws URISyntaxException {

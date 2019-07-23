@@ -26,8 +26,13 @@ public class MetadataPublishingBundle<T extends Configuration> implements Config
                 .path(mpConfiguration.getMetadataPublishPath().toString())
                 .build();
 
+        final Resource metadataCertsPublishResource = Resource.builder(MetadataCertsPublishingResource.class)
+                .path(mpConfiguration.getMetadataCertsPublishPath().toString())
+                .build();
+
         environment.jersey().register(getJerseyMetadataResourcePathBinder(mpConfiguration));
         environment.jersey().getResourceConfig().registerResources(metadataPublishResource);
+        environment.jersey().getResourceConfig().registerResources(metadataCertsPublishResource);
     }
 
     @Override
@@ -43,6 +48,9 @@ public class MetadataPublishingBundle<T extends Configuration> implements Config
             @Override
             protected void configure() {
                 bind(configuration.getMetadataFilePath()).to(URI.class).named("metadataFilePath");
+                bind(configuration.getMetadataPublishPath()).to(URI.class).named("metadataPublishPath");
+                bind(configuration.getMetadataSigningCertBase64()).to(String.class).named("metadataSigningCertBase64");
+                bind(configuration.getMetadataCACertsFilePath()).to(URI.class).named("metadataCACertsFilePath");
             }
         };
     }

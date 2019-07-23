@@ -33,6 +33,13 @@ public class StubConnectorAssetsAppRuleTests extends StubConnectorAppRuleTestBas
         assertThat(metadata).isEqualTo(expectedMetadata);
     }
 
+    @Test
+    public void shouldPublishMetadataSigningCertificates() throws URISyntaxException {
+        final Response response = stubConnectorAppRule.target(METADATA_CERTS_PUBLISH_PATH).request().get();
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+    }
+
     private String readResource(String resourcePath) throws IOException {
         return new String(Files.readAllBytes(Paths.get(
                 getClass().getClassLoader().getResource(resourcePath).getPath())));
