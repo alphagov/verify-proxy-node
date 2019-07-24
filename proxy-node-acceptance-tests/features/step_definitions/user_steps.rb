@@ -27,7 +27,7 @@ Given("the stub connector supplies an authn request with {string}") do |issue|
     "a missing signature": "/MissingSignature",
     "an invalid signature": "/InvalidSignature"
   }
-  visit(ENV.fetch('STUB_CONNECTOR_URL') + scenario_path_map[issue])
+  visit(ENV.fetch('STUB_CONNECTOR_URL') + scenario_path_map[issue.to_sym])
 end
 
 Given('they login to stub idp') do
