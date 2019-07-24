@@ -12,7 +12,7 @@ ENV VERIFY_USE_PUBLIC_BINARIES $VERIFY_USE_PUBLIC_BINARIES
 
 ARG component
 COPY ${component}/ ${component}/
-RUN gradle -Pcloudhsm --no-daemon -p ${component} installDist -x test
+RUN gradle -Pcloudhsm --no-daemon -p ${component} --parallel installDist -x test
 ENTRYPOINT ["gradle", "--no-daemon"]
 
 FROM openjdk:11-jre-slim
@@ -30,4 +30,3 @@ ENV COMPONENT $component
 
 ENTRYPOINT ["/tini", "--"]
 CMD "bin/$COMPONENT"
-

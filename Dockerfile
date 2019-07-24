@@ -2,7 +2,6 @@
 
 FROM gradle:jdk11 AS build
 WORKDIR /app
-USER root
 ENV GRADLE_USER_HOME ~/.gradle
 
 COPY gradle/ gradle/
@@ -21,7 +20,6 @@ ENTRYPOINT ["gradle", "--no-daemon"]
 
 FROM openjdk:11-jre-slim
 WORKDIR /app
-USER root
 
 ARG TINI_VERSION=v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
