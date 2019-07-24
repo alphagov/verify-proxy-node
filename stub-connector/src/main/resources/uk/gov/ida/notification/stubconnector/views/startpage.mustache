@@ -45,12 +45,13 @@
       font-family: Arial, sans-serif;
       color: #fff;
       padding: 10px;
-      margin: 5px;
+      margin: 10px 1px;
       font-size: 1em;
       line-height: 1.25;
       border: none;
       cursor: pointer;
       text-decoration: unset;
+      height: 17px;
     }
     .submitBtnGreen {
         background-color: #00823b;
@@ -58,6 +59,9 @@
     }
     .submitBtnGreen:hover, .submitBtnGreen:focus {
       background-color: #00692f;
+    }
+    .action-label {
+      margin-bottom: 0;
     }
     .submitBtnRed {
         background-color: #E30707;
@@ -71,7 +75,7 @@
 <div>
     <div class="logo"></div>
     <h1>Welcome to the eIDAS Proxy Node Connector Node</h1>
-    <p>To start a Journey press the button below</p>
+    <p class="action-label">To start a Journey press the button below</p>
     <div>
         <a href="./RequestLow" class="submitBtn submitBtnGreen">Start Journey LOA Low</a>
         <a href="./RequestSubstantial" class="submitBtn submitBtnGreen">Start Journey LOA Substantial</a>
