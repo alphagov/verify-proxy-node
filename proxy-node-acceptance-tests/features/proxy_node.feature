@@ -16,8 +16,12 @@ Feature: proxy-node feature
         Given the proxy node is sent a LOA 'High' request
         Then the user should be presented with an error page
 
-    Scenario: Stub connector Generates Authn Failure
-        Given the stub connector supplies a bad authn request
+    Scenario: Stub connector generates an Authn request with a missing signature
+        Given the stub connector supplies an authn request with a missing signature
+        Then the user should be presented with an error page
+
+    Scenario: Stub connector generates an Authn request with an invalid signature
+        Given the stub connector supplies an authn request with an invalid signature
         Then the user should be presented with an error page
 
     Scenario: Show error page if page doesnt exist
