@@ -41,19 +41,30 @@
         margin-bottom: 20px;
     }
     .submitBtn {
+      display: inline-block;
       font-family: Arial, sans-serif;
-      background-color: #00823b;
       color: #fff;
       padding: 10px;
+      margin: 5px;
       font-size: 1em;
       line-height: 1.25;
       border: none;
-      box-shadow: 0 2px 0 #003618;
       cursor: pointer;
       text-decoration: unset;
     }
-    .submitBtn:hover, .submitBtn:focus {
+    .submitBtnGreen {
+        background-color: #00823b;
+        box-shadow: 0 2px 0 #003618;
+    }
+    .submitBtnGreen:hover, .submitBtnGreen:focus {
       background-color: #00692f;
+    }
+    .submitBtnRed {
+        background-color: #E30707;
+        box-shadow: 0 2px 0 #9A0000;
+    }
+    .submitBtnRed:hover, .submitBtnRed:focus {
+      background-color: #D60C0C;
     }
 </style>
 <body class="main">
@@ -61,10 +72,15 @@
     <div class="logo"></div>
     <h1>Welcome to the eIDAS Proxy Node Connector Node</h1>
     <p>To start a Journey press the button below</p>
-    <a href="./RequestLow" class="submitBtn">Start Journey LOA Low</a>
-    <a href="./RequestSubstantial" class="submitBtn">Start Journey LOA Substantial</a>
-    <a href="./RequestHigh" class="submitBtn">Start Journey LOA High</a>
-    <a href="./BadRequest" class="submitBtn">Send Bad Request</a>
+    <div>
+        <a href="./RequestLow" class="submitBtn submitBtnGreen">Start Journey LOA Low</a>
+        <a href="./RequestSubstantial" class="submitBtn submitBtnGreen">Start Journey LOA Substantial</a>
+        <a href="./RequestHigh" class="submitBtn submitBtnGreen">Start Journey LOA High</a>
+    </div>
+    <div>
+        <a href="./MissingSignature" class="submitBtn submitBtnRed">Send request with missing signature</a>
+        <a href="./InvalidSignature" class="submitBtn submitBtnRed">Send request with invalid signature</a>
+    </div>
 </div>
 </body>
 </html>
