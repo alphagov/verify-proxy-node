@@ -22,7 +22,7 @@ And('they progress through verify') do
   find('button', :text => 'Stub Idp Demo One').click
 end
 
-Given("the stub connector supplies an authn request with {string}") do |issue|
+Given(/^the stub connector supplies an authn request with (.*)$/) do |issue|
   scenario_path_map = {
     "a missing signature": "/MissingSignature",
     "an invalid signature": "/InvalidSignature"
