@@ -1,7 +1,12 @@
 package uk.gov.ida.notification.helpers;
 
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509ExtensionUtils;
@@ -50,7 +55,7 @@ public class SelfSignedCertificateGenerator {
 
     public X509Certificate getCertificate() throws NoSuchAlgorithmException, CertificateException, CertIOException, OperatorCreationException {
         if (certificate == null) {
-            certificate = generateCert_v3(getKeys(), "SHA256withRSA", getCN(), 1);
+            certificate = generateCertV3(getKeys(), "SHA256withRSA", getCN(), 1);
         }
         return certificate;
     }
@@ -64,7 +69,7 @@ public class SelfSignedCertificateGenerator {
         return gen.generateKeyPair();
     }
 
-    private X509Certificate generateCert_v3(KeyPair keyPair, String hashAlgorithm, String cn, int days)
+    private X509Certificate generateCertV3(KeyPair keyPair, String hashAlgorithm, String cn, int days)
             throws CertificateException, OperatorCreationException, CertIOException {
 
         Instant now = Instant.now();

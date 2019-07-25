@@ -6,8 +6,6 @@ import uk.gov.ida.notification.validations.ValidDestinationUriString;
 import uk.gov.ida.notification.validations.ValidPEM;
 import uk.gov.ida.notification.validations.ValidSamlId;
 
-import javax.validation.constraints.NotNull;
-
 public class EidasSamlParserResponse {
 
     @JsonProperty

@@ -39,6 +39,10 @@ public class EidasSamlParserProxyTest {
 
     private static String unchained_public_PEM;
 
+    private static final String JOURNEY_ID = "this_is_not_a_uuid";
+
+    private final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest(sample_hubSamlAuthnRequest);
+
     @Before
     public void init() throws Exception {
         unchained_public_PEM = new SelfSignedCertificateGenerator("test-cn").getCertificateAsPEM();
@@ -77,10 +81,6 @@ public class EidasSamlParserProxyTest {
             return new EidasSamlParserResponse(sample_requestId, sample_issuer, unchained_public_PEM, sample_destinationUrl);
         }
     }
-
-    private static final String JOURNEY_ID = "this_is_not_a_uuid";
-
-    private final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest(sample_hubSamlAuthnRequest);
 
     @ClassRule
     public static final DropwizardClientRule clientRule = new DropwizardClientRule(new TestESPResource());

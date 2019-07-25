@@ -20,20 +20,18 @@ import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
+import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
-
-import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
 
 @SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
