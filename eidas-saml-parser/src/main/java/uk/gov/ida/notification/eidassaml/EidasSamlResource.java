@@ -46,7 +46,7 @@ public class EidasSamlResource {
 
     @POST
     @Valid
-    public EidasSamlParserResponse post(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {
+    public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {
 
         AuthnRequest authnRequest = ObjectUtils.unmarshall(
                 new ByteArrayInputStream(Base64.getDecoder().decode(request.getAuthnRequest().getBytes())),

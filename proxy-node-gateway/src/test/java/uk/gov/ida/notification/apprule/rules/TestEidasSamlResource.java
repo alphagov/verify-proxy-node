@@ -10,6 +10,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasRequestId;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_issuer;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
@@ -20,10 +23,10 @@ public class TestEidasSamlResource {
     @Valid
     public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) {
         return new EidasSamlParserResponse(
-            "eidas request id",
-            "issuer",
+            sample_eidasRequestId,
+            sample_issuer,
             STUB_COUNTRY_PUBLIC_PRIMARY_CERT,
-            "http://connector-node.com"
+            sample_destinationUrl
         );
     }
 }

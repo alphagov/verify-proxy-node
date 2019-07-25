@@ -17,6 +17,7 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
+import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
@@ -53,7 +54,7 @@ public class EidasAuthnRequestResource {
     @GET
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH)
     public View handleRedirectBinding(
-            @QueryParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
+            @QueryParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
             @Session HttpSession session) {
         return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
@@ -63,7 +64,7 @@ public class EidasAuthnRequestResource {
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View handlePostBinding(
-            @FormParam(SamlFormMessageType.SAML_REQUEST) String encodedEidasAuthnRequest,
+            @FormParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
             @Session HttpSession session) {
         return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session);

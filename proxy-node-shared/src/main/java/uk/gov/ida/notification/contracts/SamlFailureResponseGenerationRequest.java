@@ -1,6 +1,9 @@
 package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.NotBlank;
+import uk.gov.ida.notification.validations.ValidDestinationUriString;
+import uk.gov.ida.notification.validations.ValidSamlId;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
@@ -11,12 +14,14 @@ public class SamlFailureResponseGenerationRequest {
     @JsonProperty
     private Response.Status responseStatus;
 
-    @NotNull
+    @NotBlank
     @JsonProperty
+    @ValidSamlId
     private String eidasRequestId;
 
-    @NotNull
+    @NotBlank
     @JsonProperty
+    @ValidDestinationUriString
     private String destinationUrl;
 
     @SuppressWarnings("Needed for JSON serialisation")

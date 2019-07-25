@@ -73,7 +73,7 @@ public class HubResponseTranslatorResource {
 
     @POST
     @Path(Urls.TranslatorUrls.GENERATE_FAILURE_RESPONSE_PATH)
-    public Response failureResponse(SamlFailureResponseGenerationRequest failureResponseRequest) {
+    public Response failureResponse(@Valid SamlFailureResponseGenerationRequest failureResponseRequest) {
 
         final org.opensaml.saml.saml2.core.Response failureEidasResponse = eidasResponseGenerator.generateFailureResponse(
                 failureResponseRequest.getResponseStatus(),

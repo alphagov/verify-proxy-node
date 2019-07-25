@@ -11,6 +11,7 @@ import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.Urls;
+import uk.gov.ida.notification.validations.ValidBase64Xml;
 
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
@@ -44,7 +45,7 @@ public class HubResponseResource {
     @Path(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
-        @FormParam(SamlFormMessageType.SAML_RESPONSE) String hubResponse,
+        @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
 

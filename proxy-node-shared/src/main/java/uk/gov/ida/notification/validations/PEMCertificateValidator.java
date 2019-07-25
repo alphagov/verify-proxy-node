@@ -43,7 +43,7 @@ public class PEMCertificateValidator implements ConstraintValidator<ValidPEM, St
             return false;
 
         } catch (Exception e) {
-            context.buildConstraintViolationWithTemplate("Exception: " + e.getMessage()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Unexpected exception: " + e.getMessage()).addConstraintViolation();
             return false;
         }
     }

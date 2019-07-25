@@ -20,6 +20,7 @@ import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
+import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.saml.security.validators.signature.SamlRequestSignatureValidator;
@@ -54,8 +55,8 @@ public class EidasSamlResourceTest {
     @Test
     public void shouldReturnRequestIdAndIssuer() throws Exception {
         String issuerAsString = "issuer";
-        String requestId = "request_id";
-        String destination = "destination";
+        String requestId = ValidationTestDataUtils.sample_requestId;
+        String destination = ValidationTestDataUtils.sample_destinationUrl;
         DateTime issueInstant = new DateTime(2019, 02, 28, 9, 54);
         Issuer issuer = ObjectUtils.createSamlObject(Issuer.class);
         issuer.setValue(issuerAsString);

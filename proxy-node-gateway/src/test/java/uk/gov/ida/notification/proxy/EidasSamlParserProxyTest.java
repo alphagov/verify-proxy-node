@@ -2,6 +2,7 @@ package uk.gov.ida.notification.proxy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.junit.DropwizardClientRule;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.MDC;
@@ -10,6 +11,7 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
+import uk.gov.ida.notification.helpers.SelfSignedCertificateGenerator;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
@@ -28,9 +30,24 @@ import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.UNCHAINED_PUBLIC_CERT;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlAuthnRequest;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_issuer;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_requestId;
 
 public class EidasSamlParserProxyTest {
+
+    private static String unchained_public_PEM;
+
+    private static final String JOURNEY_ID = "this_is_not_a_uuid";
+
+    private final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest(sample_hubSamlAuthnRequest);
+
+    @Before
+    public void init() throws Exception {
+        unchained_public_PEM = new SelfSignedCertificateGenerator("test-cn").getCertificateAsPEM();
+    }
+
     @Path("/parse")
     @Produces(MediaType.APPLICATION_JSON)
     public static class TestESPResource {
@@ -39,7 +56,7 @@ public class EidasSamlParserProxyTest {
         @Valid
         @Path("/valid")
         public EidasSamlParserResponse testValidParse(EidasSamlParserRequest eidasSamlParserRequest) {
-            return new EidasSamlParserResponse("request_id", "issuer", UNCHAINED_PUBLIC_CERT, "destination");
+            return new EidasSamlParserResponse(sample_requestId, sample_issuer, unchained_public_PEM, sample_destinationUrl);
         }
 
         @POST
@@ -61,13 +78,9 @@ public class EidasSamlParserProxyTest {
         @Path("/test-journey-id-header")
         public EidasSamlParserResponse testJourneyIdHeader(EidasSamlParserRequest eidasSamlParserRequest, @Context HttpHeaders headers) {
             TestESPResource.headers = headers.getRequestHeaders();
-            return new EidasSamlParserResponse("request_id", "issuer", UNCHAINED_PUBLIC_CERT, "destination");
+            return new EidasSamlParserResponse(sample_requestId, sample_issuer, unchained_public_PEM, sample_destinationUrl);
         }
     }
-
-    private static final String JOURNEY_ID = "this_is_not_a_uuid";
-
-    private final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest("authn_request");
 
     @ClassRule
     public static final DropwizardClientRule clientRule = new DropwizardClientRule(new TestESPResource());
@@ -78,10 +91,10 @@ public class EidasSamlParserProxyTest {
 
         EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
 
-        assertThat("request_id").isEqualTo(response.getRequestId());
-        assertThat("issuer").isEqualTo(response.getIssuer());
-        assertThat(UNCHAINED_PUBLIC_CERT).isEqualTo(response.getConnectorEncryptionPublicCertificate());
-        assertThat("destination").isEqualTo(response.getDestination());
+        assertThat(sample_requestId).isEqualTo(response.getRequestId());
+        assertThat(sample_issuer).isEqualTo(response.getIssuer());
+        assertThat(unchained_public_PEM).isEqualTo(response.getConnectorEncryptionPublicCertificate());
+        assertThat(sample_destinationUrl).isEqualTo(response.getDestination());
     }
 
     @Test
