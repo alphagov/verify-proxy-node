@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface ValidBase64Xml {
 
-    String message() default "does not seem to be valid XML encoded in Base64";
+    String message() default "is not a valid Base64 encoded String";
 
     Class<?>[] groups() default { };
     Class<? extends Payload>[] payload() default { };
