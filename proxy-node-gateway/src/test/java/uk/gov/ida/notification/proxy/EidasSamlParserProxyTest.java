@@ -11,7 +11,7 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
-import uk.gov.ida.notification.pki.SelfSignedCertificateGenerator;
+import uk.gov.ida.notification.helpers.SelfSignedCertificateGenerator;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
@@ -27,8 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-
-import java.security.cert.X509Certificate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;

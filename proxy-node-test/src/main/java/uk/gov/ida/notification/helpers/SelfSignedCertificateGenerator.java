@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.pki;
+package uk.gov.ida.notification.helpers;
 
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.x509.*;
