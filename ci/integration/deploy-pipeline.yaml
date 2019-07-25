@@ -51,6 +51,68 @@ spec:
 
     jobs:
 
+    - name: deploy-dk-integration
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: daily
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            RELEASE_NAME: dk-integration
+            CONNECTOR_NODE_NATIONALITY_CODE: DK
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
+            CONNECTOR_ENTITY_ID: https://eidasconnector.test.eid.digst.dk/metadata
+            CONNECTOR_METADATA_FQDN: eidasconnector.test.eid.digst.dk
+            HUB_FQDN: www.integration.signin.service.gov.uk
+            CONNECTOR_METADATA_PATH: /EidasNodeC/ConnectorMetadata
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+          run:
+            path: /bin/bash
+            args:
+            - -eu
+            - -c
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
+                --set "hubFqdn=${HUB_FQDN}" \
+                --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
     - name: deploy-nl-integration
       serial: true
       plan:
