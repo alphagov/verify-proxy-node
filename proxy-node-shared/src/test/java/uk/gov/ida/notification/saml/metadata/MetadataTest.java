@@ -60,7 +60,7 @@ public class MetadataTest {
         assertThat(expectedPublicKey).isEqualTo(hubSigningPublicKey);
     }
 
-    @Test(expected = MissingMetadataException.class)
+    @Test(expected = InvalidMetadataException.class)
     public void shouldErrorIfEncryptionPublicKeyElementIsEmpty() throws Exception {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withEncryptionCert("")
@@ -71,7 +71,7 @@ public class MetadataTest {
         metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
     }
 
-    @Test(expected = MissingMetadataException.class)
+    @Test(expected = InvalidMetadataException.class)
     public void shouldErrorIfNoEncryptionPublicKeyElement() throws Exception {
         MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_CONNECTOR_NODE_METADATA_FILE)
                 .withNoEncryptionCert()
@@ -87,7 +87,7 @@ public class MetadataTest {
 
     @Test
     public void shouldErrorIfUnableToResolveMetadata() throws Exception {
-        expectedEx.expect(InvalidMetadataException.class);
+        expectedEx.expect(MissingMetadataException.class);
         expectedEx.expectMessage("Unable to resolve metadata credentials");
 
         MetadataCredentialResolver metadataCredentialResolver = mock(MetadataCredentialResolver.class);

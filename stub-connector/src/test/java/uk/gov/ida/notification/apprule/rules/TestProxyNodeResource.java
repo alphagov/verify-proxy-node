@@ -41,19 +41,19 @@ public class TestProxyNodeResource {
                 TEST_RP_PRIVATE_ENCRYPTION_KEY
         ).getDecryptingCredential();
 
-        AttributeValue firstnameValue = PersonNameAttributeValueBuilder
+        AttributeValue firstNameValue = PersonNameAttributeValueBuilder
                 .aPersonNameValue()
                 .withValue("Jazzy Harold")
                 .withVerified(true)
                 .build();
 
-        Attribute firstname = PersonNameAttributeBuilder_1_1.aPersonName_1_1()
-                .addValue(firstnameValue)
+        Attribute firstName = PersonNameAttributeBuilder_1_1.aPersonName_1_1()
+                .addValue(firstNameValue)
                 .buildAsFirstname();
 
         AttributeStatement attributeStatement = AttributeStatementBuilder
                 .anAttributeStatement()
-                .addAttribute(firstname)
+                .addAttribute(firstName)
                 .build();
 
         AuthnStatement authnStatement = AuthnStatementBuilder.anAuthnStatement().build();
@@ -72,7 +72,6 @@ public class TestProxyNodeResource {
                 .build();
 
         SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
-        String samlMessage = marshaller.transformToString(response);
-        return samlMessage;
+        return marshaller.transformToString(response);
     }
 }

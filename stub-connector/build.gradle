@@ -7,9 +7,11 @@ repositories {
 
 dependencies {
     compile configurations.dropwizard,
+            configurations.dropwizard_assets,
             configurations.opensaml,
             configurations.eidas_saml,
             configurations.common,
+            configurations.dev_pki,
             project(':proxy-node-shared')
 
     if (project.hasProperty('cloudhsm')) {

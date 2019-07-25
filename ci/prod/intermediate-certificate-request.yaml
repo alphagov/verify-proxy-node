@@ -4,7 +4,7 @@ kind: CertificateRequest
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: proxy-node-ca
+  name: proxy-node-metadata-ca
 spec:
   countryCode: GB
   commonName: Verify Proxy Node Metadata CA

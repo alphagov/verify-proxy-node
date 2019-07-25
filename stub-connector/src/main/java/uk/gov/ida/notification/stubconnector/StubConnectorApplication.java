@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.stubconnector;
 
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -14,6 +15,7 @@ import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.CatchAllExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.MissingMetadataExceptionMapper;
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.converters.AuthnRequestParameterProvider;
@@ -22,6 +24,7 @@ import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.metadata.MetadataPublishingBundle;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
@@ -61,9 +64,9 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
     public void initialize(final Bootstrap<StubConnectorConfiguration> bootstrap) {
         // Needed to correctly interpolate environment variables in config file
         bootstrap.setConfigurationSourceProvider(
-            new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
-                new EnvironmentVariableSubstitutor(false)
-            )
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
+                        new EnvironmentVariableSubstitutor(false)
+                )
         );
 
         // Needed to initialise OpenSAML libraries
@@ -71,7 +74,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         // by the InitializationService
         try {
             InitializationService.initialize();
-        } catch(InitializationException e) {
+        } catch (InitializationException e) {
             throw new RuntimeException(e);
         }
 
@@ -79,17 +82,15 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
 
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
+        bootstrap.addBundle(new AssetsBundle("/assets/favicon.ico", "/favicon.ico"));
+        bootstrap.addBundle(new MetadataPublishingBundle<>(StubConnectorConfiguration::getMetadataPublishingConfiguration));
 
-
-        // Metadata
         proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getProxyNodeMetadataConfiguration()));
         bootstrap.addBundle(proxyNodeMetadataResolverBundle);
     }
 
     @Override
-    public void run(final StubConnectorConfiguration configuration,
-                    final Environment environment) throws Exception {
-
+    public void run(final StubConnectorConfiguration configuration, final Environment environment) {
         proxyNodeMetadata = new Metadata(proxyNodeMetadataResolverBundle.getMetadataCredentialResolver());
 
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
@@ -101,11 +102,12 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
                 environment,
                 "proxy-node-metadata");
 
+        environment.jersey().register(new MissingMetadataExceptionMapper());
         environment.jersey().register(new CatchAllExceptionMapper());
 
         registerProviders(environment);
-        registerResources(configuration, environment);
         registerInjections(environment);
+        registerResources(configuration, environment);
     }
 
     private void registerProviders(Environment environment) {
@@ -120,26 +122,15 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
     }
 
     private void registerResources(StubConnectorConfiguration configuration, Environment environment) {
-        environment.jersey().register(new SendAuthnRequestResource(
-            configuration,
-            proxyNodeMetadata));
-
         ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(configuration.getCredentialConfiguration().getCredential());
 
-        environment.jersey().register(
-                new ReceiveResponseResource(
-                        configuration,
-                        decrypter,
-                        proxyNodeMetadataResolverBundle
-                )
-        );
+        environment.jersey().register(new SendAuthnRequestResource(configuration, proxyNodeMetadata));
+        environment.jersey().register(new ReceiveResponseResource(configuration, decrypter, proxyNodeMetadataResolverBundle));
     }
 
     private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
         MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
-                metadataResolver,
-                name,
-                connectorMetadataConfiguration.getExpectedEntityId()
+                metadataResolver, name, connectorMetadataConfiguration.getExpectedEntityId()
         );
 
         environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);

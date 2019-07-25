@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-connector
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: connector
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -21,17 +22,29 @@ spec:
       labels:
         app.kubernetes.io/name: connector
         app.kubernetes.io/instance: {{ .Release.Name }}
-        talksToHsm: ""
+        talksToHsm: "true"
     spec:
       restartPolicy: Always
       volumes:
       - name: hsm-client-crt
         secret:
           secretName: {{ .Release.Name }}-connector-metadata
+      - name: connector-metadata-volume
+        secret:
+          secretName: {{ .Release.Name }}-connector-metadata
+          items:
+          - key: metadata.xml
+            path: metadata.xml
+          - key: metadataCACerts
+            path: metadataCACerts
       containers:
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
         imagePullPolicy: {{ .Values.stubConnector.image.pullPolicy }}
+        volumeMounts:
+        - name: connector-metadata-volume
+          mountPath: /app/metadata
+          readOnly: true
         ports:
         - name: http
           containerPort: 80
@@ -52,27 +65,34 @@ spec:
         - name: PORT
           value: "80"
         - name: CONNECTOR_NODE_BASE_URL
-          value: https://{{ include "connector.host" . }}
+          value: https://{{ include "stubConnector.host" . }}
+        - name: CONNECTOR_NODE_ENTITY_ID
+          value: {{ include "connector.entityID" . }}
         - name: PROXY_NODE_ENTITY_ID
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: entityID
         - name: PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: entityID
         - name: PROXY_NODE_METADATA_TRUSTSTORE
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: metadataSigningTruststoreBase64
         - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-proxy-metadata
+              name: {{ .Release.Name }}-proxy-node-metadata
               key: metadataSigningTruststorePassword
+        - name: CONNECTOR_METADATA_SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: metadataSigningCertBase64
         - name: SIGNER_CONFIG_TYPE
           valueFrom:
             secretKeyRef:

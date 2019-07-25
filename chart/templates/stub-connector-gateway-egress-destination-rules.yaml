@@ -1,0 +1,16 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-stub-connector-gateway-egressgateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+    - name: {{ .Release.Name }}-stub-connector-gateway-egress
+{{- end }}

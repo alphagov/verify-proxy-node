@@ -12,6 +12,14 @@ logging:
     - type: logstash-console
 
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
+connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID}
+
+metadataPublishingConfiguration:
+  metadataFilePath: ${CONNECTOR_METADATA_FILE_PATH:-/app/metadata/metadata.xml}
+  metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH:-/ConnectorMetadata}
+  metadataSigningCertBase64: ${CONNECTOR_METADATA_SIGNING_CERT}
+  metadataCACertsFilePath: ${CONNECTOR_METADATA_CA_CERTS_FILE_PATH:-/app/metadata/metadataCACerts}
+  metadataCertsPublishPath: ${CONNECTOR_METADATA_CERTS_PUBLISH_PATH:-/ConnectorMetadataSigningCertificates}
 
 proxyNodeMetadataConfiguration:
   url: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
@@ -20,7 +28,7 @@ proxyNodeMetadataConfiguration:
   trustStore:
     type: ${TRUSTSTORE_TYPES:-encoded}
     store: ${PROXY_NODE_METADATA_TRUSTSTORE}
-    password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD}
+    password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
 credentialConfiguration:
   type: ${SIGNER_CONFIG_TYPE:-file}

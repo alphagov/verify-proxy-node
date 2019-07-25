@@ -27,7 +27,7 @@ public abstract class BaseJsonErrorResponseExceptionMapper<TException extends Th
         final String message = getResponseMessage(exception);
 
         ProxyNodeLogger.logException(exception, Level.WARNING,
-                format("Error whilst contacting URI {0}: {1}", uriInfo.getPath(), message));
+                format("Error whilst contacting URI {0}: {1}", uriInfo.getAbsolutePath(), message));
 
         return Response.status(responseStatus)
                 .type(MediaType.APPLICATION_JSON_TYPE)

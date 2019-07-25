@@ -4,7 +4,7 @@ kind: Pipeline
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: release
+  name: build-release
 spec:
   exposed: true
   pipelineString: |
@@ -78,7 +78,8 @@ spec:
       icon: file-document
       source:
         <<: *github_source
-        drafts: true
+        pre_release: true
+        release: false
         
     - name: release
       type: github-release
@@ -232,6 +233,7 @@ spec:
         - get: tests-image
           passed: ["build"]
           trigger: true
+        - get: release
 
       - task: generate-chart-values
         config:
@@ -283,8 +285,6 @@ spec:
                 EOF
                 echo "merging with chart values..."
                 spruce merge ./src/chart/values.yaml ./overrides.yaml | tee -a chart-values/values.yaml
-
-      - get: release
 
       - task: generate-chart-version
         config:
@@ -376,9 +376,11 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
             RELEASE_NAME: test
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
           run:
             path: /bin/bash
             args:
@@ -399,6 +401,8 @@ spec:
                 --namespace "${RELEASE_NAMESPACE}" \
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                 --set "stubConnector.enabled=true" \
                 --set "vsp.secretName=vsp" \
                 --output-dir "./manifests/" \
@@ -478,4 +482,3 @@ spec:
           tag: chart/tag
           globs:
           - chart/*.tgz*
-

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="test-stub-connector-metadata.xml" validUntil="2020-06-26T16:12:29.897Z"
+    xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" 
+    xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" 
+    xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+    <md:Extensions xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+        <mdattr:EntityAttributes xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute">
+            <saml2:Attribute Name="urn:oasis:names:tc:SAML:attribute:assurance-certification " NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri" 
+                xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+                <saml2:AttributeValue>http://eidas.europa.eu/LoA/substantial</saml2:AttributeValue>
+            </saml2:Attribute>
+        </mdattr:EntityAttributes>
+        <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" 
+            xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport"/>
+        <alg:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256" MinKeySize="256" 
+            xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport"/>
+        <alg:SigningMethod Algorithm="http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1" MaxKeySize="4096" MinKeySize="2048" 
+            xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport"/>
+    </md:Extensions>
+    <md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <md:NameIDFormat xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://test-proxy-node.london.verify.govsvc.uk/SAML2/SSO/POST" 
+            xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"/>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://test-proxy-node.london.verify.govsvc.uk/Redirect" 
+            xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"/>
+        <saml2:Attribute FriendlyName="PersonIdentifier" Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" 
+            xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"/>
+        <saml2:Attribute FriendlyName="FamilyName" Name=" http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" 
+            xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"/>
+        <saml2:Attribute FriendlyName="FirstName" Name=" http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" 
+            xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"/>
+        <saml2:Attribute FriendlyName="DateOfBirth" Name=" http://eidas.europa.eu/attributes/naturalperson/DateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" 
+            xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"/>
+    </md:IDPSSODescriptor>
+    <md:Organization xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+        <md:OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">Government Digital Service</md:OrganizationName>
+        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">GDS</md:OrganizationDisplayName>
+        <md:OrganizationURL xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">https://www.gov.uk/verify</md:OrganizationURL>
+    </md:Organization>
+    <md:ContactPerson contactType="technical" 
+        xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+        <md:Company>GOV.UK Verify</md:Company>
+        <md:GivenName>GOV.UK Verify</md:GivenName>
+        <md:SurName>Support</md:SurName>
+        <md:EmailAddress>idasupport@digital.cabinet-office.gov.uk</md:EmailAddress>
+    </md:ContactPerson>
+</md:EntityDescriptor>

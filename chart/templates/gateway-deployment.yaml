@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-gateway
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: gateway
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -22,10 +23,23 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: Always
+      volumes:
+      - name: proxy-node-metadata-volume
+        secret:
+          secretName: {{ .Release.Name }}-proxy-node-metadata
+          items:
+          - key: metadata.xml
+            path: metadata.xml
+          - key: metadataCACerts
+            path: metadataCACerts
       containers:
       - name: gateway
         image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
         imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
+        volumeMounts:
+        - name: proxy-node-metadata-volume
+          mountPath: /app/metadata
+          readOnly: true
         ports:
         - name: http
           containerPort: 80
@@ -55,3 +69,8 @@ spec:
           value: http://{{ .Release.Name }}-vsp/
         - name: PROXY_NODE_ERROR_PAGE_URI
           value: {{ .Values.gateway.errorPageURL }}
+        - name : PROXY_NODE_METADATA_SIGNING_CERT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-node-metadata
+              key: metadataSigningCertBase64
