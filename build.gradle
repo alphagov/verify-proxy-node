@@ -95,7 +95,6 @@ subprojects {
         ida_utils
         verify_saml
         verify_saml_test
-        proxy_node_shared
         proxy_node_test
         soft_hsm
     }
@@ -180,13 +179,10 @@ subprojects {
                 "uk.gov.ida:saml-test:${saml_lib_version}",
         )
 
-        proxy_node_shared(
-                "org.bouncycastle:bcpkix-jdk15on:1.62",
-        )
-
         proxy_node_test(
                 "net.sourceforge.htmlcleaner:htmlcleaner:2.22",
                 "net.sourceforge.htmlunit:htmlunit:2.28",
+                "org.bouncycastle:bcpkix-jdk15on:1.62",
         )
 
         testCompile(

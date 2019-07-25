@@ -4,4 +4,4 @@
 # Any new gradle configurations to be tested should be added here.
 
 # shellcheck disable=SC2034
-CONFIGURATIONS="common dropwizard eidas_saml ida_utils opensaml soft_hsm verify_saml dev_pki proxy_node_shared"
+CONFIGURATIONS="common dropwizard eidas_saml ida_utils opensaml soft_hsm verify_saml dev_pki"
