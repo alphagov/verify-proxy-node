@@ -29,6 +29,16 @@ import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate
 
 public class StubConnectorAppRuleTestBase {
 
+    protected static final String METADATA_CERTS_PUBLISH_PATH = "/proxy-node-md-certs-publish-path";
+    protected static final String METADATA_PUBLISH_PATH = "/stub-connector-md-publish-path";
+    protected static final String ENTITY_ID = "http://stub-connector/Connector";
+
+    private static final String METADATA_FILE_PATH =
+            StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/test-stub-connector-metadata.xml").getPath();
+
+    private static final String METADATA_CA_CERTS_FILE_PATH =
+            StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/metadataCACerts").getPath();
+
     private Map<String, NewCookie> cookies;
 
     @ClassRule
@@ -62,6 +72,7 @@ public class StubConnectorAppRuleTestBase {
     @Rule
     public StubConnectorAppRule stubConnectorAppRule = new StubConnectorAppRule(
             ConfigOverride.config("connectorNodeBaseUrl", "http://stub-connector"),
+            ConfigOverride.config("connectorNodeEntityId", ENTITY_ID),
 
             ConfigOverride.config("proxyNodeMetadataConfiguration.url", metadataClientRule.baseUri() + "/proxy-node/metadata"), //
             ConfigOverride.config("proxyNodeMetadataConfiguration.expectedEntityId", "http://proxy-node/Metadata"),
@@ -72,7 +83,12 @@ public class StubConnectorAppRuleTestBase {
             ConfigOverride.config("credentialConfiguration.type", "file"),
             ConfigOverride.config("credentialConfiguration.publicKey.type", "x509"),
             ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_CERT),
-            ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY)
+            ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY),
+
+            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", METADATA_FILE_PATH),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH),
+            ConfigOverride.config("metadataPublishingConfiguration.metadataCACertsFilePath", METADATA_CA_CERTS_FILE_PATH)
     );
 
     protected String getEidasRequest() throws URISyntaxException {
@@ -94,8 +110,9 @@ public class StubConnectorAppRuleTestBase {
         Invocation.Builder request = stubConnectorAppRule.target("/SAML2/Response/POST")
                 .request();
 
-        if (cookies != null)
+        if (cookies != null) {
             request.cookie(cookies.get("stub-connector-session"));
+        }
 
         Response response = request.post(Entity.form(postForm));
         return response.readEntity(String.class);

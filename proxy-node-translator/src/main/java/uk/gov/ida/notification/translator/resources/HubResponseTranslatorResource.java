@@ -7,6 +7,7 @@ import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.Urls;
@@ -43,6 +44,7 @@ public class HubResponseTranslatorResource {
     }
 
     @POST
+    @IngressEgressLogging
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
     public Response hubResponse(@Valid HubResponseTranslatorRequest hubResponseTranslatorRequest) {
 

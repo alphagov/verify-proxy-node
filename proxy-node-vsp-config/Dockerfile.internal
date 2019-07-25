@@ -8,10 +8,8 @@ COPY build.gradle build.gradle
 COPY settings.gradle settings.gradle
 COPY src src
 
-RUN gradle installDist
-
-ENTRYPOINT ["gradle"]
-CMD ["tasks"]
+RUN gradle --no-daemon installDist
+ENTRYPOINT ["gradle", "--no-daemon"]
 
 FROM openjdk:11-jre-slim
 

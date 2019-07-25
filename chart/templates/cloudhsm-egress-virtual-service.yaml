@@ -1,0 +1,98 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-cloudhsm-2223-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  hosts:
+  - cloudhsm-2223.tcp.svc
+  gateways:
+  - mesh
+  tcp:
+  - match:
+    - gateways:
+      - mesh
+      destinationSubnets:
+      - {{ .Values.global.cloudHsm.ip }}/32
+      port: 2223
+      sourceLabels:
+        talksToHsm: "true"
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        subset: {{ .Release.Name }}-cloudhsm-2223-egress
+        port:
+          number: 443
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-cloudhsm-2224-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  hosts:
+  - cloudhsm-2224.tcp.svc
+  gateways:
+  - mesh
+  tcp:
+  - match:
+    - gateways:
+      - mesh
+      destinationSubnets:
+      - {{ .Values.global.cloudHsm.ip }}/32
+      port: 2224
+      sourceLabels:
+        talksToHsm: "true"
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        subset: {{ .Release.Name }}-cloudhsm-2224-egress
+        port:
+          number: 443
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-cloudhsm-2225-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: proxy-node
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  hosts:
+  - cloudhsm-2225.tcp.svc
+  gateways:
+  - mesh
+  tcp:
+  - match:
+    - gateways:
+      - mesh
+      destinationSubnets:
+      - {{ .Values.global.cloudHsm.ip }}/32
+      port: 2225
+      sourceLabels:
+        talksToHsm: "true"
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        subset: {{ .Release.Name }}-cloudhsm-2225-egress
+        port:
+          number: 443
+  exportTo:
+  - "."

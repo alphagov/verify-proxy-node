@@ -52,7 +52,6 @@ public class TranslatorProxyTest {
             return Response.serverError().build();
         }
 
-
         public static MultivaluedMap<String, String> headers;
         @POST
         @Path("/test-journey-id-header" + TRANSLATE_HUB_RESPONSE_PATH)
@@ -147,5 +146,4 @@ public class TranslatorProxyTest {
 
         assertThat(TranslatorProxyTest.TestTranslatorResource.headers.getFirst(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())).isEqualTo(JOURNEY_ID);
     }
-
 }

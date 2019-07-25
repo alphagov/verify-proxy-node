@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.eidassaml;
+package uk.gov.ida.notification.eidassaml.apprule;
 
 import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
@@ -26,7 +26,7 @@ import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_REQUEST_ID;
 public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
 
     @Test
-    public void checkIfHeadersPersist() throws Exception {
+    public void headersShouldPersist() throws Exception {
         AuthnRequest authnRequest = ObjectUtils.createSamlObject(AuthnRequest.class);
         Issuer issuer = ObjectUtils.createSamlObject(Issuer.class);
         issuer.setValue("issuer");
@@ -50,8 +50,6 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
                 .header(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
                 .header(SOME_RANDOM_HEADER, SOME_RANDOM_HEADER)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
-
-
 
         assertThat(response.getHeaders().getFirst(X_REQUEST_ID)).isEqualTo(X_REQUEST_ID);
         assertThat(response.getHeaders().getFirst(X_B3_TRACEID)).isEqualTo(X_B3_TRACEID);

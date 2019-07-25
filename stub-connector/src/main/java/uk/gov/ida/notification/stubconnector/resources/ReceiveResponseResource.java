@@ -23,6 +23,7 @@ import se.litsec.opensaml.saml2.common.response.ResponseValidator;
 import uk.gov.ida.notification.saml.ResponseAssertionDecrypter;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
+import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
+@IngressEgressLogging
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
 
@@ -76,7 +78,7 @@ public class ReceiveResponseResource {
 
         String authnRequestId = (String) session.getAttribute("authn_id");
 
-        ValidationContext validationContext = new ValidationContext(buildStaticParemeters(authnRequestId));
+        ValidationContext validationContext = new ValidationContext(buildStaticParameters(authnRequestId));
 
         ValidationResult validate = responseValidator.validate(response, validationContext);
 
@@ -115,7 +117,7 @@ public class ReceiveResponseResource {
         return new ResponseView(attributesByName, loa, validate.toString(), eidasRequestId, SAML_OBJECT_MARSHALLER.transformToString(decrypted));
     }
 
-    private Map<String, Object> buildStaticParemeters(String authnRequestId) {
+    private Map<String, Object> buildStaticParameters(String authnRequestId) {
         String responseDestination = configuration.getConnectorNodeBaseUrl() + "/SAML2/Response/POST";
 
         HashMap<String, Object> params = new HashMap<>();

@@ -30,9 +30,9 @@ repositories {
 
 ext {
     opensaml_version = '3.4.2'
-    dropwizard_version = '1.3.12'
-    utils_version = '2.0.0-360'
-    saml_lib_version = "${opensaml_version}-203"
+    dropwizard_version = '1.3.13'
+    utils_version = '2.0.0-370'
+    saml_lib_version = "${opensaml_version}-206"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
@@ -87,7 +87,9 @@ subprojects {
 
     configurations {
         common
+        dev_pki
         dropwizard
+        dropwizard_assets
         opensaml
         eidas_saml
         ida_utils
@@ -102,9 +104,8 @@ subprojects {
     dependencies {
         configurations.all {
             resolutionStrategy.dependencySubstitution {
-                substitute module("dom4j:dom4j:1.6.1") because "dom4j vulnerable to XML External Entity (XXE) Injection due to not validating the QName inputs, see CVE-2018-1000632" with module("org.dom4j:dom4j:2.1.1")
-                substitute module("org.eclipse.jetty:jetty-server") because "jetty-server dependency org.eclipse.jetty:jetty-util:9.4.14.v20181114 is vulnerable to CVE-2019-10247" with module("org.eclipse.jetty:jetty-server:9.4.17.v20190418")
-                substitute module("com.fasterxml.jackson.core:jackson-databind") because "https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-174736" with module("com.fasterxml.jackson.core:jackson-databind:2.9.9")
+                substitute module("com.fasterxml.jackson.core:jackson-databind") because "https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-174736" with module("com.fasterxml.jackson.core:jackson-databind:2.9.9.1")
+                substitute module("ca.juliusdavies:not-yet-commons-ssl:0.3.9") because "https://snyk.io/vuln/SNYK-JAVA-CAJULIUSDAVIES-30073" with module("ca.juliusdavies:not-yet-commons-ssl:0.3.11")
 
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
@@ -122,6 +123,10 @@ subprojects {
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
                 "io.dropwizard:dropwizard-json-logging:${dropwizard_version}",
                 "uk.gov.ida:dropwizard-logstash:1.3.5-68"
+        )
+
+        dropwizard_assets(
+                "io.dropwizard:dropwizard-assets:${dropwizard_version}",
         )
 
         opensaml(
@@ -166,6 +171,10 @@ subprojects {
                 because "saml_lib_version 185 has a dep on bcprov-jdk15on:1.59 which is vulnerable to CVE-2018-1000180"
             }
         }
+
+        dev_pki(
+                "uk.gov.ida:ida-dev-pki:1.1.0-38"
+        )
 
         verify_saml_test(
                 "uk.gov.ida:saml-test:${saml_lib_version}",

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Metadata Certificates</title>
+</head>
+
+<style>
+  .main {
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+
+  .title {
+    margin-left: 10px;
+  }
+  .title h1 {
+    margin-bottom: 5px;
+  }
+  .title h2 {
+    margin-top: 0;
+  }
+
+  .cert-section {
+    margin: 55px 0 10px 10px;
+  }
+
+  .subject-name {
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+  .issuer-name {
+    margin: 5px 0 0 0;
+  }
+
+  .cert-properties {
+    display: inline-block;
+    vertical-align: middle;
+    width: 350px;
+    margin-right: 80px;
+  }
+  .cert-property-list {
+    list-style: none;
+    padding-left: 15px;
+    margin-bottom: 0;
+  }
+  .cert-property-list-item {
+    margin-top: 20px;
+  }
+  .cert-property-list-item label {
+    padding-right: .75em;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 18px;
+  }
+
+  .validity-list {
+    list-style: none;
+    padding-left: 10px;
+  }
+  .validity-list li {
+    margin-top: 10px;
+  }
+  .validity-list li label {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 17px;
+    padding-right: .75em;
+    width: 85px;
+    display: block;
+    float: left;
+  }
+
+  .cert-base64 {
+    width: 625px;
+    height: 180px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 20px;
+  }
+</style>
+
+<body class="main">
+
+<div class="title">
+  <h1>Signature validation certificate chain for metadata published at</h1>
+  <h2><a href="{{metadataUrl}}">{{metadataUrl}}</a></h2>
+</div>
+
+{{#certs}}
+  {{#.}}
+    <div class="cert-section">
+      <div class="cert-properties">
+        <h3 class="subject-name">{{subjectCommonName}}</h3>
+        <ul class="cert-property-list">
+
+          <li class="cert-property-list-item">
+            <label><b><i>Issuer</i></b></label>
+            <p class="issuer-name">{{issuerCommonName}}</p>
+          </li>
+
+          <li class="cert-property-list-item">
+            <label><b><i>Validity</i></b></label>
+            <ul class="validity-list">
+              <li>
+                <label><i>Not Before:</i></label>
+                <span>{{validNotBefore}}</span>
+              </li>
+              <li>
+                <label><i>Not After:</i></label>
+                <span>{{validNotAfter}}</span>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+
+      <textarea readonly class="cert-base64">{{base64String}}</textarea>
+    </div>
+  {{/.}}
+{{/certs}}
+
+</body>
+</html>

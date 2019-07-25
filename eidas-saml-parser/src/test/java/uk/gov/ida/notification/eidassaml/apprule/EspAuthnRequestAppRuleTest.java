@@ -25,12 +25,15 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
+import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
@@ -262,7 +265,8 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender, times(5)).doAppend(loggingEventArgumentCaptor.capture());
 
-        final Map<String, String> mdcPropertyMap = loggingEventArgumentCaptor.getAllValues().stream()
+        final List<ILoggingEvent> logEvents = loggingEventArgumentCaptor.getAllValues();
+        final Map<String, String> mdcPropertyMap = logEvents.stream()
                 .filter(e -> e.getMessage().equals(ProxyNodeLoggingFilter.MESSAGE_EGRESS))
                 .findFirst()
                 .map(ILoggingEvent::getMDCPropertyMap)
@@ -272,5 +276,8 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo("http://proxy-node/eidasAuthnRequest");
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo("2015-04-30T19:25:14.273Z");
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo("http://connector-node/Metadata");
+
+        assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_INGRESS)).hasSize(1);
+        assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_EGRESS)).hasSize(1);
     }
 }

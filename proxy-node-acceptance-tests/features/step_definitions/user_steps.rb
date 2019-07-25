@@ -22,8 +22,12 @@ And('they progress through verify') do
   find('button', :text => 'Stub Idp Demo One').click
 end
 
-Given("the stub connector supplies a bad authn request") do
-  visit(ENV.fetch('STUB_CONNECTOR_URL') + '/BadRequest')
+Given(/^the stub connector supplies an authn request with (.*)$/) do |issue|
+  scenario_path_map = {
+    "a missing signature": "/MissingSignature",
+    "an invalid signature": "/InvalidSignature"
+  }
+  visit(ENV.fetch('STUB_CONNECTOR_URL') + scenario_path_map[issue.to_sym])
 end
 
 Given('they login to stub idp') do

@@ -6,6 +6,7 @@ import uk.gov.ida.notification.configuration.EidasSamlParserServiceConfiguration
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.configuration.TranslatorServiceConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
+import uk.gov.ida.notification.shared.metadata.MetadataPublishingConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -13,30 +14,35 @@ import java.net.URI;
 
 public class GatewayConfiguration extends Configuration {
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private TranslatorServiceConfiguration translatorService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private EidasSamlParserServiceConfiguration eidasSamlParserService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private VerifyServiceProviderConfiguration verifyServiceProviderService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private RedisServiceConfiguration redisService;
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private URI errorPageRedirectUrl;
+
+    @Valid
+    @NotNull
+    @JsonProperty
+    private MetadataPublishingConfiguration metadataPublishingConfiguration;
 
 
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }
@@ -51,5 +57,9 @@ public class GatewayConfiguration extends Configuration {
 
     public URI getErrorPageRedirectUrl() {
         return errorPageRedirectUrl;
+    }
+
+    public MetadataPublishingConfiguration getMetadataPublishingConfiguration() {
+        return metadataPublishingConfiguration;
     }
 }
