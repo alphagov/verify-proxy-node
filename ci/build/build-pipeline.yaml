@@ -139,11 +139,11 @@ spec:
     jobs:
 
     - name: delete-old-pipeline
+      plan:
+      - task: delete-old-pipeline
         config:
           platform: linux
           image_resource: *task_toolbox
-          inputs:
-          - name: manifests
           params:
             KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
             KUBERNETES_TOKEN: ((namespace-deployer.token))
