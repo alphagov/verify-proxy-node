@@ -11,6 +11,7 @@
 
   .title {
     margin-left: 10px;
+    margin-bottom: 60px;
   }
   .title h1 {
     margin-bottom: 5px;
@@ -20,7 +21,7 @@
   }
 
   .cert-section {
-    margin: 55px 0 10px 10px;
+    margin: 0 0 45px 20px;
   }
 
   .subject-name {
@@ -34,8 +35,8 @@
   .cert-properties {
     display: inline-block;
     vertical-align: middle;
-    width: 350px;
-    margin-right: 80px;
+    max-width: 500px;
+    margin-left: 60px;
   }
   .cert-property-list {
     list-style: none;
@@ -68,11 +69,15 @@
   }
 
   .cert-base64 {
-    width: 625px;
-    height: 180px;
+    width: 465px;
+    height: 295px;
     display: inline-block;
     vertical-align: middle;
-    margin-top: 20px;
+    font-family: monospace;
+    font-size: 12px;
+    margin-left: 25px;
+    resize: none;
+    border: none;
   }
 </style>
 
@@ -86,6 +91,8 @@
 {{#certs}}
   {{#.}}
     <div class="cert-section">
+      <textarea readonly class="cert-base64">{{certPem}}</textarea>
+
       <div class="cert-properties">
         <h3 class="subject-name">{{subjectCommonName}}</h3>
         <ul class="cert-property-list">
@@ -111,8 +118,6 @@
 
         </ul>
       </div>
-
-      <textarea readonly class="cert-base64">{{base64String}}</textarea>
     </div>
   {{/.}}
 {{/certs}}

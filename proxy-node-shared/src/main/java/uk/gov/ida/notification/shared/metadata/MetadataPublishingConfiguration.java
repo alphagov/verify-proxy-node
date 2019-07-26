@@ -21,7 +21,7 @@ public class MetadataPublishingConfiguration {
 
     @Valid
     @JsonProperty
-    private String metadataSigningCertBase64;
+    private URI metadataSigningCertFilePath;
 
     @Valid
     @NotNull
@@ -41,8 +41,8 @@ public class MetadataPublishingConfiguration {
         return metadataPublishPath;
     }
 
-    public String getMetadataSigningCertBase64() {
-        return Optional.ofNullable(metadataSigningCertBase64).orElse("");
+    public URI getMetadataSigningCertFilePath() {
+        return Optional.ofNullable(metadataSigningCertFilePath).orElse(URI.create(""));
     }
 
     public URI getMetadataCACertsFilePath() {

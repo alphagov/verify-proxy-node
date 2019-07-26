@@ -19,7 +19,7 @@ logging:
 metadataPublishingConfiguration:
   metadataFilePath: ${PROXY_NODE_METADATA_FILE_PATH:-/app/metadata/metadata.xml}
   metadataPublishPath: ${PROXY_NODE_METADATA_PUBLISH_PATH:-/ServiceMetadata}
-  metadataSigningCertBase64: ${PROXY_NODE_METADATA_SIGNING_CERT}
+  metadataSigningCertFilePath: ${PROXY_NODE_METADATA_SIGNING_CERT_FILE_PATH:-/app/metadata/metadataSigningCert}
   metadataCACertsFilePath: ${PROXY_NODE_METADATA_CA_CERTS_FILE_PATH:-/app/metadata/metadataCACerts}
   metadataCertsPublishPath: ${PROXY_NODE_METADATA_CERTS_PUBLISH_PATH:-/ServiceMetadataSigningCertificates}
 

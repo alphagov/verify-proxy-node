@@ -17,7 +17,7 @@ connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID}
 metadataPublishingConfiguration:
   metadataFilePath: ${CONNECTOR_METADATA_FILE_PATH:-/app/metadata/metadata.xml}
   metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH:-/ConnectorMetadata}
-  metadataSigningCertBase64: ${CONNECTOR_METADATA_SIGNING_CERT}
+  metadataSigningCertFilePath: ${CONNECTOR_METADATA_SIGNING_CERT_FILE_PATH:-/app/metadata/metadataSigningCert}
   metadataCACertsFilePath: ${CONNECTOR_METADATA_CA_CERTS_FILE_PATH:-/app/metadata/metadataCACerts}
   metadataCertsPublishPath: ${CONNECTOR_METADATA_CERTS_PUBLISH_PATH:-/ConnectorMetadataSigningCertificates}
 
