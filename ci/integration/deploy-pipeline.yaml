@@ -144,7 +144,7 @@ spec:
                 --allow-ns "${RELEASE_NAMESPACE}" \
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
-                --labels "app=${APP_NAME}" \
+                --labels "${RELEASE_NAME}-${APP_NAME}" \
                 -f ./manifests/
 
 
@@ -239,7 +239,7 @@ spec:
                 -y \
                 --namespace "${RELEASE_NAMESPACE}" \
                 --allow-ns "${RELEASE_NAMESPACE}" \
-                --app "${RELEASE_NAME}-${APP_NAME}" \
+                --app "${APP_NAME}" \
                 --diff-changes \
                 --labels "app=${APP_NAME}" \
                 -f ./manifests/
