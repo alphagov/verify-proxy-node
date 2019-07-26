@@ -133,7 +133,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
         environment.jersey().register(new CatchAllExceptionMapper());
     }
 
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlParserConfiguration configuration, MetadataResolverBundle hubMetadataResolverBundle) throws Exception {
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlParserConfiguration configuration, MetadataResolverBundle connectorMetadataResolverBundle) throws Exception {
         MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("eidas-saml-parser");
         DestinationValidator destinationValidator = new DestinationValidator(
                 configuration.getProxyNodeAuthnRequestUrl(), configuration.getProxyNodeAuthnRequestUrl().getPath());
@@ -146,7 +146,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
                 replayChecker,
                 new ComparisonValidator(),
                 destinationValidator,
-                new AssertionConsumerServiceValidator(hubMetadataResolverBundle.getMetadataResolver())
+                new AssertionConsumerServiceValidator(connectorMetadataResolverBundle.getMetadataResolver())
         );
     }
 
