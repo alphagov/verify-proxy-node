@@ -86,8 +86,8 @@ public class MetadataCertsPublishingResource {
                 .filter(s -> !s.isBlank())
                 .map(c -> c.substring(0, c.indexOf(END_LINE)))
                 .map(c -> c.replace("\n", ""))
-                .filter(c -> !c.equals(metadataSigningCertBase64.replace("\n", "").trim()))
                 .map(String::trim)
+                .filter(c -> !c.equals(metadataSigningCertBase64.replace("\n", "").trim()))
                 .map(this::createCert)
                 .collect(Collectors.toList());
 
