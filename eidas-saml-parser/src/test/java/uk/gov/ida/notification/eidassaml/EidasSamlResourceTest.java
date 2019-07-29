@@ -48,7 +48,7 @@ public class EidasSamlResourceTest {
             .build();
 
     @Before
-    public void setup() throws Exception {
+    public void setUp() throws Exception {
         InitializationService.initialize();
     }
 

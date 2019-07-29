@@ -8,6 +8,7 @@ import uk.gov.ida.notification.views.MetadataSigningCertsView.Cert;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
+@Path("/")
 public class MetadataCertsPublishingResource {
 
     private static final String BEGIN_LINE = "-----BEGIN CERTIFICATE-----";

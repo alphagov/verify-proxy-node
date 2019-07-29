@@ -36,7 +36,6 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static uk.gov.ida.notification.apprule.rules.GatewayAppRule.ERROR_PAGE_REDIRECT_URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
@@ -90,9 +89,7 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("redisService.local", "true"),
             ConfigOverride.config("redisService.url", ""),
             ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", "metadata/invalid-md-path.xml"),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataCACertsFilePath", "metadata/invalid-md-signing-cert-path.xml"),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH)
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH)
     );
 
     @Test
@@ -142,14 +139,6 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(html).contains("Validity");
         assertThat(html).contains("Not Before");
         assertThat(html).contains("Not After");
-    }
-
-    @Test
-    public void shouldRedirectToErrorPageWhenMetadataSigningCertsMissing() throws URISyntaxException {
-        final Response response = proxyNodeAppRuleMissingMetadata.target(METADATA_CERTS_PUBLISH_PATH, false).request().get();
-
-        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
-        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
     @Test
