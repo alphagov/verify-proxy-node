@@ -144,7 +144,7 @@ spec:
                 --allow-ns "${RELEASE_NAMESPACE}" \
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
-                --labels "app=${APP_NAME}" \
+                --labels "${RELEASE_NAME}-${APP_NAME}" \
                 -f ./manifests/
 
 
@@ -234,6 +234,9 @@ spec:
               kubectl config set-context deployer --user deployer --cluster self
               kubectl config use-context deployer
 
+              echo "Deleting old version of the deployment..."
+              kapp delete -a ${APP_NAME}
+
               echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
               kapp deploy \
                 -y \
@@ -241,5 +244,5 @@ spec:
                 --allow-ns "${RELEASE_NAMESPACE}" \
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
-                --labels "app=${APP_NAME}" \
+                --labels "app=${RELEASE_NAME}-${APP_NAME}" \
                 -f ./manifests/
