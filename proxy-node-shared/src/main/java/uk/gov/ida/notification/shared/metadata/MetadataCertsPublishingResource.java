@@ -8,6 +8,7 @@ import uk.gov.ida.notification.views.MetadataSigningCertsView.Cert;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
@@ -24,13 +25,13 @@ import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
+@Path("/")
 public class MetadataCertsPublishingResource {
 
     private static final String BEGIN_LINE = "-----BEGIN CERTIFICATE-----";
@@ -38,26 +39,35 @@ public class MetadataCertsPublishingResource {
     private static final String COMMON_NAME_PREFIX = "CN=";
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
+    private static MetadataSigningCertsView metadataSigningCertsView;
+
     @Context
     private UriInfo uriInfo;
 
     private URI metadataPublishPath;
     private URI metadataCACertsFilePath;
-    private String metadataSigningCertBase64;
+    private URI metadataSigningCertFilePath;
 
     @Inject
     public MetadataCertsPublishingResource(
-            @Named("metadataSigningCertBase64") String metadataSigningCertBase64,
+            @Named("metadataSigningCertFilePath") URI metadataSigningCertFilePath,
             @Named("metadataCACertsFilePath") URI metadataCACertsFilePath,
             @Named("metadataPublishPath") URI metadataPublishPath) {
-        this.metadataSigningCertBase64 = metadataSigningCertBase64;
+        this.metadataSigningCertFilePath = metadataSigningCertFilePath;
         this.metadataCACertsFilePath = metadataCACertsFilePath;
         this.metadataPublishPath = metadataPublishPath;
     }
 
     @GET
     public MetadataSigningCertsView getMetadataSigningCerts() {
+        if (metadataSigningCertsView == null) {
+            metadataSigningCertsView = generateMetadataSigningCertsView();
+        }
 
+        return metadataSigningCertsView;
+    }
+
+    private MetadataSigningCertsView generateMetadataSigningCertsView() {
         final URL metadataPublishUrl;
         try {
             metadataPublishUrl = new URL(this.uriInfo.getBaseUri().toURL(), this.metadataPublishPath.toString());
@@ -67,51 +77,36 @@ public class MetadataCertsPublishingResource {
                     uriInfo.getBaseUri(), metadataPublishPath), e);
         }
 
-        final File concatenatedPemCertsFile = new File(metadataCACertsFilePath.toString());
-        if (!concatenatedPemCertsFile.exists()) {
-            throw new InvalidMetadataException(format(
-                    "No file containing metadata signing certs found at {0}", metadataCACertsFilePath));
-        }
-
-        String concatenatedPemCerts;
-        try {
-            concatenatedPemCerts = Files.readString(concatenatedPemCertsFile.toPath());
-        } catch (IOException e) {
-            throw new InvalidMetadataException(format(
-                    "Couldn't read metadata certs file from {0}", metadataCACertsFilePath), e);
-        }
+        final String concatenatedPemCerts = readFile(metadataCACertsFilePath).orElseThrow(() ->
+                new InvalidMetadataException("Couldn't read metadata certs file from " + metadataCACertsFilePath));
 
         final List<Cert> certificates = Arrays
                 .stream(concatenatedPemCerts.split(BEGIN_LINE))
                 .filter(s -> !s.isBlank())
                 .map(c -> c.substring(0, c.indexOf(END_LINE)))
-                .map(c -> c.replace("\n", ""))
-                .map(String::trim)
-                .filter(c -> !c.equals(metadataSigningCertBase64.replace("\n", "").trim()))
+                .map(c -> BEGIN_LINE + c + END_LINE)
                 .map(this::createCert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
+        readFile(metadataSigningCertFilePath).flatMap(this::createCert).ifPresentOrElse(
+                msc -> certificates.removeIf(
+                        c -> c.getSubjectCommonName().equals(msc.getSubjectCommonName()) &&
+                                c.getIssuerCommonName().equals(msc.getIssuerCommonName())),
+                () -> ProxyNodeLogger.warning("Couldn't read metadata signing cert file from " + metadataSigningCertFilePath));
+
         if (certificates.isEmpty()) {
-            throw new InvalidMetadataException(format(
-                    "No valid metadata signing certs extracted from \n{0}", concatenatedPemCerts));
+            throw new InvalidMetadataException("No valid metadata signing certs extracted from \n" + concatenatedPemCerts);
         }
 
         return new MetadataSigningCertsView(metadataPublishUrl, certificates);
     }
 
-    private Cert createCert(String certBase64) {
-        return Optional.ofNullable(generateCertificate(certBase64))
-                .map(c -> new Cert(certBase64, getSubjectCommonName(c), getIssuerCommonName(c),
-                        DATE_FORMAT.format(c.getNotBefore()), DATE_FORMAT.format(c.getNotAfter())))
-                .orElse(null);
-    }
-
-    private String getSubjectCommonName(X509Certificate cert) {
-        return Optional.of(cert).map(c -> getCommonName(c.getSubjectDN())).orElse("");
-    }
-
-    private String getIssuerCommonName(X509Certificate cert) {
-        return Optional.of(cert).map(c -> getCommonName(c.getIssuerDN())).orElse("");
+    private Optional<Cert> createCert(String certPem) {
+        return Optional.ofNullable(generateCertificate(certPem))
+                .map(c -> new Cert(certPem, getCommonName(c.getSubjectDN()), getCommonName(c.getIssuerDN()),
+                        DATE_FORMAT.format(c.getNotBefore()), DATE_FORMAT.format(c.getNotAfter())));
     }
 
     private String getCommonName(Principal principal) {
@@ -120,18 +115,28 @@ public class MetadataCertsPublishingResource {
                 .findFirst()
                 .map(s -> s.replace(COMMON_NAME_PREFIX, ""))
                 .map(String::trim)
-                .orElse("");
+                .get();
     }
 
-    private X509Certificate generateCertificate(String certBase64) {
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(certBase64));
+    private X509Certificate generateCertificate(String certPem) {
+        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(certPem.getBytes())) {
+            return (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(inputStream);
+        } catch (CertificateException | IOException e) {
+            ProxyNodeLogger.logException(e, "Could not create X509 certificate from PEM string: \n" + certPem);
+            return null;
+        }
+    }
+
+    private Optional<String> readFile(URI filePath) {
+        final File file = new File(filePath.toString());
+        if (!file.exists()) {
+            return Optional.empty();
+        }
 
         try {
-            return (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(inputStream);
-        } catch (CertificateException e) {
-            ProxyNodeLogger.logException(e,
-                    format("Could not create X509 certificate from base64 encoded string: {0}", certBase64));
-            return null;
+            return Optional.of(Files.readString(file.toPath()));
+        } catch (IOException e) {
+            return Optional.empty();
         }
     }
 }

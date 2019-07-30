@@ -30,14 +30,14 @@ public class MetadataSigningCertsView extends View {
         private final String issuerCommonName;
         private final String validNotBefore;
         private final String validNotAfter;
-        private final String base64String;
+        private final String certPem;
 
-        public Cert(String base64String, String subjectCommonName, String issuerCommonName, String validNotBefore, String validNotAfter) {
+        public Cert(String certPem, String subjectCommonName, String issuerCommonName, String validNotBefore, String validNotAfter) {
             this.subjectCommonName = subjectCommonName;
             this.issuerCommonName = issuerCommonName;
             this.validNotBefore = validNotBefore;
             this.validNotAfter = validNotAfter;
-            this.base64String = base64String;
+            this.certPem = certPem;
         }
 
         public String getSubjectCommonName() {
@@ -56,8 +56,8 @@ public class MetadataSigningCertsView extends View {
             return validNotAfter;
         }
 
-        public String getBase64String() {
-            return base64String;
+        public String getCertPem() {
+            return certPem;
         }
     }
 }

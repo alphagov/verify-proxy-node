@@ -37,6 +37,8 @@ spec:
             path: metadata.xml
           - key: metadataCACerts
             path: metadataCACerts
+          - key: metadataSigningCert
+            path: metadataSigningCert
       containers:
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
@@ -88,11 +90,6 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-proxy-node-metadata
               key: metadataSigningTruststorePassword
-        - name: CONNECTOR_METADATA_SIGNING_CERT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: metadataSigningCertBase64
         - name: SIGNER_CONFIG_TYPE
           valueFrom:
             secretKeyRef:

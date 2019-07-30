@@ -1,9 +1,10 @@
-package uk.gov.ida.notification.apprule.rules;
+package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.glassfish.jersey.client.ClientProperties;
 import org.junit.ClassRule;
 import org.junit.Test;
+import uk.gov.ida.notification.apprule.rules.TestExceptionMapperResource;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 
@@ -13,17 +14,17 @@ import java.net.URISyntaxException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestErrorPageExceptionMapperRule {
+public class ErrorPageExceptionMapperResourceRuleTest {
 
     private static final String EIDAS_ERROR_PAGE_URI = "http://eidas_error_page_uri";
     private static final String GENERIC_ERROR_PAGE_URI = "http://generic_error_page_uri";
 
     @ClassRule
     public static final ResourceTestRule resources = ResourceTestRule.builder()
-                                    .addProvider(new ErrorPageExceptionMapper(getUri(EIDAS_ERROR_PAGE_URI)))
-                                    .addProvider(new GenericExceptionMapper(getUri(GENERIC_ERROR_PAGE_URI)))
-                                    .addResource(new TestExceptionMapperResource())
-                                    .build();
+            .addProvider(new ErrorPageExceptionMapper(getUri(EIDAS_ERROR_PAGE_URI)))
+            .addProvider(new GenericExceptionMapper(getUri(GENERIC_ERROR_PAGE_URI)))
+            .addResource(new TestExceptionMapperResource())
+            .build();
 
     @Test
     public void shouldMapEidasSamlParserResponseExceptionToErrorPageExceptionMapper() {
@@ -75,12 +76,12 @@ public class TestErrorPageExceptionMapperRule {
 
     private Response getResponse(String uri) {
         return resources.getJerseyTest()
-                        .client().property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)
-                        .target(uri).request().get();
+                .client().property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)
+                .target(uri).request().get();
     }
 
     private static URI getUri(String errorUri) {
-        URI uri =null;
+        URI uri = null;
         try {
             uri = new URI(errorUri);
         } catch (URISyntaxException e) {
@@ -88,5 +89,4 @@ public class TestErrorPageExceptionMapperRule {
         }
         return uri;
     }
-
 }
