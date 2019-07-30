@@ -6,4 +6,8 @@ ignore:
     - '*':
         reason: Fix not available
         expires: 2019-11-30T19:21:05.816Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-455617:
+    - '*':
+        reason: Fix not yet available in Dropwizard
+        expires: 2019-11-30T19:21:05.816Z
 patch: {}

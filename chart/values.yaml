@@ -36,7 +36,7 @@ gateway:
     repository: registry.tools.verify.govsvc.uk/eidas/gateway@sha256
     tag: 1975031b78f5df2611e00b8cf9e264106d8a43628e52f1499119f33278048bb5
     pullPolicy: IfNotPresent
-  errorPageURL: https://www.signin.service.gov.uk/proxy-node-error
+  errorPageURL: https://www.integration.signin.service.gov.uk/proxy-node-error
 
 hsm:
   image:

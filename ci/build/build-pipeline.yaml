@@ -376,11 +376,11 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLOUDHSM_IP: ((cluster.cloudHsmIp))
-            RELEASE_NAME: test
-            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: test
             ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
           run:
             path: /bin/bash
             args:
@@ -418,8 +418,8 @@ spec:
             KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
             KUBERNETES_TOKEN: ((namespace-deployer.token))
             KUBERNETES_API: kubernetes.default.svc
-            RELEASE_NAME: test
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: test
             APP_NAME: proxy-node
           run:
             path: /bin/bash
