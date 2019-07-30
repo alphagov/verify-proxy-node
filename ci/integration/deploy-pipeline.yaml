@@ -244,5 +244,4 @@ spec:
                 --allow-ns "${RELEASE_NAMESPACE}" \
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
-                --labels "app=${RELEASE_NAME}-${APP_NAME}" \
                 -f ./manifests/
