@@ -234,9 +234,6 @@ spec:
               kubectl config set-context deployer --user deployer --cluster self
               kubectl config use-context deployer
 
-              echo "Deleting old version of the deployment..."
-              kapp delete -a "proxy-node" --namespace "${RELEASE_NAMESPACE}" --yes
-
               echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
               kapp deploy \
                 -y \
