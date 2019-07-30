@@ -38,17 +38,17 @@ spec:
 
     - name: release
       type: github-release
-      icon: file-document
+      icon: tag
       source:
         <<: *github_source
 
-    - name: daily
+    - name: nightly
       type: time
       icon: update
       source:
-        interval: 12h
-        start: 8:00 AM
-        stop: 8:00 PM
+        interval: 1h
+        start: 3:00 AM
+        stop: 4:00 AM
 
     jobs:
 
@@ -59,7 +59,7 @@ spec:
       - get: release
         trigger: true
 
-      - get: daily
+      - get: nightly
         trigger: true
 
       - task: render-manifests

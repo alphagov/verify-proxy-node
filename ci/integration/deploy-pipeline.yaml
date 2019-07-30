@@ -38,7 +38,7 @@ spec:
 
     - name: release
       type: github-release
-      icon: file-document
+      icon: tag
       source:
         <<: *github_source
 
@@ -120,8 +120,8 @@ spec:
             KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
             KUBERNETES_TOKEN: ((namespace-deployer.token))
             KUBERNETES_API: kubernetes.default.svc
-            RELEASE_NAME: dk-integration
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: dk-integration
             APP_NAME: proxy-node
           run:
             path: /bin/bash
@@ -260,10 +260,10 @@ spec:
             params:
               CLUSTER_NAME: ((cluster.name))
               CLUSTER_DOMAIN: ((cluster.domain))
-              RELEASE_NAME: test-integration
-              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
               CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
-              ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: test-integration
+              CLOUDHSM_IP: ((cluster.cloudHsmIp))
             run:
               path: /bin/bash
               args:
@@ -283,8 +283,8 @@ spec:
                     --namespace "${RELEASE_NAMESPACE}" \
                     --set "global.cluster.name=${CLUSTER_NAME}" \
                     --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
                     --set "stubConnector.enabled=true" \
-                    --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                     --output-dir "./manifests/" \
                     ./release/*.tgz
 
@@ -298,8 +298,8 @@ spec:
               KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
               KUBERNETES_TOKEN: ((namespace-deployer.token))
               KUBERNETES_API: kubernetes.default.svc
-              RELEASE_NAME: test-integration
               RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: test-integration
               APP_NAME: proxy-node
             run:
               path: /bin/bash
@@ -319,7 +319,6 @@ spec:
                     -y \
                     --namespace "${RELEASE_NAMESPACE}" \
                     --allow-ns "${RELEASE_NAMESPACE}" \
-                    --app "${APP_NAME}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}" \
                     --diff-changes \
-                    --labels "app=${APP_NAME}" \
                     -f ./manifests/
