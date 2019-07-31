@@ -1,17 +1,17 @@
 FROM gradle:jdk11 as build
+ENV GRADLE_USER_HOME ~/.gradle
 WORKDIR /verify-service-provider
 
+ARG RUN_TESTS=true
 ARG VERIFY_USE_PUBLIC_BINARIES=false
 ENV VERIFY_USE_PUBLIC_BINARIES $VERIFY_USE_PUBLIC_BINARIES
-
-ENV GRADLE_USER_HOME ~/.gradle
 
 COPY build.gradle build.gradle
 COPY settings.gradle settings.gradle
 COPY src src
 
-RUN gradle --no-daemon --parallel installDist -x test
-ENTRYPOINT ["gradle", "--no-daemon"]
+RUN gradle --parallel installDist
+RUN if [ "$RUN_TESTS" = "true" ]; then gradle --parallel test ; fi
 
 FROM openjdk:11-jre-slim
 WORKDIR /verify-service-provider
