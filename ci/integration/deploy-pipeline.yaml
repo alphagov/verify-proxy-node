@@ -38,7 +38,7 @@ spec:
 
     - name: release
       type: github-release
-      icon: file-document
+      icon: tag
       source:
         <<: *github_source
 
@@ -120,8 +120,8 @@ spec:
             KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
             KUBERNETES_TOKEN: ((namespace-deployer.token))
             KUBERNETES_API: kubernetes.default.svc
-            RELEASE_NAME: dk-integration
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: dk-integration
             APP_NAME: proxy-node
           run:
             path: /bin/bash
@@ -238,3 +238,87 @@ spec:
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
                 -f ./manifests/
+
+    - name: deploy-test-integration
+      serial: true
+      plan:
+
+        - get: release
+          trigger: true
+
+        - get: daily
+          trigger: true
+
+        - task: render-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: release
+            outputs:
+              - name: manifests
+            params:
+              CLUSTER_NAME: ((cluster.name))
+              CLUSTER_DOMAIN: ((cluster.domain))
+              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: test-integration
+              CLOUDHSM_IP: ((cluster.cloudHsmIp))
+            run:
+              path: /bin/bash
+              args:
+                - -eu
+                - -c
+                - |
+                  echo "preparing keyring..."
+                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  gpg --import key
+                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  echo "verifying package"
+                  helm verify ./release/*.tgz
+                  echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                  helm template \
+                    --name "${RELEASE_NAME}" \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --set "global.cluster.name=${CLUSTER_NAME}" \
+                    --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                    --set "stubConnector.enabled=true" \
+                    --output-dir "./manifests/" \
+                    ./release/*.tgz
+
+        - task: deploy-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: test-integration
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -eu
+                - -c
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                  kapp deploy \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --allow-ns "${RELEASE_NAMESPACE}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}" \
+                    --diff-changes \
+                    -f ./manifests/

@@ -3,6 +3,10 @@
 {{- printf "%s-%s.%s" .Release.Name .Chart.Name (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "gateway.entityID" -}}
+{{- printf "https://%s%s" (include "gateway.host" .) .Values.gateway.metadataPath -}}
+{{- end -}}
+
 {{- define "stubConnector.host" -}}
 {{- if .Values.stubConnector.enabled -}}
 {{- printf "%s-%s.%s" .Release.Name "connector" (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}

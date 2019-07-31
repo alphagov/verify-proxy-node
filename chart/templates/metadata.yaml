@@ -9,7 +9,7 @@ spec:
   id: _entities
   type: proxy
   data:
-    entityID: https://{{ include "gateway.host" . }}/ServiceMetadata
+    entityID: {{ include "gateway.entityID" . }}
     postURL: https://{{ include "gateway.host" . }}/SAML2/SSO/POST
     redirectURL: https://{{ include "gateway.host" . }}/Redirect
     orgName: Government Digital Service

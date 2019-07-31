@@ -26,7 +26,7 @@ spec:
         imagePullPolicy: {{ .Values.vsp.image.pullPolicy }}
         env:
         - name: SERVICE_ENTITY_IDS
-          value: "[\"https://{{ include "gateway.host" . }}\"]"
+          value: "[\"{{ include "gateway.entityID" . }}\"]"
         - name: VERIFY_ENVIRONMENT
           valueFrom:
             secretKeyRef:
