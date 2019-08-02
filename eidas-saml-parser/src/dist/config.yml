@@ -4,20 +4,20 @@ server:
       port: ${PORT:-6000}
   adminConnectors:
     - type: http
-      port: ${ADMIN_PORT:-6008}
+      port: ${ADMIN_PORT:-6001}
   requestLog:
     appenders:
       - type: console
         layout:
-          type: access-json
+          ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
 
 logging:
   level: ${LOG_LEVEL:-INFO}
   appenders:
-    - type: logstash-console
+    - type: ${LOGGING_APPENDER:-logstash-console}
 
 connectorMetadataConfiguration:
-  url: ${CONNECTOR_NODE_METADATA_URL:-http://DefaultNotUsed}
+  url: ${CONNECTOR_NODE_METADATA_URL:-https://DefaultNotUsed}
   expectedEntityId: ${CONNECTOR_NODE_ENTITY_ID:-DefaultNotUsed}
   jerseyClientName: connector-metadata-client
   maxRefreshDelay: ${METADATA_REFRESH_DELAY:-600000}
@@ -27,6 +27,6 @@ connectorMetadataConfiguration:
     password: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
 replayChecker:
-  redisUrl: ${REDIS_SERVER_URI:-http://DefaultNotUsed}
+  redisUrl: ${REDIS_SERVER_URI:-https://DefaultNotUsed}
 
 proxyNodeAuthnRequestUrl: ${PROXY_NODE_AUTHN_REQUEST_ENDPOINT:-DefaultNotUsed}

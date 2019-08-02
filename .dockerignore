@@ -54,5 +54,4 @@ local_eidas_reference/translator
 .local_pki
 
 */Dockerfile
-proxy-node-test/
 mdgen/

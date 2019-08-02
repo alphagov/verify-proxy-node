@@ -1,15 +1,20 @@
 server:
   applicationConnectors:
     - type: http
-      port: ${PORT:-6666}
+      port: ${PORT:-6610}
   adminConnectors:
     - type: http
-      port: ${ADMIN_PORT:-6667}
+      port: ${ADMIN_PORT:-6611}
+  requestLog:
+    appenders:
+      - type: console
+        layout:
+          ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
 
 logging:
   level: ${LOG_LEVEL:-INFO}
   appenders:
-    - type: logstash-console
+    - type: ${LOGGING_APPENDER:-logstash-console}
 
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
 connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID}

@@ -9,12 +9,12 @@ server:
     appenders:
       - type: console
         layout:
-          type: access-json
+          ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
 
 logging:
   level: ${LOG_LEVEL:-INFO}
   appenders:
-    - type: logstash-console
+    - type: ${LOGGING_APPENDER:-logstash-console}
 
 proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
 

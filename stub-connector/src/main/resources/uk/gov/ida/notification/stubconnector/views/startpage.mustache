@@ -15,9 +15,7 @@
     .logo {
         /* maximum that displays in Chrome/macOS */
         font-size: 7em;
-        margin: auto;
-        margin-top: 20px;
-        margin-bottom: 20px;
+        margin: 20px auto;
         width: 183px;
         height: 183px;
         background-size: contain;
@@ -45,7 +43,7 @@
       font-family: Arial, sans-serif;
       color: #fff;
       padding: 10px;
-      margin: 5px;
+      margin: 9px 5px;
       font-size: 1em;
       line-height: 1.25;
       border: none;
@@ -66,20 +64,23 @@
     .submitBtnRed:hover, .submitBtnRed:focus {
       background-color: #D60C0C;
     }
+    .action-label {
+      margin-bottom: 10px;
+    }
 </style>
 <body class="main">
 <div>
     <div class="logo"></div>
     <h1>Welcome to the eIDAS Proxy Node Connector Node</h1>
-    <p>To start a Journey press the button below</p>
+    <p class="action-label">To start a Journey press the button below</p>
     <div>
         <a href="./RequestLow" class="submitBtn submitBtnGreen">Start Journey LOA Low</a>
         <a href="./RequestSubstantial" class="submitBtn submitBtnGreen">Start Journey LOA Substantial</a>
-        <a href="./RequestHigh" class="submitBtn submitBtnGreen">Start Journey LOA High</a>
     </div>
     <div>
         <a href="./MissingSignature" class="submitBtn submitBtnRed">Send request with missing signature</a>
         <a href="./InvalidSignature" class="submitBtn submitBtnRed">Send request with invalid signature</a>
+        <a href="./RequestHigh" class="submitBtn submitBtnRed">Start Journey LOA High</a>
     </div>
 </div>
 </body>

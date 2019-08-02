@@ -33,6 +33,7 @@ public class StubConnectorAppRule extends DropwizardAppRule<StubConnectorConfigu
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
+        configOverridesList.add(ConfigOverride.config("logging.appenders[0].type", "console"));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 

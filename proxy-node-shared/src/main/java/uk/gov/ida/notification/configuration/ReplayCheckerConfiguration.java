@@ -15,9 +15,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 public class ReplayCheckerConfiguration {
-    @JsonProperty
+
     @Valid
     @NotNull
+    @JsonProperty
     private String redisUrl = "";
 
     public MessageReplayChecker createMessageReplayChecker(String name) throws Exception {

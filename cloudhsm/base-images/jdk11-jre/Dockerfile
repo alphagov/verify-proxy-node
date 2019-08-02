@@ -1,6 +1,6 @@
-# Base builder image
+# Base builder image to run apps that need the HSM
 
-FROM gradle:jdk11 AS build
+FROM eidas/cloudhsm-jce-gradle AS build
 ENV GRADLE_USER_HOME ~/.gradle
 WORKDIR /app
 
@@ -17,7 +17,7 @@ ARG component
 COPY ${component}/src ${component}/src
 COPY ${component}/build.gradle ${component}/build.gradle
 
-RUN gradle --parallel -p ${component} installDist
+RUN gradle -Pcloudhsm --parallel -p ${component} installDist
 RUN if [ "$RUN_TESTS" = "true" ]; then \
       gradle --parallel \
         -x createPoms \
