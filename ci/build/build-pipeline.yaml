@@ -162,11 +162,11 @@ spec:
 
     groups:
       - name: proxy-node
-        jobs: [build]
+        jobs: [build, package, test, release]
       - name: base-images
         jobs: [build-base-images]
       - name: all
-        jobs: [build-base-images, build]
+        jobs: [build-base-images, build, package, test, release]
 
     jobs:
 
