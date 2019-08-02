@@ -75,7 +75,7 @@ spec:
         branch: master
 
     - name: vsp-config
-      icon: file-document-box-check-outline
+      icon: file-document-box-check
       type: github
       source:
         <<: *github_source
@@ -202,7 +202,7 @@ spec:
             params:
               build: vsp-src
               build_args: {VERIFY_USE_PUBLIC_BINARIES: "false"}
-              dockerfile: src/proxy-node-vsp-config/Dockerfile
+              dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
