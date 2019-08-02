@@ -6,9 +6,10 @@ ARG RUN_TESTS=true
 ARG VERIFY_USE_PUBLIC_BINARIES=false
 ENV VERIFY_USE_PUBLIC_BINARIES $VERIFY_USE_PUBLIC_BINARIES
 
+COPY src/ src/
 COPY build.gradle build.gradle
 COPY settings.gradle settings.gradle
-COPY src src
+COPY verify-service-provider.yml verify-service-provider.yml
 
 RUN gradle --parallel installDist
 RUN if [ "$RUN_TESTS" = "true" ]; then gradle --parallel test ; fi
