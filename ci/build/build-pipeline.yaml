@@ -75,7 +75,7 @@ spec:
         branch: master
 
     - name: vsp-config
-      icon: file-document-box-check
+      icon: check-outline
       type: github
       source:
         <<: *github_source
