@@ -76,7 +76,7 @@ spec:
 
     - name: vsp-config
       icon: file-document-box-check-outline
-      type: git
+      type: github
       source:
         <<: *github_source
         paths: [proxy-node-vsp-config]
