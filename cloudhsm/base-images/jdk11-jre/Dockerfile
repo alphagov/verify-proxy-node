@@ -1,6 +1,6 @@
 # Base builder image to run apps that need the HSM
 
-FROM eidas/cloudhsm-jce-gradle AS build
+FROM registry.london.verify.govsvc.uk/eidas/cloudhsm-jce-gradle AS build
 ENV GRADLE_USER_HOME ~/.gradle
 WORKDIR /app
 
