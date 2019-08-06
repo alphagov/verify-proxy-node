@@ -25,6 +25,7 @@ import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.metadata.MetadataPublishingBundle;
+import uk.gov.ida.notification.stubconnector.exceptions.mappers.TemplatedResponseWebApplicationExceptionMapper;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
@@ -103,6 +104,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
                 "proxy-node-metadata");
 
         environment.jersey().register(new MissingMetadataExceptionMapper());
+        environment.jersey().register(new TemplatedResponseWebApplicationExceptionMapper());
         environment.jersey().register(new CatchAllExceptionMapper());
 
         registerProviders(environment);

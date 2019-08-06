@@ -100,6 +100,15 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     }
 
     @Test
+    public void shouldReturnHTTP400WhenAuthnRequestIsMalformedBase64() throws Exception {
+        AuthnRequest request = this.request.withRandomRequestId().build();
+        samlObjectSigner.sign(request, null);
+
+        Response response = postMalformedEidasAuthnRequest(request);
+        assertErrorResponse(response);
+    }
+
+    @Test
     public void shouldReturnHTTP400WhenAuthnRequestForceAuthnFalse() throws Exception {
         assertBadRequestWithMessage(
                 request.withForceAuthn(false),
@@ -263,7 +272,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         postEidasAuthnRequest(authnRequest);
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(appender, times(5)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, times(6)).doAppend(loggingEventArgumentCaptor.capture());
 
         final List<ILoggingEvent> logEvents = loggingEventArgumentCaptor.getAllValues();
         final Map<String, String> mdcPropertyMap = logEvents.stream()

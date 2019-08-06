@@ -43,6 +43,12 @@ public class GatewayAppRuleTestBase {
         return proxyNodeAppRule.target("/SAML2/SSO/POST", followRedirects).request().post(Entity.form(postForm));
     }
 
+    protected Response postInvalidEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule, boolean followRedirects) throws URISyntaxException {
+        String encodedRequest = "not-a-base64-xml-opening-tag" + Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
+        Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest).param("RelayState", "relay-state");
+        return proxyNodeAppRule.target("/SAML2/SSO/POST", followRedirects).request().post(Entity.form(postForm));
+    }
+
     protected Response redirectEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule) throws URISyntaxException {
         String encodedRequest = Base64.encodeAsString(marshaller.transformToString(eidasAuthnRequest));
         return proxyNodeAppRule.target("/SAML2/SSO/Redirect")
@@ -50,6 +56,13 @@ public class GatewayAppRuleTestBase {
                 .queryParam("RelayState", "relay-state")
                 .request()
                 .get();
+    }
+
+    protected AuthnRequest buildAuthnRequestWithoutId() throws Exception {
+        return new EidasAuthnRequestBuilder()
+            .withIssuer(CONNECTOR_NODE_ENTITY_ID)
+            .withRequestId(null)
+            .build();
     }
 
     protected AuthnRequest buildAuthnRequest() throws Exception {

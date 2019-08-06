@@ -158,6 +158,23 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
+    @Test
+    public void requestWithNoIdReirectsToErrorPage() throws Exception {
+        AuthnRequest requestWithoutId = buildAuthnRequestWithoutId();
+        Response response = postEidasAuthnRequest(requestWithoutId, proxyNodeVspServerErrorAppRule, false);
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+    }
+
+    @Test
+    public void badlyFormattedRequestRedirectsToErrorPage() throws Exception {
+        Response response = postInvalidEidasAuthnRequest(buildAuthnRequest(), proxyNodeVspServerErrorAppRule, false);
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+    }
+
     private void assertGoodRequest(AuthnRequest request) throws Throwable {
         assertGoodSamlSuccessResponse(postEidasAuthnRequest(request, proxyNodeAppRule));
         assertGoodSamlSuccessResponse(redirectEidasAuthnRequest(request, proxyNodeAppRule));

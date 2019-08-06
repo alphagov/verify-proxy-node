@@ -12,6 +12,7 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.AttributeStatement;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.impl.ResponseImpl;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
 import org.opensaml.security.credential.UsageType;
@@ -26,10 +27,13 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
+import uk.gov.ida.notification.stubconnector.validations.ValidBase64SamlResponse;
 import uk.gov.ida.notification.stubconnector.views.ResponseView;
+import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -71,6 +75,8 @@ public class ReceiveResponseResource {
             @Session HttpSession session,
             @FormParam(SamlFormMessageType.SAML_RESPONSE) Response response,
             @FormParam("RelayState") String relayState) throws DecryptionException {
+
+        // TODO(LGW) - it fails BEFORE validation because it cannot cast
 
         SAMLSignatureProfileValidator samlSignatureProfileValidator = new SAMLSignatureProfileValidator();
         ResponseValidator responseValidator = new ResponseValidator(connectorMetadataResolverBundle.getSignatureTrustEngine(), samlSignatureProfileValidator);

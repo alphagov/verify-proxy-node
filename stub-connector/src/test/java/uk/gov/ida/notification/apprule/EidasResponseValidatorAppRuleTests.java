@@ -60,17 +60,29 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
         String validSamlMessage = responseToString(response);
 
-        hasValidity(validSamlMessage, "VALID");
+        checkValidity(validSamlMessage, "VALID");
     }
 
     @Test
     public void shouldReturnInvalidSamlResponse() throws Exception {
         String authnId = getAuthnRequestIdFromSession();
-
         Response unsignedSamlResponse = getEidasSamlMessage(authnId);
         String invalidSamlMessage = responseToString(unsignedSamlResponse);
 
-        hasValidity(invalidSamlMessage, "INVALID");
+        checkValidity(invalidSamlMessage, "INVALID");
+    }
+
+    @Test
+    public void shouldRejectMalformedBase64Saml() throws Exception {
+        String authnId = getAuthnRequestIdFromSession();
+
+        Response response = getEidasSamlMessage(authnId);
+        encryptAssertions(response);
+        signResponse(response);
+
+        String validSamlMessage = responseToString(response);
+        String invalidSamlMessage = "not-the-xml-opening-tag" + validSamlMessage;
+        checkValidity(invalidSamlMessage, "INVALID");
     }
 
     @Test
@@ -82,7 +94,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
 
         String validSamlMessage = responseToString(response);
 
-        hasValidity(validSamlMessage, "INDETERMINATE");
+        checkValidity(validSamlMessage, "INDETERMINATE");
     }
 
     private AuthnRequest getEidasAuthnRequest() throws IOException, URISyntaxException {
@@ -95,7 +107,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
         return getEidasAuthnRequest().getID();
     }
 
-    private void hasValidity(String samlMessage, String validity) throws URISyntaxException {
+    private void checkValidity(String samlMessage, String validity) throws URISyntaxException {
         String html = postEidasResponse(samlMessage);
         assertThat(html).contains("Saml Validity: " + validity);
     }

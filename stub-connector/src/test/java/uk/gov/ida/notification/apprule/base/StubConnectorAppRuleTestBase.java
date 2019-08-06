@@ -117,4 +117,21 @@ public class StubConnectorAppRuleTestBase {
         Response response = request.post(Entity.form(postForm));
         return response.readEntity(String.class);
     }
+
+    protected String postMalformedEidasResponse(String samlForm) throws URISyntaxException {
+        String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(samlForm);
+        Form postForm = new Form()
+            .param(SamlFormMessageType.SAML_RESPONSE, encodedResponse)
+            .param("RelayState", "relay");
+
+        Invocation.Builder request = stubConnectorAppRule.target("/SAML2/Response/POST")
+            .request();
+
+        if (cookies != null) {
+            request.cookie(cookies.get("stub-connector-session"));
+        }
+
+        Response response = request.post(Entity.form(postForm));
+        return response.readEntity(String.class);
+    }
 }
