@@ -21,9 +21,11 @@ import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlClientErrorResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlResource;
 import uk.gov.ida.notification.apprule.rules.TestEidasSamlServerErrorResource;
+import uk.gov.ida.notification.apprule.rules.TestEidasSamlServerValidationResource;
 import uk.gov.ida.notification.apprule.rules.TestTranslatorResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderResource;
 import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerErrorResource;
+import uk.gov.ida.notification.apprule.rules.TestVerifyServiceProviderServerValidationResource;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
@@ -54,6 +56,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     public static final DropwizardClientRule espClientServerErrorRule = new DropwizardClientRule(new TestEidasSamlServerErrorResource());
 
     @ClassRule
+    public static final DropwizardClientRule espClientServerValidationRule = new DropwizardClientRule(new TestEidasSamlServerValidationResource());
+
+    @ClassRule
     public static final DropwizardClientRule espClientClientErrorRule = new DropwizardClientRule(new TestEidasSamlClientErrorResource());
 
     @ClassRule
@@ -61,6 +66,9 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     @ClassRule
     public static final DropwizardClientRule vspClientServerErrorRule = new DropwizardClientRule(new TestVerifyServiceProviderServerErrorResource());
+
+    @ClassRule
+    public static final DropwizardClientRule vspClientServerValidationRule = new DropwizardClientRule(new TestVerifyServiceProviderServerValidationResource());
 
     @Mock
     Appender<ILoggingEvent> appender;
@@ -91,6 +99,16 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     );
 
     @Rule
+    public GatewayAppRule proxyNodeEspServerValidationAppRule = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientServerValidationRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+        ConfigOverride.config("redisService.url", mockedRedisUrl),
+        ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
+        ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+    );
+
+    @Rule
     public GatewayAppRule proxyNodeEspClientErrorAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
@@ -108,6 +126,16 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("redisService.url", mockedRedisUrl),
             ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
             ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+    );
+
+    @Rule
+    public GatewayAppRule proxyNodeVspServerValidationAppRule = new GatewayAppRule(
+        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+        ConfigOverride.config("verifyServiceProviderService.url", vspClientServerValidationRule.baseUri().toString()),
+        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+        ConfigOverride.config("redisService.url", mockedRedisUrl),
+        ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
+        ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
     );
 
     @Test
@@ -143,6 +171,14 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
+    public void server400ResponseFromEspRedirectsToErrorPage() throws Exception {
+        Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspServerValidationAppRule, false);
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+    }
+
+    @Test
     public void clientErrorResponseFromEspRedirectsToErrorPage() throws Exception {
         Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeEspClientErrorAppRule, false);
 
@@ -153,6 +189,14 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     @Test
     public void serverErrorResponseFromVspRedirectsToErrorPage() throws Exception {
         Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeVspServerErrorAppRule, false);
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+    }
+
+    @Test
+    public void server400ResponseFromVspRedirectsToErrorPage() throws Exception {
+        Response response = postEidasAuthnRequest(buildAuthnRequest(), proxyNodeVspServerValidationAppRule, false);
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
         assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
