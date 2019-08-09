@@ -32,7 +32,7 @@ public class SamlResponseExceptionMapperResourceRuleTest {
     public void before() {
         when(sessionStore.getSession(any(String.class))).thenReturn(
                 new GatewaySessionData("HubRequestId", "EidasRequestId", "EidasDestination",
-                        "EidasConnectorPublicKey", "EidasRelayState"));
+                        "EidasConnectorPublicKey", "EidasRelayState", "Issuer"));
 
         when(samlFormViewBuilder.buildResponse("EidasDestination", (String) null, "Continue", "EidasRelayState"))
                 .thenReturn(new SamlFormView("postUrl", "samlMessageType", "encodedSamlMessage", "submitText"));

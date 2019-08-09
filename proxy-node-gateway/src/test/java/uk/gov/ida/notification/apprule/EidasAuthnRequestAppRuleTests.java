@@ -28,16 +28,19 @@ import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.notification.apprule.rules.GatewayAppRule.ERROR_PAGE_REDIRECT_URL;
+import static uk.gov.ida.notification.session.SessionCookieService.COOKIE_X_PN_SESSION;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
 
@@ -166,6 +169,12 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     private void assertGoodSamlSuccessResponse(Response response) throws XPathExpressionException, ParserConfigurationException {
         final String htmlString = getHtmlStringFromResponse(response);
+
+        Map<String, NewCookie> cookies = response.getCookies();
+        NewCookie cookie = cookies.get(COOKIE_X_PN_SESSION);
+        assertThat(cookie.isHttpOnly()).isTrue();
+        assertThat(cookie.isSecure()).isTrue();
+
 
         HtmlHelpers.assertXPath(
                 htmlString,

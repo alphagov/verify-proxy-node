@@ -21,11 +21,13 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestRespo
 import uk.gov.ida.notification.helpers.SelfSignedCertificateGenerator;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
+import uk.gov.ida.notification.session.SessionCookieService;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasAuthnRequest;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasRequestId;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidas_relay_state;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlAuthnRequest;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_issuer;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_requestId;
@@ -83,8 +86,17 @@ public class EidasAuthnRequestResourceTest {
     @Captor
     private ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
 
+    @Mock
+    private HttpServletResponse httpServletResponse;
+
+    @Mock
+    private SessionCookieService sessionCookieService;
+
+    @Mock
+    private EntityMetadata entityMetadata;
+
     @Captor
-    private ArgumentCaptor<GatewaySessionData> captorGatewaySessionData;
+    private ArgumentCaptor<Map<String, Object>> sessionCookieClaimsCaptor;
 
     private Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
 
@@ -98,14 +110,14 @@ public class EidasAuthnRequestResourceTest {
     @Test
     public void testHappyPathRedirect() throws URISyntaxException {
         setupHappyPath();
-        resource.handleRedirectBinding(sample_eidasAuthnRequest, "eidas relay state", session);
+        resource.handleRedirectBinding(sample_eidasAuthnRequest, sample_eidas_relay_state, session, httpServletResponse);
         verifyHappyPath();
     }
 
     @Test
     public void testHappyPath() throws URISyntaxException {
         setupHappyPath();
-        resource.handlePostBinding(sample_eidasAuthnRequest, "eidas relay state", session);
+        resource.handlePostBinding(sample_eidasAuthnRequest, sample_eidas_relay_state, session, httpServletResponse);
         verifyHappyPath();
     }
 
@@ -131,6 +143,14 @@ public class EidasAuthnRequestResourceTest {
 
         verify(sessionStore).createOrUpdateSession(eq(sessionId), any(GatewaySessionData.class));
         verify(session).getId();
+        verify(sessionCookieService).setCookie(sessionCookieClaimsCaptor.capture(), eq(httpServletResponse));
+        verify(entityMetadata).setData("sample_issuer", EntityMetadata.Key.encryptionCertificate, unchained_public_PEM);
+        verify(entityMetadata).setData("sample_issuer", EntityMetadata.Key.eidasDestination, sample_destinationUrl);
+        Map<String, Object> claims = sessionCookieClaimsCaptor.getValue();
+        assertThat(claims.size()).isEqualTo(4);
+        assertThat(claims.get(GatewaySessionData.Keys.eidasRequestId.name())).isEqualTo(sample_eidasRequestId);
+        assertThat(claims.get(GatewaySessionData.Keys.hubRequestId.name())).isEqualTo(sample_requestId);
+        assertThat(claims.get(GatewaySessionData.Keys.eidasRelayState.name())).isEqualTo(sample_eidas_relay_state);
 
         verify(appender).doAppend(captorILoggingEvent.capture());
         final ILoggingEvent logEvent = captorILoggingEvent.getValue();

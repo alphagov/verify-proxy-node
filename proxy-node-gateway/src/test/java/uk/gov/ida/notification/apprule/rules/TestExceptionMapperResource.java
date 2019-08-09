@@ -4,6 +4,7 @@ import uk.gov.ida.common.ExceptionType;
 import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
 import uk.gov.ida.notification.exceptions.FailureResponseGenerationException;
+import uk.gov.ida.notification.exceptions.JSONWebTokenException;
 import uk.gov.ida.notification.exceptions.RedisSerializationException;
 import uk.gov.ida.notification.exceptions.SessionAlreadyExistsException;
 import uk.gov.ida.notification.exceptions.SessionAttributeException;
@@ -86,5 +87,11 @@ public class TestExceptionMapperResource {
     @Path("/NullPointerException")
     public Response getGeneric() {
         throw new NullPointerException();
+    }
+
+    @GET
+    @Path("/JSONWebTokenException")
+    public Response getJSONWebTokenException() {
+        throw new JSONWebTokenException("This caused a JSONWebTokenException");
     }
 }

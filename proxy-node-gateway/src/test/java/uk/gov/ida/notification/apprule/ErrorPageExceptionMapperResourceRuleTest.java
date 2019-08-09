@@ -74,6 +74,13 @@ public class ErrorPageExceptionMapperResourceRuleTest {
         assertThat(response.getLocation()).isEqualTo(getUri(GENERIC_ERROR_PAGE_URI));
     }
 
+    @Test
+    public void shouldMapJSONWebTokenExceptionToGenericExceptionMapper() {
+        Response response = getResponse("/JSONWebTokenException");
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.SEE_OTHER);
+        assertThat(response.getLocation()).isEqualTo(getUri(GENERIC_ERROR_PAGE_URI));
+    }
+
     private Response getResponse(String uri) {
         return resources.getJerseyTest()
                 .client().property(ClientProperties.FOLLOW_REDIRECTS, Boolean.FALSE)

@@ -1,11 +1,13 @@
 package uk.gov.ida.notification.apprule.rules;
 
+import com.nimbusds.jose.JOSEException;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
 import uk.gov.ida.notification.GatewayApplication;
 import uk.gov.ida.notification.GatewayConfiguration;
+import uk.gov.ida.notification.session.JWKSetGenerator;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -39,6 +41,8 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("logging.appenders[0].type", "console"));
         configOverridesList.add(ConfigOverride.config("errorPageRedirectUrl", ERROR_PAGE_REDIRECT_URL));
+        configOverridesList.add(ConfigOverride.config("sessionCookieConfiguration.jwkSetConfiguration.jwkSet", createJWKSet()));
+        configOverridesList.add(ConfigOverride.config("sessionCookieConfiguration.domain", "apprule-test-proxy-node.london.verify.govsvc.uk"));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 
@@ -86,4 +90,13 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
 
         return client;
     }
+
+    private static String createJWKSet() {
+        try {
+            return JWKSetGenerator.createJWKSet();
+        } catch (JOSEException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 }

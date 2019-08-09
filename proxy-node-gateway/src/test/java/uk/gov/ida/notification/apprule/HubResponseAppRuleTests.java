@@ -31,12 +31,14 @@ import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,15 +141,14 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception {
-        NewCookie sessionCookie = getSessionCookie(proxyNodeAppRule);
+        Collection<NewCookie> cookies = postEidasAuthnRequest(proxyNodeAppRule);
+        assertThat(cookies.size()).isEqualTo(2);
         Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
 
-      Response response = proxyNodeAppRule
-                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
-                .request()
-                .cookie(sessionCookie)
-                .post(Entity.form(postForm));
+        Invocation.Builder builder = createGatewayResponseBuilder(cookies, proxyNodeAppRule);
+        Entity<Form> form = Entity.form(postForm);
+        Response response = builder.buildPost(form).invoke();
 
         assertThat(response.getStatus()).isEqualTo(200);
         assertLogsIngressEgress();
@@ -169,11 +170,9 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void redisCanStoreCertificateInSession() throws Throwable {
-        Response response = proxyNodeAppRuleEmbeddedRedis
-                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
-                .request()
-                .cookie(getSessionCookie(proxyNodeAppRuleEmbeddedRedis))
-                .post(Entity.form(postForm));
+        Collection<NewCookie> cookies = postEidasAuthnRequest(proxyNodeAppRuleEmbeddedRedis);
+        Invocation.Builder builder = createGatewayResponseBuilder(cookies, proxyNodeAppRuleEmbeddedRedis);
+        Response response = builder.post(Entity.form(postForm));
 
         assertThat(response.getStatus()).isEqualTo(200);
 
@@ -195,22 +194,18 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void serverErrorResponseFromTranslatorReturns200SamlErrorResponse() throws Exception {
-        Response response = proxyNodeServerErrorAppRule
-                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
-                .request()
-                .cookie(getSessionCookie(proxyNodeServerErrorAppRule))
-                .post(Entity.form(postForm));
+        Collection<NewCookie> cookies = postEidasAuthnRequest(proxyNodeServerErrorAppRule);
+        Invocation.Builder builder = createGatewayResponseBuilder(cookies, proxyNodeServerErrorAppRule);
+        Response response = builder.post(Entity.form(postForm));
 
         assertGoodSamlErrorResponse(response);
     }
 
     @Test
     public void clientErrorResponseFromTranslatorReturns200SamlErrorResponse() throws Exception {
-        Response response = proxyNodeClientErrorAppRule
-                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
-                .request()
-                .cookie(getSessionCookie(proxyNodeClientErrorAppRule))
-                .post(Entity.form(postForm));
+        Collection<NewCookie> cookies = postEidasAuthnRequest(proxyNodeClientErrorAppRule);
+        Invocation.Builder builder = createGatewayResponseBuilder(cookies, proxyNodeClientErrorAppRule);
+        Response response = builder.post(Entity.form(postForm));
 
         assertGoodSamlErrorResponse(response);
     }
@@ -223,8 +218,22 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_EGRESS)).hasSizeGreaterThanOrEqualTo(1);
     }
 
-    private NewCookie getSessionCookie(GatewayAppRule appRule) throws Exception {
-        return postEidasAuthnRequest(buildAuthnRequest(), appRule).getCookies().get("gateway-session");
+    private Collection<NewCookie> postEidasAuthnRequest(GatewayAppRule appRule) throws Exception {
+        return postEidasAuthnRequest(buildAuthnRequest(), appRule).getCookies().values();
+    }
+
+    private Invocation.Builder createGatewayResponseBuilder(Collection<NewCookie> cookies, GatewayAppRule gatewayAppRule) throws URISyntaxException {
+        Invocation.Builder builder = gatewayAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request();
+        for (NewCookie cookie : cookies) { // hack to remove append of ',$Version=1' to cookie value
+            if ("gateway-session".equals(cookie.getName())) {
+                builder.cookie(cookie.getName(), cookie.getValue());
+            } else {
+                builder.cookie(cookie);
+            }
+        }
+        return builder;
     }
 
     private void assertGoodSamlErrorResponse(Response response) throws XPathExpressionException, ParserConfigurationException {
