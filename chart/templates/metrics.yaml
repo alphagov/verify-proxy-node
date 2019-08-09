@@ -1,0 +1,82 @@
+---
+apiVersion: config.istio.io/v1alpha2
+kind: metric
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: requestcountbypath
+  namespace: {{ .Release.Namespace }}
+spec:
+  dimensions:
+    connection_security_policy: conditional((context.reporter.kind | "inbound") ==
+      "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
+    destination_app: destination.labels["app"] | "unknown"
+    destination_principal: destination.principal | "unknown"
+    destination_version: destination.labels["version"] | "unknown"
+    destination_workload: destination.workload.name | "unknown"
+    destination_workload_namespace: destination.workload.namespace | "unknown"
+    permissive_response_code: rbac.permissive.response_code | "none"
+    permissive_response_policyid: rbac.permissive.effective_policy_id | "none"
+    reporter: conditional((context.reporter.kind | "inbound") == "outbound", "source",
+      "destination")
+    request_path: request.path | "unknown"
+    request_protocol: api.protocol | context.protocol | "unknown"
+    response_code: response.code | 200
+    response_flags: context.proxy_error_code | "-"
+    source_app: source.labels["app"] | "unknown"
+    source_principal: source.principal | "unknown"
+    source_version: source.labels["version"] | "unknown"
+    source_workload: source.workload.name | "unknown"
+    source_workload_namespace: source.workload.namespace | "unknown"
+  value: "1"
+---
+apiVersion: config.istio.io/v1alpha2
+kind: rule
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: promhttpbypath
+  namespace: {{ .Release.Namespace }}
+spec:
+  actions:
+  - handler: prometheusbypath
+    instances:
+    - requestcountbypath.metric
+  match: (context.protocol == "http") && (match((request.useragent | "-"), "kube-probe*") == false)
+---
+apiVersion: config.istio.io/v1alpha2
+kind: handler
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: prometheusbypath
+  namespace: {{ .Release.Namespace }}
+spec:
+  compiledAdapter: prometheus
+  params:
+    metrics:
+    - instance_name: requestcountbypath.metric.{{ .Release.Namespace }}
+      kind: COUNTER
+      label_names:
+      - reporter
+      - source_app
+      - source_principal
+      - source_workload
+      - source_workload_namespace
+      - source_version
+      - destination_app
+      - destination_principal
+      - destination_workload
+      - destination_workload_namespace
+      - destination_version
+      - request_path
+      - request_protocol
+      - response_code
+      - response_flags
+      - permissive_response_code
+      - permissive_response_policyid
+      - connection_security_policy
+      name: {{ .Release.Namespace | replace "-" "_" }}_requests_by_path_total
+    metricsExpirationPolicy:
+      metricsExpiryDuration: 10m
+
