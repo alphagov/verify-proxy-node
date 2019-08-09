@@ -13,7 +13,6 @@ import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 
-import javax.print.attribute.URISyntax;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

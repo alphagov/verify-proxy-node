@@ -1,10 +1,8 @@
 package uk.gov.ida.notification.stubconnector.exceptions.mappers;
 
-import io.dropwizard.jersey.validation.JerseyViolationException;
 import org.opensaml.saml.common.assertion.ValidationResult;
 import uk.gov.ida.notification.stubconnector.views.ResponseView;
 
-import javax.validation.ConstraintViolation;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -12,7 +10,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 //public class TemplatedResponseValidationExceptionMapper implements ExceptionMapper<JerseyViolationException> {
 public class TemplatedResponseWebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
