@@ -49,3 +49,9 @@ redisService:
   url: ${REDIS_SERVER_URI}
 
 errorPageRedirectUrl: ${PROXY_NODE_ERROR_PAGE_URI}
+
+sessionCookieConfiguration:
+  jwkSetConfiguration:
+    jwkSet: ${SESSION_COOKIE_JWK_SET}
+  expiryMinutes: ${SESSION_COOKIE_EXPIRY_MINUTES:-90}
+  domain: ${SESSION_COOKIE_DOMAIN}

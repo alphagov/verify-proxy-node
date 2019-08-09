@@ -71,3 +71,10 @@ spec:
           value: http://{{ .Release.Name }}-vsp/
         - name: PROXY_NODE_ERROR_PAGE_URI
           value: {{ .Values.gateway.errorPageURL }}
+        - name: SESSION_COOKIE_JWK_SET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.gateway.sessionCookieJWKSet }}
+              key: SESSION_COOKIE_JWK_SET
+        - name: SESSION_COOKIE_DOMAIN
+          value: {{ include "gateway.host" . }}

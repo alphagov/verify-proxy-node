@@ -38,6 +38,7 @@ gateway:
     pullPolicy: IfNotPresent
   errorPageURL: https://www.integration.signin.service.gov.uk/proxy-node-error
   metadataPath: /ServiceMetadata
+  sessionCookieJWKSet: session-cookie-jwk-set
 
 hsm:
   image:
