@@ -2,6 +2,7 @@ package uk.gov.ida.notification.session;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -13,10 +14,18 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GatewaySessionData {
+
+    public enum Keys {
+        hubRequestId,
+        eidasRequestId,
+        eidasRelayState,
+        issuer
+    }
 
     @NotNull
     @NotEmpty
@@ -41,19 +50,26 @@ public class GatewaySessionData {
     @JsonProperty
     private final String eidasConnectorPublicKey;
 
+    @NotNull
+    @NotEmpty
+    @JsonProperty
+    private final String issuer;
+
     @JsonCreator
     public GatewaySessionData(
         @JsonProperty("HUB_REQUEST_ID") String hubRequestId,
         @JsonProperty("EIDAS_REQUEST_ID") String eidasRequestId,
         @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
         @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
-        @JsonProperty("eidasRelayState") String eidasRelayState
+        @JsonProperty("eidasRelayState") String eidasRelayState,
+        @JsonProperty("issuer") String issuer
     ) {
        this.hubRequestId = hubRequestId;
        this.eidasRequestId = eidasRequestId;
        this.eidasDestination = eidasDestination;
        this.eidasConnectorPublicKey = eidasConnectorPublicKey;
        this.eidasRelayState = eidasRelayState;
+       this.issuer = issuer;
     }
 
     public GatewaySessionData(
@@ -66,6 +82,7 @@ public class GatewaySessionData {
         this.eidasDestination = eidasSamlParserResponse.getDestination();
         this.eidasRelayState = eidasRelayState;
         this.eidasConnectorPublicKey = eidasSamlParserResponse.getConnectorEncryptionPublicCertificate();
+        this.issuer = eidasSamlParserResponse.getIssuer();
         validate();
     }
 
@@ -97,4 +114,18 @@ public class GatewaySessionData {
     public String getEidasRelayState() { return this.eidasRelayState; }
 
     public String getEidasConnectorPublicKey() { return this.eidasConnectorPublicKey; }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    @JsonIgnore
+    public Map<String, Object> createClaimsMap() {
+        return Map.of(
+                Keys.issuer.name(), getIssuer(),
+                Keys.eidasRequestId.name(), getEidasRequestId(),
+                Keys.eidasRelayState.name(), getEidasRelayState(),
+                Keys.hubRequestId.name(), getHubRequestId()
+        );
+    }
 }

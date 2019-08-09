@@ -44,6 +44,10 @@ public class GatewayConfiguration extends Configuration {
     @JsonProperty
     private MetadataPublishingConfiguration metadataPublishingConfiguration;
 
+    @Valid
+    @NotNull
+    @JsonProperty
+    private SessionCookieConfiguration sessionCookieConfiguration;
 
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }
 
@@ -61,5 +65,9 @@ public class GatewayConfiguration extends Configuration {
 
     public MetadataPublishingConfiguration getMetadataPublishingConfiguration() {
         return metadataPublishingConfiguration;
+    }
+
+    public SessionCookieConfiguration getSessionCookieConfiguration() {
+        return sessionCookieConfiguration;
     }
 }

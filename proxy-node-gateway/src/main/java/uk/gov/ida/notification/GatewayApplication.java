@@ -3,6 +3,7 @@ package uk.gov.ida.notification;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
@@ -20,7 +21,11 @@ import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.resources.AssetsResource;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
+import uk.gov.ida.notification.resources.EntityMetadata;
 import uk.gov.ida.notification.resources.HubResponseResource;
+import uk.gov.ida.notification.session.JSONWebTokenService;
+import uk.gov.ida.notification.session.JWKSetConfiguration;
+import uk.gov.ida.notification.session.SessionCookieService;
 import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
@@ -91,8 +96,16 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 .getTranslatorServiceConfiguration()
                 .buildTranslatorProxy(environment);
 
+
+        SessionCookieConfiguration sessionCookieConfiguration = configuration.getSessionCookieConfiguration();
+        JWKSetConfiguration jwkSetConfiguration = sessionCookieConfiguration.getJwkSetConfiguration();
+        SessionCookieService sessionCookieService = new SessionCookieService(
+                sessionCookieConfiguration.getExpiryMinutes(),
+                sessionCookieConfiguration.getDomain(),
+                new JSONWebTokenService(jwkSetConfiguration.getEncryptionKeyPair(), jwkSetConfiguration.getSigningKeyPair()));
+
         registerProviders(environment);
-        registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage);
+        registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage, sessionCookieService);
         registerExceptionMappers(environment, samlFormViewBuilder, translatorProxy, sessionStorage, configuration.getErrorPageRedirectUrl());
         registerInjections(environment);
     }
@@ -119,9 +132,16 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void setResponseServletFilter(Environment environment) {
-        JourneyIdHubResponseServletFilter responseFilter = new JourneyIdHubResponseServletFilter();
-        environment.servlets()
-                .addFilter(responseFilter.getClass().getSimpleName(), responseFilter)
+        JourneyIdHubResponseServletFilter journeyIdHubResponseServletFilter = new JourneyIdHubResponseServletFilter();
+        RemoveSessionCookieFilter removeSessionCookieFilter = new RemoveSessionCookieFilter();
+        ServletEnvironment servlets = environment.servlets();
+        servlets.addFilter(journeyIdHubResponseServletFilter.getClass().getSimpleName(), journeyIdHubResponseServletFilter)
+                .addMappingForUrlPatterns(
+                        EnumSet.of(DispatcherType.REQUEST),
+                        true,
+                        Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE);
+
+        servlets.addFilter(removeSessionCookieFilter.getClass().getSimpleName(), removeSessionCookieFilter)
                 .addMappingForUrlPatterns(
                         EnumSet.of(DispatcherType.REQUEST),
                         true,
@@ -146,7 +166,8 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             Environment environment,
             SamlFormViewBuilder samlFormViewBuilder,
             TranslatorProxy translatorProxy,
-            SessionStore sessionStorage) {
+            SessionStore sessionStorage,
+            SessionCookieService sessionCookieService) {
 
         EidasSamlParserProxy espProxy = configuration
                 .getEidasSamlParserServiceConfiguration()
@@ -158,18 +179,24 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         environment.lifecycle().manage(sessionStorage);
 
+        EntityMetadata entityMetadata = new EntityMetadata();
+
         environment.jersey().register(AssetsResource.class);
         environment.jersey().register(new EidasAuthnRequestResource(
                 espProxy,
                 vspProxy,
                 samlFormViewBuilder,
-                sessionStorage));
+                sessionStorage,
+                sessionCookieService,
+                entityMetadata));
 
         environment.jersey().register(new HubResponseResource(
                 samlFormViewBuilder,
                 translatorProxy,
-                sessionStorage
-        ));
+                sessionStorage,
+                sessionCookieService,
+                entityMetadata)
+        );
     }
 
     private void registerInjections(Environment environment) {
