@@ -419,7 +419,6 @@ spec:
       plan:
 
       - get: chart
-        passed: ["package"]
         trigger: true
 
       - task: render-chart-package
