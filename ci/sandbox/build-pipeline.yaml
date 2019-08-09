@@ -17,7 +17,7 @@ spec:
       github_api_token: ((github.api-token))
       access_token: ((github.api-token))
       approvers: ((trusted-developers.github-accounts))
-      required_approval_count: 2
+      required_approval_count: 0
       commit_verification_keys: ((trusted-developers.gpg-keys))
 
     harbor_source: &harbor_source
