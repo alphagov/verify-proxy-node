@@ -64,7 +64,7 @@ spec:
       icon: github-circle
       source:
         <<: *github_source
-        ignore_paths: [cloudhsm, proxy-node-vsp-config]
+        ignore_paths: [cloudhsm, proxy-node-vsp-config, ci/sandbox]
         branch: master
 
     - name: vsp-src

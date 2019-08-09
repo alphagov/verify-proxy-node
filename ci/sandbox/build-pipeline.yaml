@@ -160,14 +160,6 @@ spec:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/verify-service-provider
 
-    groups:
-      - name: proxy-node
-        jobs: [build, package, test, release]
-      - name: base-images
-        jobs: [build-base-images]
-      - name: all
-        jobs: [build-base-images, build, package, test, release]
-
     jobs:
 
     - name: build-base-images
