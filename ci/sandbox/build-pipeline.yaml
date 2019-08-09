@@ -193,7 +193,9 @@ spec:
             get_params: {skip_download: true}
             params:
               build: vsp-src
-              build_args: {VERIFY_USE_PUBLIC_BINARIES: "true"}
+              build_args:
+                RUN_TESTS: false
+                VERIFY_USE_PUBLIC_BINARIES: true
               dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
               tag_file: src/.git/short_ref
               tag_as_latest: true
