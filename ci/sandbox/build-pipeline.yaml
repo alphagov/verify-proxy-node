@@ -193,7 +193,7 @@ spec:
             get_params: {skip_download: true}
             params:
               build: vsp-src
-              build_args: {VERIFY_USE_PUBLIC_BINARIES: "false"}
+              build_args: {VERIFY_USE_PUBLIC_BINARIES: "true"}
               dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
               tag_file: src/.git/short_ref
               tag_as_latest: true
@@ -221,6 +221,7 @@ spec:
               build: src
               build_args:
                 component: proxy-node-gateway
+                VERIFY_USE_PUBLIC_BINARIES: true
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
@@ -232,6 +233,7 @@ spec:
               dockerfile: src/cloudhsm/base-images/jdk11-jre/Dockerfile
               build_args:
                 component: proxy-node-translator
+                VERIFY_USE_PUBLIC_BINARIES: true
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
@@ -242,6 +244,7 @@ spec:
               build: src
               build_args:
                 component: eidas-saml-parser
+                VERIFY_USE_PUBLIC_BINARIES: true
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
@@ -253,6 +256,7 @@ spec:
               dockerfile: src/cloudhsm/base-images/jdk11-jre/Dockerfile
               build_args:
                 component: stub-connector
+                VERIFY_USE_PUBLIC_BINARIES: true
               tag_file: src/.git/short_ref
               tag_as_latest: true
               tag_prefix: v
