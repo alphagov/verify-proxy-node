@@ -162,6 +162,20 @@ spec:
 
     jobs:
 
+    - name: test
+      plan:
+      - task: write-text
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          run:
+            path: /bin/bash
+            args:
+              - -eu
+              - -c
+              - |
+                echo "Printing var..." ((cluster.domain))
+
     - name: build-base-images
       serial: true
       serial_groups: [build-base-images]
