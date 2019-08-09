@@ -98,6 +98,14 @@ spec:
         pre_release: true
         release: false
         
+    - name: last-release
+      type: github-release
+      icon: file-document
+      source:
+        <<: *github_source
+        pre_release: true
+        release: true
+        
     - name: release
       type: github-release
       icon: tag
@@ -305,7 +313,7 @@ spec:
           passed: ["build-base-images"]
           trigger: true
           params: {skip_download: true}
-        - get: release
+        - get: last-release
 
       - task: generate-chart-values
         config:
@@ -363,7 +371,7 @@ spec:
           platform: linux
           image_resource: *task_toolbox
           inputs:
-          - name: release
+          - name: last-release
           outputs:
           - name: chart-version
           params:
@@ -375,7 +383,7 @@ spec:
             - -c
             - |
               echo "bumping release number..."
-              CURRENT_TAG=$(cat release/tag)
+              CURRENT_TAG=$(cat last-release/tag)
               awk -F. '/[0-9]+\./{$NF++;print}' OFS=. <<< "${CURRENT_TAG}" > chart-version/tag
               NEW_TAG=$(cat chart-version/tag)
               echo "${NEW_TAG}" > chart-version/name
