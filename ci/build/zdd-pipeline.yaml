@@ -151,11 +151,11 @@ resources:
 
 groups:
   - name: proxy-node
-    jobs: [build, package, test, release]
+    jobs: [build, package, roll-test, test, release]
   - name: base-images
     jobs: [build-base-images]
   - name: all
-    jobs: [build-base-images, build, package, test, release]
+    jobs: [build-base-images, build, package, roll-test, test, release]
 
 jobs:
 
@@ -408,16 +408,8 @@ jobs:
           tag: chart-version/tag
           globs:
             - chart-package/*
-      - put: tests-image
-        get_params: {skip_download: true}
-        params:
-          cache: true
-          build: src/proxy-node-acceptance-tests
-          tag_file: src/.git/short_ref
-          tag_as_latest: true
-          tag_prefix: v
-
-  - name: test
+            -
+  - name: roll-test
     serial: true
     serial_groups: ["package"]
     plan:
@@ -501,9 +493,25 @@ jobs:
                   --app "${RELEASE_NAME}-${APP_NAME}" \
                   --diff-changes \
                   -f ./manifests/
+      - put: tests-image
+        get_params: {skip_download: true}
+        params:
+          cache: true
+          build: src/proxy-node-acceptance-tests
+          tag_file: src/.git/short_ref
+          tag_as_latest: true
+          tag_prefix: v
+      - put: chart
+
+  - name: test
+    serial: true
+    serial_groups: ["package"]
+    plan:
 
       - get: tests-image
-        passed: ["package"]
+        passed: ["roll-test"]
+      - get: chart
+        passed: ["roll-test"]
 
       - task: test-chart-package
         image: tests-image
@@ -524,6 +532,7 @@ jobs:
                 set -euo pipefail
                 cd /
                 bundle exec cucumber --strict --tags "not @ignore"
+
 
   - name: release
     serial: true
