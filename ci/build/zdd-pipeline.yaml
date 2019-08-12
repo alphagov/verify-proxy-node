@@ -154,6 +154,8 @@ groups:
     jobs: [build, package, roll-test, test, release]
   - name: base-images
     jobs: [build-base-images]
+  - name: test
+    jobs: [roll-test, test]
   - name: all
     jobs: [build-base-images, build, package, roll-test, test, release]
 
@@ -536,7 +538,7 @@ jobs:
 
   - name: release
     serial: true
-    serial_groups: ["package"]
+    serial_groups: ["test"]
     plan:
 
       - get: chart
