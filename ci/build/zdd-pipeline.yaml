@@ -253,14 +253,6 @@ jobs:
                 tag_file: src/.git/short_ref
                 tag_as_latest: true
                 tag_prefix: v
-            - put: tests-image
-              get_params: {skip_download: true}
-              params:
-                cache: true
-                build: src/proxy-node-acceptance-tests
-                tag_file: src/.git/short_ref
-                tag_as_latest: true
-                tag_prefix: v
 
   - name: package
     serial: true
@@ -416,6 +408,14 @@ jobs:
           tag: chart-version/tag
           globs:
             - chart-package/*
+      - put: tests-image
+        get_params: {skip_download: true}
+        params:
+          cache: true
+          build: src/proxy-node-acceptance-tests
+          tag_file: src/.git/short_ref
+          tag_as_latest: true
+          tag_prefix: v
 
   - name: test
     serial: true
@@ -503,7 +503,7 @@ jobs:
                   -f ./manifests/
 
       - get: tests-image
-        passed: ["build"]
+        passed: ["package"]
 
       - task: test-chart-package
         image: tests-image
