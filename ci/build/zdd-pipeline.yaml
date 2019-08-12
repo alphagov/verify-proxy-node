@@ -151,13 +151,13 @@ resources:
 
 groups:
   - name: proxy-node
-    jobs: [build, package, roll-test, test, release]
+    jobs: [build, package, roll-test, test, zdd, release]
   - name: base-images
     jobs: [build-base-images]
   - name: test
-    jobs: [roll-test, test]
+    jobs: [roll-test, test, zdd]
   - name: all
-    jobs: [build-base-images, build, package, roll-test, test, release]
+    jobs: [build-base-images, build, package, roll-test, test, zdd, release]
 
 jobs:
 
@@ -404,6 +404,14 @@ jobs:
                   --key "${KEY_ID}" \
                   "./${CHART_NAME}"
 
+      - put: tests-image
+        get_params: {skip_download: true}
+        params:
+          cache: true
+          build: src/proxy-node-acceptance-tests
+          tag_file: src/.git/short_ref
+          tag_as_latest: true
+          tag_prefix: v
       - put: chart
         params:
           name: chart-version/name
@@ -411,6 +419,8 @@ jobs:
           globs:
             - chart-package/*
             -
+
+
   - name: roll-test
     serial: true
     serial_groups: ["package"]
@@ -495,14 +505,6 @@ jobs:
                   --app "${RELEASE_NAME}-${APP_NAME}" \
                   --diff-changes \
                   -f ./manifests/
-      - put: tests-image
-        get_params: {skip_download: true}
-        params:
-          cache: true
-          build: src/proxy-node-acceptance-tests
-          tag_file: src/.git/short_ref
-          tag_as_latest: true
-          tag_prefix: v
       - put: chart
 
   - name: test
@@ -511,9 +513,9 @@ jobs:
     plan:
 
       - get: tests-image
-        passed: ["roll-test"]
       - get: chart
         passed: ["roll-test"]
+        trigger: true
 
       - task: test-chart-package
         image: tests-image
@@ -526,6 +528,38 @@ jobs:
             STUB_CONNECTOR_URL: "https://test-connector.((cluster.domain))"
             STUB_IDP_USER: "stub-idp-demo-one"
             SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                set -euo pipefail
+                cd /
+                bundle exec cucumber --strict --tags "not @ignore"
+
+
+
+  - name: zdd
+    serial: true
+    serial_groups: ["package"]
+    plan:
+
+      - get: tests-image
+        passed: ["package"]
+        trigger: true
+
+      - task: test-chart-package
+        image: tests-image
+        attempts: 2
+        timeout: 15m
+        config:
+          platform: linux
+          params:
+            PROXY_NODE_URL: "https://test-proxy-node.((cluster.domain))"
+            STUB_CONNECTOR_URL: "https://test-connector.((cluster.domain))"
+            STUB_IDP_USER: "stub-idp-demo-one"
+            SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
+            ZDD: true
           run:
             path: /bin/bash
             args:
