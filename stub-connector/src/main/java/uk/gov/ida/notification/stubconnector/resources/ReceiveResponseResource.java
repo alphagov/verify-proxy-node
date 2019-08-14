@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
-
 @Path("/SAML2/Response")
 public class ReceiveResponseResource {
 

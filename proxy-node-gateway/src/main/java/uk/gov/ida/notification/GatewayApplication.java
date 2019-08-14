@@ -12,6 +12,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
+import uk.gov.ida.notification.exceptions.mappers.ErrorPageRedirectResponseValidationExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.ExceptionToSamlErrorResponseMapper;
 import uk.gov.ida.notification.exceptions.mappers.GenericExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.MissingMetadataExceptionMapper;
@@ -138,6 +139,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         environment.jersey().register(new MissingMetadataExceptionMapper());
         environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore));
         environment.jersey().register(new ErrorPageExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new ErrorPageRedirectResponseValidationExceptionMapper(errorPageRedirectUrl));
         environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
     }
 

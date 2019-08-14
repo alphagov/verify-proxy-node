@@ -145,6 +145,13 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     @Test
+    public void shouldRespondWithHTTP400ErrorForMalformedRequest() throws Exception {
+        Response signedResponse = buildSignedHubResponse();
+        javax.ws.rs.core.Response response = postMalformedHubResponseToTranslator(signedResponse);
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
     public void shouldDecryptAndReadEidasAssertion() throws Exception {
         Response hubResponse = buildSignedHubResponse();
         Response eidasResponse = extractEidasResponseFromTranslator(hubResponse);
@@ -195,7 +202,26 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
     }
 
-    private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
+    protected javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
+        String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
+
+        HubResponseTranslatorRequest hubResponseTranslatorRequest =
+            new HubResponseTranslatorRequest(
+                encodedResponse,
+                "_request-id_of-20-characters-or-more",
+                ResponseBuilder.DEFAULT_REQUEST_ID,
+                "LEVEL_2",
+                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                STUB_COUNTRY_PUBLIC_PRIMARY_CERT
+            );
+
+        return translatorAppRule
+            .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
+            .request()
+            .post(Entity.json(hubResponseTranslatorRequest));
+    }
+
+    protected javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
         String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =

@@ -54,9 +54,20 @@ public class EidasSamlParserAppRuleTestBase {
     );
 
     protected Response postEidasAuthnRequest(AuthnRequest authnRequest) throws URISyntaxException {
-
         String eidasAuthnRequest =
             Base64.getEncoder().encodeToString(
+                new SamlObjectMarshaller().transformToString(authnRequest).getBytes()
+            );
+
+        EidasSamlParserRequest request = new EidasSamlParserRequest(eidasAuthnRequest);
+
+        return eidasSamlParserAppRule.target("/eidasAuthnRequest")
+            .request(MediaType.APPLICATION_JSON_TYPE)
+            .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
+    }
+
+    protected Response postMalformedEidasAuthnRequest(AuthnRequest authnRequest) throws URISyntaxException {
+        String eidasAuthnRequest = "not-a-base-64-encoded-xml-start-tag" + Base64.getEncoder().encodeToString(
                 new SamlObjectMarshaller().transformToString(authnRequest).getBytes()
             );
 
