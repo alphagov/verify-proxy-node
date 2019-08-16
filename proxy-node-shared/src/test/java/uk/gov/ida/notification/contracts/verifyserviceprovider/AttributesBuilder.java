@@ -10,12 +10,12 @@ import static java.util.Collections.singletonList;
 
 public class AttributesBuilder {
 
-    public static String FIRST_NAME = "Jean";
-    public static String MIDDLE_NAME = "Paul";
-    public static String LAST_NAME = "Smith";
-    public static String GENDER = "NOT_SPECIFIED";
-    public static DateTime VALID_FROM = createDateTime(2001, 1, 1, 12, 0);
-    public static DateTime DATE_OF_BIRTH = createDateTime(1990, 1, 1, 0, 0);
+    public static final String FIRST_NAME = "Jean";
+    public static final String MIDDLE_NAME = "Paul";
+    public static final String LAST_NAME = "Smith";
+    public static final String GENDER = "NOT_SPECIFIED";
+    public static final DateTime VALID_FROM = createDateTime(2001, 1, 1, 12, 0);
+    public static final DateTime DATE_OF_BIRTH = createDateTime(1990, 1, 1, 0, 0);
 
     private List<Attribute<String>> firstNames = new ArrayList<>(singletonList(createAttribute(FIRST_NAME)));
     private List<Attribute<String>> middleNames = new ArrayList<>(singletonList(createAttribute(MIDDLE_NAME)));

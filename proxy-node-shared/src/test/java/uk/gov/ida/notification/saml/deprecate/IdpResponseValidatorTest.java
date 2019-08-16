@@ -1,8 +1,8 @@
 package uk.gov.ida.notification.saml.deprecate;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.saml.saml2.core.Response;
@@ -17,31 +17,21 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class IdpResponseValidatorTest {
 
-    private IdpResponseValidator responseValidator;
+    @Mock
+    private static AssertionDecrypter assertionDecrypter;
+    @Mock
+    private static DestinationValidator responseDestinationValidator;
+    @Mock
+    private static EncryptedResponseFromIdpValidator responseFromIdpValidator;
+    @Mock
+    private static SamlResponseSignatureValidator samlResponseSignatureValidator;
+    @Mock
+    private static SamlAssertionsSignatureValidator samlAssertionsSignatureValidator;
+    @Mock
+    private static ResponseAssertionsFromIdpValidator responseAssertionsFromIdpValidator;
 
-    @Mock
-    private SamlResponseSignatureValidator samlResponseSignatureValidator;
-    @Mock
-    private AssertionDecrypter assertionDecrypter;
-    @Mock
-    private SamlAssertionsSignatureValidator samlAssertionsSignatureValidator;
-    @Mock
-    private EncryptedResponseFromIdpValidator responseFromIdpValidator;
-    @Mock
-    private DestinationValidator responseDestinationValidator;
-    @Mock
-    private ResponseAssertionsFromIdpValidator responseAssertionsFromIdpValidator;
-
-    @Before
-    public void setUp() {
-        responseValidator = new IdpResponseValidator(
-                samlResponseSignatureValidator,
-                assertionDecrypter,
-                samlAssertionsSignatureValidator,
-                responseFromIdpValidator,
-                responseDestinationValidator,
-                responseAssertionsFromIdpValidator);
-    }
+    @InjectMocks
+    private static IdpResponseValidator responseValidator;
 
     @Test
     public void testThatSamlResponseSignatureValidatorUsesSPSSODescriptorRoleForValidation() {

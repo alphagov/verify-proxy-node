@@ -51,5 +51,4 @@ public class EidasSamlParserRequestValidationTests extends AbstractDtoValidation
 
         assertThat(badViolationsMap.size()).isEqualTo(1);
     }
-
 }

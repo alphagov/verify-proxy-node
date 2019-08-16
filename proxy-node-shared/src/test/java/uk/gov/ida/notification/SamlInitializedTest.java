@@ -1,12 +1,12 @@
 package uk.gov.ida.notification;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 
 public class SamlInitializedTest {
-    @Before
-    public void initializeSaml() throws InitializationException {
+    @BeforeClass
+    public static void initializeSaml() throws InitializationException {
         InitializationService.initialize();
         VerifySamlInitializer.init();
     }

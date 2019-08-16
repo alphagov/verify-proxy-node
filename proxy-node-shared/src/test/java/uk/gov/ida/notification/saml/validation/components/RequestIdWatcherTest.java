@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.saml.validation.components;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -18,37 +18,37 @@ import static uk.gov.ida.notification.helpers.HubResponseBuilder.aHubResponse;
 import static uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder.anAuthnRequest;
 
 public class RequestIdWatcherTest {
-  private RequestIdWatcher requestIdWatcher;
 
-  @Before
-  public void setUp() throws InitializationException {
-    InitializationService.initialize();
-    this.requestIdWatcher = new RequestIdWatcher();
-  }
+    private static final RequestIdWatcher REQUEST_ID_WATCHER = new RequestIdWatcher();
 
-  @Test
-  public void shouldNotValidateIdThatHasNotBeenObserved() throws MarshallingException, SignatureException {
-    Response response = aHubResponse().withInResponseTo(ResponseBuilder.DEFAULT_REQUEST_ID).build();
-
-    assertThat(this.requestIdWatcher.haveSeenRequestFor(response)).isFalse();
-  }
-
-  @Test
-  public void shouldValidateIdThatHasBeenObserved() throws MarshallingException, SignatureException {
-    AuthnRequest authnRequest = anAuthnRequest().build();
-    Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
-
-    this.requestIdWatcher.observe(authnRequest);
-    assertThat(this.requestIdWatcher.haveSeenRequestFor(response)).isTrue();
-  }
-
-  @Test
-  public void shouldValidateManyIdsThatHaveBeenObserved() throws MarshallingException, SignatureException {
-    for (AuthnRequest authnRequest : Stream.generate(() -> anAuthnRequest().build()).limit(128).collect(toList())) {
-      this.requestIdWatcher.observe(authnRequest);
-      Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
-
-      assertThat(this.requestIdWatcher.haveSeenRequestFor(response)).isTrue();
+    @BeforeClass
+    public static void setUp() throws InitializationException {
+        InitializationService.initialize();
     }
-  }
+
+    @Test
+    public void shouldNotValidateIdThatHasNotBeenObserved() throws MarshallingException, SignatureException {
+        Response response = aHubResponse().withInResponseTo(ResponseBuilder.DEFAULT_REQUEST_ID).build();
+
+        assertThat(REQUEST_ID_WATCHER.haveSeenRequestFor(response)).isFalse();
+    }
+
+    @Test
+    public void shouldValidateIdThatHasBeenObserved() throws MarshallingException, SignatureException {
+        AuthnRequest authnRequest = anAuthnRequest().build();
+        Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
+
+        REQUEST_ID_WATCHER.observe(authnRequest);
+        assertThat(REQUEST_ID_WATCHER.haveSeenRequestFor(response)).isTrue();
+    }
+
+    @Test
+    public void shouldValidateManyIdsThatHaveBeenObserved() throws MarshallingException, SignatureException {
+        for (AuthnRequest authnRequest : Stream.generate(() -> anAuthnRequest().build()).limit(128).collect(toList())) {
+            REQUEST_ID_WATCHER.observe(authnRequest);
+            Response response = aHubResponse().withInResponseTo(authnRequest.getID()).build();
+
+            assertThat(REQUEST_ID_WATCHER.haveSeenRequestFor(response)).isTrue();
+        }
+    }
 }

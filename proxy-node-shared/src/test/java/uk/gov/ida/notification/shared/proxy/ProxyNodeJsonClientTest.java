@@ -23,17 +23,17 @@ import static org.mockito.Mockito.when;
 public class ProxyNodeJsonClientTest {
 
     @Mock
-    ErrorHandlingClient errorHandlingClient;
+    private static ErrorHandlingClient errorHandlingClient;
 
     @Mock
-    JsonResponseProcessor responseProcessor;
+    private static JsonResponseProcessor responseProcessor;
 
     @Mock
-    IstioHeaderStorage istioHeaderStorage;
+    private static IstioHeaderStorage istioHeaderStorage;
 
     @Spy
     @InjectMocks
-    private ProxyNodeJsonClient proxyNodeJsonClient;
+    private static ProxyNodeJsonClient proxyNodeJsonClient;
 
     @Test
     public void shouldSendIstioHeadersInPostRequest() throws URISyntaxException {

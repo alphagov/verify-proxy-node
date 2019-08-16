@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.saml;
 
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
-import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.Response;
@@ -16,18 +15,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SamlParserTest extends SamlInitializedTest {
 
-    private static SamlParser parser;
-
-    @Before
-    public void setUp() {
-        parser = new SamlParser();
-    }
+    private static final SamlParser SAML_PARSER = new SamlParser();
 
     @Test
     public void shouldParseAuthnRequest() throws Exception {
         String testXML = FileHelpers.readFileAsString("eidas_authn_request.xml");
 
-        AuthnRequestImpl authnRequest = parser.parseSamlString(testXML);
+        AuthnRequestImpl authnRequest = SAML_PARSER.parseSamlString(testXML);
 
         assertThat(AuthnRequestImpl.class).isEqualTo(authnRequest.getClass());
     }
@@ -36,7 +30,7 @@ public class SamlParserTest extends SamlInitializedTest {
     public void shouldParseAuthnResponse() throws Exception {
         String testXML = FileHelpers.readFileAsString("idp_response_unencrypted.xml");
 
-        Response authnResponse = parser.parseSamlString(testXML);
+        Response authnResponse = SAML_PARSER.parseSamlString(testXML);
 
         assertThat(ResponseImpl.class).isEqualTo(authnResponse.getClass());
     }
@@ -46,7 +40,7 @@ public class SamlParserTest extends SamlInitializedTest {
         String xmlString = "<?xml version=\"1.0\"?>\n" +
                 "<lolz>hey</lolz>";
 
-        assertThatThrownBy(() -> parser.parseSamlString(xmlString))
+        assertThatThrownBy(() -> SAML_PARSER.parseSamlString(xmlString))
                 .isInstanceOfSatisfying(SamlParsingException.class, e -> {
                     assertThat(e.getCause()).isInstanceOf(UnmarshallingException.class);
                     assertThat(e.getCause()).hasMessage("No unmarshaller found for lolz");
@@ -75,7 +69,7 @@ public class SamlParserTest extends SamlInitializedTest {
                 "]>\n" +
                 "<lolz>&lol9;</lolz>";
 
-        assertThatThrownBy(() -> parser.parseSamlString(xmlString))
+        assertThatThrownBy(() -> SAML_PARSER.parseSamlString(xmlString))
                 .isInstanceOfSatisfying(SamlParsingException.class, e ->
                         assertThat(e.getCause()).isInstanceOf(XMLParserException.class));
     }
@@ -92,7 +86,7 @@ public class SamlParserTest extends SamlInitializedTest {
                 "  <!ELEMENT foo ANY >" +
                 "  <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]><foo>&xxe;</foo>";
 
-        assertThatThrownBy(() -> parser.parseSamlString(xmlString))
+        assertThatThrownBy(() -> SAML_PARSER.parseSamlString(xmlString))
                 .isInstanceOfSatisfying(SamlParsingException.class, e ->
                         assertThat(e.getCause()).isInstanceOf(XMLParserException.class));
     }

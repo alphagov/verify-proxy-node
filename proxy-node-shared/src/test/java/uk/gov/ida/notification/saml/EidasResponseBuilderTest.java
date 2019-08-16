@@ -28,7 +28,7 @@ public class EidasResponseBuilderTest {
         try {
             InitializationService.initialize();
         } catch (InitializationException e) {
-            throw new IllegalStateException("Could not initialize opensaml in test", e);
+            throw new RuntimeException(e);
         }
     }
 

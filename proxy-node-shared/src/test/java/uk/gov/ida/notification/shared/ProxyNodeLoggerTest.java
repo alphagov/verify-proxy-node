@@ -24,18 +24,21 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyNodeLoggerTest {
 
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
+
     @Mock
-    private Appender<ILoggingEvent> appender;
+    private static Appender<ILoggingEvent> appender;
 
     @Captor
-    private ArgumentCaptor<ILoggingEvent> loggingEventCaptor;
+    private static ArgumentCaptor<ILoggingEvent> loggingEventCaptor;
 
-    private final Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
+    static {
+        LoggingUtil.hijackJDKLogging();
+    }
 
     @Before
     public void setUp() {
-        LoggingUtil.hijackJDKLogging();
-        logger.addAppender(appender);
+        LOGGER.addAppender(appender);
     }
 
     @Test

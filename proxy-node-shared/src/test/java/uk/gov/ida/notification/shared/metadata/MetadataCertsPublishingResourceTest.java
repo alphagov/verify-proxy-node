@@ -5,7 +5,7 @@ import io.dropwizard.testing.junit.ResourceTestRule;
 import io.dropwizard.views.ViewMessageBodyWriter;
 import io.dropwizard.views.ViewRenderer;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.ws.rs.core.Response;
@@ -41,8 +41,8 @@ public class MetadataCertsPublishingResourceTest {
     private static final MetadataCertsPublishingResource METADATA_CERTS_PUBLISHING_RESOURCE = new MetadataCertsPublishingResource(
             URI.create(METADATA_SIGNING_CERT_FILE_PATH), URI.create(METADATA_CA_CERTS_FILE_PATH), URI.create(METADATA_PUBLISH_PATH));
 
-    @Rule
-    public ResourceTestRule metadataCertsResource = ResourceTestRule.builder()
+    @ClassRule
+    public static final ResourceTestRule metadataCertsResource = ResourceTestRule.builder()
             .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
             .addProvider(new ViewMessageBodyWriter(new MetricRegistry(), ServiceLoader.load(ViewRenderer.class)))
             .addResource(METADATA_CERTS_PUBLISHING_RESOURCE)

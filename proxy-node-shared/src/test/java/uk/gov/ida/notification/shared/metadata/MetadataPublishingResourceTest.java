@@ -17,15 +17,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class MetadataPublishingResourceTest {
 
-    private MetadataPublishingResource metadataPublishingResource;
-
     @Test
     public void shouldReturnExistingMetadataResource() throws URISyntaxException, IOException {
         final String metadataResourcePath = "metadata/test-metadata.xml";
         final String metadataFilePath = getClass().getClassLoader().getResource(metadataResourcePath).getPath();
         final String expectedMetadata = new String(Files.readAllBytes(Paths.get(metadataFilePath)));
 
-        metadataPublishingResource = new MetadataPublishingResource(new URI(metadataFilePath));
+        final MetadataPublishingResource metadataPublishingResource = new MetadataPublishingResource(new URI(metadataFilePath));
 
         final String metadata = IOUtils.toString(
                 (InputStream) metadataPublishingResource.getMetadata().getEntity(), StandardCharsets.UTF_8);
@@ -37,9 +35,9 @@ public class MetadataPublishingResourceTest {
     public void shouldThrowMetadataMissingExceptionWhenMetadataNotFound() throws URISyntaxException {
         final String metadataFilePath = "metadata/invalid-metadata-path.xml";
         final URI metadataResourcePath = new URI(metadataFilePath);
-        metadataPublishingResource = new MetadataPublishingResource(metadataResourcePath);
+        final MetadataPublishingResource metadataPublishingResource = new MetadataPublishingResource(metadataResourcePath);
 
-        assertThatThrownBy(() -> metadataPublishingResource.getMetadata())
+        assertThatThrownBy(metadataPublishingResource::getMetadata)
                 .isInstanceOf(MissingMetadataException.class)
                 .hasMessageContaining(metadataFilePath);
     }
