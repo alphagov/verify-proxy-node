@@ -98,7 +98,7 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-connector-metadata
               key: samlSigningKeyLabel
-        - name: SIGNING_CERT
+        - name: CONNECTOR_SIGNING_CERT
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-connector-metadata

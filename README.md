@@ -16,13 +16,17 @@ The eIDAS Proxy Node also runs the [verify-service-provider](https://github.com/
 
 The eIDAS Proxy Node does not perform matching.
 
-## Architectural Descision Records and documentation
+## Architectural Decision Records and documentation
 
 We record our architectural decisions in `doc/adr`
 
 A technical overview of the Proxy Node is available [here](doc/overview.md).
 
 ## Running the proxy node services
+
+### Running locally with Docker
+
+See [instructions](local-startup/running-proxy-node-locally.md) to run the Proxy Node locally with minimal set-up using Docker.
 
 #### Preparing your environment (MacOS)
 `./Brewfile` defines system dependencies for this project, notably Docker, Minikube and Kubernetes.
