@@ -29,8 +29,8 @@ public class SamlFailureResponseGenerationRequestValidationTests extends Abstrac
     public void shouldPassValidationWithValidParameters() {
         SamlFailureResponseGenerationRequest goodRequest = new SamlFailureResponseGenerationRequest(
                 Response.Status.OK, // null is the only 'malformed' Response.Status
-                ValidationTestDataUtils.sample_eidasRequestId,
-                ValidationTestDataUtils.sample_destinationUrl);
+                ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID,
+                ValidationTestDataUtils.SAMPLE_DESTINATION_URL);
 
         Map<String, List<ConstraintViolation<SamlFailureResponseGenerationRequest>>> goodViolationsMap = validateAndMap(goodRequest);
 

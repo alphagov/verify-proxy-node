@@ -209,7 +209,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
     }
 
-    protected javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
+    private javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
         String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
@@ -228,7 +228,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
             .post(Entity.json(hubResponseTranslatorRequest));
     }
 
-    protected javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
+    private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
         String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =

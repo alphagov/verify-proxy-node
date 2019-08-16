@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlAuthnRequest;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
 
 public class EidasSamlParserRequestValidationTests extends AbstractDtoValidationsTest<EidasSamlParserRequest> {
 
@@ -36,7 +36,7 @@ public class EidasSamlParserRequestValidationTests extends AbstractDtoValidation
 
     @Test
     public void shouldPassValidationWithValidRequest() {
-        EidasSamlParserRequest goodRequest = new EidasSamlParserRequest(sample_hubSamlAuthnRequest);
+        EidasSamlParserRequest goodRequest = new EidasSamlParserRequest(SAMPLE_HUB_SAML_AUTHN_REQUEST);
 
         Map<String, List<ConstraintViolation<EidasSamlParserRequest>>> goodViolationsMap = validateAndMap(goodRequest);
 

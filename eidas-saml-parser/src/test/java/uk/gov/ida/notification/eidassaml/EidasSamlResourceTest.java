@@ -55,8 +55,8 @@ public class EidasSamlResourceTest {
     @Test
     public void shouldReturnRequestIdAndIssuer() throws Exception {
         String issuerAsString = "issuer";
-        String requestId = ValidationTestDataUtils.sample_requestId;
-        String destination = ValidationTestDataUtils.sample_destinationUrl;
+        String requestId = ValidationTestDataUtils.SAMPLE_REQUEST_ID;
+        String destination = ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
         DateTime issueInstant = new DateTime(2019, 02, 28, 9, 54);
         Issuer issuer = ObjectUtils.createSamlObject(Issuer.class);
         issuer.setValue(issuerAsString);
