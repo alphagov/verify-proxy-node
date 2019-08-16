@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.stubconnector;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
@@ -18,17 +17,12 @@ import static org.mockito.Mockito.when;
 
 public class EidasAuthnRequestContextFactoryTest {
 
-    private EidasAuthnRequestContextFactory factory;
+    private static final EidasAuthnRequestContextFactory factory = new EidasAuthnRequestContextFactory();
 
     @BeforeClass
     public static void classSetup() throws Throwable {
         InitializationService.initialize();
         VerifySamlInitializer.init();
-    }
-
-    @Before
-    public void setUp() {
-        factory = new EidasAuthnRequestContextFactory();
     }
 
     @Test

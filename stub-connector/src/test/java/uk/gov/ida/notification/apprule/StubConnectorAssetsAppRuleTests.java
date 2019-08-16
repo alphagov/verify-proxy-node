@@ -1,7 +1,11 @@
 package uk.gov.ida.notification.apprule;
 
+import io.dropwizard.testing.junit.DropwizardClientRule;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
+import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -12,6 +16,12 @@ import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class StubConnectorAssetsAppRuleTests extends StubConnectorAppRuleTestBase {
+
+    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
+    private static final StubConnectorAppRule stubConnectorAppRule = createStubConnectorAppRule(metadataClientRule);
+
+    @ClassRule
+    public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(stubConnectorAppRule);
 
     @Test
     public void shouldReturnFavicon() throws IOException, URISyntaxException {

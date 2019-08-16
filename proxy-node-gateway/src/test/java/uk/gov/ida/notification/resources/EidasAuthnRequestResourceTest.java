@@ -74,9 +74,6 @@ public class EidasAuthnRequestResourceTest {
     @Captor
     private static ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
 
-    @Captor
-    private static ArgumentCaptor<GatewaySessionData> captorGatewaySessionData;
-
     @InjectMocks
     private EidasAuthnRequestResource resource;
 
