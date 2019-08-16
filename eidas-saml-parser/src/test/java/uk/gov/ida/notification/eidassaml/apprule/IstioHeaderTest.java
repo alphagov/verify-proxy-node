@@ -1,13 +1,14 @@
 package uk.gov.ida.notification.eidassaml.apprule;
 
-import org.glassfish.jersey.internal.util.Base64;
-import org.joda.time.DateTime;
+import io.dropwizard.testing.junit.DropwizardClientRule;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.opensaml.saml.saml2.core.Issuer;
-import se.litsec.opensaml.utils.ObjectUtils;
-import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
+import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
+import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
+import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.ws.rs.client.Entity;
@@ -25,19 +26,24 @@ import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_REQUEST_ID;
 
 public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
 
+    private static final String SOME_RANDOM_HEADER = "some-random-header";
+
+    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
+    private static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metadataClientRule);
+
+    @ClassRule
+    public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(eidasSamlParserAppRule);
+
     @Test
     public void headersShouldPersist() throws Exception {
-        AuthnRequest authnRequest = ObjectUtils.createSamlObject(AuthnRequest.class);
-        Issuer issuer = ObjectUtils.createSamlObject(Issuer.class);
-        issuer.setValue("issuer");
-        authnRequest.setID("request_id");
-        authnRequest.setIssuer(issuer);
-        authnRequest.setDestination("destination");
-        authnRequest.setIssueInstant(new DateTime(2019, 02, 28, 9, 54));
+        AuthnRequest authnRequest = new EidasAuthnRequestBuilder()
+                .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
+                .withDestination("http://proxy-node/eidasAuthnRequest")
+                .withRandomRequestId()
+                .build();
 
-        String SOME_RANDOM_HEADER = "some-random-header";
+        SAML_OBJECT_SIGNER.sign(authnRequest, "response-id");
 
-        EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(ObjectUtils.toString(authnRequest)));
         Response response = eidasSamlParserAppRule.target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .header(X_REQUEST_ID, X_REQUEST_ID)
@@ -49,7 +55,7 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
                 .header(X_OT_SPAN_CONTEXT, X_OT_SPAN_CONTEXT)
                 .header(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
                 .header(SOME_RANDOM_HEADER, SOME_RANDOM_HEADER)
-                .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
+                .post(Entity.entity(createEspRequest(authnRequest), MediaType.APPLICATION_JSON_TYPE));
 
         assertThat(response.getHeaders().getFirst(X_REQUEST_ID)).isEqualTo(X_REQUEST_ID);
         assertThat(response.getHeaders().getFirst(X_B3_TRACEID)).isEqualTo(X_B3_TRACEID);
