@@ -3,7 +3,6 @@ package uk.gov.ida.notification.translator.apprule.base;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.translator.apprule.rules.StubVspResource;
@@ -21,14 +20,16 @@ public class TranslatorAppRuleTestBase {
         try {
             InitializationService.initialize();
             VerifySamlInitializer.init();
-            vspClientRule = new DropwizardClientRule(new StubVspResource());
-        } catch (Exception e) {
+            vspClientRule = new DropwizardClientRule(new StubVspResource()) {{
+                this.before();
+            }};
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Rule
-    public TranslatorAppRule translatorAppRule = new TranslatorAppRule(
+    @ClassRule
+    public static final TranslatorAppRule translatorAppRule = new TranslatorAppRule(
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("connectorNodeIssuerId", "http://connector-node:8080/ConnectorMetadata"),
             ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri() + "/vsp"),

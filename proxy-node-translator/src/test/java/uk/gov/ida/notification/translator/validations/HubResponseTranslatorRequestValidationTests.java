@@ -3,8 +3,8 @@ package uk.gov.ida.notification.translator.validations;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.validations.AbstractDtoValidationsTest;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.validations.AbstractDtoValidationsTest;
 
 import javax.validation.ConstraintViolation;
 import java.net.URI;
@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_connectorEncryptionCertificate;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasRequestId;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlResponse;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_levelofAssurance;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_requestId;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlResponse;
 
 public class HubResponseTranslatorRequestValidationTests extends AbstractDtoValidationsTest<HubResponseTranslatorRequest> {
 
@@ -40,7 +40,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
                 null,
                 null);
 
-        Map<String,List<ConstraintViolation<HubResponseTranslatorRequest>>> nullViolationsMap = validateAndMap(nullRequest);
+        Map<String, List<ConstraintViolation<HubResponseTranslatorRequest>>> nullViolationsMap = validateAndMap(nullRequest);
 
         assertThat(nullViolationsMap.size()).isEqualTo(6);
     }
@@ -70,9 +70,8 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
                 URI.create("xyz://something.somewhere/with/an/invalid/protocol"),
                 "not a certificate");
 
-        Map<String,List<ConstraintViolation<HubResponseTranslatorRequest>>> badViolationsMap = validateAndMap(badRequest);
+        Map<String, List<ConstraintViolation<HubResponseTranslatorRequest>>> badViolationsMap = validateAndMap(badRequest);
 
         assertThat(badViolationsMap.size()).isEqualTo(6);
     }
-
 }

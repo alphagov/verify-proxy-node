@@ -28,10 +28,10 @@ public class EidasResponseAttributesHashLoggerTest {
     private static final Method APPLY_ATTRIBUTES_TO_LOGGER_METHOD = getApplyAttributesToLoggerMethod();
 
     @Mock
-    Attributes attributes;
+    private Attributes attributes;
 
     @Mock
-    EidasResponseAttributesHashLogger attributesHashLogger;
+    private EidasResponseAttributesHashLogger attributesHashLogger;
 
     @Test
     public void shouldOnlyIncludeFirstVerifiedFirstNameInHash() {

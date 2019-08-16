@@ -22,9 +22,9 @@ public class TranslatorAppRule extends DropwizardAppRule<TranslatorConfiguration
 
     public TranslatorAppRule(ConfigOverride... configOverrides) {
         super(
-            TranslatorApplication.class,
-            resourceFilePath("config.yml"),
-            getConfigOverrides(configOverrides)
+                TranslatorApplication.class,
+                resourceFilePath("config.yml"),
+                getConfigOverrides(configOverrides)
         );
     }
 
@@ -41,13 +41,14 @@ public class TranslatorAppRule extends DropwizardAppRule<TranslatorConfiguration
         return target(path, getLocalPort());
     }
 
-    public WebTarget target(String path, int port) throws URISyntaxException {
+    private WebTarget target(String path, int port) throws URISyntaxException {
         if (client == null) {
             client = new JerseyClientBuilder(getEnvironment())
                     .withProperty(ClientProperties.CONNECT_TIMEOUT, 10000)
                     .withProperty(ClientProperties.READ_TIMEOUT, 10000)
                     .build("test client");
         }
+
         return client.target(new URI("http://localhost:" + port).resolve(path));
     }
 }

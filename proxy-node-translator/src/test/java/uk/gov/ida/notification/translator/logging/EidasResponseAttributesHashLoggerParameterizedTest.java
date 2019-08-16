@@ -34,7 +34,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
     private Appender<ILoggingEvent> appender;
 
     @Mock
-    HubResponseTranslatorRequest hubResponseTranslatorRequest;
+    private HubResponseTranslatorRequest hubResponseTranslatorRequest;
 
     private TranslatedHubResponse translatedHubResponse;
     private String hashResult;
