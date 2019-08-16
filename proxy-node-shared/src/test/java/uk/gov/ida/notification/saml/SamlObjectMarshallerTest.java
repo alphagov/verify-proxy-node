@@ -14,34 +14,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SamlObjectMarshallerTest extends SamlInitializedTest {
 
-    private final String xmlObjectFormat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><saml2:Issuer xmlns:saml2=\"{0}\" Format=\"{1}\">{2}</saml2:Issuer>";
-    private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
+    private static final String XML_OBJECT_FORMAT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><saml2:Issuer xmlns:saml2=\"{0}\" Format=\"{1}\">{2}</saml2:Issuer>";
+    private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
 
-    private final QName defaultElementName = Issuer.DEFAULT_ELEMENT_NAME;
-    private final String entity = NameIDType.ENTITY;
-    private final String aValue = "an-issuer";
+    private static final QName DEFAULT_ELEMENT_NAME = Issuer.DEFAULT_ELEMENT_NAME;
+    private static final String ENTITY = NameIDType.ENTITY;
+    private static final String ISSUER = "an-issuer";
 
     @Test
     public void shouldMarshallSamlObjectToString() {
-        Issuer issuer = buildXmlObject(defaultElementName, entity, aValue);
+        Issuer issuer = buildXmlObject(DEFAULT_ELEMENT_NAME, ENTITY, ISSUER);
 
-        String issuerXML = marshaller.transformToString(issuer);
+        String issuerXML = MARSHALLER.transformToString(issuer);
 
-        String expectedIssuerXML = buildExpectedXmlObjectFormat(defaultElementName, entity, aValue);
+        String expectedIssuerXML = buildExpectedXmlObjectFormat(DEFAULT_ELEMENT_NAME, ENTITY, ISSUER);
         assertThat(expectedIssuerXML).isEqualTo(issuerXML);
     }
 
     @Test
     public void shouldMarshallSamlObject() throws Throwable {
-        Issuer issuer = buildXmlObject(defaultElementName, entity, aValue);
+        Issuer issuer = buildXmlObject(DEFAULT_ELEMENT_NAME, ENTITY, ISSUER);
         assertThat(issuer.getDOM()).isEqualTo(null);
 
-        Element element = marshaller.marshallToElement(issuer);
+        Element element = MARSHALLER.marshallToElement(issuer);
 
-        assertThat(element.getNamespaceURI()).isEqualTo(defaultElementName.getNamespaceURI() );
+        assertThat(element.getNamespaceURI()).isEqualTo(DEFAULT_ELEMENT_NAME.getNamespaceURI());
         assertThat(element.getLocalName()).isEqualTo("Issuer");
-        assertThat(element.getFirstChild().getNodeValue()).isEqualTo(aValue );
-        assertThat(element.getAttribute(entity)).isNotNull();
+        assertThat(element.getFirstChild().getNodeValue()).isEqualTo(ISSUER);
+        assertThat(element.getAttribute(ENTITY)).isNotNull();
         assertThat(element).isEqualTo(issuer.getDOM());
     }
 
@@ -53,6 +53,6 @@ public class SamlObjectMarshallerTest extends SamlInitializedTest {
     }
 
     private String buildExpectedXmlObjectFormat(QName elementName, String entity, String aValue) {
-        return MessageFormat.format(xmlObjectFormat, elementName.getNamespaceURI(), entity, aValue);
+        return MessageFormat.format(XML_OBJECT_FORMAT, elementName.getNamespaceURI(), entity, aValue);
     }
 }

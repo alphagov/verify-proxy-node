@@ -1,8 +1,10 @@
 package uk.gov.ida.notification.apprule;
 
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.joda.time.DateTime;
-import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
@@ -14,6 +16,7 @@ import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
+import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
@@ -36,11 +39,20 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SI
 
 public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
 
-    private static BasicX509Credential encryptionCredential;
+    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
+    private static final StubConnectorAppRule stubConnectorAppRule = createStubConnectorAppRule(metadataClientRule);
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        encryptionCredential = X509CredentialFactory.build(TEST_PUBLIC_CERT, TEST_PRIVATE_KEY);
+    @ClassRule
+    public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(stubConnectorAppRule);
+
+    private static final BasicX509Credential encryptionCredential;
+
+    static {
+        try {
+            encryptionCredential = X509CredentialFactory.build(TEST_PUBLIC_CERT, TEST_PRIVATE_KEY);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -98,7 +110,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     }
 
     private AuthnRequest getEidasAuthnRequest() throws IOException, URISyntaxException {
-        String html = getEidasRequest();
+        String html = getEidasRequest(stubConnectorAppRule);
         String decodedSaml = HtmlHelpers.getValueFromForm(html, "SAMLRequest");
         return new SamlParser().parseSamlString(decodedSaml);
     }
@@ -108,7 +120,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     }
 
     private void checkValidity(String samlMessage, String validity) throws URISyntaxException {
-        String html = postEidasResponse(samlMessage);
+        String html = postEidasResponse(stubConnectorAppRule, samlMessage);
         assertThat(html).contains("Saml Validity: " + validity);
     }
 

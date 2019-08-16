@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import io.dropwizard.logging.LoggingUtil;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -26,33 +25,38 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class SamlObjectSignerTest extends SamlInitializedTest {
-    private TestKeyPair testKeyPair;
-    private SamlObjectSigner samlObjectSigner;
-    private BasicX509Credential signingCredential;
 
-    @Before
-    public void setup() throws Throwable {
-        testKeyPair = new TestKeyPair();
-        signingCredential = testKeyPair.getX509Credential();
-        samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, 99L);
+    private static final TestKeyPair TEST_KEY_PAIR;
+    private static final BasicX509Credential SIGNING_CREDENTIAL;
+    private static final SamlObjectSigner SAML_OBJECT_SIGNER;
+
+    static {
+        try {
+            TEST_KEY_PAIR = new TestKeyPair();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        SIGNING_CREDENTIAL = TEST_KEY_PAIR.getX509Credential();
+        SAML_OBJECT_SIGNER = new SamlObjectSigner(SIGNING_CREDENTIAL, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, 99L);
     }
 
     @Test
     public void shouldSignAuthRequest() throws Throwable {
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
-        samlObjectSigner.sign(authnRequest, "response-id");
+        SAML_OBJECT_SIGNER.sign(authnRequest, "response-id");
         Signature signature = authnRequest.getSignature();
 
         String actualCertificate = signature.getKeyInfo().getX509Datas().get(0).getX509Certificates().get(0).getValue();
 
-        assertThat(testKeyPair.getEncodedCertificate()).isEqualTo(actualCertificate.replaceAll("\\s+", ""));
+        assertThat(TEST_KEY_PAIR.getEncodedCertificate()).isEqualTo(actualCertificate.replaceAll("\\s+", ""));
         assertThat(signature).isNotNull();
         String algoIdSignatureRsaSha256 = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
         assertThat(signature.getSignatureAlgorithm()).isEqualTo(algoIdSignatureRsaSha256);
-        assertThat(signature.getSigningCredential().getPublicKey()).isEqualTo(signingCredential.getPublicKey());
-        assertThat(signature.getSigningCredential().getPrivateKey()).isEqualTo(signingCredential.getPrivateKey());
+        assertThat(signature.getSigningCredential().getPublicKey()).isEqualTo(SIGNING_CREDENTIAL.getPublicKey());
+        assertThat(signature.getSigningCredential().getPrivateKey()).isEqualTo(SIGNING_CREDENTIAL.getPrivateKey());
         assertThat(signature.getCanonicalizationAlgorithm()).isEqualTo(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
-        SignatureValidator.validate(signature, signingCredential);
+        SignatureValidator.validate(signature, SIGNING_CREDENTIAL);
     }
 
     @Test
@@ -64,7 +68,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
         logger.addAppender(appender);
 
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
-        samlObjectSigner.sign(authnRequest, "response-id");
+        SAML_OBJECT_SIGNER.sign(authnRequest, "response-id");
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender, times(1)).doAppend(loggingEventArgumentCaptor.capture());
@@ -77,7 +81,7 @@ public class SamlObjectSignerTest extends SamlInitializedTest {
 
     @Test
     public void shouldNotLogKeyHandleWhenKeyHandleIsNull() throws Exception {
-        samlObjectSigner = new SamlObjectSigner(signingCredential, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, null);
+        final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(SIGNING_CREDENTIAL, SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, null);
         LoggingUtil.hijackJDKLogging();
 
         Appender<ILoggingEvent> appender = mock(Appender.class);

@@ -76,7 +76,7 @@ public class VspProxyGenerateRequestTest {
     public static final DropwizardClientRule testVspClientErrorClientRule = new DropwizardClientRule(new TestVSPClientErrorResource());
 
     @Spy
-    JsonClient jsonClient = new JsonClient(
+    static JsonClient jsonClient = new JsonClient(
             new ErrorHandlingClient(ClientBuilder.newClient()),
             new JsonResponseProcessor(new ObjectMapper())
     );

@@ -2,7 +2,7 @@ package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.security.credential.Credential;
@@ -18,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CredentialConfigurationTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         InitializationService.initialize();
     }
 

@@ -6,7 +6,6 @@ import ch.qos.logback.core.Appender;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -53,44 +52,43 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
             HealthCheckAppRuleTests.class.getClassLoader().getResource("metadata/metadataSigningCert").getPath();
 
     @ClassRule
-    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
+    public static final DropwizardClientRule translatorClientRule = createInitialisedClientRule(new TestTranslatorResource());
 
     @ClassRule
-    public static final DropwizardClientRule espClientRule = new DropwizardClientRule(new TestEidasSamlResource());
+    public static final DropwizardClientRule espClientRule = createInitialisedClientRule(new TestEidasSamlResource());
 
     @ClassRule
-    public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
+    public static final DropwizardClientRule vspClientRule = createInitialisedClientRule(new TestVerifyServiceProviderResource());
 
-    @Mock
-    private Appender<ILoggingEvent> appender;
-
-    @Captor
-    private ArgumentCaptor<ILoggingEvent> loggingEventCaptor;
-
-    @Rule
-    public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.local", "true"),
-            ConfigOverride.config("redisService.url", ""),
             ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", METADATA_FILE_PATH),
             ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
             ConfigOverride.config("metadataPublishingConfiguration.metadataSigningCertFilePath", METADATA_SIGNING_CERT_FILE_PATH),
             ConfigOverride.config("metadataPublishingConfiguration.metadataCACertsFilePath", METADATA_CA_CERTS_FILE_PATH),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH)
+            ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH),
+            ConfigOverride.config("redisService.local", "true")
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeAppRuleMissingMetadata = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeAppRuleMissingMetadata = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.local", "true"),
-            ConfigOverride.config("redisService.url", ""),
             ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", "metadata/invalid-md-path.xml"),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH)
+            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
+            ConfigOverride.config("redisService.local", "true")
     );
+
+    @Mock
+    private static Appender<ILoggingEvent> appender;
+
+    @Captor
+    private static ArgumentCaptor<ILoggingEvent> loggingEventCaptor;
+
 
     @Test
     public void shouldExposeHealthCheck() throws Exception {

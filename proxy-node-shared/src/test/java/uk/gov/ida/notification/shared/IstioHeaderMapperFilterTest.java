@@ -24,16 +24,16 @@ import static org.mockito.Mockito.when;
 public class IstioHeaderMapperFilterTest {
 
     @Spy
-    IstioHeaderStorage istioHeaderStorage = new IstioHeaderStorage();
+    private static IstioHeaderStorage istioHeaderStorage = new IstioHeaderStorage();
+
+    @Mock
+    private static ContainerRequestContext requestContext;
+
+    @Mock
+    private static ContainerResponseContext responseContext;
 
     @InjectMocks
-    IstioHeaderMapperFilter filter;
-
-    @Mock
-    ContainerRequestContext requestContext;
-
-    @Mock
-    ContainerResponseContext responseContext;
+    private static IstioHeaderMapperFilter filter;
 
     @Test
     public void shouldTransmitIstioHeadersInResponseContext() {

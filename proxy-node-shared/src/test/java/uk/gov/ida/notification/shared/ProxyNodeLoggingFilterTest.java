@@ -29,30 +29,33 @@ import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.JOUR
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyNodeLoggingFilterTest {
 
-    @Mock
-    private ContainerRequestContext requestContext;
+    private static final URI URI;
+    private static final ProxyNodeLoggingFilter LOGGING_FILTER = new ProxyNodeLoggingFilter();
 
     @Mock
-    private ContainerResponseContext responseContext;
+    private static ContainerRequestContext requestContext;
 
     @Mock
-    private UriInfo uriInfo;
+    private static ContainerResponseContext responseContext;
 
-    private URI uri;
+    @Mock
+    private static UriInfo uriInfo;
 
-    private MultivaluedHashMap<String, Object> headers;
+    private static MultivaluedHashMap<String, Object> headers;
 
-    private ProxyNodeLoggingFilter filter;
+    static {
+        try {
+            URI = new URI("http://www.uri.com");
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Before
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         headers = new MultivaluedHashMap<>();
-        uri = new URI("http://www.uri.com");
-
         when(requestContext.getUriInfo()).thenReturn(uriInfo);
-        when(uriInfo.getAbsolutePath()).thenReturn(uri);
-
-        filter = new ProxyNodeLoggingFilter();
+        when(uriInfo.getAbsolutePath()).thenReturn(URI);
     }
 
     @After
@@ -66,7 +69,7 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
         when(requestContext.getUriInfo()).thenReturn(uriInfo);
 
-        filter.filter(requestContext);
+        LOGGING_FILTER.filter(requestContext);
 
         assertThat(MDC.getCopyOfContextMap()).doesNotContainKey(X_B3_TRACEID);
         verify(requestContext).getHeaderString(X_B3_TRACEID);
@@ -78,7 +81,7 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getHeaderString(X_B3_TRACEID)).thenReturn("foo");
         when(requestContext.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
 
-        filter.filter(requestContext);
+        LOGGING_FILTER.filter(requestContext);
         Map<String, String> mdcMap = MDC.getCopyOfContextMap();
 
         assertThat(mdcMap.get(X_B3_TRACEID)).isEqualTo("foo");
@@ -90,14 +93,14 @@ public class ProxyNodeLoggingFilterTest {
     public void shouldOnlyRemoveProxyNodeMdcKeysAndIstioHeaderAfterResponse() {
         when(requestContext.getHeaderString(JOURNEY_ID_KEY)).thenReturn("a journey id");
         when(responseContext.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
-        when(responseContext.getLocation()).thenReturn(uri);
+        when(responseContext.getLocation()).thenReturn(URI);
         when(responseContext.getHeaders()).thenReturn(headers);
 
         MDC.put(X_B3_TRACEID, "foo");
         MDC.put(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name(), "an id");
         MDC.put("some_other_key", "some value");
 
-        filter.filter(requestContext, responseContext);
+        LOGGING_FILTER.filter(requestContext, responseContext);
         Map<String, String> mdcMap = MDC.getCopyOfContextMap();
 
         assertThat(mdcMap.size()).isEqualTo(1);
@@ -112,7 +115,7 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getProperty(JOURNEY_ID_KEY)).thenReturn("a journey id");
         when(responseContext.getHeaders()).thenReturn(headers);
 
-        filter.filter(requestContext, responseContext);
+        LOGGING_FILTER.filter(requestContext, responseContext);
 
         assertThat(responseContext.getHeaders().getFirst(JOURNEY_ID_KEY)).isEqualTo("a journey id");
         verify(requestContext).getHeaderString(JOURNEY_ID_KEY);
@@ -124,7 +127,7 @@ public class ProxyNodeLoggingFilterTest {
         when(requestContext.getProperty(JOURNEY_ID_KEY)).thenReturn("a journey id");
         when(responseContext.getHeaders()).thenReturn(headers);
 
-        filter.filter(requestContext, responseContext);
+        LOGGING_FILTER.filter(requestContext, responseContext);
 
         assertThat(responseContext.getHeaders().getFirst(JOURNEY_ID_KEY)).isEqualTo("a journey id");
     }

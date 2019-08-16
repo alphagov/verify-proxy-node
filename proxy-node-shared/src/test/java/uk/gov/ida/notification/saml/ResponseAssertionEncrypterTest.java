@@ -20,6 +20,7 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResponseAssertionEncrypterTest extends SamlInitializedTest {
+
     @Test
     public void shouldEncryptAssertionsInResponse() throws Throwable {
         TestKeyPair testKeyPair = new TestKeyPair();

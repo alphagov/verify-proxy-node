@@ -5,7 +5,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import io.dropwizard.logging.LoggingUtil;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -38,90 +37,82 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasAuthnRequest;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_eidasRequestId;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_hubSamlAuthnRequest;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_issuer;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_requestId;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_AUTHN_REQUEST;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ISSUER;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_REQUEST_ID;
 import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestResourceTest {
 
+    private static final String UNCHAINED_PUBLIC_PEM;
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
+
+    @Mock
+    private static SessionStore sessionStore;
+    @Mock
+    private static EidasSamlParserProxy eidasSamlParserService;
+    @Mock
+    private static VerifyServiceProviderProxy vspProxy;
+    @Mock
+    private static SamlFormViewBuilder samlFormViewBuilder;
+    @Mock
+    private static HttpSession session;
+    @Mock
+    private static EidasSamlParserResponse eidasSamlParserResponse;
+    @Mock
+    private static AuthnRequestResponse vspResponse;
+    @Mock
+    private static Appender<ILoggingEvent> appender;
+
+    @Captor
+    private static ArgumentCaptor<ILoggingEvent> captorILoggingEvent;
+
+    @Captor
+    private static ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
+
     @InjectMocks
     private EidasAuthnRequestResource resource;
 
-    @Mock
-    private SessionStore sessionStore;
+    static {
+        LoggingUtil.hijackJDKLogging();
 
-    @Mock
-    private EidasSamlParserProxy eidasSamlParserService;
-
-    @Mock
-    private VerifyServiceProviderProxy vspProxy;
-
-    @Mock
-    private SamlFormViewBuilder samlFormViewBuilder;
-
-    @Mock
-    private HttpSession session;
-
-    @Mock
-    private EidasSamlParserResponse eidasSamlParserResponse;
-
-    @Mock
-    private AuthnRequestResponse vspResponse;
-
-    @Mock
-    private Appender<ILoggingEvent> appender;
-
-    @Captor
-    private ArgumentCaptor<ILoggingEvent> captorILoggingEvent;
-
-    @Captor
-    private ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
-
-    @Captor
-    private ArgumentCaptor<GatewaySessionData> captorGatewaySessionData;
-
-    private Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
-
-    private String unchained_public_PEM;
-
-    @Before
-    public void init() throws Exception {
-        unchained_public_PEM = new SelfSignedCertificateGenerator("happy-path-cn").getCertificateAsPEM();
+        try {
+            UNCHAINED_PUBLIC_PEM = new SelfSignedCertificateGenerator("happy-path-cn").getCertificateAsPEM();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     public void testHappyPathRedirect() throws URISyntaxException {
         setupHappyPath();
-        resource.handleRedirectBinding(sample_eidasAuthnRequest, "eidas relay state", session);
+        resource.handleRedirectBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session);
         verifyHappyPath();
     }
 
     @Test
     public void testHappyPath() throws URISyntaxException {
         setupHappyPath();
-        resource.handlePostBinding(sample_eidasAuthnRequest, "eidas relay state", session);
+        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session);
         verifyHappyPath();
     }
 
     private void setupHappyPath() throws URISyntaxException {
-        LoggingUtil.hijackJDKLogging();
-        logger.addAppender(appender);
+        LOGGER.addAppender(appender);
 
         when(eidasSamlParserService.parse(any(EidasSamlParserRequest.class), any(String.class))).thenReturn(eidasSamlParserResponse);
         when(vspProxy.generateAuthnRequest(any(String.class))).thenReturn(vspResponse);
-        when(eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()).thenReturn(unchained_public_PEM);
-        when(eidasSamlParserResponse.getDestination()).thenReturn(sample_destinationUrl);
-        when(eidasSamlParserResponse.getIssuer()).thenReturn(sample_issuer);
-        when(eidasSamlParserResponse.getRequestId()).thenReturn(sample_eidasRequestId);
-        when(vspResponse.getRequestId()).thenReturn(sample_requestId);
+        when(eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()).thenReturn(UNCHAINED_PUBLIC_PEM);
+        when(eidasSamlParserResponse.getDestination()).thenReturn(SAMPLE_DESTINATION_URL);
+        when(eidasSamlParserResponse.getIssuer()).thenReturn(SAMPLE_ISSUER);
+        when(eidasSamlParserResponse.getRequestId()).thenReturn(SAMPLE_EIDAS_REQUEST_ID);
+        when(vspResponse.getRequestId()).thenReturn(SAMPLE_REQUEST_ID);
         when(vspResponse.getSsoLocation()).thenReturn(new URI("http://hub.bub"));
-        when(vspResponse.getSamlRequest()).thenReturn(sample_hubSamlAuthnRequest);
+        when(vspResponse.getSamlRequest()).thenReturn(SAMPLE_HUB_SAML_AUTHN_REQUEST);
         when(session.getId()).thenReturn("some session id");
         when(session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())).thenReturn("journey id");
     }
@@ -136,22 +127,22 @@ public class EidasAuthnRequestResourceTest {
         final ILoggingEvent logEvent = captorILoggingEvent.getValue();
         final Map<String, String> mdc = logEvent.getMDCPropertyMap();
 
-        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(sample_eidasRequestId);
-        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(sample_issuer);
-        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(sample_destinationUrl);
-        assertThat(mdc.get(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX.name())).isEqualTo(StringUtils.right(unchained_public_PEM, 10));
-        assertThat(mdc.get(ProxyNodeMDCKey.HUB_REQUEST_ID.name())).isEqualTo(sample_requestId);
+        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(SAMPLE_EIDAS_REQUEST_ID);
+        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(SAMPLE_ISSUER);
+        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(SAMPLE_DESTINATION_URL);
+        assertThat(mdc.get(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX.name())).isEqualTo(StringUtils.right(UNCHAINED_PUBLIC_PEM, 10));
+        assertThat(mdc.get(ProxyNodeMDCKey.HUB_REQUEST_ID.name())).isEqualTo(SAMPLE_REQUEST_ID);
         assertThat(mdc.get(ProxyNodeMDCKey.HUB_URL.name())).isEqualTo("http://hub.bub");
         assertThat(logEvent.getLevel().toString()).isEqualTo(Level.INFO.toString());
         assertThat(logEvent.getMessage()).isEqualTo("Authn requests received from ESP and VSP");
 
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
-        verify(samlFormViewBuilder).buildRequest("http://hub.bub", sample_hubSamlAuthnRequest, SUBMIT_BUTTON_TEXT, "journey id");
+        verify(samlFormViewBuilder).buildRequest("http://hub.bub", SAMPLE_HUB_SAML_AUTHN_REQUEST, SUBMIT_BUTTON_TEXT, "journey id");
         verify(session).getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name());
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder, session);
         verifyNoMoreInteractions(sessionStore);
 
-        assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo(sample_eidasAuthnRequest);
+        assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo(SAMPLE_EIDAS_AUTHN_REQUEST);
     }
 }

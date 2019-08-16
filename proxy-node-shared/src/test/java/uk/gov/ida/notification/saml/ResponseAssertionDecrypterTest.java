@@ -11,8 +11,8 @@ import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class ResponseAssertionDecrypterTest extends SamlInitializedTest {
+
     @Test
     public void shouldDecryptAssertionsInResponse() throws Throwable {
         TestKeyPair testKeyPair = new TestKeyPair();

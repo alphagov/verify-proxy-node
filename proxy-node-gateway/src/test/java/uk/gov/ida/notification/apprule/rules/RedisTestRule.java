@@ -31,8 +31,8 @@ public class RedisTestRule extends ExternalResource {
         }
 
         RedisExecProvider customProvider = RedisExecProvider.defaultProvider()
-            .override(OS.UNIX, redisServerTrusty.getAbsolutePath())
-            .override(OS.MAC_OS_X, Architecture.x86_64, redisServerMac.getAbsolutePath());
+                .override(OS.UNIX, redisServerTrusty.getAbsolutePath())
+                .override(OS.MAC_OS_X, Architecture.x86_64, redisServerMac.getAbsolutePath());
 
         try {
             redis = new RedisServer(customProvider, port);
@@ -40,11 +40,17 @@ public class RedisTestRule extends ExternalResource {
             throw new EmbeddedRedisException(e.getMessage());
         }
 
+        try {
+            this.before();
+        } catch (Throwable ignored) {
+        }
     }
 
     @Override
     protected void before() throws Throwable {
-        redis.start();
+        if (!redis.isActive()) {
+            redis.start();
+        }
         super.before();
     }
 

@@ -67,10 +67,35 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
 
-    private BasicCredential hubSigningCredential;
-    private EncryptedAssertion authnAssertion;
-    private EncryptedAssertion matchingDatasetAssertion;
-    private Credential eidasDecryptingCredential;
+    private static final BasicCredential idpSigningCredential;
+    private static final BasicCredential hubSigningCredential;
+    private static final Credential eidasDecryptingCredential;
+    private static final Credential hubAssertionsEncryptionCredential;
+
+    static {
+        try {
+            idpSigningCredential = BasicCredentialBuilder.instance()
+                    .withPublicSigningCert(STUB_IDP_PUBLIC_PRIMARY_CERT)
+                    .withPrivateSigningKey(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY)
+                    .build();
+
+            hubSigningCredential = BasicCredentialBuilder.instance()
+                    .withPublicSigningCert(HUB_TEST_PUBLIC_SIGNING_CERT)
+                    .withPrivateSigningKey(HUB_TEST_PRIVATE_SIGNING_KEY)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        hubAssertionsEncryptionCredential = new BasicCredential(
+                X_509_CERTIFICATE_FACTORY.createCertificate(HUB_TEST_PUBLIC_ENCRYPTION_CERT).getPublicKey());
+
+        eidasDecryptingCredential =
+                new TestCredentialFactory(
+                        STUB_COUNTRY_PUBLIC_PRIMARY_CERT,
+                        STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY
+                ).getDecryptingCredential();
+    }
 
     @Mock
     private Appender<ILoggingEvent> appender;
@@ -78,29 +103,11 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     @Captor
     private ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor;
 
+    private EncryptedAssertion authnAssertion;
+    private EncryptedAssertion matchingDatasetAssertion;
+
     @Before
-    public void setUp() throws Throwable {
-
-        Credential hubAssertionsEncryptionCredential = new BasicCredential(
-                X_509_CERTIFICATE_FACTORY.createCertificate(HUB_TEST_PUBLIC_ENCRYPTION_CERT).getPublicKey()
-        );
-
-        eidasDecryptingCredential =
-                new TestCredentialFactory(
-                        STUB_COUNTRY_PUBLIC_PRIMARY_CERT,
-                        STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY
-                ).getDecryptingCredential();
-
-        hubSigningCredential = BasicCredentialBuilder.instance()
-                .withPublicSigningCert(HUB_TEST_PUBLIC_SIGNING_CERT)
-                .withPrivateSigningKey(HUB_TEST_PRIVATE_SIGNING_KEY)
-                .build();
-
-        final BasicCredential idpSigningCredential = BasicCredentialBuilder.instance()
-                .withPublicSigningCert(STUB_IDP_PUBLIC_PRIMARY_CERT)
-                .withPrivateSigningKey(STUB_IDP_PUBLIC_PRIMARY_PRIVATE_KEY)
-                .build();
-
+    public void setUp() {
         authnAssertion = HubAssertionBuilder.anAuthnStatementAssertion()
                 .withSignature(idpSigningCredential, STUB_IDP_PUBLIC_PRIMARY_CERT)
                 .withIssuer(TestEntityIds.STUB_IDP_ONE)
@@ -202,7 +209,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
     }
 
-    protected javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
+    private javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
         String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
@@ -221,7 +228,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
             .post(Entity.json(hubResponseTranslatorRequest));
     }
 
-    protected javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
+    private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
         String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =

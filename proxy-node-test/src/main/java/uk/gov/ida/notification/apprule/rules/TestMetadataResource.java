@@ -65,7 +65,6 @@ public class TestMetadataResource {
                 .addSpServiceDescriptor(spssoDescriptor)
                 .withValidUntil(DateTime.now().plusWeeks(2))
                 .withSignature(signature)
-                .setAddDefaultSpServiceDescriptor(false)
                 .build();
     }
 
@@ -77,7 +76,6 @@ public class TestMetadataResource {
         IDPSSODescriptor idpssoDescriptor = IdpSsoDescriptorBuilder.anIdpSsoDescriptor()
                 .addKeyDescriptor(signingKeyDescriptor)
                 .build();
-
 
         Signature signature = SignatureBuilder.aSignature()
                 .withSigningCredential(new TestCredentialFactory(METADATA_SIGNING_A_PUBLIC_CERT, METADATA_SIGNING_A_PRIVATE_KEY).getSigningCredential())
@@ -96,13 +94,13 @@ public class TestMetadataResource {
     }
 
     @GET
-    @Path("/proxy-node/metadata")
+    @Path("/proxy-node/Metadata")
     public String getProxyNodeMetadata() {
         return proxyNodeMetadataXml;
     }
 
     @GET
-    @Path("/connector-node/metadata")
+    @Path("/connector-node/Metadata")
     public String getConnectorMetadata() {
         return connectorMetadataXml;
     }

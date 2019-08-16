@@ -36,9 +36,23 @@ import static uk.gov.ida.notification.shared.Urls.TranslatorUrls.TRANSLATOR_ROOT
 
 @RunWith(MockitoJUnitRunner.class)
 public class TranslatorProxyTest {
+
+    @ClassRule
+    public static final DropwizardClientRule clientRule = new DropwizardClientRule(new TestTranslatorResource());
+
+    private static final String JOURNEY_ID = "this_is_not_a_uuid";
+
+    @Spy
+    private static ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
+            new ErrorHandlingClient(ClientBuilder.newClient()),
+            new JsonResponseProcessor(new ObjectMapper()),
+            new IstioHeaderStorage()
+    );
+
     @Path(TRANSLATOR_ROOT)
     @Produces(MediaType.APPLICATION_JSON)
     public static class TestTranslatorResource {
+        static MultivaluedMap<String, String> headers;
 
         @Path("/happy" + TRANSLATE_HUB_RESPONSE_PATH)
         @POST
@@ -52,7 +66,6 @@ public class TranslatorProxyTest {
             return Response.serverError().build();
         }
 
-        public static MultivaluedMap<String, String> headers;
         @POST
         @Path("/test-journey-id-header" + TRANSLATE_HUB_RESPONSE_PATH)
         public Response testJourneyIdHeader(HubResponseTranslatorRequest hubResponseTranslatorRequest, @Context HttpHeaders headers) {
@@ -60,18 +73,6 @@ public class TranslatorProxyTest {
             return Response.ok().entity("translated_saml_response_blob").build();
         }
     }
-
-    private static final String JOURNEY_ID = "this_is_not_a_uuid";
-
-    @ClassRule
-    public static final DropwizardClientRule clientRule = new DropwizardClientRule(new TestTranslatorResource());
-
-    @Spy
-    ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
-            new ErrorHandlingClient(ClientBuilder.newClient()),
-            new JsonResponseProcessor(new ObjectMapper()),
-            new IstioHeaderStorage()
-    );
 
     @Test
     public void shouldAcceptHubResponseTranslatorRequestAndReturnString() {

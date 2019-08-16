@@ -21,7 +21,7 @@ install:
   - npm install -g snyk@1.146.0
 
 script:
-  - ./gradlew --no-daemon test
+  - ./gradlew --no-daemon --parallel test
   - snyk/test.sh
   - libs/check-dependencies.sh
 

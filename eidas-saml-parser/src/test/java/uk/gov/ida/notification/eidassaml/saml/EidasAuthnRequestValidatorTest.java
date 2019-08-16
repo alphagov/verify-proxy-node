@@ -5,6 +5,10 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -28,51 +32,44 @@ import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestValidatorTest {
 
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public final ExpectedException expectedException = ExpectedException.none();
 
+    @Mock
+    private static RequestIssuerValidator requestIssuerValidator;
+    @Mock
+    private static SpTypeValidator spTypeValidator;
+    @Mock
+    private static LoaValidator loaValidator;
+    @Mock
+    private static RequestedAttributesValidator requestedAttributesValidator;
+    @Mock
+    private static MessageReplayChecker messageReplayChecker;
+    @Mock
+    private static ComparisonValidator comparisonValidator;
+    @Mock
+    private static DestinationValidator destinationValidator;
+    @Mock
+    private static AssertionConsumerServiceValidator assertionConsumerServiceValidator;
+
+    @InjectMocks
     private EidasAuthnRequestValidator eidasAuthnRequestValidator;
+
     private EidasAuthnRequestBuilder eidasAuthnRequestBuilder;
-    private RequestIssuerValidator requestIssuerValidator;
-    private SpTypeValidator spTypeValidator;
-    private LoaValidator loaValidator;
-    private RequestedAttributesValidator requestedAttributesValidator;
-    private MessageReplayChecker messageReplayChecker;
-    private ComparisonValidator comparisonValidator;
-    private DestinationValidator destinationValidator;
-    private AssertionConsumerServiceValidator assertionConsumerServiceValidator;
 
     @BeforeClass
-    public static void classSetup() throws Throwable {
+    public static void setUpClass() throws Throwable {
         InitializationService.initialize();
     }
 
     @Before
     public void setUp() throws Throwable {
-        requestIssuerValidator = mock(RequestIssuerValidator.class);
-        spTypeValidator = mock(SpTypeValidator.class);
-        loaValidator = mock(LoaValidator.class);
-        requestedAttributesValidator = mock(RequestedAttributesValidator.class);
-        messageReplayChecker = mock(MessageReplayChecker.class);
-        comparisonValidator = mock(ComparisonValidator.class);
-        destinationValidator = mock(DestinationValidator.class);
-        assertionConsumerServiceValidator = mock(AssertionConsumerServiceValidator.class);
-
-        eidasAuthnRequestValidator = new EidasAuthnRequestValidator(requestIssuerValidator,
-                spTypeValidator,
-                loaValidator,
-                requestedAttributesValidator,
-                messageReplayChecker,
-                comparisonValidator,
-                destinationValidator,
-                assertionConsumerServiceValidator);
-
         eidasAuthnRequestBuilder = new EidasAuthnRequestBuilder().withRandomRequestId();
     }
 

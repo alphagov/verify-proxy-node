@@ -3,9 +3,12 @@ package uk.gov.ida.notification.eidassaml.apprule;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
@@ -17,6 +20,7 @@ import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
+import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -36,21 +40,23 @@ import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESS
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
 
 public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
+    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
+    private static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metadataClientRule);
+
+    @ClassRule
+    public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(eidasSamlParserAppRule);
+
     private EidasAuthnRequestBuilder request;
-    private SamlObjectSigner samlObjectSigner;
 
     @Before
-    public void setup() throws Exception {
+    public void setUp() throws Exception {
         MDC.clear();
         request = new EidasAuthnRequestBuilder()
                 .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest");
-        samlObjectSigner = new SamlObjectSigner(X509CredentialFactory.build(TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, Long.valueOf(1));
     }
 
     @Test
@@ -61,11 +67,11 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestNotSignedCorrectly() throws Exception {
         AuthnRequest requestWithIncorrectSigningKey = request.build();
-        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, Long.valueOf(1));
+        SamlObjectSigner samlObjectSignerIncorrectSigningKey = new SamlObjectSigner(X509CredentialFactory.build(STUB_COUNTRY_PUBLIC_PRIMARY_CERT, STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, 1L);
         samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey, "response-id");
 
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(requestWithIncorrectSigningKey),
+                postEidasAuthnRequest(eidasSamlParserAppRule, requestWithIncorrectSigningKey),
                 "Error during AuthnRequest Signature Validation: SAML Validation Specification: Signature was not valid."
         );
     }
@@ -75,7 +81,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         AuthnRequest unsignedRequest = request.withRandomRequestId().build();
 
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(unsignedRequest),
+                postEidasAuthnRequest(eidasSamlParserAppRule, unsignedRequest),
                 "Error during AuthnRequest Signature Validation: SAML Validation Specification: Message has no signature."
         );
     }
@@ -91,10 +97,10 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestMissingRequestId() throws Exception {
         AuthnRequest requestWithoutId = request.withoutRequestId().build();
-        samlObjectSigner.sign(requestWithoutId, null);
+        SAML_OBJECT_SIGNER.sign(requestWithoutId, null);
 
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(requestWithoutId),
+                postEidasAuthnRequest(eidasSamlParserAppRule, requestWithoutId),
                 "Bad Authn Request from Connector Node: Missing Request ID"
         );
     }
@@ -102,9 +108,9 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestIsMalformedBase64() throws Exception {
         AuthnRequest request = this.request.withRandomRequestId().build();
-        samlObjectSigner.sign(request, null);
+        SAML_OBJECT_SIGNER.sign(request, null);
 
-        Response response = postMalformedEidasAuthnRequest(request);
+        Response response = postMalformedEidasAuthnRequest(eidasSamlParserAppRule, request);
         assertErrorResponse(response);
     }
 
@@ -213,51 +219,23 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void authnRequestShouldNotBeNotDuplicated() throws Exception {
         AuthnRequest duplicatedRequest = request.build();
-        samlObjectSigner.sign(duplicatedRequest, "response-id");
+        SAML_OBJECT_SIGNER.sign(duplicatedRequest, "response-id");
 
-        assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(duplicatedRequest));
+        assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(eidasSamlParserAppRule, duplicatedRequest));
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(duplicatedRequest),
+                postEidasAuthnRequest(eidasSamlParserAppRule, duplicatedRequest),
                 "Bad Authn Request from Connector Node: Replay check of ID"
         );
     }
 
-    private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Exception {
-        AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest, "response-id");
+    @Test
+    public void shouldConsumeMetadata() throws Exception {
+        Response response = eidasSamlParserAppRule.target("healthcheck", eidasSamlParserAppRule.getAdminPort())
+                .request()
+                .get();
 
-        assertGoodResponse(postedRequest, postEidasAuthnRequest(postedRequest));
-    }
-
-    private void assertBadRequest(EidasAuthnRequestBuilder builder) throws Exception {
-        AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest, "response-id");
-
-        assertErrorResponse(postEidasAuthnRequest(postedRequest));
-    }
-
-    private void assertBadRequestWithMessage(EidasAuthnRequestBuilder builder, String errorMessageContains) throws Exception {
-        AuthnRequest postedRequest = builder.withRandomRequestId().build();
-        samlObjectSigner.sign(postedRequest, "response-id");
-
-        assertErrorResponseWithMessage(postEidasAuthnRequest(postedRequest), errorMessageContains);
-    }
-
-    private void assertGoodResponse(AuthnRequest eidasAuthnRequest, Response response) {
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
-        EidasSamlParserResponse espResponse = response.readEntity(EidasSamlParserResponse.class);
-
-        assertThat(espResponse.getRequestId()).isEqualTo(eidasAuthnRequest.getID());
-        assertThat(espResponse.getIssuer()).isEqualTo(TestMetadataResource.CONNECTOR_ENTITY_ID);
-    }
-
-    private void assertErrorResponse(Response response) {
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_BAD_REQUEST);
-    }
-
-    private void assertErrorResponseWithMessage(Response response, String errorMessageContains) {
-        assertErrorResponse(response);
-        assertThat(response.readEntity(String.class)).contains(errorMessageContains);
+        final String healthCheck = response.readEntity(String.class);
+        assertThat(healthCheck).contains("\"connector-metadata\":{\"healthy\":true}");
     }
 
     @Test
@@ -267,9 +245,9 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         logger.addAppender(appender);
 
         AuthnRequest authnRequest = request.withRequestId("request_id").build();
-        samlObjectSigner.sign(authnRequest, "response-id");
+        SAML_OBJECT_SIGNER.sign(authnRequest, "response-id");
 
-        postEidasAuthnRequest(authnRequest);
+        postEidasAuthnRequest(eidasSamlParserAppRule, authnRequest);
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender, times(6)).doAppend(loggingEventArgumentCaptor.capture());
@@ -288,5 +266,43 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
         assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_INGRESS)).hasSize(1);
         assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_EGRESS)).hasSize(1);
+    }
+
+    private void assertGoodRequest(EidasAuthnRequestBuilder builder) throws Exception {
+        AuthnRequest postedRequest = builder.withRandomRequestId().build();
+        SAML_OBJECT_SIGNER.sign(postedRequest, "response-id");
+
+        assertGoodResponse(postedRequest, postEidasAuthnRequest(eidasSamlParserAppRule, postedRequest));
+    }
+
+    private void assertBadRequest(EidasAuthnRequestBuilder builder) throws Exception {
+        AuthnRequest postedRequest = builder.withRandomRequestId().build();
+        SAML_OBJECT_SIGNER.sign(postedRequest, "response-id");
+
+        assertErrorResponse(postEidasAuthnRequest(eidasSamlParserAppRule, postedRequest));
+    }
+
+    private void assertBadRequestWithMessage(EidasAuthnRequestBuilder builder, String errorMessageContains) throws Exception {
+        AuthnRequest postedRequest = builder.withRandomRequestId().build();
+        SAML_OBJECT_SIGNER.sign(postedRequest, "response-id");
+
+        assertErrorResponseWithMessage(postEidasAuthnRequest(eidasSamlParserAppRule, postedRequest), errorMessageContains);
+    }
+
+    private void assertGoodResponse(AuthnRequest eidasAuthnRequest, Response response) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
+        EidasSamlParserResponse espResponse = response.readEntity(EidasSamlParserResponse.class);
+
+        assertThat(espResponse.getRequestId()).isEqualTo(eidasAuthnRequest.getID());
+        assertThat(espResponse.getIssuer()).isEqualTo(TestMetadataResource.CONNECTOR_ENTITY_ID);
+    }
+
+    private void assertErrorResponse(Response response) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    private void assertErrorResponseWithMessage(Response response, String errorMessageContains) {
+        assertErrorResponse(response);
+        assertThat(response.readEntity(String.class)).contains(errorMessageContains);
     }
 }

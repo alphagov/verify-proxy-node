@@ -9,42 +9,41 @@ import javax.ws.rs.core.UriBuilder;
 
 public class TestGatewaySessionDataValidator {
 
-    private final AuthnRequestResponse vspResponse = new AuthnRequestResponse(
-        "saml-request",
-        "hub-request-id",
-        UriBuilder.fromUri("https://example.com").build()
+    private static final AuthnRequestResponse vspResponse = new AuthnRequestResponse(
+            "saml-request",
+            "hub-request-id",
+            UriBuilder.fromUri("https://example.com").build()
     );
 
     @Test
     public void getValidatedSessionDataShouldReturnSessionData() {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
-            "hub-request-id",
-            "issuer",
-            "eidas-connector-public-key",
-            "eidas-destination"
+                "hub-request-id",
+                "issuer",
+                "eidas-connector-public-key",
+                "eidas-destination"
         );
 
         new GatewaySessionData(
-            eidasSamlParserResponse,
-            vspResponse,
-            "eidas-relay-state"
+                eidasSamlParserResponse,
+                vspResponse,
+                "eidas-relay-state"
         );
     }
-
 
     @Test(expected = SessionAttributeException.class)
     public void getValidatedSessionDataShouldThrowSessionAttributeExceptionIfSAttributeIsNullOrEmpty() {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
-            null,
-            "issuer",
-            "eidas-connector-public-key",
-            ""
+                null,
+                "issuer",
+                "eidas-connector-public-key",
+                ""
         );
 
         new GatewaySessionData(
-            eidasSamlParserResponse,
-            vspResponse,
-            "eidas-relay-state"
+                eidasSamlParserResponse,
+                vspResponse,
+                "eidas-relay-state"
         );
     }
 }

@@ -24,17 +24,16 @@ public class ResponseAttributesValidatorTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private static ResponseAttributesValidator responseAttributesValidator;
+    private static final ResponseAttributesValidator responseAttributesValidator = new ResponseAttributesValidator();
 
     @BeforeClass
     public static void classSetup() throws Throwable {
         InitializationService.initialize();
         VerifySamlInitializer.init();
-        responseAttributesValidator = new ResponseAttributesValidator();
     }
 
     @Test
-    public void shouldNotThrowExceptionIfVerifiedAttributesWithMiddleName() throws Throwable {
+    public void shouldNotThrowExceptionIfVerifiedAttributesWithMiddleName() {
         AttributeValue firstnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Harry").withVerified(true).build();
         AttributeValue middleNameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("James").withVerified(true).build();
         AttributeValue surnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Potter").withVerified(true).build();
@@ -51,7 +50,7 @@ public class ResponseAttributesValidatorTest {
     }
 
     @Test
-    public void shouldNotThrowExceptionIfVerifiedAttributesWithoutMiddleName() throws Throwable {
+    public void shouldNotThrowExceptionIfVerifiedAttributesWithoutMiddleName() {
         AttributeValue firstnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Harry").withVerified(true).build();
         AttributeValue surnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Potter").withVerified(true).build();
         AttributeValue dobValue = DateAttributeValueBuilder.aDateValue().withValue("1980-07-31").withVerified(true).build();
@@ -66,7 +65,7 @@ public class ResponseAttributesValidatorTest {
     }
 
     @Test
-    public void shouldNotThrowExceptionIfVerifiedAttributesWithEmptyNotVerifiedMiddleName() throws Throwable {
+    public void shouldNotThrowExceptionIfVerifiedAttributesWithEmptyNotVerifiedMiddleName() {
         AttributeValue firstnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Harry").withVerified(true).build();
         AttributeValue middleNameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("").build();
         AttributeValue surnameValue = PersonNameAttributeValueBuilder.aPersonNameValue().withValue("Potter").withVerified(true).build();

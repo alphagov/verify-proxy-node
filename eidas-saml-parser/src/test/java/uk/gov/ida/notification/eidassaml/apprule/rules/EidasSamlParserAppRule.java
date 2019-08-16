@@ -21,11 +21,11 @@ public class EidasSamlParserAppRule extends DropwizardAppRule<EidasSamlParserCon
 
     private Client client;
 
-    public EidasSamlParserAppRule(ConfigOverride... configOverrides) {
+    protected EidasSamlParserAppRule(ConfigOverride... configOverrides) {
         super(
-            EidasSamlApplication.class,
-            resourceFilePath("config.yml"),
-            getConfigOverrides(configOverrides)
+                EidasSamlApplication.class,
+                resourceFilePath("config.yml"),
+                getConfigOverrides(configOverrides)
         );
     }
 
@@ -50,6 +50,7 @@ public class EidasSamlParserAppRule extends DropwizardAppRule<EidasSamlParserCon
                     .withProperty(ClientProperties.READ_TIMEOUT, 10000)
                     .build("test client");
         }
+
         return client.target(new URI("http://localhost:" + port).resolve(path));
     }
 }

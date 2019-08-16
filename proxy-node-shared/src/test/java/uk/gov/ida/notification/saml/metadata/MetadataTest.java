@@ -29,6 +29,9 @@ public class MetadataTest {
     private static final String TEST_HUB_METADATA_FILE = "hub_metadata.xml";
     private static final String TEST_HUB_METADATA_ENTITY_ID = "http://stub-idp-one.local/SSO/POST";
 
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
+
     @Test
     public void shouldReturnConnectorNodeEncryptionPublicKeyFromMetadata() throws Exception {
         X509Certificate encryptionCert = new TestKeyPair().certificate;
@@ -81,9 +84,6 @@ public class MetadataTest {
         Metadata metadata = new Metadata(metadataCredentialResolver);
         metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
     }
-
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
 
     @Test
     public void shouldErrorIfUnableToResolveMetadata() throws Exception {

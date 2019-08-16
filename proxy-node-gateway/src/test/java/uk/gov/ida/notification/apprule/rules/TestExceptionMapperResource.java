@@ -46,7 +46,7 @@ public class TestExceptionMapperResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTranslatorResponseException() {
         throw new TranslatorResponseException(ApplicationException.createUnauditedException(ExceptionType.CLIENT_ERROR, UUID.randomUUID()),
-                                              SESSION_ID, HUB_REQUEST_ID, EIDAS_REQUEST_ID);
+                SESSION_ID, HUB_REQUEST_ID, EIDAS_REQUEST_ID);
     }
 
     @GET
@@ -59,21 +59,21 @@ public class TestExceptionMapperResource {
     @Path("/EidasSamlParserResponseException")
     public Response getEidasSamlParserResponseException() {
         throw new EidasSamlParserResponseException(new Exception("This caused an EidasSamlParserResponseException"),
-                                                   SESSION_ID);
+                SESSION_ID);
     }
 
     @GET
     @Path("/FailureResponseGenerationException")
     public Response getFailureRepsonseGenerationException() {
         throw new FailureResponseGenerationException(new Exception("This caused a FailureResponseGenerationException"),
-                                                     EIDAS_REQUEST_ID);
+                EIDAS_REQUEST_ID);
     }
 
     @GET
     @Path("/VerifyServiceProviderRequestException")
     public Response getVerifyServiceProviderRequestException() {
         throw new VerifyServiceProviderRequestException(new Exception("This caused a VerifyServiceProviderRequestException"),
-                                                        SESSION_ID);
+                SESSION_ID);
     }
 
     @GET

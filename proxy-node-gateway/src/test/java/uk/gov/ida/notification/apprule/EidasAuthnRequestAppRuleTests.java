@@ -5,10 +5,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
+import org.junit.AfterClass;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -46,97 +45,90 @@ import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESS
 @RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
-    @ClassRule
-    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(new TestTranslatorResource());
+    private static final String MOCKED_REDIS_URL = setupTestRedis();
 
     @ClassRule
-    public static final DropwizardClientRule espClientRule = new DropwizardClientRule(new TestEidasSamlResource());
+    public static final DropwizardClientRule translatorClientRule = createInitialisedClientRule(new TestTranslatorResource());
 
     @ClassRule
-    public static final DropwizardClientRule espClientServerErrorRule = new DropwizardClientRule(new TestEidasSamlServerErrorResource());
+    public static final DropwizardClientRule espClientRule = createInitialisedClientRule(new TestEidasSamlResource());
 
     @ClassRule
-    public static final DropwizardClientRule espClientServerValidationRule = new DropwizardClientRule(new TestEidasSamlServerValidationResource());
+    public static final DropwizardClientRule espClientServerErrorRule = createInitialisedClientRule(new TestEidasSamlServerErrorResource());
 
     @ClassRule
-    public static final DropwizardClientRule espClientClientErrorRule = new DropwizardClientRule(new TestEidasSamlClientErrorResource());
+    public static final DropwizardClientRule espClientServerValidationRule = createInitialisedClientRule(new TestEidasSamlServerValidationResource());
 
     @ClassRule
-    public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
+    public static final DropwizardClientRule espClientClientErrorRule = createInitialisedClientRule(new TestEidasSamlClientErrorResource());
 
     @ClassRule
-    public static final DropwizardClientRule vspClientServerErrorRule = new DropwizardClientRule(new TestVerifyServiceProviderServerErrorResource());
+    public static final DropwizardClientRule vspClientRule = createInitialisedClientRule(new TestVerifyServiceProviderResource());
 
     @ClassRule
-    public static final DropwizardClientRule vspClientServerValidationRule = new DropwizardClientRule(new TestVerifyServiceProviderServerValidationResource());
+    public static final DropwizardClientRule vspClientServerErrorRule = createInitialisedClientRule(new TestVerifyServiceProviderServerErrorResource());
 
-    @Mock
-    Appender<ILoggingEvent> appender;
+    @ClassRule
+    public static final DropwizardClientRule vspClientServerValidationRule = createInitialisedClientRule(new TestVerifyServiceProviderServerValidationResource());
 
-    @Captor
-    ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor;
-
-    private String mockedRedisUrl = this.setupTestRedis();
-
-    @Rule
-    public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", MOCKED_REDIS_URL)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeEspServerErrorAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeEspServerErrorAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientServerErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", MOCKED_REDIS_URL)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeEspServerValidationAppRule = new GatewayAppRule(
-        ConfigOverride.config("eidasSamlParserService.url", espClientServerValidationRule.baseUri().toString()),
-        ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", mockedRedisUrl),
-        ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-        ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+    @ClassRule
+    public static final GatewayAppRule proxyNodeEspServerValidationAppRule = new GatewayAppRule(
+            ConfigOverride.config("eidasSamlParserService.url", espClientServerValidationRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("redisService.url", MOCKED_REDIS_URL)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeEspClientErrorAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeEspClientErrorAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientClientErrorRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", MOCKED_REDIS_URL)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeVspServerErrorAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeVspServerErrorAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientServerErrorRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-            ConfigOverride.config("redisService.url", mockedRedisUrl),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", MOCKED_REDIS_URL)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeVspServerValidationAppRule = new GatewayAppRule(
-        ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
-        ConfigOverride.config("verifyServiceProviderService.url", vspClientServerValidationRule.baseUri().toString()),
-        ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
-        ConfigOverride.config("redisService.url", mockedRedisUrl),
-        ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-        ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+    @ClassRule
+    public static final GatewayAppRule proxyNodeVspServerValidationAppRule = new GatewayAppRule(
+            ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
+            ConfigOverride.config("verifyServiceProviderService.url", vspClientServerValidationRule.baseUri().toString()),
+            ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
+            ConfigOverride.config("redisService.url", MOCKED_REDIS_URL)
     );
+
+    @Mock
+    private static Appender<ILoggingEvent> appender;
+
+    @Captor
+    private static ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor;
+
+    @AfterClass
+    public static void tearDown() {
+        killTestRedis();
+    }
 
     @Test
     public void bindingsReturnHubAuthnRequestForm() throws Throwable {
@@ -235,8 +227,8 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
         HtmlHelpers.assertXPath(
                 htmlString,
                 String.format("//form[@action='http://www.hub.com']/input[@name='RelayState'][@value='%s']",
-                              response.getHeaders().getFirst(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
-                              )
+                        response.getHeaders().getFirst(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
+                )
         );
     }
 
@@ -250,10 +242,5 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
 
     private String getHtmlStringFromResponse(Response response) {
         return response.readEntity(String.class);
-    }
-
-    @AfterAll
-    public void tearDown() {
-        this.killTestRedis();
     }
 }

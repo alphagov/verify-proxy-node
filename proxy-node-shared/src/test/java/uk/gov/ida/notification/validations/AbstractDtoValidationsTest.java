@@ -1,7 +1,5 @@
 package uk.gov.ida.notification.validations;
 
-import org.junit.Before;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -13,25 +11,20 @@ import java.util.Set;
 
 public abstract class AbstractDtoValidationsTest<DTO> {
 
-    protected Validator validator;
+    private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @Before
-    public void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    protected Map<String, List<ConstraintViolation<DTO>>> validateAndMap(DTO dto) {
+        return mapViolations(VALIDATOR.validate(dto));
     }
 
-    protected Map<String, List<ConstraintViolation<DTO>>> mapViolations(Set<ConstraintViolation<DTO>> violations) {
+    private Map<String, List<ConstraintViolation<DTO>>> mapViolations(Set<ConstraintViolation<DTO>> violations) {
         Map<String, List<ConstraintViolation<DTO>>> violationMap = new HashMap<>();
         for (ConstraintViolation<DTO> violation : violations) {
             String path = violation.getPropertyPath().toString();
             violationMap.computeIfAbsent(path, k -> new LinkedList<>());
             violationMap.get(path).add(violation);
         }
+
         return violationMap;
     }
-
-    protected Map<String, List<ConstraintViolation<DTO>>> validateAndMap(DTO dto) {
-        return mapViolations(validator.validate(dto));
-    }
-
 }

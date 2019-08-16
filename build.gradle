@@ -29,10 +29,10 @@ repositories {
 }
 
 ext {
-    opensaml_version = '3.4.2'
-    dropwizard_version = '1.3.13'
-    utils_version = '2.0.0-370'
-    saml_lib_version = "${opensaml_version}-206"
+    opensaml_version = '3.4.3'
+    dropwizard_version = '1.3.14'
+    utils_version = '2.0.0-371'
+    saml_lib_version = "${opensaml_version}-210"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
@@ -186,11 +186,11 @@ subprojects {
         )
 
         testCompile(
-                "org.junit.jupiter:junit-jupiter-api:5.4.2",
-                'org.junit.jupiter:junit-jupiter-params:5.4.2',
-                "org.assertj:assertj-core:3.12.2",
-                "org.mockito:mockito-core:2.27.0",
-                "org.mockito:mockito-junit-jupiter:2.27.0",
+                "org.junit.jupiter:junit-jupiter-api:5.5.1",
+                'org.junit.jupiter:junit-jupiter-params:5.5.1',
+                "org.assertj:assertj-core:3.13.2",
+                "org.mockito:mockito-core:3.0.0",
+                "org.mockito:mockito-junit-jupiter:3.0.0",
                 "io.dropwizard:dropwizard-testing:${dropwizard_version}",
                 "net.sourceforge.htmlunit:htmlunit:2.35.0",
                 "com.github.stefanbirkner:system-rules:1.19.0",

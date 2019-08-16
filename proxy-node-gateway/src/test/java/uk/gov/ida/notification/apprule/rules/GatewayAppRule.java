@@ -33,12 +33,16 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
     }
 
     private static ConfigOverride[] getConfigOverrides(ConfigOverride... configOverrides) {
-        List<ConfigOverride> configOverridesList = new ArrayList<>(Arrays.asList(configOverrides));
+        List<ConfigOverride> configOverridesList = new ArrayList<>();
         configOverridesList.add(ConfigOverride.config("server.applicationConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("server.adminConnectors[0].port", "0"));
         configOverridesList.add(ConfigOverride.config("logging.appenders[0].type", "console"));
         configOverridesList.add(ConfigOverride.config("errorPageRedirectUrl", ERROR_PAGE_REDIRECT_URL));
+        configOverridesList.add(ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""));
+        configOverridesList.add(ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", ""));
+        configOverridesList.add(ConfigOverride.config("redisService.url", ""));
+        configOverridesList.addAll(Arrays.asList(configOverrides));
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 

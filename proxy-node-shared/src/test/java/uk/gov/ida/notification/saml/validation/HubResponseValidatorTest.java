@@ -7,6 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.core.config.InitializationService;
@@ -30,52 +31,49 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class HubResponseValidatorTest {
 
+    private static Assertion matchingDatasetAssertion;
+    private static Assertion authnStatementAssertion;
+
+    @Mock
+    private static Response response;
+    @Mock
+    private static LoaValidator loaValidator;
+    @Mock
+    private static IdpResponseValidator idpResponseValidator;
+    @Mock
+    private static ResponseAttributesValidator responseAttributesValidator;
+
+    @InjectMocks
     private HubResponseValidator hubResponseValidator;
 
-    @Mock
-    private IdpResponseValidator idpResponseValidator;
-    @Mock
-    private ResponseAttributesValidator responseAttributesValidator;
-    @Mock
-    private LoaValidator loaValidator;
-    @Mock
-    private Response response;
-
-    private Assertion matchingDatasetAssertion;
-    private Assertion authnStatementAssertion;
-
     @BeforeClass
-    public static void classSetup() throws Throwable {
+    public static void setUpClass() throws Throwable {
         InitializationService.initialize();
         VerifySamlInitializer.init();
+
+        authnStatementAssertion = HubAssertionBuilder.anAuthnStatementAssertion().build();
+        matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion().build();
     }
 
     @Before
     public void setUp() {
-        hubResponseValidator = new HubResponseValidator(
-            idpResponseValidator,
-            responseAttributesValidator,
-            loaValidator
-        );
-        authnStatementAssertion = HubAssertionBuilder.anAuthnStatementAssertion().build();
-        matchingDatasetAssertion = HubAssertionBuilder.aMatchingDatasetAssertion().build();
         when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(authnStatementAssertion, matchingDatasetAssertion)));
     }
 
     @Test
-    public void shouldValidateIdpResponseMessage() throws Exception {
+    public void shouldValidateIdpResponseMessage() {
         hubResponseValidator.validate(response);
         verify(idpResponseValidator, times(1)).validate(response);
     }
 
     @Test
-    public void shouldValidateResponseAttributes() throws Exception {
+    public void shouldValidateResponseAttributes() {
         hubResponseValidator.validate(response);
         verify(responseAttributesValidator, times(1)).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
     }
 
     @Test
-    public void shouldVaidateLoA() throws Exception {
+    public void shouldVaidateLoA() {
         hubResponseValidator.validate(response);
         verify(loaValidator, times(1)).validate(authnStatementAssertion.getAuthnStatements().get(0).getAuthnContext());
     }
@@ -84,7 +82,7 @@ public class HubResponseValidatorTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void shouldThrowExceptionIfMatchingDatasetAssertionsNotAvailable() throws Exception {
+    public void shouldThrowExceptionIfMatchingDatasetAssertionsNotAvailable() {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Missing Matching Dataset Assertions");
         when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(authnStatementAssertion)));
@@ -93,7 +91,7 @@ public class HubResponseValidatorTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfAuthnStatementAssertionNotAvailable() throws Exception {
+    public void shouldThrowExceptionIfAuthnStatementAssertionNotAvailable() {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Missing Authn Statement Assertion");
         when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of(matchingDatasetAssertion)));
@@ -102,7 +100,7 @@ public class HubResponseValidatorTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfEmptyAssertions() throws Exception {
+    public void shouldThrowExceptionIfEmptyAssertions() {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Missing Matching Dataset Assertions");
         when(idpResponseValidator.getValidatedAssertions()).thenReturn(new ValidatedAssertions(ImmutableList.of()));
@@ -113,23 +111,23 @@ public class HubResponseValidatorTest {
     }
 
     @Test
-    public void shouldThrowInvalidHubExceptionIfIdpResponseInvalid() throws Exception {
+    public void shouldThrowInvalidHubExceptionIfIdpResponseInvalid() {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Idp Response Error");
 
         doThrow(new SamlTransformationErrorException("Idp Response Error", Level.ERROR))
-            .when(idpResponseValidator).validate(response);
+                .when(idpResponseValidator).validate(response);
 
         hubResponseValidator.validate(response);
     }
 
     @Test
-    public void shouldThrowInvalidHubExceptionIfResponseAttributesInvalid() throws Exception {
+    public void shouldThrowInvalidHubExceptionIfResponseAttributesInvalid() {
         expectedException.expect(InvalidHubResponseException.class);
         expectedException.expectMessage("Bad IDP Response from Hub: Response Attribute Error");
 
         doThrow(new InvalidHubResponseException("Response Attribute Error"))
-            .when(responseAttributesValidator).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
+                .when(responseAttributesValidator).validate(matchingDatasetAssertion.getAttributeStatements().get(0));
 
         hubResponseValidator.validate(response);
     }
