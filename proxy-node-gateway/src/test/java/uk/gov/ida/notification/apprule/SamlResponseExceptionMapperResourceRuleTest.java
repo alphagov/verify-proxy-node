@@ -28,6 +28,13 @@ public class SamlResponseExceptionMapperResourceRuleTest {
     private static final TranslatorProxy translatorProxy = mock(TranslatorProxy.class);
     private static final SessionStore sessionStore = mock(SessionStore.class);
 
+    @ClassRule
+    public static final ResourceTestRule resources = ResourceTestRule.builder()
+            .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
+            .addProvider(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore))
+            .addResource(new TestExceptionMapperResource())
+            .build();
+
     @Before
     public void before() {
         when(sessionStore.getSession(any(String.class))).thenReturn(
@@ -38,16 +45,9 @@ public class SamlResponseExceptionMapperResourceRuleTest {
                 .thenReturn(new SamlFormView("postUrl", "samlMessageType", "encodedSamlMessage", "submitText"));
     }
 
-    @ClassRule
-    public static final ResourceTestRule resources = ResourceTestRule.builder()
-            .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-            .addProvider(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore))
-            .addResource(new TestExceptionMapperResource())
-            .build();
 
     @Test
     public void shouldMapSessionAlreadyExistsExceptionToExceptionToSamlErrorResponseMapper() {
-
         Response response = resources.getJerseyTest()
                 .target("SessionAlreadyExistsException")
                 .request()

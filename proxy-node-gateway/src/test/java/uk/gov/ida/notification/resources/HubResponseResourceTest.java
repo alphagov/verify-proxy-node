@@ -30,16 +30,16 @@ import static org.mockito.Mockito.when;
 public class HubResponseResourceTest {
 
     @Mock
-    TranslatorProxy translatorProxy;
+    private static TranslatorProxy translatorProxy;
 
     @Mock
-    private HttpSession session;
+    private static HttpSession session;
 
     @Mock
-    private SessionStore sessionStore;
+    private static SessionStore sessionStore;
 
     @Captor
-    private ArgumentCaptor<HubResponseTranslatorRequest> requestCaptor;
+    private static ArgumentCaptor<HubResponseTranslatorRequest> requestCaptor;
 
     @Test
     public void testsHappyPath() {

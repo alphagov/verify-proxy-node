@@ -5,10 +5,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
+import org.junit.AfterClass;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -43,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.notification.apprule.rules.TestTranslatorClientErrorResource.SAML_ERROR_BLOB;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.sample_destinationUrl;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
@@ -52,90 +51,83 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBL
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     private static final int EMBEDDED_REDIS_PORT = 6380;
-
-    private static final String errorPageRedirectUrl = "https://proxy-node-error-page";
-    private static final TestTranslatorResource testTranslatorResource = new TestTranslatorResource();
-
-    @ClassRule
-    public static final DropwizardClientRule translatorClientRule = new DropwizardClientRule(testTranslatorResource);
-
-    @ClassRule
-    public static final DropwizardClientRule translatorClientServerErrorRule = new DropwizardClientRule(new TestTranslatorServerErrorResource());
+    private static final String ERROR_PAGE_REDIRECT_URL = "https://proxy-node-error-page";
+    private static final TestTranslatorResource TEST_TRANSLATOR_RESOURCE = new TestTranslatorResource();
+    private static final String REDIS_MOCK_URI = setupTestRedis();
+    private static final Form POST_FORM = new Form()
+            .param(SamlFormMessageType.SAML_RESPONSE, ValidationTestDataUtils.SAMLPLE_HUB_SAML_RESPONSE)
+            .param("RelayState", "relay-state");
 
     @ClassRule
-    public static final DropwizardClientRule translatorClientClientErrorRule = new DropwizardClientRule(new TestTranslatorClientErrorResource());
+    public static final DropwizardClientRule translatorClientRule = createInitialisedClientRule(TEST_TRANSLATOR_RESOURCE);
 
     @ClassRule
-    public static final DropwizardClientRule espClientRule = new DropwizardClientRule(new TestEidasSamlResource());
+    public static final DropwizardClientRule translatorClientServerErrorRule = createInitialisedClientRule(new TestTranslatorServerErrorResource());
 
     @ClassRule
-    public static final DropwizardClientRule vspClientRule = new DropwizardClientRule(new TestVerifyServiceProviderResource());
+    public static final DropwizardClientRule translatorClientClientErrorRule = createInitialisedClientRule(new TestTranslatorClientErrorResource());
+
+    @ClassRule
+    public static final DropwizardClientRule espClientRule = createInitialisedClientRule(new TestEidasSamlResource());
+
+    @ClassRule
+    public static final DropwizardClientRule vspClientRule = createInitialisedClientRule(new TestVerifyServiceProviderResource());
 
     @ClassRule
     public static final RedisTestRule embeddedRedis = new RedisTestRule(EMBEDDED_REDIS_PORT);
 
-    @Mock
-    Appender<ILoggingEvent> appender;
-
-    @Captor
-    ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor;
-
-    private final String redisMockURI = this.setupTestRedis();
-
-    @Rule
-    public GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI),
-            ConfigOverride.config("errorPageRedirectUrl", errorPageRedirectUrl),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", REDIS_MOCK_URI),
+            ConfigOverride.config("errorPageRedirectUrl", ERROR_PAGE_REDIRECT_URL)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeAppRuleNoErrorPageUrl = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeAppRuleNoErrorPageUrl = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", REDIS_MOCK_URI)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeAppRuleEmbeddedRedis = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeAppRuleEmbeddedRedis = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", "redis://localhost:" + EMBEDDED_REDIS_PORT),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", "redis://localhost:" + EMBEDDED_REDIS_PORT)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeServerErrorAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeServerErrorAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientServerErrorRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", REDIS_MOCK_URI)
     );
 
-    @Rule
-    public GatewayAppRule proxyNodeClientErrorAppRule = new GatewayAppRule(
+    @ClassRule
+    public static final GatewayAppRule proxyNodeClientErrorAppRule = new GatewayAppRule(
             ConfigOverride.config("eidasSamlParserService.url", espClientRule.baseUri().toString()),
             ConfigOverride.config("verifyServiceProviderService.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("translatorService.url", translatorClientClientErrorRule.baseUri().toString()),
-            ConfigOverride.config("redisService.url", redisMockURI),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", ""),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", "")
+            ConfigOverride.config("redisService.url", REDIS_MOCK_URI)
     );
 
-    private final Form postForm = new Form()
-            .param(SamlFormMessageType.SAML_RESPONSE, ValidationTestDataUtils.sample_hubSamlResponse)
-            .param("RelayState", "relay-state");
+    @Mock
+    private static Appender<ILoggingEvent> appender;
+
+    @Captor
+    private static ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor;
+
+    @AfterClass
+    public static void tearDown() {
+        killTestRedis();
+    }
+
 
     @Test
     public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception {
@@ -143,11 +135,11 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
 
-      Response response = proxyNodeAppRule
+        Response response = proxyNodeAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
                 .cookie(sessionCookie)
-                .post(Entity.form(postForm));
+                .post(Entity.form(POST_FORM));
 
         assertThat(response.getStatus()).isEqualTo(200);
         assertLogsIngressEgress();
@@ -157,14 +149,14 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 htmlString,
                 String.format(
                         "//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']",
-                        sample_destinationUrl,
+                        SAMPLE_DESTINATION_URL,
                         TestTranslatorResource.SAML_SUCCESS_BLOB));
 
         HtmlHelpers.assertXPath(
                 htmlString,
                 String.format(
                         "//form[@action='%s']/input[@name='RelayState'][@value='relay-state']",
-                        sample_destinationUrl));
+                        SAMPLE_DESTINATION_URL));
     }
 
     @Test
@@ -173,11 +165,11 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
                 .cookie(getSessionCookie(proxyNodeAppRuleEmbeddedRedis))
-                .post(Entity.form(postForm));
+                .post(Entity.form(POST_FORM));
 
         assertThat(response.getStatus()).isEqualTo(200);
 
-        final List<HubResponseTranslatorRequest> translatorArgs = testTranslatorResource.getTranslatorArgs();
+        final List<HubResponseTranslatorRequest> translatorArgs = TEST_TRANSLATOR_RESOURCE.getTranslatorArgs();
         assertThat(translatorArgs.get(0).getConnectorEncryptionCertificate()).isEqualTo(STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
         assertThat(translatorArgs.size()).isOne();
     }
@@ -187,10 +179,10 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         Response response = proxyNodeAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE, false)
                 .request()
-                .post(Entity.form(postForm));
+                .post(Entity.form(POST_FORM));
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
-        assertThat(response.getHeaderString("Location")).isEqualTo(errorPageRedirectUrl);
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
     }
 
     @Test
@@ -199,7 +191,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
                 .cookie(getSessionCookie(proxyNodeServerErrorAppRule))
-                .post(Entity.form(postForm));
+                .post(Entity.form(POST_FORM));
 
         assertGoodSamlErrorResponse(response);
     }
@@ -210,7 +202,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
                 .cookie(getSessionCookie(proxyNodeClientErrorAppRule))
-                .post(Entity.form(postForm));
+                .post(Entity.form(POST_FORM));
 
         assertGoodSamlErrorResponse(response);
     }
@@ -234,17 +226,12 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
         HtmlHelpers.assertXPath(
                 htmlString,
-                String.format("//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']", sample_destinationUrl, SAML_ERROR_BLOB)
+                String.format("//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']", SAMPLE_DESTINATION_URL, SAML_ERROR_BLOB)
         );
 
         HtmlHelpers.assertXPath(
                 htmlString,
-                String.format("//form[@action='%s']/input[@name='RelayState'][@value='relay-state']", sample_destinationUrl)
+                String.format("//form[@action='%s']/input[@name='RelayState'][@value='relay-state']", SAMPLE_DESTINATION_URL)
         );
-    }
-
-    @AfterAll
-    public void tearDown() {
-        this.killTestRedis();
     }
 }
