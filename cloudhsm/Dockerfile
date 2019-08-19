@@ -1,3 +1,5 @@
+# AWS CloudHSM client
+
 FROM amazonlinux:2.0.20190508
 WORKDIR /cloudhsm
 

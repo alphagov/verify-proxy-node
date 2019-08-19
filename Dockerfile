@@ -1,43 +1,41 @@
-# Base builder image
+# Base AWS Java app image
 
-FROM gradle:jdk11 AS build
-ENV GRADLE_USER_HOME ~/.gradle
+ARG JAVA_HOME=/usr/local/openjdk-11
+FROM openjdk:11-jre-slim AS jre
+
+FROM amazonlinux:2.0.20190508
 WORKDIR /app
 
-COPY gradle/ gradle/
-COPY build.gradle settings.gradle ./
-COPY proxy-node-shared/ proxy-node-shared/
-COPY proxy-node-test/ proxy-node-test/
+# Install Java
+ARG JAVA_HOME
+ENV JAVA_HOME $JAVA_HOME
+ENV PATH=$PATH:$JAVA_HOME/bin
+COPY --from=jre $JAVA_HOME $JAVA_HOME
 
-ARG RUN_TESTS=true
-ARG VERIFY_USE_PUBLIC_BINARIES=false
-ENV VERIFY_USE_PUBLIC_BINARIES $VERIFY_USE_PUBLIC_BINARIES
+# Install AWS CloudHSM Java library if needed
+ARG TALKS_TO_HSM=false
+ENV LD_LIBRARY_PATH=/opt/cloudhsm/lib
+ENV HSM_PARTITION=PARTITION_1
 
-ARG component
-COPY ${component}/src ${component}/src
-COPY ${component}/build.gradle ${component}/build.gradle
+ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-2.0.0-3.el7.x86_64.rpm .
+ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-2.0.0-3.el7.x86_64.rpm .
 
-RUN gradle --parallel -p ${component} installDist
-RUN if [ "$RUN_TESTS" = "true" ]; then \
-      gradle --parallel \
-        -x createPoms \
-        -x :proxy-node-shared:jar \
-        -x :${component}:jar \
-        :proxy-node-shared:test \
-        :${component}:test ; fi
+RUN if ${TALKS_TO_HSM}; then echo "Installing CloudHSM libs" \
+    && yum install -y ./cloudhsm-client-*.rpm \
+    && sed -i 's/UNIXSOCKET/TCPSOCKET/g' /opt/cloudhsm/data/application.cfg ; fi
 
-FROM openjdk:11-jre-slim
-WORKDIR /app
+RUN rm ./cloudhsm-client-*.rpm
 
+# Install Proxy Node app
 ARG TINI_VERSION=v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 
 ARG component
-COPY --from=build /app/${component}/build/install/${component} .
-
-ENV CONFIG_FILE config.yml
 ENV COMPONENT $component
+
+COPY ${component}/build/install/${component} .
+ENV CONFIG_FILE config.yml
 
 ENTRYPOINT ["/tini", "--"]
 CMD "bin/$COMPONENT"
