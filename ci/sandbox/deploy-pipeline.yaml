@@ -24,15 +24,15 @@ spec:
       type: docker-image
       source:
         repository: govsvc/task-toolbox
-        tag: "1.2.0"
+        tag: 1.5.0
 
     resource_types:
 
     - name: github
       type: registry-image
       source:
-        repository: "govsvc/concourse-github-resource"
-        tag: "v0.0.3"
+        repository: govsvc/concourse-github-resource
+        tag: v0.0.3
 
     resources:
 
@@ -51,8 +51,9 @@ spec:
 
     jobs:
 
-    - name: deploy-nl-integration
+    - name: deploy-test-integration
       serial: true
+      timeout: 15m
       plan:
 
       - get: release
@@ -72,7 +73,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            RELEASE_NAME: nl-integration
+            RELEASE_NAME: test-integration
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
             ERROR_PAGE_URL: https://www.integration.signin.service.gov.uk/proxy-node-error
@@ -130,7 +131,7 @@ spec:
             KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
             KUBERNETES_TOKEN: ((namespace-deployer.token))
             KUBERNETES_API: kubernetes.default.svc
-            RELEASE_NAME: nl-integration
+            RELEASE_NAME: test-integration
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             APP_NAME: proxy-node
           run:
