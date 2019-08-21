@@ -17,6 +17,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.gradle.build-scan' version '2.4.1'
+}
+
 apply plugin: 'java'
 apply plugin: 'com.github.ben-manes.versions'
 
@@ -208,7 +212,7 @@ subprojects {
 
 task jacocoMerge(type: JacocoMerge) {
     destinationFile = file("$buildDir/jacoco/allTestCoverage.exec")
-    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/*est.exec')
+    executionData = project.fileTree(dir: '.', include: '**/build/jacoco/*est.exec')
     jacocoClasspath = project.files(project.configurations.jacocoAnt)
 }
 
@@ -227,6 +231,12 @@ task jacocoRootReport(type: JacocoReport) {
     doFirst {
         executionData files(executionData.findAll { it.exists() })
     }
+}
+
+buildScan {
+    publishOnFailureIf(project.hasProperty('CI'))
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
 }
 
 defaultTasks 'clean', 'test'
