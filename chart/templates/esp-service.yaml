@@ -16,7 +16,7 @@ spec:
     targetPort: http
     protocol: TCP
   - name: mgmt
-    port: 6008
+    port: 6001
     targetPort: mgmt
     protocol: TCP
   selector:

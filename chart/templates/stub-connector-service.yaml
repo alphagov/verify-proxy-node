@@ -16,7 +16,7 @@ spec:
     port: 80
     targetPort: http
   - name: mgmt
-    port: 6667
+    port: 6611
     targetPort: mgmt
   selector:
     app.kubernetes.io/name: connector

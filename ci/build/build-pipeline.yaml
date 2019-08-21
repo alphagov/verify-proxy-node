@@ -40,7 +40,21 @@ spec:
       type: docker-image
       source:
         repository: govsvc/task-toolbox
-        tag: "1.2.0"
+        tag: "1.5.0"
+
+    image_tag: &image_tag
+      tag_file: src/.git/short_ref
+      tag_as_latest: true
+      tag_prefix: v
+
+    gradle_cache_path: &gradle_cache_path
+      path: home/gradle/.gradle
+
+    openjdk_image: &openjdk_image
+      type: docker-image
+      source:
+        repository: openjdk
+        tag: 11-jdk-slim
 
     resource_types:
 
@@ -175,7 +189,6 @@ spec:
       serial_groups: [build-base-images]
       plan:
       - in_parallel:
-        - get: src
         - get: vsp-src
           trigger: true
         - get: cloudhsm-config
@@ -183,29 +196,53 @@ spec:
         - get: vsp-config
           trigger: true
       - in_parallel:
+          limit: 3
+          fail_fast: true
+          steps:
           - put: cloudhsm-client-image
             get_params: {skip_download: true}
             params:
-              build: src/cloudhsm
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+              cache: true
+              build: cloudhsm-config/cloudhsm
+              <<: *image_tag
+              tag_file: cloudhsm-config/.git/short_ref
           - put: cloudhsm-jce-image
             get_params: {skip_download: true}
             params:
-              build: src/cloudhsm/base-images/jdk11-jce-gradle
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
-          - put: verify-service-provider-image
-            get_params: {skip_download: true}
-            params:
-              build: vsp-src
-              build_args: {VERIFY_USE_PUBLIC_BINARIES: "false"}
-              dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+              cache: true
+              build: cloudhsm-config/cloudhsm/jdk-jce-image
+              <<: *image_tag
+              tag_file: cloudhsm-config/.git/short_ref
+
+          - do:
+            - task: build-and-test-vsp
+              attempts: 2
+              config:
+                platform: linux
+                image_resource: *openjdk_image
+                inputs:
+                - name: vsp-src
+                outputs:
+                - name: vsp-src
+                caches:
+                - *gradle_cache_path
+                run:
+                  path: /bin/sh
+                  args:
+                    - -euc
+                    - |
+                      cd vsp-src
+                      rm -f .dockerignore
+                      export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
+                      ./gradlew --console verbose test installDist
+
+            - put: verify-service-provider-image
+              get_params: {skip_download: true}
+              params:
+                build: vsp-src
+                dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
+                <<: *image_tag
+                tag_file: vsp-config/.git/short_ref
 
     - name: build
       serial: true
@@ -215,9 +252,50 @@ spec:
         - get: src
           trigger: true
         - get: cloudhsm-jce-image
-          passed: ["build-base-images"]
+          passed: [build-base-images]
           trigger: true
-          params: {skip_download: true}
+
+      - task: run-tests
+        config:
+          platform: linux
+          image_resource: *openjdk_image
+          inputs:
+          - name: src
+          outputs:
+          - name: gradle-cache
+            <<: *gradle_cache_path
+          caches:
+          - *gradle_cache_path
+          run:
+            path: /bin/sh
+            args:
+              - -euc
+              - |
+                cd src
+                export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
+                ./gradlew --console verbose --parallel test -x createPoms
+
+      - task: build-apps
+        image: cloudhsm-jce-image
+        config:
+          platform: linux
+          inputs:
+          - name: src
+          - name: gradle-cache
+            <<: *gradle_cache_path
+          outputs:
+          - name: src
+          caches:
+          - *gradle_cache_path
+          run:
+            path: /bin/sh
+            args:
+              - -elc
+              - |
+                cd src
+                export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
+                ./gradlew --console verbose --parallel -Pcloudhsm installDist
+
       - in_parallel:
           limit: 3
           fail_fast: true
@@ -229,20 +307,16 @@ spec:
               build: src
               build_args:
                 component: proxy-node-gateway
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+              <<: *image_tag
           - put: translator-image
             get_params: {skip_download: true}
             params:
               cache: true
               build: src
-              dockerfile: src/cloudhsm/base-images/jdk11-jre/Dockerfile
               build_args:
                 component: proxy-node-translator
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+                TALKS_TO_HSM: true
+              <<: *image_tag
           - put: parser-image
             get_params: {skip_download: true}
             params:
@@ -250,60 +324,52 @@ spec:
               build: src
               build_args:
                 component: eidas-saml-parser
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+              <<: *image_tag
           - put: stub-connector-image
             get_params: {skip_download: true}
             params:
               cache: true
               build: src
-              dockerfile: src/cloudhsm/base-images/jdk11-jre/Dockerfile
               build_args:
                 component: stub-connector
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+                TALKS_TO_HSM: true
+              <<: *image_tag
           - put: tests-image
             get_params: {skip_download: true}
             params:
               cache: true
               build: src/proxy-node-acceptance-tests
-              tag_file: src/.git/short_ref
-              tag_as_latest: true
-              tag_prefix: v
+              <<: *image_tag
 
     - name: package
       serial: true
-      serial_groups: ["package"]
+      serial_groups: [package]
       plan:
       - in_parallel:
         - get: src
-          passed: ["build"]
+          passed: [build]
           trigger: true
         - get: gateway-image
-          passed: ["build"]
+          passed: [build]
           trigger: true
           params: {skip_download: true}
         - get: translator-image
-          passed: ["build"]
+          passed: [build]
           trigger: true
           params: {skip_download: true}
         - get: parser-image
-          passed: ["build"]
+          passed: [build]
           trigger: true
           params: {skip_download: true}
         - get: stub-connector-image
-          passed: ["build"]
+          passed: [build]
           trigger: true
           params: {skip_download: true}
         - get: cloudhsm-client-image
-          passed: ["build-base-images"]
-          trigger: true
+          passed: [build-base-images]
           params: {skip_download: true}
         - get: verify-service-provider-image
-          passed: ["build-base-images"]
-          trigger: true
+          passed: [build-base-images]
           params: {skip_download: true}
         - get: release
 
@@ -366,15 +432,12 @@ spec:
           - name: release
           outputs:
           - name: chart-version
-          params:
-            CLUSTER_DOMAIN: ((cluster.domain))
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
-              echo "bumping release number..."
+              echo "Bumping release number..."
               CURRENT_TAG=$(cat release/tag)
               awk -F. '/[0-9]+\./{$NF++;print}' OFS=. <<< "${CURRENT_TAG}" > chart-version/tag
               NEW_TAG=$(cat chart-version/tag)
@@ -396,15 +459,14 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
               gpg --import key
               gpg --export-secret-keys > ~/.gnupg/pubring.gpg
               KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
-              echo "building chart with release values..."
+              echo "Building chart with release values..."
               CHART_NAME=$(yq . < ./src/chart/Chart.yaml | jq -r .name)
               cp -r "./src/chart" "./${CHART_NAME}"
               cp "./chart-values/values.yaml" "./${CHART_NAME}/values.yaml"
@@ -430,12 +492,15 @@ spec:
 
     - name: test
       serial: true
-      serial_groups: ["package"]
+      serial_groups: [package]
       plan:
 
-      - get: chart
-        passed: ["package"]
-        trigger: true
+      - in_parallel:
+        - get: chart
+          passed: [package]
+          trigger: true
+        - get: tests-image
+          passed: [build]
 
       - task: render-chart-package
         config:
@@ -458,15 +523,15 @@ spec:
             - -eu
             - -c
             - |
-              echo "preparing keyring..."
+              echo "Preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
               gpg --import key
               gpg --export-secret-keys > ~/.gnupg/pubring.gpg
               KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
-              echo "verifying package signature..."
+              echo "Verifying package signature..."
               helm verify ./chart/*.tgz
               echo "OK!"
-              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              echo "Rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
               helm template \
                 --name "${RELEASE_NAME}" \
                 --namespace "${RELEASE_NAMESPACE}" \
@@ -479,6 +544,7 @@ spec:
                 ./chart/*.tgz
 
       - task: deploy-chart-package
+        timeout: 10m
         config:
           platform: linux
           image_resource: *task_toolbox
@@ -497,14 +563,14 @@ spec:
             - -eu
             - -c
             - |
-              echo "configuring kubectl"
+              echo "Configuring kubectl"
               echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
               kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
               kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
               kubectl config set-context deployer --user deployer --cluster self
               kubectl config use-context deployer
 
-              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              echo "Applying chart to ${RELEASE_NAMESPACE} namespace..."
               kapp deploy \
                 -y \
                 --namespace "${RELEASE_NAMESPACE}" \
@@ -513,13 +579,10 @@ spec:
                 --diff-changes \
                 -f ./manifests/
 
-      - get: tests-image
-        passed: ["build"]
-
       - task: test-chart-package
         image: tests-image
         attempts: 2
-        timeout: 15m
+        timeout: 5m
         config:
           platform: linux
           params:
@@ -538,11 +601,11 @@ spec:
 
     - name: release
       serial: true
-      serial_groups: ["package"]
+      serial_groups: [package]
       plan:
 
       - get: chart
-        passed: ["test"]
+        passed: [test]
         trigger: true
 
       - put: release
