@@ -4,8 +4,7 @@ buildscript {
             logger.warn('Production builds MUST NOT be built with public binaries.\nUse artifactory/whitelisted-repos for production builds.\n\n')
             maven { url 'https://dl.bintray.com/alphagov/maven-test' }
             jcenter()
-        }
-        else {
+        } else {
             maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
         }
     }
@@ -67,8 +66,16 @@ subprojects {
         }
     }
 
-    build.dependsOn createPoms
-    test.dependsOn createPoms
+    if (project.hasProperty('CI')) {
+        test {
+            testLogging {
+                exceptionFormat = 'full'
+            }
+        }
+    } else {
+        build.dependsOn createPoms
+        test.dependsOn createPoms
+    }
 
     repositories {
         if (System.getenv('VERIFY_USE_PUBLIC_BINARIES') == 'true') {
@@ -77,8 +84,7 @@ subprojects {
             maven { url 'https://dl.bintray.com/alphagov/maven' }
             maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases' }
             jcenter()
-        }
-        else {
+        } else {
             maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
         }
     }

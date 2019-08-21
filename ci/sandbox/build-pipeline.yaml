@@ -261,7 +261,7 @@ spec:
               - |
                 cd src
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
-                ./gradlew --console verbose --parallel test -x createPoms
+                ./gradlew --console verbose --parallel -PCI test
 
       - task: build-apps
         image: cloudhsm-jce-image
@@ -282,7 +282,7 @@ spec:
               - |
                 cd src
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
-                ./gradlew --console verbose --parallel -Pcloudhsm installDist
+                ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
       - in_parallel:
           limit: 3

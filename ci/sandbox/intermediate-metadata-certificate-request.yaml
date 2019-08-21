@@ -5,7 +5,6 @@ metadata:
   labels:
     controller-tools.k8s.io: "1.0"
   name: proxy-node-metadata-ca
-  namespace: sandbox-proxy-node-dev
 spec:
   countryCode: GB
   commonName: Verify Sandbox Dev Metadata CA
