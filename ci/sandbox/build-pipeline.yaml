@@ -104,16 +104,19 @@ spec:
         paths: [cloudhsm]
         branch: sandbox
 
+    - name: alpine-image
+      type: docker-image
+      icon: toolbox
+      source:
+        repository: alpine
+        tag: 3
+
     - name: sandbox-release
       type: harbor
       icon: tag
       source:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/sandbox-release
-
-    - name: task-toolbox-image
-      icon: toolbox
-      <<: *task_toolbox
 
     - name: tests-image
       type: harbor
@@ -261,7 +264,7 @@ spec:
               - |
                 cd src
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
-                ./gradlew --console verbose --parallel test -x createPoms
+                ./gradlew --console verbose --parallel -PCI test
 
       - task: build-apps
         image: cloudhsm-jce-image
@@ -282,7 +285,7 @@ spec:
               - |
                 cd src
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
-                ./gradlew --console verbose --parallel -Pcloudhsm installDist
+                ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
       - in_parallel:
           limit: 3
@@ -359,7 +362,7 @@ spec:
         - get: verify-service-provider-image
           passed: [build-base-images]
           params: {skip_download: true}
-        - get: task-toolbox-image
+        - get: alpine-image
           params: {rootfs: true}
 
       - task: generate-chart-values
@@ -436,9 +439,9 @@ spec:
           - name: src
           - name: chart-version
           - name: chart-values
-          - name: task-toolbox-image
+          - name: alpine-image
           outputs:
-          - name: task-toolbox-image
+          - name: alpine-image
           params:
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
           run:
@@ -455,24 +458,25 @@ spec:
               CHART_NAME=$(yq . < ./src/chart/Chart.yaml | jq -r .name)
               cp -r "./src/chart" "./${CHART_NAME}"
               cp "./chart-values/values.yaml" "./${CHART_NAME}/values.yaml"
-              mkdir -p proxy-node-chart-package
+              mkdir -p chart-package
               APP_VERSION=$(cat ./src/.git/short_ref)
               CHART_VERSION=$(cat ./chart-version/tag)
               echo "generating signed (${KEY_ID}) helm package for ${CHART_NAME} at app-version: '${APP_VERSION}' chart-version: '${CHART_VERSION}'..."
               helm package \
                 --app-version "${APP_VERSION}" \
                 --version "${CHART_VERSION}" \
-                --destination "./proxy-node-chart-package/" \
+                --destination "./chart-package/" \
                 --save=false \
                 --sign \
                 --key "${KEY_ID}" \
                 "./${CHART_NAME}"
-              tar -rf task-toolbox-image/rootfs.tar proxy-node-chart-package/
+              mv chart-package proxy-node-chart-package
+              tar -rf alpine-image/rootfs.tar proxy-node-chart-package/
 
       - put: sandbox-release
         get_params: {skip_download: true}
         params:
-          import_file: task-toolbox-image/rootfs.tar
+          import_file: alpine-image/rootfs.tar
           <<: *image_tag
 
     - name: test
@@ -487,10 +491,26 @@ spec:
         - get: tests-image
           passed: [build]
 
-      - task: render-chart-package
+      - task: extract-sandbox-release
         image: sandbox-release
         config:
           platform: linux
+          outputs:
+          - name: chart
+          run:
+            path: /bin/sh
+            args:
+            - -euc
+            - |
+              echo "Extracting chart package from the release image..."
+              cp -r /proxy-node-chart-package/* chart/
+
+      - task: render-chart-package
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: chart
           outputs:
           - name: manifests
           params:
@@ -503,8 +523,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "Preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
@@ -512,7 +531,7 @@ spec:
               gpg --export-secret-keys > ~/.gnupg/pubring.gpg
               KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
               echo "Verifying package signature..."
-              helm verify /proxy-node-chart-package/*.tgz
+              helm verify ./chart/*.tgz
               echo "OK!"
               echo "Rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
               helm template \
@@ -524,7 +543,7 @@ spec:
                 --set "stubConnector.enabled=true" \
                 --set "vsp.secretName=vsp" \
                 --output-dir "./manifests/" \
-                /proxy-node-chart-package/*.tgz
+                ./chart/*.tgz
 
       - task: deploy-chart-package
         timeout: 10m
