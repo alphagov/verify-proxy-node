@@ -294,7 +294,6 @@ spec:
           - put: gateway-image
             get_params: {skip_download: true}
             params:
-              cache: true
               build: src
               build_args:
                 component: proxy-node-gateway
@@ -302,7 +301,6 @@ spec:
           - put: translator-image
             get_params: {skip_download: true}
             params:
-              cache: true
               build: src
               build_args:
                 component: proxy-node-translator
@@ -311,7 +309,6 @@ spec:
           - put: parser-image
             get_params: {skip_download: true}
             params:
-              cache: true
               build: src
               build_args:
                 component: eidas-saml-parser
@@ -319,7 +316,6 @@ spec:
           - put: stub-connector-image
             get_params: {skip_download: true}
             params:
-              cache: true
               build: src
               build_args:
                 component: stub-connector
@@ -328,7 +324,6 @@ spec:
           - put: tests-image
             get_params: {skip_download: true}
             params:
-              cache: true
               build: src/proxy-node-acceptance-tests
               <<: *image_tag
 
