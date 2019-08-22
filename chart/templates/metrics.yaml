@@ -4,7 +4,7 @@ kind: metric
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: requestcountbypath
+  name: {{ .Release.Name }}-metrics-request-count-by-path
   namespace: {{ .Release.Namespace }}
 spec:
   dimensions:
@@ -35,7 +35,7 @@ kind: rule
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: promhttpbypath
+  name: {{ .Release.Name }}-metrics-prometheus-by-path-rule
   namespace: {{ .Release.Namespace }}
 spec:
   actions:
@@ -49,7 +49,7 @@ kind: handler
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: prometheusbypath
+  name: {{ .Release.Name }}-prometheus-by-path-handler
   namespace: {{ .Release.Namespace }}
 spec:
   compiledAdapter: prometheus
@@ -79,4 +79,3 @@ spec:
       name: {{ .Release.Namespace | replace "-" "_" }}_requests_by_path_total
     metricsExpirationPolicy:
       metricsExpiryDuration: 10m
-
