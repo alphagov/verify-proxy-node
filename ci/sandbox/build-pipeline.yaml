@@ -40,7 +40,7 @@ spec:
       type: docker-image
       source:
         repository: govsvc/task-toolbox
-        tag: "1.5.0"
+        tag: 1.5.0
 
     image_tag: &image_tag
       tag_file: src/.git/short_ref
@@ -62,14 +62,14 @@ spec:
       type: registry-image
       source:
         repository: "govsvc/concourse-github-resource"
-        tag: "v0.0.1"
+        tag: v0.0.1
 
     - name: harbor
       type: docker-image
       privileged: true
       source:
         repository: govsvc/gsp-harbor-docker-image-resource
-        tag: "0.0.1553882420"
+        tag: 0.0.1553882420
 
     resources:
 
@@ -111,12 +111,12 @@ spec:
         repository: alpine
         tag: 3
 
-    - name: sandbox-release
+    - name: chart
       type: harbor
-      icon: tag
+      icon: file-document
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/sandbox-release
+        repository: registry.((cluster.domain))/eidas/proxy-node-release
 
     - name: tests-image
       type: harbor
@@ -377,8 +377,7 @@ spec:
           run:
             path: /bin/bash
             args:
-              - -eu
-              - -c
+              - -euc
               - |
                 echo "generating helm values for latest image versions..."
                 mkdir -p chart-values
@@ -453,22 +452,22 @@ spec:
               CHART_NAME=$(yq . < ./src/chart/Chart.yaml | jq -r .name)
               cp -r "./src/chart" "./${CHART_NAME}"
               cp "./chart-values/values.yaml" "./${CHART_NAME}/values.yaml"
-              mkdir -p chart-package
+              mkdir -p proxy-node-chart-package
               APP_VERSION=$(cat ./src/.git/short_ref)
               CHART_VERSION=$(cat ./chart-version/tag)
               echo "generating signed (${KEY_ID}) helm package for ${CHART_NAME} at app-version: '${APP_VERSION}' chart-version: '${CHART_VERSION}'..."
               helm package \
                 --app-version "${APP_VERSION}" \
                 --version "${CHART_VERSION}" \
-                --destination "./chart-package/" \
+                --destination "./proxy-node-chart-package/" \
                 --save=false \
                 --sign \
                 --key "${KEY_ID}" \
                 "./${CHART_NAME}"
-              mv chart-package proxy-node-chart-package
+              cp chart-version/tag proxy-node-chart-package/
               tar -rf alpine-image/rootfs.tar proxy-node-chart-package/
 
-      - put: sandbox-release
+      - put: chart
         get_params: {skip_download: true}
         params:
           import_file: alpine-image/rootfs.tar
@@ -480,14 +479,14 @@ spec:
       plan:
 
       - in_parallel:
-        - get: sandbox-release
+        - get: chart
           passed: [package]
           trigger: true
         - get: tests-image
           passed: [build]
 
-      - task: extract-sandbox-release
-        image: sandbox-release
+      - task: extract-chart
+        image: chart
         config:
           platform: linux
           outputs:
@@ -557,8 +556,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "Configuring kubectl"
               echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
@@ -590,8 +588,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -c
+            - -euc
             - |
-              set -euo pipefail
               cd /
               bundle exec cucumber --strict --tags "not @ignore"

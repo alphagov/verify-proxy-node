@@ -81,8 +81,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
@@ -137,8 +136,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "configuring kubectl"
               echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt

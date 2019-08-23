@@ -24,15 +24,15 @@ spec:
       type: docker-image
       source:
         repository: govsvc/task-toolbox
-        tag: "1.2.0"
+        tag: 1.5.0
 
     resource_types:
 
     - name: github
       type: registry-image
       source:
-        repository: "govsvc/concourse-github-resource"
-        tag: "v0.0.3"
+        repository: govsvc/concourse-github-resource
+        tag: v0.0.3
 
     resources:
 
@@ -87,8 +87,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
@@ -115,6 +114,7 @@ spec:
                 ./release/*.tgz
 
       - task: deploy-manifests
+        timeout: 10m
         config:
           platform: linux
           image_resource: *task_toolbox
@@ -130,8 +130,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "configuring kubectl"
               echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
