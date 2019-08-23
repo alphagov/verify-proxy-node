@@ -24,15 +24,15 @@ spec:
       type: docker-image
       source:
         repository: govsvc/task-toolbox
-        tag: "1.2.0"
+        tag: 1.5.0
 
     resource_types:
 
     - name: github
       type: registry-image
       source:
-        repository: "govsvc/concourse-github-resource"
-        tag: "v0.0.3"
+        repository: govsvc/concourse-github-resource
+        tag: v0.0.3
 
     resources:
 
@@ -80,13 +80,12 @@ spec:
             CONNECTOR_ENTITY_ID: https://eidasconnector.test.eid.digst.dk/Metadata
             CONNECTOR_METADATA_FQDN: eidasconnector.test.eid.digst.dk
             CONNECTOR_METADATA_PATH: /Metadata
-            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
             CLOUDHSM_IP: ((cluster.cloudHsmIp))
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
@@ -111,6 +110,7 @@ spec:
                 ./release/*.tgz
 
       - task: deploy-manifests
+        timeout: 10m
         config:
           platform: linux
           image_resource: *task_toolbox
@@ -126,8 +126,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "configuring kubectl"
               echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
@@ -179,8 +178,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "preparing keyring..."
               echo "${CLUSTER_PRIVATE_KEY}" > key
@@ -205,6 +203,7 @@ spec:
                 ./release/*.tgz
 
       - task: deploy-manifests
+        timeout: 10m
         config:
           platform: linux
           image_resource: *task_toolbox
@@ -220,8 +219,7 @@ spec:
           run:
             path: /bin/bash
             args:
-            - -eu
-            - -c
+            - -euc
             - |
               echo "configuring kubectl"
               echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
@@ -267,8 +265,7 @@ spec:
             run:
               path: /bin/bash
               args:
-                - -eu
-                - -c
+                - -euc
                 - |
                   echo "preparing keyring..."
                   echo "${CLUSTER_PRIVATE_KEY}" > key
@@ -289,6 +286,7 @@ spec:
                     ./release/*.tgz
 
         - task: deploy-manifests
+          timeout: 10m
           config:
             platform: linux
             image_resource: *task_toolbox
@@ -304,8 +302,7 @@ spec:
             run:
               path: /bin/bash
               args:
-                - -eu
-                - -c
+                - -euc
                 - |
                   echo "configuring kubectl"
                   echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
