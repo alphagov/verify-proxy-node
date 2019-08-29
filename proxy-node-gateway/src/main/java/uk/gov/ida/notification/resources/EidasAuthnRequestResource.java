@@ -12,16 +12,17 @@ import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
-import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -66,12 +67,14 @@ public class EidasAuthnRequestResource {
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
-            @Session HttpSession session) {
+            @Session HttpSession session, @CookieParam("gateway-journey-id") String journeyId) {
+        ProxyNodeLogger.info("gateway-journey-id cookie value " + journeyId);
         return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session);
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
         final String sessionId = session.getId();
+        ProxyNodeLogger.info("request session id " + sessionId);
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 

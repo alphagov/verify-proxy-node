@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -97,7 +98,7 @@ public class EidasAuthnRequestResourceTest {
     @Test
     public void testHappyPath() throws URISyntaxException {
         setupHappyPath();
-        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session);
+        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session, "");
         verifyHappyPath();
     }
 
@@ -123,7 +124,7 @@ public class EidasAuthnRequestResourceTest {
         verify(sessionStore).createOrUpdateSession(eq(sessionId), any(GatewaySessionData.class));
         verify(session).getId();
 
-        verify(appender).doAppend(captorILoggingEvent.capture());
+        verify(appender, times(2)).doAppend(captorILoggingEvent.capture());
         final ILoggingEvent logEvent = captorILoggingEvent.getValue();
         final Map<String, String> mdc = logEvent.getMDCPropertyMap();
 

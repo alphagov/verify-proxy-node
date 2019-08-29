@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: {{ .Release.Name }}-gateway
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
 spec:
   hosts:
   - {{ include "gateway.host" . }}

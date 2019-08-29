@@ -3,6 +3,9 @@ kind: Metadata
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
   name: {{ .Release.Name }}-proxy-node-metadata
   namespace: {{ .Release.Namespace }}
 spec:

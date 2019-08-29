@@ -86,6 +86,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         final SessionStore sessionStorage = redisService.isLocal() ?
                 new InMemoryStorage() : new RedisStorage(redisService);
 
+
         final SamlFormViewBuilder samlFormViewBuilder = new SamlFormViewBuilder();
 
         final TranslatorProxy translatorProxy = configuration

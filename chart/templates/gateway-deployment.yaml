@@ -8,6 +8,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
 spec:
   replicas: {{ .Values.gateway.replicaCount }}
   strategy:
@@ -59,8 +60,10 @@ spec:
         env:
         - name: PORT
           value: "80"
-        - name: REDIS_SERVER_URI
-          value: redis://{{ .Release.Name }}-gateway-redis:6379/
+        - name: REDIS_SERVER_URI_WRITE
+          value: redis://{{ .Release.Name }}-gateway-redis-cluster-master:6379/
+        - name: REDIS_SERVER_URI_READ
+          value: redis://{{ .Release.Name }}-gateway-redis-cluster-slave:6379/
         - name: TRANSLATOR_URL
           value: http://{{ .Release.Name }}-translator/
         - name: EIDAS_SAML_PARSER_URL

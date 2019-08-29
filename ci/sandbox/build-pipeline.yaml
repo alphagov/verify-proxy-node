@@ -188,7 +188,6 @@ spec:
         - get: vsp-config
           trigger: true
       - in_parallel:
-          limit: 3
           fail_fast: true
           steps:
           - put: cloudhsm-client-image
@@ -242,6 +241,7 @@ spec:
       plan:
       - in_parallel:
         - get: src
+          trigger: true
         - get: cloudhsm-jce-image
           passed: [build-base-images]
           trigger: true
@@ -265,7 +265,7 @@ spec:
               - |
                 cd src
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
-                ./gradlew --console verbose --parallel -PCI test
+                ./gradlew --console verbose --parallel -PCI compileJava
 
       - task: build-apps
         image: cloudhsm-jce-image
@@ -289,7 +289,6 @@ spec:
                 ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
       - in_parallel:
-          limit: 3
           fail_fast: true
           steps:
           - put: gateway-image

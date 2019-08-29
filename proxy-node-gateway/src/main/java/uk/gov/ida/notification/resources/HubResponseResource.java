@@ -49,7 +49,9 @@ public class HubResponseResource {
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
 
-        GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
+        String sessionId = session.getId();
+        ProxyNodeLogger.info("request session id " + sessionId);
+        GatewaySessionData sessionData = sessionStorage.getSession(sessionId);
 
         ProxyNodeLogger.info("Retrieved GatewaySessionData");
 
@@ -62,7 +64,7 @@ public class HubResponseResource {
             sessionData.getEidasConnectorPublicKey()
         );
 
-        String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, session.getId());
+        String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, sessionId);
         ProxyNodeLogger.info("Received eIDAS response from Translator");
 
         return samlFormViewBuilder.buildResponse(

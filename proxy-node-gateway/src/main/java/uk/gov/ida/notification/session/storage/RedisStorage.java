@@ -12,16 +12,17 @@ import uk.gov.ida.notification.session.GatewaySessionData;
 public class RedisStorage implements SessionStore {
 
     private RedisServiceConfiguration redisConfiguration;
-
-    private RedisClient redisClient;
-    private StatefulRedisConnection<String, GatewaySessionData> redisConnection;
-    private RedisCommands<String, GatewaySessionData> redisCommands;
+    private RedisClient redisClientWrite;
+    private final RedisClient redisClientRead;
+    private StatefulRedisConnection<String, GatewaySessionData> redisConnectionWrite;
+    private RedisCommands<String, GatewaySessionData> redisCommandsWrite;
+    private StatefulRedisConnection<String, GatewaySessionData> redisConnectionRead;
+    private RedisCommands<String, GatewaySessionData> redisCommandsRead;
 
     public RedisStorage(RedisServiceConfiguration redisConfiguration) {
         this.redisConfiguration = redisConfiguration;
-
-        RedisURI redisURI = RedisURI.create(redisConfiguration.getUrl());
-        redisClient = RedisClient.create(redisURI);
+        redisClientWrite = RedisClient.create(RedisURI.create(redisConfiguration.getUrlWrite()));
+        redisClientRead = RedisClient.create(RedisURI.create(redisConfiguration.getUrlRead()));
     }
 
     @Override
@@ -38,29 +39,33 @@ public class RedisStorage implements SessionStore {
 
     @Override
     public void createOrUpdateSession(String sessionId, GatewaySessionData sessionData) {
-        redisCommands.setex(sessionId, redisConfiguration.getRecordTTL(), sessionData);
+        redisCommandsWrite.setex(sessionId, redisConfiguration.getRecordTTL(), sessionData);
     }
 
     @Override
     public boolean sessionExists(String sessionId) {
-        return redisCommands.exists(sessionId) > 0;
+        return redisCommandsRead.exists(sessionId) > 0;
     }
 
     @Override
     public GatewaySessionData getSession(String sessionId) {
         if (!sessionExists(sessionId)) throw new SessionMissingException(sessionId);
-        return redisCommands.get(sessionId);
+        return redisCommandsRead.get(sessionId);
     }
 
     @Override
     public void start() {
-        redisConnection = redisClient.connect(new SessionRedisCodec());
-        redisCommands = redisConnection.sync();
+        redisConnectionWrite = redisClientWrite.connect(new SessionRedisCodec());
+        redisCommandsWrite = redisConnectionWrite.sync();
+        redisConnectionRead = redisClientRead.connect(new SessionRedisCodec());
+        redisCommandsRead = redisConnectionRead.sync();
     }
 
     @Override
     public void stop() {
-        redisConnection.close();
-        redisClient.shutdown();
+        redisConnectionWrite.close();
+        redisClientWrite.shutdown();
+        redisConnectionRead.close();
+        redisClientRead.shutdown();
     }
 }

@@ -1,6 +1,8 @@
 package uk.gov.ida.notification;
 
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
+import uk.gov.ida.notification.shared.Urls;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
 import javax.servlet.Filter;
@@ -9,8 +11,11 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class JourneyIdGeneratingServletFilter implements Filter {
 
@@ -28,6 +33,14 @@ public class JourneyIdGeneratingServletFilter implements Filter {
         String journeyId = idGenerationStrategy.generateIdentifier();
         request.getSession().setAttribute(JOURNEY_ID_KEY, journeyId);
         servletRequest.setAttribute(JOURNEY_ID_KEY, journeyId);
+        Cookie cookie = new Cookie("gateway-journey-id", journeyId);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge((int) TimeUnit.MINUTES.toSeconds(90));
+        // cookie.setDomain(request.getServerName());
+        ProxyNodeLogger.info("server name is " + request.getServerName());
+        cookie.setPath(Urls.GatewayUrls.GATEWAY_ROOT);
+        ((HttpServletResponse) servletResponse).addCookie(cookie);
         chain.doFilter(servletRequest, servletResponse);
     }
 

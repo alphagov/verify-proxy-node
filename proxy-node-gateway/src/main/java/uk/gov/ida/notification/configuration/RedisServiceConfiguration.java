@@ -13,7 +13,11 @@ public class RedisServiceConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    private URI url = null;
+    private URI urlWrite = null;
+
+    @JsonProperty
+    @Valid
+    private URI urlRead = null;
 
     @Valid
     @JsonProperty
@@ -24,8 +28,12 @@ public class RedisServiceConfiguration extends Configuration {
     private Boolean local = false;
 
 
-    public URI getUrl() {
-        return url;
+    public URI getUrlWrite() {
+        return urlWrite;
+    }
+
+    public URI getUrlRead() {
+        return urlRead;
     }
 
     public Long getRecordTTL() {

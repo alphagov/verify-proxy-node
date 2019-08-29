@@ -45,6 +45,7 @@ translatorService:
 
 redisService:
   local: ${USE_REDIS_LOCAL:-false}
-  url: ${REDIS_SERVER_URI}
+  urlWrite: ${REDIS_SERVER_URI_WRITE}
+  urlRead: ${REDIS_SERVER_URI_READ}
 
 errorPageRedirectUrl: ${PROXY_NODE_ERROR_PAGE_URI}

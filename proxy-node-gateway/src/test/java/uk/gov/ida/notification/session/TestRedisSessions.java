@@ -37,7 +37,7 @@ public class TestRedisSessions {
 
         URI redisURI = new URI("redis://" + server.getHost() + ":" + server.getBindPort() + "/");
 
-        when(redisServiceConfiguration.getUrl()).thenReturn(redisURI);
+        when(redisServiceConfiguration.getUrlWrite()).thenReturn(redisURI);
         when(redisServiceConfiguration.getRecordTTL()).thenReturn(Long.valueOf(1000));
 
         sessionStore = new RedisStorage(redisServiceConfiguration);
