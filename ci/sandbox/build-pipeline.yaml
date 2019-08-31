@@ -247,6 +247,7 @@ spec:
           trigger: true
 
       - task: run-tests
+        attempts: 2
         config:
           platform: linux
           image_resource: *openjdk_image

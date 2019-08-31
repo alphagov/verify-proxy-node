@@ -8,7 +8,7 @@ metadata:
 spec:
   countryCode: GB
   commonName: Verify Sandbox Dev Metadata CA
-  expiryMonths: 120
+  expiryMonths: 60
   organization: Cabinet Office
   organizationUnit: GDS
   location: London
