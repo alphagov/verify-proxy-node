@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
-import java.util.Optional;
 
 public class MetadataPublishingConfiguration {
 
@@ -18,10 +17,6 @@ public class MetadataPublishingConfiguration {
     @NotNull
     @JsonProperty
     private URI metadataPublishPath;
-
-    @Valid
-    @JsonProperty
-    private URI metadataSigningCertFilePath;
 
     @Valid
     @NotNull
@@ -41,15 +36,11 @@ public class MetadataPublishingConfiguration {
         return metadataPublishPath;
     }
 
-    public URI getMetadataSigningCertFilePath() {
-        return Optional.ofNullable(metadataSigningCertFilePath).orElse(URI.create(""));
-    }
-
-    public URI getMetadataCACertsFilePath() {
+    URI getMetadataCACertsFilePath() {
         return metadataCACertsFilePath;
     }
 
-    public URI getMetadataCertsPublishPath() {
+    URI getMetadataCertsPublishPath() {
         return metadataCertsPublishPath;
     }
 }

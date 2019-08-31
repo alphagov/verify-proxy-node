@@ -49,7 +49,6 @@ public class MetadataPublishingBundle<T extends Configuration> implements Config
             protected void configure() {
                 bind(configuration.getMetadataFilePath()).to(URI.class).named("metadataFilePath");
                 bind(configuration.getMetadataPublishPath()).to(URI.class).named("metadataPublishPath");
-                bind(configuration.getMetadataSigningCertFilePath()).to(URI.class).named("metadataSigningCertFilePath");
                 bind(configuration.getMetadataCACertsFilePath()).to(URI.class).named("metadataCACertsFilePath");
             }
         };

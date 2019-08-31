@@ -37,8 +37,6 @@ spec:
             path: metadata.xml
           - key: metadataCACerts
             path: metadataCACerts
-          - key: metadataSigningCert
-            path: metadataSigningCert
       containers:
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"

@@ -35,11 +35,8 @@ public class MetadataCertsPublishingResourceTest {
     private static final String METADATA_CA_CERTS_FILE_PATH =
             MetadataCertsPublishingResourceTest.class.getClassLoader().getResource("metadata/metadataCACerts").getPath();
 
-    private static final String METADATA_SIGNING_CERT_FILE_PATH =
-            MetadataCertsPublishingResourceTest.class.getClassLoader().getResource("metadata/metadataSigningCert").getPath();
-
     private static final MetadataCertsPublishingResource METADATA_CERTS_PUBLISHING_RESOURCE = new MetadataCertsPublishingResource(
-            URI.create(METADATA_SIGNING_CERT_FILE_PATH), URI.create(METADATA_CA_CERTS_FILE_PATH), URI.create(METADATA_PUBLISH_PATH));
+            URI.create(METADATA_CA_CERTS_FILE_PATH), URI.create(METADATA_PUBLISH_PATH));
 
     @ClassRule
     public static final ResourceTestRule metadataCertsResource = ResourceTestRule.builder()
@@ -66,26 +63,12 @@ public class MetadataCertsPublishingResourceTest {
     }
 
     @Test
-    public void shouldNotContainLeafMetadataSigningCert() throws IOException {
-        final String metadataSigningCertBase64 = readCertsBase64(METADATA_SIGNING_CERT_FILE_PATH).get(0);
-        final X509Certificate metadataSigningCert = generateCertificateFromBase64(metadataSigningCertBase64);
-
-        final String html = metadataCertsResource.target("/").request().get().readEntity(String.class);
-
-        assertThat(html).doesNotContain(metadataSigningCertBase64);
-        assertThat(html).doesNotContain(getSubjectCommonName(metadataSigningCert));
-    }
-
-    @Test
     public void shouldIncludeCorrectCerts() throws IOException {
-        final String metadataSigningCertBase64 = readCertsBase64(METADATA_SIGNING_CERT_FILE_PATH).get(0);
-        final X509Certificate metadataSigningCert = generateCertificateFromBase64(metadataSigningCertBase64);
-
-        final List<String> certsBase64 = readCertsBase64(METADATA_CA_CERTS_FILE_PATH);
-        final List<Entry<String, X509Certificate>> certs = certsBase64.stream()
-                .map(c -> new SimpleEntry<>(c, generateCertificateFromBase64(c)))
-                .filter(c -> !getSubjectCommonName(c.getValue()).equals(getSubjectCommonName(metadataSigningCert)))
-                .collect(Collectors.toList());
+        final List<Entry<String, X509Certificate>> certs =
+                readCertsBase64()
+                        .stream()
+                        .map(c -> new SimpleEntry<>(c, generateCertificateFromBase64(c)))
+                        .collect(Collectors.toList());
 
         final Response response = metadataCertsResource.target("/").request().get();
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
@@ -117,9 +100,10 @@ public class MetadataCertsPublishingResourceTest {
         }
     }
 
-    private List<String> readCertsBase64(String filePath) throws IOException {
-        return Arrays.stream(new String(Files.readAllBytes(Paths.get(filePath)))
-                .split(BEGIN_LINE))
+    private List<String> readCertsBase64() throws IOException {
+        return Arrays.stream(
+                new String(Files.readAllBytes(Paths.get(MetadataCertsPublishingResourceTest.METADATA_CA_CERTS_FILE_PATH)))
+                        .split(BEGIN_LINE))
                 .filter(s -> !s.isEmpty())
                 .map(s -> s.substring(0, s.indexOf(END_LINE)))
                 .collect(Collectors.toList());

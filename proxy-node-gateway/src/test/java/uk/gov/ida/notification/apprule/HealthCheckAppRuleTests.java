@@ -22,15 +22,10 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
@@ -48,9 +43,6 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
     private static final String METADATA_CA_CERTS_FILE_PATH =
             HealthCheckAppRuleTests.class.getClassLoader().getResource("metadata/metadataCACerts").getPath();
 
-    private static final String METADATA_SIGNING_CERT_FILE_PATH =
-            HealthCheckAppRuleTests.class.getClassLoader().getResource("metadata/metadataSigningCert").getPath();
-
     @ClassRule
     public static final DropwizardClientRule translatorClientRule = createInitialisedClientRule(new TestTranslatorResource());
 
@@ -67,7 +59,6 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
             ConfigOverride.config("translatorService.url", translatorClientRule.baseUri() + "/translator/SAML2/SSO/Response"),
             ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", METADATA_FILE_PATH),
             ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
-            ConfigOverride.config("metadataPublishingConfiguration.metadataSigningCertFilePath", METADATA_SIGNING_CERT_FILE_PATH),
             ConfigOverride.config("metadataPublishingConfiguration.metadataCACertsFilePath", METADATA_CA_CERTS_FILE_PATH),
             ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH),
             ConfigOverride.config("redisService.local", "true")
@@ -126,13 +117,12 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void shouldPublishMetadataSigningCertificates() throws URISyntaxException, IOException, CertificateException {
+    public void shouldPublishMetadataSigningCertificates() throws URISyntaxException {
         final Response response = proxyNodeAppRule.target(METADATA_CERTS_PUBLISH_PATH).request().get();
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 
         final String html = response.readEntity(String.class);
         assertThat(html).contains(METADATA_PUBLISH_PATH);
-        assertThat(html).doesNotContain(getMetadataSigningCertSubjectName());
         assertThat(html).contains("Issuer");
         assertThat(html).contains("Validity");
         assertThat(html).contains("Not Before");
@@ -144,18 +134,5 @@ public class HealthCheckAppRuleTests extends GatewayAppRuleTestBase {
         final Response response = proxyNodeAppRule.target("/favicon.ico").request().get();
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEmpty();
-    }
-
-    private String getMetadataSigningCertSubjectName() throws IOException, CertificateException {
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(Paths.get(METADATA_SIGNING_CERT_FILE_PATH)));
-        final X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(inputStream);
-
-        return Arrays
-                .stream(cert.getSubjectDN().getName().split(","))
-                .filter(s -> s.startsWith("CN="))
-                .findFirst()
-                .map(s -> s.replace("CN=", ""))
-                .map(String::trim)
-                .get();
     }
 }
