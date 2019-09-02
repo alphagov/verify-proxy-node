@@ -39,32 +39,23 @@ public class MetadataCertsPublishingResource {
     private static final String COMMON_NAME_PREFIX = "CN=";
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
-    private static MetadataSigningCertsView metadataSigningCertsView;
-
     @Context
     private UriInfo uriInfo;
 
     private URI metadataPublishPath;
     private URI metadataCACertsFilePath;
-    private URI metadataSigningCertFilePath;
 
     @Inject
     public MetadataCertsPublishingResource(
-            @Named("metadataSigningCertFilePath") URI metadataSigningCertFilePath,
             @Named("metadataCACertsFilePath") URI metadataCACertsFilePath,
             @Named("metadataPublishPath") URI metadataPublishPath) {
-        this.metadataSigningCertFilePath = metadataSigningCertFilePath;
         this.metadataCACertsFilePath = metadataCACertsFilePath;
         this.metadataPublishPath = metadataPublishPath;
     }
 
     @GET
     public MetadataSigningCertsView getMetadataSigningCerts() {
-        if (metadataSigningCertsView == null) {
-            metadataSigningCertsView = generateMetadataSigningCertsView();
-        }
-
-        return metadataSigningCertsView;
+        return generateMetadataSigningCertsView();
     }
 
     private MetadataSigningCertsView generateMetadataSigningCertsView() {
@@ -89,12 +80,6 @@ public class MetadataCertsPublishingResource {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
-
-        readFile(metadataSigningCertFilePath).flatMap(this::createCert).ifPresentOrElse(
-                msc -> certificates.removeIf(
-                        c -> c.getSubjectCommonName().equals(msc.getSubjectCommonName()) &&
-                                c.getIssuerCommonName().equals(msc.getIssuerCommonName())),
-                () -> ProxyNodeLogger.warning("Couldn't read metadata signing cert file from " + metadataSigningCertFilePath));
 
         if (certificates.isEmpty()) {
             throw new InvalidMetadataException("No valid metadata signing certs extracted from \n" + concatenatedPemCerts);

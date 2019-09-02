@@ -20,11 +20,12 @@ spec:
     contactGivenName: Jeff
     contactSurname: Jefferson
     contactEmail: jeff@example.local
+    validityDays: 14
   enabled: true
   samlSigningCertRequest:
     countryCode: EU
     commonName: Stub Connector SAML Signing
-    expiryMonths: 2
+    expiryMonths: 3
     organization: EU Member State
     organizationUnit: Test
     location: European Union

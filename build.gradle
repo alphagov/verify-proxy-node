@@ -115,7 +115,7 @@ subprojects {
             resolutionStrategy.dependencySubstitution {
                 substitute module("com.fasterxml.jackson.core:jackson-databind") because "https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-174736" with module("com.fasterxml.jackson.core:jackson-databind:2.9.9.1")
                 substitute module("ca.juliusdavies:not-yet-commons-ssl:0.3.9") because "https://snyk.io/vuln/SNYK-JAVA-CAJULIUSDAVIES-30073" with module("ca.juliusdavies:not-yet-commons-ssl:0.3.11")
-
+                substitute module("org.apache.santuario:xmlsec") because "https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281" with module("org.apache.santuario:xmlsec:2.1.4")
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
