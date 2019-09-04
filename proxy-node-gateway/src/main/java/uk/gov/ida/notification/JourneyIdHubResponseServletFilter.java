@@ -8,8 +8,11 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class JourneyIdHubResponseServletFilter implements Filter {
 
@@ -21,6 +24,16 @@ public class JourneyIdHubResponseServletFilter implements Filter {
         final String journeyId = (String) request.getSession().getAttribute(JOURNEY_ID_KEY);
         servletRequest.setAttribute(JOURNEY_ID_KEY, journeyId);
         chain.doFilter(servletRequest, servletResponse);
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Arrays.stream(cookies)
+                    .filter(c -> JOURNEY_ID_KEY.toLowerCase().equals(c.getName()))
+                    .forEach(c -> {
+                        c.setMaxAge(0);
+                        response.addCookie(c);
+                    });
+        }
     }
 
     @Override
