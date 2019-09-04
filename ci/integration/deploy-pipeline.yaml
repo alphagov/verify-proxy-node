@@ -237,6 +237,282 @@ spec:
                 --diff-changes \
                 -f ./manifests/
 
+    - name: deploy-se-integration
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: daily
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: se-integration
+            CONNECTOR_NODE_NATIONALITY_CODE: SE
+            CONNECTOR_ENTITY_ID: https://qa.connector.eidas.swedenconnect.se/idp/metadata/sp
+            CONNECTOR_METADATA_FQDN: qa.connector.eidas.swedenconnect.se
+            CONNECTOR_METADATA_PATH: /idp/metadata/sp
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
+      - task: deploy-manifests
+        timeout: 10m
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: se-integration
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${RELEASE_NAME}-${APP_NAME}" \
+                --diff-changes \
+                -f ./manifests/
+
+    - name: deploy-cz-integration
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: daily
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: cz-integration
+            CONNECTOR_NODE_NATIONALITY_CODE: CZ
+            CONNECTOR_ENTITY_ID: https://conn.dev.eidasnode.cz/EidasNode/ConnectorMetadata
+            CONNECTOR_METADATA_FQDN: conn.dev.eidasnode.cz
+            CONNECTOR_METADATA_PATH: /EidasNode/ConnectorMetadata
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: MIIDvgIBAzCCA3cGCSqGSIb3DQEHAaCCA2gEggNkMIIDYDCCA1wGCSqGSIb3DQEHBqCCA00wggNJAgEAMIIDQgYJKoZIhvcNAQcBMCkGCiqGSIb3DQEMAQYwGwQUtEBxkJF5nQodITN8RMG0SZZySZMCAwDDUICCAwgxpPO5+psYMsSUd2od5jkna9gy/gwbUh7oeJbGUJSPRYdVtpY/+2b+nAX75dLf07AXkXweSWfWV1nhCBg3PvHEFi+BtrULM+xeQ91Oe5w768LMgsQxq/oTkZ25iP6PldCC6ElJckcH+cxsuziUjrt3WMkdx9PrFqZHBRRH5OYQi25Q/A6yiXg823tsyCQEOLJk5omZvtRPjfKRLaGmBhd37nrMy/texLJfR7xpj2BVuv/0Jl4PwijPBvXbT7DE28x3WSI5JL3MeouZT4oklKzRPx2U4SyhIG1B7leYIoaC/Cp3G3i5XiqwdnaXFr0SwKbhZCBk32S2I6gTQpCWaypv8+LilwtTWDiG83OYYOkDArP4+23RkUgu40Dz8K4cyGibH9CS2i619GGPOXc+/za5s2AE0hYvZGWZUdxKJcCxmbaDFpDP+KJvtnGKtCKv0tigwUtHzI0Ydh8in6Qp/osnO3aMjRTxdfRD4ynQA2C8+gxcjTzZSrzQpsSBFE/+BXL6G1AUqNPCpAWMb4n0U9P9LXz1FD2zhz6PgtUjglIXPvK+IeuAoiwYYSlRBtItazsMsWBjBqqMGKt3f4YCasxFg/2hTrkNhb13QhYlkusAFSMfR5SG5BTYZ53uAZOBnZD4ToKf3yCLqsm05PV9NexyPbUhAGuX/AJ7cILM0Exlaa+TozjV6wQAKzDMfnRcFicYsLQg9ebRa67Azdg4QYBd2CCDwMKu3bmFGFmP38BOr7LOBhkp5QK/P4U5ZY5b9bTu4QKGr7M7ZidChUlqq4Zf8fik6TD5fj1gn8o2ULHmsxiwCkPq/ukQJqjEoKIRxYIgZmE9NwqVWz0ALNULmOLceVjd2iadjgPST05AMcsEUKbz0Z4wmJu7o9ligPXKaybKcnJW93mAzJQbKg9ZxZiqwZgkTx+BWWnpf8FDKPyMxlljlw8e/dMvgkPSXkr01wm0pQqQ5oxPHTYSJsyVPK1T2XjBMyp+mAi1ZhAracB27PfGN88Tsdg2Md1LnB7zcyRXRIiayOZFnDA+MCEwCQYFKw4DAhoFAAQUG0IyxZ29L0sOyOu0K9E3T5yBXAAEFPpJ9er/sYynQAmGFCOUOrjKOKfhAgMBhqA=
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
+      - task: deploy-manifests
+        timeout: 10m
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: cz-integration
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${RELEASE_NAME}-${APP_NAME}" \
+                --diff-changes \
+                -f ./manifests/
+
+    - name: deploy-it-integration
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: daily
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: it-integration
+            CONNECTOR_NODE_NATIONALITY_CODE: IT
+            CONNECTOR_ENTITY_ID: https://connector.pre.eid.gov.it/EidasNode/ConnectorMetadata
+            CONNECTOR_METADATA_FQDN: connector.pre.eid.gov.it
+            CONNECTOR_METADATA_PATH: /EidasNode/ConnectorMetadata
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: MIIFlgIBAzCCBU8GCSqGSIb3DQEHAaCCBUAEggU8MIIFODCCBTQGCSqGSIb3DQEHBqCCBSUwggUhAgEAMIIFGgYJKoZIhvcNAQcBMCkGCiqGSIb3DQEMAQYwGwQUsgaqXrNnmO1JA8dZ9+fTipn3yngCAwDDUICCBOBwArUVyBPKEH232lZD4z3a08MvPF70G1rfg2dT7/33afUybZ1bDxHknNa5NETVaEd/LZLOEPDcJEsrz3z4lXe++WV356W4/EuMHPZziWLQkI3XKZHVPpDqIO9feAdKUW0wdQewF2FlTo0o3Xc63qcz9fLZM4DiuHDplSUBLztBRhiJnPzZStUwh62FTrJr1apxLMrcC3XHS4BIL20i51jcv6LYDS1VyWu1TeNkmf9BFM27tEynqXABwXXoNxuMuGggp9nSITc6H6J0fJa13Zp1gnyUgk57/F+/r5Afim/QG8yPleJZxlwQ2np3pfC1cXNk2THPmynF6V0JLa9NWqUzE/1Ocy5bgrNrGTvvTya0mNqnOtEJZdVPRk9YIp/F/iZYjSA9EKKSoK/d1jDPagU7Y9iNqsc2duAhQPMbHA2HcLfnUcNyxGCtQWt+Htu1EAK+fKWDAMsMRQpOKFo34/t+rlH1onwNX16oqIsLUWJrRo36isg3xXAQSYL0QazsBJpTxcUSwIVplIdv7aSbSlPw8iKcpn2ksQe6e4jZvN2rZ45LfDOdinojlPiTcy804hW6KMkQ2VNadfWFoKyj9GZ/kbMvHqrgH8IwVLInhPtnXsP+6ALDJglshyKBgB/Z0T6iZqkPUIobxx4p35nGb4FcNxFLhRCQqBcK2OMXxoJGc3TJBnypNjgn9QOltXIUtOHgESlfBdYDWyKlPOYMY+3XBHAxlfAp2AeZosMQNsXhx1SWlxws+MsPdIUbUh+44rM/2TFvH6W1SP9kXGPW2bOih1M3eQ896v36Nx8FQbatv6567VTh4gxEt9XfuDprHvrax37wcYFcKEFJpnwE6kj4wIQyEXTwbKBe0X1SZU2hGbJqpgY3v7PHkwRJKBHVKbI6qQoVaivZMKS8R9+VglM5yrgMnNE9jkqqC9FYrrUC7A4Aq6RIKDpBx7etHjqqFhCf8TsQEYLhnLoUjK1jgIMzYWD7Vif64mWNl2udKBMoi1FX3SP8vfw08idwojn9MgZTGu4wJnk8ySIDGFL2536HedA7QwhNCukjWLqjbfpXWrR15K9uwj+ea/trgwKhUWzyD2qzj7q57k+9rujTdF7+Ywfq7FNmx+xNAP6CbsLPN/fYtdXH9buZMYzNOBfUFuI3RyGd9sE33rsb/dd/XWIArLicmCglVQJbRZs1WKhcJyAc90pJzcJy5U5L3vsO1/gkU0e0aVyKfclkdJJhnaUkKbSBVy6rhVe7KsUXC74NBCxwK0smBKtHSFqXU+Dx5SMgLYyOi0PWWpdbQ6V3Dih08nxOR5Lyg4gcPC1S4hzPdojC5PRU6IqdsE/0smUNW/DuHSXK0G/VuiRAehAE9tgsKpFOL8+INcE58r8SI6vBmwzVVh7MXP43UeL7v5WUhekndiX0Butvk3AvrJ009tm4KxQNn5XMy/rDLuMVUadlPKDW5pZQwBDAsIm620mmztaaCqnLWKq3JHsCGLvPQ8ziZmCRwTlz3DiqeoaNzWbnwlKr9y8HedARD2sNTHhrLQZLseZ+6SerUJYGUVPkre1rT3k7n01VHNRWEelOwL/c2cYe3zWAWCB69r1nqAQoCfDwSbnKpSnZY5KrLjbyizouEZU3fOaPuoiF4wRljVg9ZP8jW4faFcXlFmlsbovIZTowPjAhMAkGBSsOAwIaBQAEFIhm7rIYwXMOFhByZOZ9HFjwwdFXBBTgluTQjkKxcHxT1HEchPsMprSReQIDAYag
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
+      - task: deploy-manifests
+        timeout: 10m
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: it-integration
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${RELEASE_NAME}-${APP_NAME}" \
+                --diff-changes \
+                -f ./manifests/
+
     - name: deploy-test-integration
       serial: true
       plan:
