@@ -63,7 +63,7 @@ public class HubResponseTranslatorRequestValidationTests extends AbstractDtoVali
     @Test
     public void shouldFailValidationWithInvalidParameters() {
         HubResponseTranslatorRequest badRequest = new HubResponseTranslatorRequest(
-                "not base 64 SAML",
+                "",
                 "1_should_fail_because_of_the_first_numeric_character",
                 "_2_is_too_short",
                 "LEVEL_7",

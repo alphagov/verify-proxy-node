@@ -44,8 +44,8 @@ public class EidasSamlParserRequestValidationTests extends AbstractDtoValidation
     }
 
     @Test
-    public void shouldFailValidationWithInvalidRequest() {
-        EidasSamlParserRequest badRequest = new EidasSamlParserRequest("not base 64 SAML");
+    public void shouldFailValidationWithBlankRequest() {
+        EidasSamlParserRequest badRequest = new EidasSamlParserRequest("");
 
         Map<String,List<ConstraintViolation<EidasSamlParserRequest>>> badViolationsMap = validateAndMap(badRequest);
 

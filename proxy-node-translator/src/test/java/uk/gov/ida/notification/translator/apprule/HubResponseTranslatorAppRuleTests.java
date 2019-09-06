@@ -210,7 +210,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     }
 
     private javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
-        String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
+        String encodedResponse = Base64.encodeAsString("");
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
             new HubResponseTranslatorRequest(
