@@ -43,8 +43,7 @@ public class HubResponseTranslator {
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
         this.connectorNodeIssuerId = connectorNodeIssuerId;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
-        this.pidPrefix = String.format("UK/%s/", nationalityCode);
-
+        this.pidPrefix = String.format("GB/%s/", nationalityCode);
     }
 
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer) {
