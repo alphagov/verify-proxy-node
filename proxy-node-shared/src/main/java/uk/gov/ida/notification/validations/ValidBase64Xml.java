@@ -11,7 +11,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Documented
-@Constraint(validatedBy = { Base64XmlValidator.class })
+@Constraint(validatedBy = { Base64NotBlankValidator.class })
 @Target({ FIELD, PARAMETER })
 @Retention(RUNTIME)
 public @interface ValidBase64Xml {
