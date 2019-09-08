@@ -22,14 +22,17 @@ import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
+
+import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
 @IngressEgressLogging
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
@@ -57,8 +60,8 @@ public class EidasAuthnRequestResource {
     public View handleRedirectBinding(
             @QueryParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
-            @Session HttpSession session) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session);
+            @Session HttpSession session, @Context ContainerRequestContext containerRequestContext) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session, containerRequestContext);
     }
 
     @POST
@@ -67,19 +70,19 @@ public class EidasAuthnRequestResource {
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
-            @Session HttpSession session, @CookieParam("gateway-journey-id") String journeyId) {
-        ProxyNodeLogger.info("gateway-journey-id cookie value " + journeyId);
-        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session);
+            @Session HttpSession session, @Context ContainerRequestContext containerRequestContext) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session, containerRequestContext);
     }
 
-    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        final String sessionId = session.getId();
-        ProxyNodeLogger.info("request session id " + sessionId);
-        final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
-        final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
+    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session, ContainerRequestContext containerRequestContext) {
+
+        String journeyId = (String) containerRequestContext.getProperty(JOURNEY_ID_KEY);
+        ProxyNodeLogger.info("gateway-journey-id cookie value " + journeyId);
+        final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, journeyId);
+        final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(journeyId);
 
         sessionStorage.createOrUpdateSession(
-            sessionId,
+                journeyId,
             new GatewaySessionData(
                 eidasSamlParserResponse,
                 vspResponse,
@@ -100,7 +103,7 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
 
-        return buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
+        return buildSamlFormView(vspResponse, journeyId);
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {

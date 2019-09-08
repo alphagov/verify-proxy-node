@@ -15,11 +15,14 @@ import uk.gov.ida.notification.validations.ValidBase64Xml;
 
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+
+import static uk.gov.ida.notification.JourneyIdGeneratingServletFilter.COOKIE_GATEWAY_JOURNEY_ID;
 
 @IngressEgressLogging
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
@@ -45,13 +48,15 @@ public class HubResponseResource {
     @Path(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public View hubResponse(
-        @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
-        @FormParam("RelayState") String relayState,
-        @Session HttpSession session) {
+            @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
+            @FormParam("RelayState") String relayState,
+            @Session HttpSession session,
+            @CookieParam(COOKIE_GATEWAY_JOURNEY_ID) String journeyId) {
 
         String sessionId = session.getId();
         ProxyNodeLogger.info("request session id " + sessionId);
-        GatewaySessionData sessionData = sessionStorage.getSession(sessionId);
+        ProxyNodeLogger.info("request cookie " + journeyId);
+        GatewaySessionData sessionData = sessionStorage.getSession(journeyId);
 
         ProxyNodeLogger.info("Retrieved GatewaySessionData");
 

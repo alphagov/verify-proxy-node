@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class JourneyIdGeneratingServletFilter implements Filter {
 
     private static final String JOURNEY_ID_KEY = ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name();
+    public static final String COOKIE_GATEWAY_JOURNEY_ID = "journey-id";
 
     private final SecureRandomIdentifierGenerationStrategy idGenerationStrategy;
 
@@ -33,11 +34,11 @@ public class JourneyIdGeneratingServletFilter implements Filter {
         String journeyId = idGenerationStrategy.generateIdentifier();
         request.getSession().setAttribute(JOURNEY_ID_KEY, journeyId);
         servletRequest.setAttribute(JOURNEY_ID_KEY, journeyId);
-        Cookie cookie = new Cookie("gateway-journey-id", journeyId);
+        Cookie cookie = new Cookie(COOKIE_GATEWAY_JOURNEY_ID, journeyId);
         cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setMaxAge((int) TimeUnit.MINUTES.toSeconds(90));
-        // cookie.setDomain(request.getServerName());
+        cookie.setDomain(request.getServerName());
         ProxyNodeLogger.info("server name is " + request.getServerName());
         cookie.setPath(Urls.GatewayUrls.GATEWAY_ROOT);
         ((HttpServletResponse) servletResponse).addCookie(cookie);

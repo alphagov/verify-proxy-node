@@ -72,7 +72,7 @@ public class HubResponseResourceTest {
                 sessionStore
         );
 
-        SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session);
+        SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session, "");
 
         verify(translatorProxy).getTranslatedHubResponse(requestCaptor.capture(), eq("session-id"));
         HubResponseTranslatorRequest request = requestCaptor.getValue();
@@ -102,6 +102,6 @@ public class HubResponseResourceTest {
                 sessionStore
         );
 
-        resource.hubResponse("hub_saml_response", "relay_state", session);
+        resource.hubResponse("hub_saml_response", "relay_state", session, "");
     }
 }

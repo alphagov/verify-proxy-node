@@ -26,12 +26,13 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.container.ContainerRequestContext;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -69,6 +70,9 @@ public class EidasAuthnRequestResourceTest {
     @Mock
     private static Appender<ILoggingEvent> appender;
 
+    @Mock
+    private ContainerRequestContext crc;
+
     @Captor
     private static ArgumentCaptor<ILoggingEvent> captorILoggingEvent;
 
@@ -91,14 +95,14 @@ public class EidasAuthnRequestResourceTest {
     @Test
     public void testHappyPathRedirect() throws URISyntaxException {
         setupHappyPath();
-        resource.handleRedirectBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session);
+        resource.handleRedirectBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session, crc);
         verifyHappyPath();
     }
 
     @Test
     public void testHappyPath() throws URISyntaxException {
         setupHappyPath();
-        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session, "");
+        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session, crc);
         verifyHappyPath();
     }
 
