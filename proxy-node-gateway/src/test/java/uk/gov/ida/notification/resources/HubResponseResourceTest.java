@@ -16,7 +16,6 @@ import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.views.SamlFormView;
 
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,9 +30,6 @@ public class HubResponseResourceTest {
 
     @Mock
     private static TranslatorProxy translatorProxy;
-
-    @Mock
-    private static HttpSession session;
 
     @Mock
     private static SessionStore sessionStore;
@@ -63,7 +59,6 @@ public class HubResponseResourceTest {
         );
 
         when(sessionStore.getSession(eq("session-id"))).thenReturn(sessionData);
-        when(session.getId()).thenReturn("session-id");
         when(translatorProxy.getTranslatedHubResponse(any(HubResponseTranslatorRequest.class), eq("session-id"))).thenReturn("translated_eidas_response");
 
         HubResponseResource resource = new HubResponseResource(
@@ -72,7 +67,7 @@ public class HubResponseResourceTest {
                 sessionStore
         );
 
-        SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", session, "");
+        SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", "");
 
         verify(translatorProxy).getTranslatedHubResponse(requestCaptor.capture(), eq("session-id"));
         HubResponseTranslatorRequest request = requestCaptor.getValue();
@@ -94,7 +89,7 @@ public class HubResponseResourceTest {
 
     @Test(expected = SessionMissingException.class)
     public void shouldThrowSamlAttributeErrorIfMissingSessionIsNull() {
-        when(sessionStore.getSession(eq(session.getId()))).thenThrow(SessionMissingException.class);
+        when(sessionStore.getSession(eq(""))).thenThrow(SessionMissingException.class);
 
         HubResponseResource resource = new HubResponseResource(
             new SamlFormViewBuilder(),
@@ -102,6 +97,6 @@ public class HubResponseResourceTest {
                 sessionStore
         );
 
-        resource.hubResponse("hub_saml_response", "relay_state", session, "");
+        resource.hubResponse("hub_saml_response", "relay_state", "");
     }
 }

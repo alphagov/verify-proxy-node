@@ -1,26 +1,34 @@
 package uk.gov.ida.notification;
 
-import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+
+import static uk.gov.ida.notification.JourneyIdGeneratingServletFilter.COOKIE_GATEWAY_JOURNEY_ID;
 
 public class JourneyIdHubResponseServletFilter implements Filter {
-
-    private static final String JOURNEY_ID_KEY = ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name();
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        final String journeyId = (String) request.getSession().getAttribute(JOURNEY_ID_KEY);
-        servletRequest.setAttribute(JOURNEY_ID_KEY, journeyId);
         chain.doFilter(servletRequest, servletResponse);
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Arrays.stream(cookies)
+                    .filter(c -> COOKIE_GATEWAY_JOURNEY_ID.equals(c.getName()))
+                    .forEach(c -> {
+                        c.setMaxAge(0);
+                        ((HttpServletResponse) servletResponse).addCookie(c);
+                    });
+        }
     }
 
     @Override

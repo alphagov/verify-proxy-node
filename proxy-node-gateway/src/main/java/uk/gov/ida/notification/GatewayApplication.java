@@ -7,7 +7,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
-import org.eclipse.jetty.server.session.SessionHandler;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
@@ -100,11 +99,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void registerProviders(Environment environment) {
-        SessionHandler sessionHandler = new SessionHandler();
-        sessionHandler.setSessionCookie("gateway-session");
-        environment.servlets().setSessionHandler(sessionHandler);
         setRequestServletFilter(environment);
-        setResponseServletFilter(environment);
         environment.jersey().register(IstioHeaderMapperFilter.class);
         environment.jersey().register(ProxyNodeLoggingFilter.class);
     }
@@ -118,16 +113,6 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                         true,
                         Urls.GatewayUrls.GATEWAY_ROOT + Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH,
                         Urls.GatewayUrls.GATEWAY_ROOT + Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH);
-    }
-
-    private void setResponseServletFilter(Environment environment) {
-        JourneyIdHubResponseServletFilter responseFilter = new JourneyIdHubResponseServletFilter();
-        environment.servlets()
-                .addFilter(responseFilter.getClass().getSimpleName(), responseFilter)
-                .addMappingForUrlPatterns(
-                        EnumSet.of(DispatcherType.REQUEST),
-                        true,
-                        Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE);
     }
 
     private void registerExceptionMappers(

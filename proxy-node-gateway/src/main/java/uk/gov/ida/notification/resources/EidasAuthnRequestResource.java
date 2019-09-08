@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.resources;
 
-import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
@@ -20,7 +19,6 @@ import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.notification.views.SamlFormView;
 
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -60,8 +58,8 @@ public class EidasAuthnRequestResource {
     public View handleRedirectBinding(
             @QueryParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
-            @Session HttpSession session, @Context ContainerRequestContext containerRequestContext) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, session, containerRequestContext);
+            @Context ContainerRequestContext containerRequestContext) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, relayState, containerRequestContext);
     }
 
     @POST
@@ -70,11 +68,11 @@ public class EidasAuthnRequestResource {
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
-            @Session HttpSession session, @Context ContainerRequestContext containerRequestContext) {
-        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, session, containerRequestContext);
+            @Context ContainerRequestContext containerRequestContext) {
+        return handleAuthnRequest(encodedEidasAuthnRequest, eidasRelayState, containerRequestContext);
     }
 
-    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session, ContainerRequestContext containerRequestContext) {
+    private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, ContainerRequestContext containerRequestContext) {
 
         String journeyId = (String) containerRequestContext.getProperty(JOURNEY_ID_KEY);
         ProxyNodeLogger.info("gateway-journey-id cookie value " + journeyId);
@@ -106,12 +104,12 @@ public class EidasAuthnRequestResource {
         return buildSamlFormView(vspResponse, journeyId);
     }
 
-    private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {
-        return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest), sessionId);
+    private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String journeyId) {
+        return eidasSamlParserService.parse(new EidasSamlParserRequest(encodedEidasAuthnRequest), journeyId);
     }
 
-    private AuthnRequestResponse generateHubRequestWithVsp(String sessionId) {
-        return vspProxy.generateAuthnRequest(sessionId);
+    private AuthnRequestResponse generateHubRequestWithVsp(String journeyId) {
+        return vspProxy.generateAuthnRequest(journeyId);
     }
 
     private SamlFormView buildSamlFormView(AuthnRequestResponse vspResponse, String relayState) {

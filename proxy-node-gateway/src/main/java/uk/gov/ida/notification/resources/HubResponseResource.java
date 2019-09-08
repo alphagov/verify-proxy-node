@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.resources;
 
-import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
@@ -8,12 +7,11 @@ import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
@@ -50,11 +48,8 @@ public class HubResponseResource {
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
             @FormParam("RelayState") String relayState,
-            @Session HttpSession session,
             @CookieParam(COOKIE_GATEWAY_JOURNEY_ID) String journeyId) {
 
-        String sessionId = session.getId();
-        ProxyNodeLogger.info("request session id " + sessionId);
         ProxyNodeLogger.info("request cookie " + journeyId);
         GatewaySessionData sessionData = sessionStorage.getSession(journeyId);
 
@@ -69,7 +64,7 @@ public class HubResponseResource {
             sessionData.getEidasConnectorPublicKey()
         );
 
-        String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, sessionId);
+        String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, journeyId);
         ProxyNodeLogger.info("Received eIDAS response from Translator");
 
         return samlFormViewBuilder.buildResponse(

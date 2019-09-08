@@ -25,7 +25,6 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.container.ContainerRequestContext;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -62,8 +61,6 @@ public class EidasAuthnRequestResourceTest {
     @Mock
     private static SamlFormViewBuilder samlFormViewBuilder;
     @Mock
-    private static HttpSession session;
-    @Mock
     private static EidasSamlParserResponse eidasSamlParserResponse;
     @Mock
     private static AuthnRequestResponse vspResponse;
@@ -95,14 +92,14 @@ public class EidasAuthnRequestResourceTest {
     @Test
     public void testHappyPathRedirect() throws URISyntaxException {
         setupHappyPath();
-        resource.handleRedirectBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session, crc);
+        resource.handleRedirectBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", crc);
         verifyHappyPath();
     }
 
     @Test
     public void testHappyPath() throws URISyntaxException {
         setupHappyPath();
-        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", session, crc);
+        resource.handlePostBinding(SAMPLE_EIDAS_AUTHN_REQUEST, "eidas relay state", crc);
         verifyHappyPath();
     }
 
@@ -118,15 +115,12 @@ public class EidasAuthnRequestResourceTest {
         when(vspResponse.getRequestId()).thenReturn(SAMPLE_REQUEST_ID);
         when(vspResponse.getSsoLocation()).thenReturn(new URI("http://hub.bub"));
         when(vspResponse.getSamlRequest()).thenReturn(SAMPLE_HUB_SAML_AUTHN_REQUEST);
-        when(session.getId()).thenReturn("some session id");
-        when(session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())).thenReturn("journey id");
     }
 
     private void verifyHappyPath() {
         final String sessionId = "some session id";
 
         verify(sessionStore).createOrUpdateSession(eq(sessionId), any(GatewaySessionData.class));
-        verify(session).getId();
 
         verify(appender, times(2)).doAppend(captorILoggingEvent.capture());
         final ILoggingEvent logEvent = captorILoggingEvent.getValue();
@@ -144,8 +138,7 @@ public class EidasAuthnRequestResourceTest {
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
         verify(samlFormViewBuilder).buildRequest("http://hub.bub", SAMPLE_HUB_SAML_AUTHN_REQUEST, SUBMIT_BUTTON_TEXT, "journey id");
-        verify(session).getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name());
-        verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder, session);
+        verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder);
         verifyNoMoreInteractions(sessionStore);
 
         assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo(SAMPLE_EIDAS_AUTHN_REQUEST);
