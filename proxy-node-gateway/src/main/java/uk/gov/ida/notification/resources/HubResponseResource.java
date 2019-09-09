@@ -13,14 +13,15 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
-import static uk.gov.ida.notification.JourneyIdGeneratingServletFilter.COOKIE_GATEWAY_JOURNEY_ID;
+import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
 @IngressEgressLogging
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
@@ -48,8 +49,9 @@ public class HubResponseResource {
     public View hubResponse(
             @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
             @FormParam("RelayState") String relayState,
-            @CookieParam(COOKIE_GATEWAY_JOURNEY_ID) String journeyId) {
+            @Context ContainerRequestContext containerRequestContext) {
 
+        String journeyId = (String) containerRequestContext.getProperty(JOURNEY_ID_KEY);
         ProxyNodeLogger.info("request cookie " + journeyId);
         GatewaySessionData sessionData = sessionStorage.getSession(journeyId);
 

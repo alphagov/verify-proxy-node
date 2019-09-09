@@ -16,6 +16,7 @@ import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.views.SamlFormView;
 
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +34,9 @@ public class HubResponseResourceTest {
 
     @Mock
     private static SessionStore sessionStore;
+
+    @Mock
+    private static ContainerRequestContext containerRequestContext;
 
     @Captor
     private static ArgumentCaptor<HubResponseTranslatorRequest> requestCaptor;
@@ -67,7 +71,7 @@ public class HubResponseResourceTest {
                 sessionStore
         );
 
-        SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", "");
+        SamlFormView response = (SamlFormView) resource.hubResponse("hub_saml_response", "relay_state", containerRequestContext);
 
         verify(translatorProxy).getTranslatedHubResponse(requestCaptor.capture(), eq("session-id"));
         HubResponseTranslatorRequest request = requestCaptor.getValue();
@@ -97,6 +101,6 @@ public class HubResponseResourceTest {
                 sessionStore
         );
 
-        resource.hubResponse("hub_saml_response", "relay_state", "");
+        resource.hubResponse("hub_saml_response", "relay_state", containerRequestContext);
     }
 }
