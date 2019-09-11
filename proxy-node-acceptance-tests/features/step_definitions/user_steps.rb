@@ -27,6 +27,9 @@ Given(/^the stub connector supplies an authn request with (.*)$/) do |issue|
     "a missing signature": "/MissingSignature",
     "an invalid signature": "/InvalidSignature"
   }
+  puts "time..........."
+  puts Time.now
+  puts "..........."
   visit(ENV.fetch('STUB_CONNECTOR_URL') + scenario_path_map[issue.to_sym])
 end
 

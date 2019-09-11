@@ -123,6 +123,21 @@ public class SendAuthnRequestResource {
         return Response.ok().build();
     }
 
+    @GET
+    @Path("/test1")
+    public String test1(
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
+                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
+        );
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
+
+        return "ok";
+    }
+
     private MessageContext generateAuthnRequestContext(
         HttpSession session,
         EidasLoaEnum loaType,
