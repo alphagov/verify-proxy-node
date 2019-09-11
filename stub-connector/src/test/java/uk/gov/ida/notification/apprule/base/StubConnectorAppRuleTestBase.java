@@ -34,8 +34,20 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
     private Map<String, NewCookie> cookies;
 
-    protected String getEidasRequest(StubConnectorAppRule stubConnectorAppRule) throws URISyntaxException {
+    protected String getValidSubstantialEidasRequest(StubConnectorAppRule stubConnectorAppRule) throws URISyntaxException {
         final Response response = stubConnectorAppRule.target("/RequestSubstantial").request().get();
+        final String message = response.readEntity(String.class);
+        cookies = response.getCookies();
+
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            throw new RuntimeException("Received response with status " + response.getStatus() + " from Connector. Message:\n" + message);
+        }
+
+        return message;
+    }
+
+    protected String getInvalidSignatureEidasRequest(StubConnectorAppRule stubConnectorAppRule) throws URISyntaxException {
+        final Response response = stubConnectorAppRule.target("/InvalidSignature").request().get();
         final String message = response.readEntity(String.class);
         cookies = response.getCookies();
 

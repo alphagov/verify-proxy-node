@@ -110,7 +110,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     }
 
     private AuthnRequest getEidasAuthnRequest() throws IOException, URISyntaxException {
-        String html = getEidasRequest(stubConnectorAppRule);
+        String html = getValidSubstantialEidasRequest(stubConnectorAppRule);
         String decodedSaml = HtmlHelpers.getValueFromForm(html, "SAMLRequest");
         return new SamlParser().parseSamlString(decodedSaml);
     }

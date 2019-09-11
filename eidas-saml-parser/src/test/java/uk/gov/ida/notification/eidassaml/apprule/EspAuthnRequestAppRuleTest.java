@@ -106,11 +106,8 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     }
 
     @Test
-    public void shouldReturnHTTP400WhenAuthnRequestIsMalformedBase64() throws Exception {
-        AuthnRequest request = this.request.withRandomRequestId().build();
-        SAML_OBJECT_SIGNER.sign(request, null);
-
-        Response response = postMalformedEidasAuthnRequest(eidasSamlParserAppRule, request);
+    public void shouldReturnHTTP400WhenAuthnRequestIsBlankBase64() throws Exception {
+        Response response = postBlankEidasAuthnRequest(eidasSamlParserAppRule);
         assertErrorResponse(response);
     }
 

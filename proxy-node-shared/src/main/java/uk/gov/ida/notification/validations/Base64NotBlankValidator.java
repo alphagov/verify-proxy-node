@@ -6,7 +6,7 @@ import org.glassfish.jersey.internal.util.Base64;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class Base64XmlValidator implements ConstraintValidator<ValidBase64Xml, String> {
+public class Base64NotBlankValidator implements ConstraintValidator<ValidBase64Xml, String> {
 
     @Override
     public void initialize(ValidBase64Xml constraint) { /* intentionally blank */ }
@@ -19,8 +19,7 @@ public class Base64XmlValidator implements ConstraintValidator<ValidBase64Xml, S
 
         try {
             String decoded = Base64.decodeAsString(potentialBase64);
-            if (StringUtils.isBlank(decoded)) { return false; }
-            return decoded.trim().startsWith("<?xml version=");
+            return StringUtils.isNotBlank(decoded);
 
         } catch (RuntimeException e) {
             context.buildConstraintViolationWithTemplate("Exception: " + e.getMessage()).addConstraintViolation();

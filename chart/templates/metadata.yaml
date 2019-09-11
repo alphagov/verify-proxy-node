@@ -27,7 +27,7 @@ spec:
   samlSigningCertRequest:
     countryCode: GB
     commonName: Verify Proxy Node SAML Signing
-    expiryMonths: 3
+    expiryMonths: 12
     organization: Cabinet Office
     organizationUnit: GDS
     location: London
