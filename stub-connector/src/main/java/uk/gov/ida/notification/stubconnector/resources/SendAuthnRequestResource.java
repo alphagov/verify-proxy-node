@@ -5,6 +5,7 @@ import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
@@ -34,6 +35,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 
@@ -150,6 +153,16 @@ public class SendAuthnRequestResource {
         );
 
         return "test2";
+    }
+
+    @GET
+    @Path("/listSecurityProviders")
+    public String listSecurityProviders(
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse) {
+
+        String providers = StringUtils.join(Arrays.stream(Security.getProviders()).map(p -> p.getName() + ": " + p.getInfo()), "<br/>");
+        return "<html><body><pre>" + providers + "</pre></body></html>";
     }
 
     private MessageContext generateAuthnRequestContext(
