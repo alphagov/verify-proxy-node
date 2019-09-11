@@ -161,8 +161,11 @@ public class SendAuthnRequestResource {
             @Session HttpSession session,
             @Context HttpServletResponse httpServletResponse) {
 
-        String providers = StringUtils.join(Arrays.stream(Security.getProviders()).map(p -> p.getName() + ": " + p.getInfo()), "<br/>");
-        return "<html><body><pre>" + providers + "</pre></body></html>";
+        StringBuilder providers = new StringBuilder();
+        for (Provider provider : Security.getProviders()) {
+            providers.append("<p>" + provider.getName() + ": " + provider.getInfo() + "</p>");
+        }
+        return "<html><body><pre>" + providers.toString() + "</pre></body></html>";
     }
 
     private MessageContext generateAuthnRequestContext(
