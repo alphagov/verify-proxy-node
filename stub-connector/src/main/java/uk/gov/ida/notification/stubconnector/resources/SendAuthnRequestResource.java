@@ -121,173 +121,18 @@ public class SendAuthnRequestResource {
         @Session HttpSession session,
         @Context HttpServletResponse httpServletResponse
     ) throws Throwable {
+        JCEMapper.setProviderId("BC");
+
         KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
                 new X509CertificateConfiguration(TEST_PUBLIC_CERT),
                 new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
         );
         MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
         encode(httpServletResponse, context);
-        return Response.ok().build();
-    }
-
-    @GET
-    @Path("/safeInvalidSignature")
-    public Response safeInvalidSignature(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        JCEMapper.setProviderId("BC");
-
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-            new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-            new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
-        );
-        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
-        encode(httpServletResponse, context);
-
         Response response = Response.ok().build();
 
         JCEMapper.setProviderId("Cavium");
         return response;
-    }
-
-
-
-    @GET
-    @Path("/nearlyInvalidSignature")
-    public String nearlyInvalidSignature(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-            new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-            new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
-        );
-
-        List<String> items = new LinkedList<>();
-        items.add("Class: " + invalidCredentialConfiguration.getClass().getCanonicalName());
-        items.add("Algo: " + invalidCredentialConfiguration.getAlgorithm());
-
-        return "<html><body><pre>" + StringUtils.join(items, "<br/>") + "</pre></body></html>";
-    }
-
-    @GET
-    @Path("/promoteBouncyCastle")
-    public String promoteBouncyCastle(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        try {
-            Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
-            Security.insertProviderAt(new BouncyCastleProvider(), 1);
-            return listSecurityProvidersAsHtml();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @GET
-    @Path("/promoteCavium")
-    public String promoteCavium(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        try {
-            Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
-                .loadClass("com.cavium.provider.CaviumProvider")
-                .getConstructor()
-                .newInstance();
-            Security.removeProvider(caviumProvider.getName());
-            Security.insertProviderAt(caviumProvider, 1);
-            JCEMapper.setProviderId("Cavium");
-            return listSecurityProvidersAsHtml();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @GET
-    @Path("/demoteBouncyCastle")
-    public String demoteBouncyCastle(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        try {
-        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
-        Security.insertProviderAt(new BouncyCastleProvider(), 100);
-        return listSecurityProvidersAsHtml();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @GET
-    @Path("/demoteCavium")
-    public String demoteCavium(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        try {
-            Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
-                .loadClass("com.cavium.provider.CaviumProvider")
-                .getConstructor()
-                .newInstance();
-            Security.removeProvider(caviumProvider.getName());
-            Security.insertProviderAt(caviumProvider, 100);
-            return listSecurityProvidersAsHtml();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @GET
-    @Path("/removeCavium")
-    public String removeCavium(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        try {
-            Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
-                .loadClass("com.cavium.provider.CaviumProvider")
-                .getConstructor()
-                .newInstance();
-            Security.removeProvider(caviumProvider.getName());
-            //Security.insertProviderAt(caviumProvider, 100);
-            //JCEMapper.setProviderId("Cavium");
-            JCEMapper.setProviderId("BC");
-            return listSecurityProvidersAsHtml();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @GET
-    @Path("/test1") // Same as above but does not call pn gateway
-    public String test1(
-            @Session HttpSession session,
-            @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
-        );
-        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
-
-        return "test1";
-    }
-
-    @GET
-    @Path("/test2") // Same as above but does not call generateAuthnRequestContext
-    public String test2(
-            @Session HttpSession session,
-            @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
-        );
-
-        return "test2";
     }
 
     @GET
