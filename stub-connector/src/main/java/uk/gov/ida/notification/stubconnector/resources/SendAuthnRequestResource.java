@@ -5,7 +5,8 @@ import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.xml.security.algorithms.JCEMapper;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
@@ -35,6 +36,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
@@ -127,6 +129,95 @@ public class SendAuthnRequestResource {
     }
 
     @GET
+    @Path("/promoteBouncyCastle")
+    public String promoteBouncyCastle(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        try {
+            Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+            Security.insertProviderAt(new BouncyCastleProvider(), 1);
+            return listSecurityProvidersAsHtml();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @GET
+    @Path("/promoteCavium")
+    public String promoteCavium(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        try {
+            Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
+                .loadClass("com.cavium.provider.CaviumProvider")
+                .getConstructor()
+                .newInstance();
+            Security.removeProvider(caviumProvider.getName());
+            Security.insertProviderAt(caviumProvider, 1);
+            JCEMapper.setProviderId("Cavium");
+            return listSecurityProvidersAsHtml();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @GET
+    @Path("/demoteBouncyCastle")
+    public String demoteBouncyCastle(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        try {
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+        Security.insertProviderAt(new BouncyCastleProvider(), 100);
+        return listSecurityProvidersAsHtml();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @GET
+    @Path("/demoteCavium")
+    public String demoteCavium(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        try {
+            Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
+                .loadClass("com.cavium.provider.CaviumProvider")
+                .getConstructor()
+                .newInstance();
+            Security.removeProvider(caviumProvider.getName());
+            Security.insertProviderAt(caviumProvider, 100);
+            return listSecurityProvidersAsHtml();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @GET
+    @Path("/removeCavium")
+    public String removeCavium(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        try {
+            Provider caviumProvider = (Provider) ClassLoader.getSystemClassLoader()
+                .loadClass("com.cavium.provider.CaviumProvider")
+                .getConstructor()
+                .newInstance();
+            Security.removeProvider(caviumProvider.getName());
+            //Security.insertProviderAt(caviumProvider, 100);
+            //JCEMapper.setProviderId("Cavium");
+            return listSecurityProvidersAsHtml();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @GET
     @Path("/test1") // Same as above but does not call pn gateway
     public String test1(
             @Session HttpSession session,
@@ -160,7 +251,10 @@ public class SendAuthnRequestResource {
     public String listSecurityProviders(
             @Session HttpSession session,
             @Context HttpServletResponse httpServletResponse) {
+        return listSecurityProvidersAsHtml();
+    }
 
+    private String listSecurityProvidersAsHtml() {
         StringBuilder providers = new StringBuilder();
         for (Provider provider : Security.getProviders()) {
             providers.append("<p>" + provider.getName() + ": " + provider.getInfo() + "</p>");
