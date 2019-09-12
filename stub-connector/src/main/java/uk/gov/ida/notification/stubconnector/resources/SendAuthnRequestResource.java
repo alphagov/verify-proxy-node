@@ -5,6 +5,7 @@ import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
+import org.apache.xml.security.algorithms.JCEMapper;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.messaging.handler.MessageHandlerException;
@@ -114,13 +115,19 @@ public class SendAuthnRequestResource {
         @Session HttpSession session,
         @Context HttpServletResponse httpServletResponse
     ) throws Throwable {
+        JCEMapper.setProviderId("BC");
+
         KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
+            new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+            new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
         );
         MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
         encode(httpServletResponse, context);
-        return Response.ok().build();
+
+        Response response = Response.ok().build();
+
+        JCEMapper.setProviderId("Cavium");
+        return response;
     }
 
     @GET
