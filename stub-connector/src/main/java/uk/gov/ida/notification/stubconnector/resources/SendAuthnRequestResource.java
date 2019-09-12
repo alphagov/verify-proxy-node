@@ -5,6 +5,7 @@ import io.dropwizard.views.View;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.velocity.VelocityEngine;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xml.security.algorithms.JCEMapper;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opensaml.messaging.context.MessageContext;
@@ -40,6 +41,7 @@ import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
@@ -129,6 +131,24 @@ public class SendAuthnRequestResource {
     }
 
     @GET
+    @Path("/nearlyInvalidSignature")
+    public String nearlyInvalidSignature(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
+            new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+            new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
+        );
+
+        List<String> items = new LinkedList<>();
+        items.add("Class: " + invalidCredentialConfiguration.getClass().getCanonicalName());
+        items.add("Algo: " + invalidCredentialConfiguration.getAlgorithm());
+
+        return "<html><body><pre>" + StringUtils.join(items, "<br/>") + "</pre></body></html>";
+    }
+
+    @GET
     @Path("/promoteBouncyCastle")
     public String promoteBouncyCastle(
         @Session HttpSession session,
@@ -211,6 +231,7 @@ public class SendAuthnRequestResource {
             Security.removeProvider(caviumProvider.getName());
             //Security.insertProviderAt(caviumProvider, 100);
             //JCEMapper.setProviderId("Cavium");
+            JCEMapper.setProviderId("BC");
             return listSecurityProvidersAsHtml();
         } catch (Exception e) {
             return e.getMessage();
@@ -259,7 +280,11 @@ public class SendAuthnRequestResource {
         for (Provider provider : Security.getProviders()) {
             providers.append("<p>" + provider.getName() + ": " + provider.getInfo() + "</p>");
         }
-        return "<html><body><pre>" + providers.toString() + "</pre></body></html>";
+        return
+            "<html><body>"
+            + "<p>JCEProvider.getProviderId: " + JCEMapper.getProviderId() + "</p>"
+            + "<pre>" + providers.toString() + "</pre>"
+            + "</body></html>";
     }
 
     private MessageContext generateAuthnRequestContext(
