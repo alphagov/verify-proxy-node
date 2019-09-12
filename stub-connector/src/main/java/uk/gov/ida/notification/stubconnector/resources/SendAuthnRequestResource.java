@@ -35,6 +35,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 
@@ -131,32 +133,23 @@ public class SendAuthnRequestResource {
     }
 
     @GET
-    @Path("/test1") // Same as above but does not call pn gateway
-    public String test1(
-            @Session HttpSession session,
-            @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
-        );
-        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
-
-        return "test1";
+    @Path("/listSecurityProviders")
+    public String listSecurityProviders(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse) {
+        return listSecurityProvidersAsHtml();
     }
 
-    @GET
-    @Path("/test2") // Same as above but does not call generateAuthnRequestContext
-    public String test2(
-            @Session HttpSession session,
-            @Context HttpServletResponse httpServletResponse
-    ) throws Throwable {
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
-        );
-
-        return "test2";
+    private String listSecurityProvidersAsHtml() {
+        StringBuilder providers = new StringBuilder();
+        for (Provider provider : Security.getProviders()) {
+            providers.append("<p>" + provider.getName() + ": " + provider.getInfo() + "</p>");
+        }
+        return
+            "<html><body>"
+                + "<p>JCEProvider.getProviderId: " + JCEMapper.getProviderId() + "</p>"
+                + "<pre>" + providers.toString() + "</pre>"
+                + "</body></html>";
     }
 
     private MessageContext generateAuthnRequestContext(
