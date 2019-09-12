@@ -1,6 +1,6 @@
 {{- if .Values.stubConnector.enabled -}}
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
 metadata:
   name: {{ .Release.Name }}-connector-ingress
   namespace: {{ .Release.Namespace }}
@@ -10,14 +10,16 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
-  hosts:
+  secretName: {{ .Release.Name }}-connector-ingress-certificate
+  dnsNames:
   - {{ include "stubConnector.host" . }}
-  gateways:
-  - {{ .Release.Name }}-connector-ingress
-  http:
-    - route:
-      - destination:
-          host: {{ .Release.Name }}-connector
-          port:
-            number: 80
+  acme:
+    config:
+    - dns01:
+        provider: route53
+      domains:
+      - {{ include "stubConnector.host" . }}
+  issuerRef:
+    name: letsencrypt-r53
+    kind: ClusterIssuer
 {{- end -}}

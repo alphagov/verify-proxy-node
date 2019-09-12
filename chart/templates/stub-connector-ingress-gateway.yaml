@@ -1,0 +1,37 @@
+{{- if .Values.stubConnector.enabled -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Release.Name }}-connector-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-connector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    externaldns.k8s.io/namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    istio: {{ .Release.Namespace }}-ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+    hosts:
+    - {{ include "stubConnector.host" . }}
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      serverCertificate: sds
+      privateKey: sds
+      credentialName: {{ .Release.Name }}-connector-ingress-certificate
+    hosts:
+    - {{ include "stubConnector.host" . }}
+{{- end -}}
