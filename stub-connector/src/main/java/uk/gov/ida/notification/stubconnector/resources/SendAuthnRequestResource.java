@@ -131,6 +131,29 @@ public class SendAuthnRequestResource {
     }
 
     @GET
+    @Path("/safeInvalidSignature")
+    public Response safeInvalidSignature(
+        @Session HttpSession session,
+        @Context HttpServletResponse httpServletResponse
+    ) throws Throwable {
+        JCEMapper.setProviderId("BC");
+
+        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
+            new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+            new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
+        );
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
+        encode(httpServletResponse, context);
+
+        Response response = Response.ok().build();
+
+        JCEMapper.setProviderId("Cavium");
+        return response;
+    }
+
+
+
+    @GET
     @Path("/nearlyInvalidSignature")
     public String nearlyInvalidSignature(
         @Session HttpSession session,
