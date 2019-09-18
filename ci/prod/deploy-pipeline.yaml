@@ -52,6 +52,102 @@ spec:
 
     jobs:
 
+    - name: deploy-dk-production
+        serial: true
+        plan:
+
+          - get: release
+            trigger: true
+
+          - get: nightly
+            trigger: true
+
+          - task: render-manifests
+            config:
+              platform: linux
+              image_resource: *task_toolbox
+              inputs:
+                - name: release
+              outputs:
+                - name: manifests
+              params:
+                CLUSTER_NAME: ((cluster.name))
+                CLUSTER_DOMAIN: ((cluster.domain))
+                CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+                RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+                RELEASE_NAME: dk
+                HUB_FQDN: www.signin.service.gov.uk
+                ERROR_PAGE_URL: https://www.signin.service.gov.uk/proxy-node-error
+                CONNECTOR_NODE_NATIONALITY_CODE: DK
+                CONNECTOR_ENTITY_ID: https://eidasconnector.eid.digst.dk/Metadata
+                CONNECTOR_METADATA_FQDN: eidasconnector.eid.digst.dk
+                CONNECTOR_METADATA_PATH: /metadata
+                CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+                CLOUDHSM_IP: ((cluster.cloudHsmIp))
+              run:
+                path: /bin/bash
+                args:
+                  - -euc
+                  - |
+                    echo "preparing keyring..."
+                    echo "${CLUSTER_PRIVATE_KEY}" > key
+                    gpg --import key
+                    gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+                    KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                    echo "verifying package"
+                    helm verify ./release/*.tgz
+                    echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                    helm template \
+                      --name "${RELEASE_NAME}" \
+                      --namespace "${RELEASE_NAMESPACE}" \
+                      --set "global.cluster.name=${CLUSTER_NAME}" \
+                      --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                      --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                      --set "hubFqdn=${HUB_FQDN}" \
+                      --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
+                      --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                      --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                      --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                      --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                      --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                      --output-dir "./manifests/" \
+                      ./release/*.tgz
+
+          - task: deploy-manifests
+            timeout: 10m
+            config:
+              platform: linux
+              image_resource: *task_toolbox
+              inputs:
+                - name: manifests
+              params:
+                KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+                KUBERNETES_TOKEN: ((namespace-deployer.token))
+                KUBERNETES_API: kubernetes.default.svc
+                RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+                RELEASE_NAME: dk
+                APP_NAME: proxy-node
+              run:
+                path: /bin/bash
+                args:
+                  - -euc
+                  - |
+                    echo "configuring kubectl"
+                    echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                    kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                    kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                    kubectl config set-context deployer --user deployer --cluster self
+                    kubectl config use-context deployer
+
+                    echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                    kapp deploy \
+                      -y \
+                      --namespace "${RELEASE_NAMESPACE}" \
+                      --allow-ns "${RELEASE_NAMESPACE}" \
+                      --app "${RELEASE_NAME}-${APP_NAME}" \
+                      --diff-changes \
+                      -f ./manifests/
+
     - name: deploy-nl-production
       serial: true
       plan:
