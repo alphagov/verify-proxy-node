@@ -72,6 +72,7 @@ public class HubResponseTranslatorResource {
     }
 
     @POST
+    @IngressEgressLogging
     @Path(Urls.TranslatorUrls.GENERATE_FAILURE_RESPONSE_PATH)
     public Response failureResponse(@Valid SamlFailureResponseGenerationRequest failureResponseRequest) {
 
