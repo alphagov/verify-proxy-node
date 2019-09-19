@@ -1,0 +1,48 @@
+---
+apiVersion: concourse.k8s.io/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: killswitch
+spec:
+  exposed: true
+  pipelineString: |
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: govsvc/task-toolbox
+        tag: 1.5.0
+
+    jobs:
+
+    - name: kill-gateway-virtual-services
+      plan:
+      - task: delete-virtual-services
+        timeout: 10m
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            NAMESPACE: ((namespace-deployer.namespace))
+          run:
+            path: /bin/bash
+            args:
+              - -euc
+              - |
+                echo "configuring kubectl"
+                echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                kubectl config set-context deployer --user deployer --cluster self
+                kubectl config use-context deployer
+
+                virtual_services=$(kubectl get -n "${NAMESPACE}" virtualservices | grep -- "-gateway-ingress" | awk {print $1})
+
+                for virtual_service in $virtual_services
+                do
+                    echo "Deleting ${virtual_service}"
+                done
