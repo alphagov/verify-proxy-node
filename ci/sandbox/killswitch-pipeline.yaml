@@ -6,7 +6,8 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: killswitch
 spec:
-  exposed: true
+  exposed: false
+  paused: true
   pipelineString: |
 
     task_toolbox: &task_toolbox
@@ -17,9 +18,9 @@ spec:
 
     jobs:
 
-    - name: kill-gateway-virtual-services
+    - name: kill
       plan:
-      - task: delete-virtual-services
+      - task: delete-resources
         timeout: 10m
         config:
           platform: linux
@@ -40,9 +41,4 @@ spec:
                 kubectl config set-context deployer --user deployer --cluster self
                 kubectl config use-context deployer
 
-                virtual_services=$(kubectl get -n "${NAMESPACE}" virtualservices | grep -- "-gateway-ingress" | awk {print $1})
-
-                for virtual_service in $virtual_services
-                do
-                    echo "Deleting ${virtual_service}"
-                done
+                kubectl -n "${NAMESPACE}" delete virtualservices,deployments --all
