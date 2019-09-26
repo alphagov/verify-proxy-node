@@ -65,6 +65,7 @@ public class HubResponseResource {
         String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, session.getId());
         ProxyNodeLogger.info("Received eIDAS response from Translator");
 
+        session.invalidate();
         return samlFormViewBuilder.buildResponse(
             sessionData.getEidasDestination(),
             eidasResponse,
