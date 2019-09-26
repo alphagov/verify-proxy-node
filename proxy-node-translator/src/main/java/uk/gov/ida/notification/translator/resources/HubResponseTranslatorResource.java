@@ -64,6 +64,10 @@ public class HubResponseTranslatorResource {
                 X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate())
         );
 
+        ProxyNodeLogger.info("test: eidas in response to" + eidasResponse.getInResponseTo());
+        ProxyNodeLogger.info("test: eidas request id" + hubResponseTranslatorRequest.getEidasRequestId());
+        ProxyNodeLogger.info("test: hub request id" + hubResponseTranslatorRequest.getEidasRequestId());
+
         logSamlResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
