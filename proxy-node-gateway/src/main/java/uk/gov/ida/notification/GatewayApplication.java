@@ -124,6 +124,14 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                         EnumSet.of(DispatcherType.REQUEST),
                         true,
                         Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE);
+
+        InvalidateSessionServletFilter invalidateSessionServletFilter = new InvalidateSessionServletFilter();
+        environment.servlets()
+                .addFilter(invalidateSessionServletFilter.getClass().getSimpleName(), invalidateSessionServletFilter)
+                .addMappingForUrlPatterns(
+                        EnumSet.of(DispatcherType.REQUEST),
+                        true,
+                        Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE);
     }
 
     private void registerExceptionMappers(
