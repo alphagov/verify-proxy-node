@@ -142,7 +142,6 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .post(Entity.form(POST_FORM));
         assertLogsIngressEgress();
         assertSuccessfulResponse(response);
-        return;
     }
 
     @Test
