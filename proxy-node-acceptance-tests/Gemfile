@@ -4,6 +4,6 @@ source 'https://rubygems.org'
 
 gem 'capybara'
 gem 'cucumber'
-gem 'selenium-webdriver'
+gem 'selenium-webdriver', '>= 3.142.4'
 gem 'geckodriver-helper'
 gem 'capybara-screenshot'
