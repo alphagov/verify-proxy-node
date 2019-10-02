@@ -435,3 +435,99 @@ spec:
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
                 -f ./manifests/
+
+    - name: deploy-cz-production
+      serial: true
+      plan:
+
+      - get: release
+        trigger: true
+
+      - get: nightly
+        trigger: true
+
+      - task: render-manifests
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: release
+          outputs:
+          - name: manifests
+          params:
+            CLUSTER_NAME: ((cluster.name))
+            CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: cz
+            HUB_FQDN: www.signin.service.gov.uk
+            ERROR_PAGE_URL: https://www.signin.service.gov.uk/proxy-node-error
+            CONNECTOR_NODE_NATIONALITY_CODE: CZ
+            CONNECTOR_ENTITY_ID: https://conn.eidasnode.cz/EidasNode/ConnectorMetadata
+            CONNECTOR_METADATA_FQDN: conn.eidasnode.cz
+            CONNECTOR_METADATA_PATH: /EidasNode/ConnectorMetadata
+            CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: MIIDfgIBAzCCAzcGCSqGSIb3DQEHAaCCAygEggMkMIIDIDCCAxwGCSqGSIb3DQEHBqCCAw0wggMJAgEAMIIDAgYJKoZIhvcNAQcBMCkGCiqGSIb3DQEMAQYwGwQUqBnJ9JaywtRr1f+gilP/uSuTb7ICAwDDUICCAsjuyYipUJ9wERod2H+k54em3CVN1sO4wVP04zgvMA6JNbkXn20T6GcbvtJAsidUBXJW/PyxVWigcXJVWTRleSfFJQljfJy5hVoV/y9Mr7fa+/wi992n8xhIbU3gIUioi1fzdYTNHJAxQYsGZN63+/OouwTBTZV8QNf3biI4JRcLVmIMYTzLt7++wQRHt/l1b0Z1mRUORlsnYRVvA8GelYpAQGTpIIMC74u834qSr3ZKIAdapVDSTL9+vh+Zb9W7nVFGqCmYT+S7y+9DlV8PLovTR5xvNo5jPBr/hxrkt/+IEqRw8sWl3ENc6cIPPKIrhvZWGbMrC/WHWkPNS/vDZBEM6BnfjgoA+pD8bOj/hJNjCw5JZOSTda238A/R9/4U0TwCl5tLwcUNae1MNE/hknZDZtmLLa3S/7sgbRVzVupEECI3qncw5/gGJIbI0q7fO7J9asKnD9teoGPjzY9MORTnxfjs8y1cdHYMGjdDGTOWMAU+VxKu5M8bUym+KglO26MH15i5OLhClIf/iKHIOQeHCYX+14QcOxTiucdVqkyEQaUbXHSZpu5mS0rYX7Voqlqt03v3Q4g6V6CsiufXVULQxPrtc95Lifhcb0N+T4bJa3g+YOq3pVYNK5yxOlCjgfnLXZpfBgGVWQ4Jgr85P3MPuuXljeuqFS8w1q/2fEqnCN1azvjSE9g7wbUHTvbBsssNePfovypikbMj4sOxZJXfqjl+J5hbc3Wt7DF3hmsLeF5RSiDtGgQ0Rptxpljczct7biZ4gEHJIVczSsjaxSqnFwFLfYAX+Afs9VynqtvdtFCERF0C8u1kLFCIUhsanoVfRqVRbRMVGd64Gg2TdTRVoL806oCR3B401zSwgVCkmupgIgxduQYvmM+j1k0jKdhZi5wnwExIRUrf2lwiY1rDAyGbRTzeoYL05jxyLB1z90a2Z5OaaZxGMD4wITAJBgUrDgMCGgUABBQVdEBb70xXdXyGgpCIbHJ70XWHsAQULRH0QjEEx/RrcyErP9YmH3NUUUMCAwGGoA==
+            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "preparing keyring..."
+              echo "${CLUSTER_PRIVATE_KEY}" > key
+              gpg --import key
+              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              echo "verifying package"
+              helm verify ./release/*.tgz
+              echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+              helm template \
+                --name "${RELEASE_NAME}" \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --set "global.cluster.name=${CLUSTER_NAME}" \
+                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                --set "hubFqdn=${HUB_FQDN}" \
+                --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
+                --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                --output-dir "./manifests/" \
+                ./release/*.tgz
+
+      - task: deploy-manifests
+        timeout: 10m
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+          - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            KUBERNETES_API: kubernetes.default.svc
+            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            RELEASE_NAME: cz
+            APP_NAME: proxy-node
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              echo "configuring kubectl"
+              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+              kubectl config set-context deployer --user deployer --cluster self
+              kubectl config use-context deployer
+
+              echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+              kapp deploy \
+                -y \
+                --namespace "${RELEASE_NAMESPACE}" \
+                --allow-ns "${RELEASE_NAMESPACE}" \
+                --app "${RELEASE_NAME}-${APP_NAME}" \
+                --diff-changes \
+                -f ./manifests/
