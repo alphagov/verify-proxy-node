@@ -210,7 +210,6 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void testThatABadResponseFromTranslatorProducingSAMLErrorResponseClearsSession() throws Exception {
-
         NewCookie samlRequestWithCookie = postSAMLRequest(proxyNodeServerErrorAppRule);
         Response response = proxyNodeServerErrorAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
