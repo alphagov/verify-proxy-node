@@ -131,7 +131,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
 
     @Test
     public void hubResponseReturnsHtmlFormWithSamlBlob() throws Exception {
-        NewCookie sessionCookie = getSessionCookie(proxyNodeAppRule);
+        NewCookie sessionCookie = postSAMLRequest(proxyNodeAppRule);
         Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
 
@@ -140,23 +140,8 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .request()
                 .cookie(sessionCookie)
                 .post(Entity.form(POST_FORM));
-
-        assertThat(response.getStatus()).isEqualTo(200);
         assertLogsIngressEgress();
-
-        final String htmlString = response.readEntity(String.class);
-        HtmlHelpers.assertXPath(
-                htmlString,
-                String.format(
-                        "//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']",
-                        SAMPLE_DESTINATION_URL,
-                        TestTranslatorResource.SAML_SUCCESS_BLOB));
-
-        HtmlHelpers.assertXPath(
-                htmlString,
-                String.format(
-                        "//form[@action='%s']/input[@name='RelayState'][@value='relay-state']",
-                        SAMPLE_DESTINATION_URL));
+        assertSuccessfulResponse(response);
     }
 
     @Test
@@ -164,7 +149,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         Response response = proxyNodeAppRuleEmbeddedRedis
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
-                .cookie(getSessionCookie(proxyNodeAppRuleEmbeddedRedis))
+                .cookie(postSAMLRequest(proxyNodeAppRuleEmbeddedRedis))
                 .post(Entity.form(POST_FORM));
 
         assertThat(response.getStatus()).isEqualTo(200);
@@ -181,8 +166,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 .request()
                 .post(Entity.form(POST_FORM));
 
-        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
-        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+        assertShowProxyNodeErrorPage(response);
     }
 
     @Test
@@ -190,7 +174,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         Response response = proxyNodeServerErrorAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
-                .cookie(getSessionCookie(proxyNodeServerErrorAppRule))
+                .cookie(postSAMLRequest(proxyNodeServerErrorAppRule))
                 .post(Entity.form(POST_FORM));
 
         assertGoodSamlErrorResponse(response);
@@ -201,10 +185,69 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         Response response = proxyNodeClientErrorAppRule
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
-                .cookie(getSessionCookie(proxyNodeClientErrorAppRule))
+                .cookie(postSAMLRequest(proxyNodeClientErrorAppRule))
                 .post(Entity.form(POST_FORM));
 
         assertGoodSamlErrorResponse(response);
+    }
+
+    @Test
+    public void testThatASuccessfulJourneyClearsSession() throws Exception {
+        NewCookie samlRequestWithCookie = postSAMLRequest(proxyNodeAppRule);
+        Response response = proxyNodeAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request()
+                .cookie(samlRequestWithCookie)
+                .post(Entity.form(POST_FORM));
+        assertSuccessfulResponse(response);
+        Response samlResponseAgain = proxyNodeAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request()
+                .cookie(samlRequestWithCookie)
+                .post(Entity.form(POST_FORM));
+        assertThatASAMLResponseCannotBeReplayed(samlRequestWithCookie, samlResponseAgain);
+    }
+
+    @Test
+    public void testThatABadResponseFromTranslatorProducingSAMLErrorResponseClearsSession() throws Exception {
+        NewCookie samlRequestWithCookie = postSAMLRequest(proxyNodeServerErrorAppRule);
+        Response response = proxyNodeServerErrorAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request()
+                .cookie(samlRequestWithCookie)
+                .post(Entity.form(POST_FORM));
+        assertGoodSamlErrorResponse(response);
+        Response samlResponseAgain = proxyNodeAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request()
+                .cookie(samlRequestWithCookie)
+                .post(Entity.form(POST_FORM));
+        assertThatASAMLResponseCannotBeReplayed(samlRequestWithCookie, samlResponseAgain);
+    }
+
+    @Test
+    public void testThatABadResponseResultingInProxyNodeErrorPageClearsSession() throws Exception {
+        NewCookie samlRequestWithCookie = postSAMLRequest(proxyNodeServerErrorAppRule);
+        Response response = proxyNodeClientErrorAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request()
+                .cookie(samlRequestWithCookie)
+                .post(Entity.form(POST_FORM));
+        assertShowProxyNodeErrorPage(response);
+        Response samlResponseAgain = proxyNodeAppRule
+                .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
+                .request()
+                .cookie(samlRequestWithCookie)
+                .post(Entity.form(POST_FORM));
+        assertThatASAMLResponseCannotBeReplayed(samlRequestWithCookie, samlResponseAgain);
+    }
+
+    private void assertThatASAMLResponseCannotBeReplayed(NewCookie requestCookie, Response response) {
+        assertThat(requestCookie.getValue()).isNotNull();
+        assertShowProxyNodeErrorPage(response);
+        NewCookie responseCookie = response.getCookies().get("gateway-session");
+        assertThat(responseCookie.getValue()).isNotNull();
+        assertThat(responseCookie.getValue()).isNotEqualTo(requestCookie.getValue());
     }
 
     private void assertLogsIngressEgress() {
@@ -215,7 +258,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_EGRESS)).hasSizeGreaterThanOrEqualTo(1);
     }
 
-    private NewCookie getSessionCookie(GatewayAppRule appRule) throws Exception {
+    private NewCookie postSAMLRequest(GatewayAppRule appRule) throws Exception {
         return postEidasAuthnRequest(buildAuthnRequest(), appRule).getCookies().get("gateway-session");
     }
 
@@ -233,5 +276,27 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
                 htmlString,
                 String.format("//form[@action='%s']/input[@name='RelayState'][@value='relay-state']", SAMPLE_DESTINATION_URL)
         );
+    }
+
+    private void assertShowProxyNodeErrorPage(Response response) {
+        assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
+        assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
+    }
+
+    private void assertSuccessfulResponse(Response response) throws XPathExpressionException, ParserConfigurationException {
+        assertThat(response.getStatus()).isEqualTo(200);
+        final String htmlString = response.readEntity(String.class);
+        HtmlHelpers.assertXPath(
+                htmlString,
+                String.format(
+                        "//form[@action='%s']/input[@name='SAMLResponse'][@value='%s']",
+                        SAMPLE_DESTINATION_URL,
+                        TestTranslatorResource.SAML_SUCCESS_BLOB));
+
+        HtmlHelpers.assertXPath(
+                htmlString,
+                String.format(
+                        "//form[@action='%s']/input[@name='RelayState'][@value='relay-state']",
+                        SAMPLE_DESTINATION_URL));
     }
 }

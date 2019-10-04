@@ -120,6 +120,15 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
     }
 
     private void setResponseServletFilter(Environment environment) {
+
+        InvalidateSessionServletFilter invalidateSessionServletFilter = new InvalidateSessionServletFilter();
+        environment.servlets()
+                .addFilter(invalidateSessionServletFilter.getClass().getSimpleName(), invalidateSessionServletFilter)
+                .addMappingForUrlPatterns(
+                        EnumSet.of(DispatcherType.REQUEST),
+                        true,
+                        Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE);
+
         JourneyIdHubResponseServletFilter responseFilter = new JourneyIdHubResponseServletFilter();
         environment.servlets()
                 .addFilter(responseFilter.getClass().getSimpleName(), responseFilter)
