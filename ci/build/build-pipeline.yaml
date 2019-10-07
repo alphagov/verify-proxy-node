@@ -369,9 +369,11 @@ spec:
           params: {skip_download: true}
         - get: cloudhsm-client-image
           passed: [build-base-images]
+          trigger: true
           params: {skip_download: true}
         - get: verify-service-provider-image
           passed: [build-base-images]
+          trigger: true
           params: {skip_download: true}
         - get: alpine-image
           params: {rootfs: true}
