@@ -61,7 +61,7 @@ spec:
     - name: github
       type: registry-image
       source:
-        repository: "govsvc/concourse-github-resource"
+        repository: govsvc/concourse-github-resource
         tag: v0.0.1
 
     - name: harbor
@@ -78,7 +78,7 @@ spec:
       icon: github-circle
       source:
         <<: *github_source
-        ignore_paths: [cloudhsm, proxy-node-vsp-config, ci/sandbox]
+        ignore_paths: [cloudhsm, proxy-node-vsp-config, ci]
         branch: master
 
     - name: vsp-src
@@ -181,26 +181,62 @@ spec:
         repository: registry.((cluster.domain))/eidas/verify-service-provider
 
     groups:
+      - name: deployment
+        jobs: [build-vsp-image, build-proxy-node, package, test, release]
       - name: proxy-node
-        jobs: [build, package, test, release]
-      - name: base-images
-        jobs: [build-base-images]
+        jobs: [build-proxy-node, package, test, release]
+      - name: components
+        jobs: [build-cloudhsm, build-vsp-image]
       - name: all
-        jobs: [build-base-images, build, package, test, release]
+        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package, test, release]
 
     jobs:
 
-    - name: build-base-images
+    - name: build-vsp-image
       serial: true
-      serial_groups: [build-base-images]
+      serial_groups: [build-vsp]
       plan:
       - in_parallel:
         - get: vsp-src
           trigger: true
-        - get: cloudhsm-config
-          trigger: true
         - get: vsp-config
           trigger: true
+
+      - task: build-and-test-vsp
+        attempts: 2
+        config:
+          platform: linux
+          image_resource: *openjdk_image
+          inputs:
+          - name: vsp-src
+          outputs:
+          - name: vsp-src
+          caches:
+          - *gradle_cache_path
+          run:
+            path: /bin/sh
+            args:
+              - -euc
+              - |
+                cd vsp-src
+                rm -f .dockerignore
+                export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
+                ./gradlew --console verbose test installDist
+
+      - put: verify-service-provider-image
+        get_params: {skip_download: true}
+        params:
+          build: vsp-src
+          dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
+          <<: *image_tag
+          tag_file: vsp-config/.git/short_ref
+
+    - name: build-cloudhsm
+      serial: true
+      serial_groups: [build-proxy-node]
+      plan:
+      - get: cloudhsm-config
+        trigger: true
       - in_parallel:
           limit: 3
           fail_fast: true
@@ -220,45 +256,15 @@ spec:
               <<: *image_tag
               tag_file: cloudhsm-config/.git/short_ref
 
-          - do:
-            - task: build-and-test-vsp
-              attempts: 2
-              config:
-                platform: linux
-                image_resource: *openjdk_image
-                inputs:
-                - name: vsp-src
-                outputs:
-                - name: vsp-src
-                caches:
-                - *gradle_cache_path
-                run:
-                  path: /bin/sh
-                  args:
-                    - -euc
-                    - |
-                      cd vsp-src
-                      rm -f .dockerignore
-                      export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
-                      ./gradlew --console verbose test installDist
-
-            - put: verify-service-provider-image
-              get_params: {skip_download: true}
-              params:
-                build: vsp-src
-                dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
-                <<: *image_tag
-                tag_file: vsp-config/.git/short_ref
-
-    - name: build
+    - name: build-proxy-node
       serial: true
-      serial_groups: [build-base-images]
+      serial_groups: [build-proxy-node]
       plan:
       - in_parallel:
         - get: src
           trigger: true
         - get: cloudhsm-jce-image
-          passed: [build-base-images]
+          passed: [build-cloudhsm]
           trigger: true
 
       - task: run-tests
@@ -345,33 +351,34 @@ spec:
 
     - name: package
       serial: true
-      serial_groups: [package]
+      serial_groups: [package, build-vsp, build-proxy-node]
       plan:
       - in_parallel:
         - get: src
-          passed: [build]
+          passed: [build-proxy-node]
           trigger: true
         - get: gateway-image
-          passed: [build]
+          passed: [build-proxy-node]
           trigger: true
           params: {skip_download: true}
         - get: translator-image
-          passed: [build]
+          passed: [build-proxy-node]
           trigger: true
           params: {skip_download: true}
         - get: parser-image
-          passed: [build]
+          passed: [build-proxy-node]
           trigger: true
           params: {skip_download: true}
         - get: stub-connector-image
-          passed: [build]
+          passed: [build-proxy-node]
+          trigger: true
+          params: {skip_download: true}
+        - get: verify-service-provider-image
+          passed: [build-vsp-image]
           trigger: true
           params: {skip_download: true}
         - get: cloudhsm-client-image
-          passed: [build-base-images]
-          params: {skip_download: true}
-        - get: verify-service-provider-image
-          passed: [build-base-images]
+          passed: [build-cloudhsm]
           params: {skip_download: true}
         - get: alpine-image
           params: {rootfs: true}
@@ -505,7 +512,7 @@ spec:
           passed: [package]
           trigger: true
         - get: tests-image
-          passed: [build]
+          passed: [build-proxy-node]
 
       - task: extract-chart
         image: chart

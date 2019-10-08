@@ -17,7 +17,7 @@ spec:
       github_api_token: ((github.api-token))
       access_token: ((github.api-token))
       approvers: ((trusted-developers.github-accounts))
-      required_approval_count: "0"
+      required_approval_count: 0
       commit_verification_keys: ((trusted-developers.gpg-keys))
 
     task_toolbox: &task_toolbox
@@ -53,7 +53,6 @@ spec:
 
     - name: deploy-test-integration
       serial: true
-      timeout: 15m
       plan:
 
       - get: release
@@ -121,6 +120,7 @@ spec:
                 ./release/*.tgz
 
       - task: deploy-manifests
+        timeout: 15m
         config:
           platform: linux
           image_resource: *task_toolbox
