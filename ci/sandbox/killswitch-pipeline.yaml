@@ -8,7 +8,7 @@ metadata:
 spec:
   exposed: false
   paused: true
-  pipelineString: |
+  config:
 
     task_toolbox: &task_toolbox
       type: docker-image
