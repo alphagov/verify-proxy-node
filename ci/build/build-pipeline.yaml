@@ -7,7 +7,7 @@ metadata:
   name: build-release
 spec:
   exposed: true
-  pipelineString: |
+  config:
 
     github_source: &github_source
       uri: https://github.com/alphagov/verify-proxy-node.git
@@ -197,10 +197,11 @@ spec:
       serial_groups: [build-vsp]
       plan:
       - in_parallel:
-        - get: vsp-src
-          trigger: true
-        - get: vsp-config
-          trigger: true
+          steps:
+          - get: vsp-src
+            trigger: true
+          - get: vsp-config
+            trigger: true
 
       - task: build-and-test-vsp
         attempts: 2
@@ -261,11 +262,12 @@ spec:
       serial_groups: [build-proxy-node]
       plan:
       - in_parallel:
-        - get: src
-          trigger: true
-        - get: cloudhsm-jce-image
-          passed: [build-cloudhsm]
-          trigger: true
+          steps:
+          - get: src
+            trigger: true
+          - get: cloudhsm-jce-image
+            passed: [build-cloudhsm]
+            trigger: true
 
       - task: run-tests
         attempts: 2
@@ -354,35 +356,36 @@ spec:
       serial_groups: [package, build-vsp, build-proxy-node]
       plan:
       - in_parallel:
-        - get: src
-          passed: [build-proxy-node]
-          trigger: true
-        - get: gateway-image
-          passed: [build-proxy-node]
-          trigger: true
-          params: {skip_download: true}
-        - get: translator-image
-          passed: [build-proxy-node]
-          trigger: true
-          params: {skip_download: true}
-        - get: parser-image
-          passed: [build-proxy-node]
-          trigger: true
-          params: {skip_download: true}
-        - get: stub-connector-image
-          passed: [build-proxy-node]
-          trigger: true
-          params: {skip_download: true}
-        - get: verify-service-provider-image
-          passed: [build-vsp-image]
-          trigger: true
-          params: {skip_download: true}
-        - get: cloudhsm-client-image
-          passed: [build-cloudhsm]
-          params: {skip_download: true}
-        - get: alpine-image
-          params: {rootfs: true}
-        - get: release
+          steps:
+          - get: src
+            passed: [build-proxy-node]
+            trigger: true
+          - get: gateway-image
+            passed: [build-proxy-node]
+            trigger: true
+            params: {skip_download: true}
+          - get: translator-image
+            passed: [build-proxy-node]
+            trigger: true
+            params: {skip_download: true}
+          - get: parser-image
+            passed: [build-proxy-node]
+            trigger: true
+            params: {skip_download: true}
+          - get: stub-connector-image
+            passed: [build-proxy-node]
+            trigger: true
+            params: {skip_download: true}
+          - get: verify-service-provider-image
+            passed: [build-vsp-image]
+            trigger: true
+            params: {skip_download: true}
+          - get: cloudhsm-client-image
+            passed: [build-cloudhsm]
+            params: {skip_download: true}
+          - get: alpine-image
+            params: {rootfs: true}
+          - get: release
 
       - task: generate-chart-values
         config:
@@ -508,11 +511,12 @@ spec:
       plan:
 
       - in_parallel:
-        - get: chart
-          passed: [package]
-          trigger: true
-        - get: tests-image
-          passed: [build-proxy-node]
+          steps:
+          - get: chart
+            passed: [package]
+            trigger: true
+          - get: tests-image
+            passed: [build-proxy-node]
 
       - task: extract-chart
         image: chart
