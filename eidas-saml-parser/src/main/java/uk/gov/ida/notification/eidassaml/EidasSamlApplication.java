@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.eidassaml;
 
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -82,6 +83,7 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
 
         bootstrap.addBundle(connectorMetadataResolverBundle);
         bootstrap.addBundle(new LogstashBundle());
+        bootstrap.addBundle(new PrometheusBundle());
     }
 
     @Override

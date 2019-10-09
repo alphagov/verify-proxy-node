@@ -124,6 +124,7 @@ subprojects {
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
                 "io.lettuce:lettuce-core:5.1.4.RELEASE",
+                "engineering.gds-reliability:gds-metrics-dropwizard:0.7.0"
         )
 
         dropwizard(

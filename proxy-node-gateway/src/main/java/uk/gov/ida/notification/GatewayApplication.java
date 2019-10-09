@@ -1,5 +1,6 @@
 package uk.gov.ida.notification;
 
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -73,6 +74,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
         bootstrap.addBundle(new MetadataPublishingBundle<>(GatewayConfiguration::getMetadataPublishingConfiguration));
+        bootstrap.addBundle(new PrometheusBundle());
     }
 
     @Override

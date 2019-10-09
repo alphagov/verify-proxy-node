@@ -57,6 +57,8 @@ spec:
           initialDelaySeconds: 20
           periodSeconds: 5
         env:
+        - name: RELEASE_NAME
+          value: {{ .Release.Name }}
         - name: PORT
           value: "80"
         - name: REDIS_SERVER_URI
