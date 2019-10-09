@@ -228,8 +228,9 @@ spec:
         params:
           build: vsp-src
           dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
-          <<: *image_tag
           tag_file: vsp-config/.git/short_ref
+          tag_as_latest: true
+          tag_prefix: v
 
     - name: build-cloudhsm
       serial: true
@@ -246,15 +247,17 @@ spec:
             params:
               cache: true
               build: cloudhsm-config/cloudhsm
-              <<: *image_tag
               tag_file: cloudhsm-config/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
           - put: cloudhsm-jce-image
             get_params: {skip_download: true}
             params:
               cache: true
               build: cloudhsm-config/cloudhsm/jdk-jce-image
-              <<: *image_tag
               tag_file: cloudhsm-config/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
 
     - name: build-proxy-node
       serial: true
