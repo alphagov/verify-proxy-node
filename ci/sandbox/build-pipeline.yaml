@@ -7,7 +7,7 @@ metadata:
   name: build-release
 spec:
   exposed: true
-  config:
+  pipelineString: |
 
     github_source: &github_source
       uri: https://github.com/alphagov/verify-proxy-node.git
@@ -191,11 +191,10 @@ spec:
       serial_groups: [build-vsp]
       plan:
       - in_parallel:
-          steps:
-          - get: vsp-src
-            trigger: true
-          - get: vsp-config
-            trigger: true
+        - get: vsp-src
+          trigger: true
+        - get: vsp-config
+          trigger: true
 
       - task: build-and-test-vsp
         attempts: 2
@@ -223,8 +222,9 @@ spec:
         params:
           build: vsp-src
           dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
-          <<: *image_tag
           tag_file: vsp-config/.git/short_ref
+          tag_as_latest: true
+          tag_prefix: v
 
     - name: build-cloudhsm
       serial: true
@@ -241,27 +241,28 @@ spec:
             params:
               cache: true
               build: cloudhsm-config/cloudhsm
-              <<: *image_tag
               tag_file: cloudhsm-config/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
           - put: cloudhsm-jce-image
             get_params: {skip_download: true}
             params:
               cache: true
               build: cloudhsm-config/cloudhsm/jdk-jce-image
-              <<: *image_tag
               tag_file: cloudhsm-config/.git/short_ref
+              tag_as_latest: true
+              tag_prefix: v
 
     - name: build-proxy-node
       serial: true
       serial_groups: [build-proxy-node]
       plan:
       - in_parallel:
-          steps:
-          - get: src
-            trigger: true
-          - get: cloudhsm-jce-image
-            passed: [build-cloudhsm]
-            trigger: true
+        - get: src
+          trigger: true
+        - get: cloudhsm-jce-image
+          passed: [build-cloudhsm]
+          trigger: true
 
       - task: run-tests
         attempts: 2
@@ -350,35 +351,34 @@ spec:
       serial_groups: [package, build-vsp, build-proxy-node]
       plan:
       - in_parallel:
-          steps:
-          - get: src
-            passed: [build-proxy-node]
-            trigger: true
-          - get: gateway-image
-            passed: [build-proxy-node]
-            trigger: true
-            params: {skip_download: true}
-          - get: translator-image
-            passed: [build-proxy-node]
-            trigger: true
-            params: {skip_download: true}
-          - get: parser-image
-            passed: [build-proxy-node]
-            trigger: true
-            params: {skip_download: true}
-          - get: stub-connector-image
-            passed: [build-proxy-node]
-            trigger: true
-            params: {skip_download: true}
-          - get: verify-service-provider-image
-            passed: [build-vsp-image]
-            trigger: true
-            params: {skip_download: true}
-          - get: cloudhsm-client-image
-            passed: [build-cloudhsm]
-            params: {skip_download: true}
-          - get: alpine-image
-            params: {rootfs: true}
+        - get: src
+          passed: [build-proxy-node]
+          trigger: true
+        - get: gateway-image
+          passed: [build-proxy-node]
+          trigger: true
+          params: {skip_download: true}
+        - get: translator-image
+          passed: [build-proxy-node]
+          trigger: true
+          params: {skip_download: true}
+        - get: parser-image
+          passed: [build-proxy-node]
+          trigger: true
+          params: {skip_download: true}
+        - get: stub-connector-image
+          passed: [build-proxy-node]
+          trigger: true
+          params: {skip_download: true}
+        - get: verify-service-provider-image
+          passed: [build-vsp-image]
+          trigger: true
+          params: {skip_download: true}
+        - get: cloudhsm-client-image
+          passed: [build-cloudhsm]
+          params: {skip_download: true}
+        - get: alpine-image
+          params: {rootfs: true}
 
       - task: generate-chart-values
         config:
@@ -499,12 +499,11 @@ spec:
       plan:
 
       - in_parallel:
-          steps:
-          - get: chart
-            passed: [package]
-            trigger: true
-          - get: tests-image
-            passed: [build-proxy-node]
+        - get: chart
+          passed: [package]
+          trigger: true
+        - get: tests-image
+          passed: [build-proxy-node]
 
       - task: extract-chart
         image: chart
