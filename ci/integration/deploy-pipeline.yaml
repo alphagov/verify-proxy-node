@@ -595,3 +595,95 @@ spec:
                     --app "${RELEASE_NAME}-${APP_NAME}" \
                     --diff-changes \
                     -f ./manifests/
+
+    - name: deploy-mt-integration
+      serial: true
+      plan:
+
+        - get: release
+          trigger: true
+
+        - get: daily
+          trigger: true
+
+        - task: render-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: release
+            outputs:
+              - name: manifests
+            params:
+              CLUSTER_NAME: ((cluster.name))
+              CLUSTER_DOMAIN: ((cluster.domain))
+              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: mt-integration
+              CONNECTOR_NODE_NATIONALITY_CODE: MT
+              CONNECTOR_ENTITY_ID: https://stgmteidasnode.gov.mt/EidasNode/ConnectorMetadata
+              CONNECTOR_METADATA_FQDN: stgmteidasnode.gov.mt
+              CONNECTOR_METADATA_PATH: /EidasNode/ConnectorMetadata
+              CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+              CLOUDHSM_IP: ((cluster.cloudHsmIp))
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "preparing keyring..."
+                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  gpg --import key
+                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  echo "verifying package"
+                  helm verify ./release/*.tgz
+                  echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                  helm template \
+                    --name "${RELEASE_NAME}" \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --set "global.cluster.name=${CLUSTER_NAME}" \
+                    --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                    --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                    --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                    --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                    --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                    --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                    --output-dir "./manifests/" \
+                    ./release/*.tgz
+
+        - task: deploy-manifests
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: mt-integration
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                  kapp deploy \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --allow-ns "${RELEASE_NAMESPACE}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}" \
+                    --diff-changes \
+                    -f ./manifests/
