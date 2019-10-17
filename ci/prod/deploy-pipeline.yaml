@@ -435,3 +435,95 @@ spec:
                 --app "${RELEASE_NAME}-${APP_NAME}" \
                 --diff-changes \
                 -f ./manifests/
+
+    - name: deploy-mt-production
+      serial: true
+      plan:
+
+        - get: release
+          trigger: true
+
+        - get: nightly
+          trigger: true
+
+        - task: render-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: release
+            outputs:
+              - name: manifests
+            params:
+              CLUSTER_NAME: ((cluster.name))
+              CLUSTER_DOMAIN: ((cluster.domain))
+              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: mt
+              CONNECTOR_NODE_NATIONALITY_CODE: MT
+              CONNECTOR_ENTITY_ID: https://mteidasnode.gov.mt/EidasNode/ConnectorMetadata
+              CONNECTOR_METADATA_FQDN: mteidasnode.gov.mt
+              CONNECTOR_METADATA_PATH: /EidasNode/ConnectorMetadata
+              CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64: 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
+              CLOUDHSM_IP: ((cluster.cloudHsmIp))
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "preparing keyring..."
+                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  gpg --import key
+                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  echo "verifying package"
+                  helm verify ./release/*.tgz
+                  echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                  helm template \
+                    --name "${RELEASE_NAME}" \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --set "global.cluster.name=${CLUSTER_NAME}" \
+                    --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                    --set "connector.entityID=${CONNECTOR_ENTITY_ID}" \
+                    --set "connector.metadata.fqdn=${CONNECTOR_METADATA_FQDN}" \
+                    --set "connector.metadata.path=${CONNECTOR_METADATA_PATH}" \
+                    --set "connector.metadataSigningTruststoreBase64=${CONNECTOR_METADATA_SIGNING_TRUSTSTORE_BASE64}" \
+                    --set "translator.connectorNodeNationalityCode=${CONNECTOR_NODE_NATIONALITY_CODE}" \
+                    --output-dir "./manifests/" \
+                    ./release/*.tgz
+
+        - task: deploy-manifests
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: mt
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                  kapp deploy \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --allow-ns "${RELEASE_NAMESPACE}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}" \
+                    --diff-changes \
+                    -f ./manifests/
