@@ -25,15 +25,17 @@ names_spaces = {
 }
 
 connected_countries = {
-    "test-integration": "Test Intergration",
+    "test-integration": "Test Integration",
     "nl": "Netherlands Prod",
-    "nl-integration": "Netherlands Intergration",
+    "nl-integration": "Netherlands Integration",
     "it": "Italy Prod",
-    "it-integration": "Italy Intergration",
+    "it-integration": "Italy Integration",
     "se": "Sweden Prod",
-    "se-integration": "Sweden Intergration",
+    "se-integration": "Sweden Integration",
     "cz": "Czech Republic Prod",
-    "cz-integration": "Czech Republic Intergration"
+    "cz-integration": "Czech Republic Integration",
+    "mt": "Malta Prod",
+    "mt-integration": "Malta Integration"
 }
 
 now = datetime.utcnow()
