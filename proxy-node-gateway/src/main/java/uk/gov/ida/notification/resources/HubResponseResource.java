@@ -49,7 +49,7 @@ public class HubResponseResource {
         @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
-        Metrics.RESPONSES.labels(Metrics.RELEASE_NAME).inc();
+        Metrics.RESPONSES.inc();
         GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
 
         ProxyNodeLogger.info("Retrieved GatewaySessionData");
@@ -71,7 +71,7 @@ public class HubResponseResource {
                 eidasResponse,
                 sessionData.getEidasRelayState()
         );
-        Metrics.RESPONSES_SUCCESSFUL.labels(Metrics.RELEASE_NAME).inc();
+        Metrics.RESPONSES_SUCCESSFUL.inc();
         return samlFormView;
     }
 }

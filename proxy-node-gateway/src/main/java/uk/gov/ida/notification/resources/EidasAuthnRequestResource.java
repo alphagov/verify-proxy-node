@@ -72,7 +72,7 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        Metrics.REQUESTS.labels(Metrics.RELEASE_NAME).inc();
+        Metrics.REQUESTS.inc();
         final String sessionId = session.getId();
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
@@ -98,7 +98,7 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
-        Metrics.REQUESTS_SUCCESSFUL.labels(Metrics.RELEASE_NAME).inc();
+        Metrics.REQUESTS_SUCCESSFUL.inc();
         return buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
     }
 
