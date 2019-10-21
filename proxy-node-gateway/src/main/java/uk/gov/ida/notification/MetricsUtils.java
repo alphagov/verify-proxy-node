@@ -2,7 +2,7 @@ package uk.gov.ida.notification;
 
 import io.prometheus.client.Counter;
 
-public class Metrics {
+public class MetricsUtils {
 
     private static final String LABEL_PREFIX = "verify_proxy_node";
 

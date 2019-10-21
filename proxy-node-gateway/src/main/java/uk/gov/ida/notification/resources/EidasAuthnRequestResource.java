@@ -4,7 +4,7 @@ import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
-import uk.gov.ida.notification.Metrics;
+import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -72,7 +72,7 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        Metrics.REQUESTS.inc();
+        MetricsUtils.REQUESTS.inc();
         final String sessionId = session.getId();
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
@@ -98,7 +98,7 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
-        Metrics.REQUESTS_SUCCESSFUL.inc();
+        MetricsUtils.REQUESTS_SUCCESSFUL.inc();
         return buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
     }
 

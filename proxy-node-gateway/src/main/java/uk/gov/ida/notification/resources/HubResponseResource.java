@@ -2,7 +2,7 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
-import uk.gov.ida.notification.Metrics;
+import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
@@ -49,7 +49,7 @@ public class HubResponseResource {
         @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
-        Metrics.RESPONSES.inc();
+        MetricsUtils.RESPONSES.inc();
         GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
 
         ProxyNodeLogger.info("Retrieved GatewaySessionData");
@@ -71,7 +71,7 @@ public class HubResponseResource {
                 eidasResponse,
                 sessionData.getEidasRelayState()
         );
-        Metrics.RESPONSES_SUCCESSFUL.inc();
+        MetricsUtils.RESPONSES_SUCCESSFUL.inc();
         return samlFormView;
     }
 }
