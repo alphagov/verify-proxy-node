@@ -37,12 +37,14 @@ public class SamlResponseExceptionMapperResourceRuleTest {
 
     @Before
     public void before() {
-        when(sessionStore.getSession(any(String.class))).thenReturn(
-                new GatewaySessionData("HubRequestId", "EidasRequestId", "EidasDestination",
-                        "EidasConnectorPublicKey", "EidasRelayState"));
-
-        when(samlFormViewBuilder.buildResponse("EidasDestination", (String) null, "Continue", "EidasRelayState"))
-                .thenReturn(new SamlFormView("postUrl", "samlMessageType", "encodedSamlMessage", "submitText"));
+        when(sessionStore.getSession(any(String.class))).thenReturn(new GatewaySessionData("HubRequestId","EidasRequestId","EidasDestination","EidasConnectorPublicKey","EidasRelayState"));
+        String nullString = null;
+        when(samlFormViewBuilder.buildResponse("EidasDestination", nullString, "EidasRelayState"))
+                .thenReturn(
+                new SamlFormView("postUrl",
+                                 "samlMessageType",
+                                 "encodedSamlMessage",
+                                 "submitText"));
     }
 
 
@@ -79,7 +81,7 @@ public class SamlResponseExceptionMapperResourceRuleTest {
     private boolean checkResponseEntityIsSamlFormResponse(String responseEntity) {
         // The actual application returns a web page with a form but this stripped down version, returns some JSON
         // As long as it matches, we can be confident that the correct exception mapper has been used
-        Pattern pattern = Pattern.compile("\\{\"postUrl\":\"postUrl\",\"samlMessageType\":\"samlMessageType\",\"encodedSamlMessage\":\"encodedSamlMessage\",\"submitText\":\"submitText\",\"relayState\":.*\"}");
+        Pattern pattern = Pattern.compile("\\{\"postUrl\":\"postUrl\",\"samlMessageType\":\"samlMessageType\",\"encodedSamlMessage\":\"encodedSamlMessage\",\"relayState\":.*\"}");
         Matcher matcher = pattern.matcher(responseEntity);
         return matcher.matches();
     }
