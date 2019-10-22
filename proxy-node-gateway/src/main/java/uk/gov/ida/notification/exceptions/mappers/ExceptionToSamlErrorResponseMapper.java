@@ -21,8 +21,6 @@ import static java.text.MessageFormat.format;
 
 public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<FailureSamlResponseException> {
 
-    private static final String SUBMIT_TEXT = "Continue";
-
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final TranslatorProxy translatorProxy;
     private final SessionStore sessionStorage;
@@ -64,7 +62,6 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
         final SamlFormView samlFormView = samlFormViewBuilder.buildResponse(
                 sessionData.getEidasDestination(),
                 samlErrorResponse,
-                SUBMIT_TEXT,
                 sessionData.getEidasRelayState());
 
         return Response.ok().entity(samlFormView).build();

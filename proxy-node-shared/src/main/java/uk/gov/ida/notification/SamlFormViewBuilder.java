@@ -17,16 +17,16 @@ public class SamlFormViewBuilder {
     }
 
     public SamlFormView buildRequest(String url, String encodedSamlMessage, String submitText, String relayState) {
-        return new SamlFormView(url, SamlFormMessageType.SAML_REQUEST, encodedSamlMessage, submitText, relayState);
+        return new SamlFormView(url, SamlFormMessageType.SAML_REQUEST, encodedSamlMessage, relayState);
     }
 
-    public SamlFormView buildResponse(String url, Response response, String submitText, String relayState) {
+    public SamlFormView buildResponse(String url, Response response, String relayState) {
         String samlMessage = marshaller.transformToString(response);
         String encodedSamlMessage = Base64.encodeAsString(samlMessage);
-        return buildResponse(url, encodedSamlMessage, submitText, relayState);
+        return buildResponse(url, encodedSamlMessage, relayState);
     }
 
-    public SamlFormView buildResponse(String url, String encodedSamlMessage, String submitText, String relayState) {
-        return new SamlFormView(url, SamlFormMessageType.SAML_RESPONSE, encodedSamlMessage, submitText, relayState);
+    public SamlFormView buildResponse(String url, String encodedSamlMessage, String relayState) {
+        return new SamlFormView(url, SamlFormMessageType.SAML_RESPONSE, encodedSamlMessage, relayState);
     }
 }

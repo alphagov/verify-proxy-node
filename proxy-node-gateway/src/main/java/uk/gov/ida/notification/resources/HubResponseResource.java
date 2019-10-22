@@ -25,7 +25,6 @@ import javax.ws.rs.core.UriBuilder;
 public class HubResponseResource {
 
     static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
-    static final String SUBMIT_TEXT = "Post eIDAS Response SAML to Connector Node";
 
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final TranslatorProxy translatorProxy;
@@ -67,7 +66,6 @@ public class HubResponseResource {
         return samlFormViewBuilder.buildResponse(
             sessionData.getEidasDestination(),
             eidasResponse,
-            SUBMIT_TEXT,
             sessionData.getEidasRelayState()
         );
     }

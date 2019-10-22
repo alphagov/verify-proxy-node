@@ -87,7 +87,6 @@ public class HubResponseResourceTest {
         assertThat("http://connector.node").isEqualTo(response.getPostUrl());
         assertThat("SAMLResponse").isEqualTo(response.getSamlMessageType());
         assertThat("translated_eidas_response").isEqualTo(response.getEncodedSamlMessage());
-        assertThat(HubResponseResource.SUBMIT_TEXT).isEqualTo(response.getSubmitText());
         assertThat("eidas_relay_state_in_session").isEqualTo(response.getRelayState());
 
     }

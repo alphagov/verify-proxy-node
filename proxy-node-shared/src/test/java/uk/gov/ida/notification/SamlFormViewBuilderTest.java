@@ -26,7 +26,6 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
         assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
         assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
         assertThat("url").isEqualTo(view.getPostUrl());
-        assertThat("submit").isEqualTo(view.getSubmitText());
         assertThat("relay").isEqualTo(view.getRelayState());
     }
 
@@ -37,7 +36,6 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
         assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
         assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
         assertThat("url").isEqualTo(view.getPostUrl());
-        assertThat("submit").isEqualTo(view.getSubmitText());
         assertThat("relay").isEqualTo(view.getRelayState());
     }
 
@@ -47,12 +45,11 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
         String encodedResponse = Base64.encodeAsString(marshaller.transformToString(response));
 
-        SamlFormView view = builder.buildResponse("url", response, "submit", "relay");
+        SamlFormView view = builder.buildResponse("url", response, "relay");
 
         assertThat(SamlFormMessageType.SAML_RESPONSE).isEqualTo(view.getSamlMessageType());
         assertThat(encodedResponse).isEqualTo(view.getEncodedSamlMessage());
         assertThat("url").isEqualTo(view.getPostUrl());
-        assertThat("submit").isEqualTo(view.getSubmitText());
         assertThat("relay").isEqualTo(view.getRelayState());
     }
 
@@ -61,12 +58,11 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
         String encodedResponse = Base64.encodeAsString("a response saml blob");
 
-        SamlFormView view = builder.buildResponse("url", encodedResponse, "submit", "relay");
+        SamlFormView view = builder.buildResponse("url", encodedResponse, "relay");
 
         assertThat(SamlFormMessageType.SAML_RESPONSE).isEqualTo(view.getSamlMessageType());
         assertThat(encodedResponse).isEqualTo(view.getEncodedSamlMessage());
         assertThat("url").isEqualTo(view.getPostUrl());
-        assertThat("submit").isEqualTo(view.getSubmitText());
         assertThat("relay").isEqualTo(view.getRelayState());
     }
 }
