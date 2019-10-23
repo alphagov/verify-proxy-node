@@ -19,11 +19,11 @@
             padding-top: 2em;
             padding-left: 2em;
             background-color: white;
-            font-family: "nta", Arial, sans-serif;
+            font-family: Arial, sans-serif;
         }
 
         .heading-large {
-            font-family: "nta", Arial, sans-serif;
+            font-family: Arial, sans-serif;
             font-weight: 700;
             text-transform: none;
             font-size: 24px;
@@ -84,7 +84,7 @@
 <body onload="init()">
 <form action={{postUrl}} method=post name=saml-form>
     <h1 class="heading-large">Continue to next step</h1>
-    <div class="application notice info-notice">
+    <div class="application-notice info-notice">
         <p>Because Javascript is not enabled on your browser, you must press the continue button</p>
     </div>
     <input type=hidden name={{samlMessageType}} value={{encodedSamlMessage}}>
