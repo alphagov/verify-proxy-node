@@ -15,40 +15,81 @@
         }
     </script>
     <style type='text/css'>
-      body {
-        padding-top: 2em;
-        padding-left: 2em;
-        background-color: white;
-      }
-      .saml-form {
-        font-family: Arial, sans-serif;
-      }
-      .submitBtn {
-        background-color: #00823b;
-        color: #fff;
-        padding: 10px;
-        font-size: 1em;
-        line-height: 1.25;
-        border: none;
-        box-shadow: 0 2px 0 #003618;
-        cursor: pointer;
-      }
-      .submitBtn:hover, .submitBtn:focus {
-        background-color: #00692f;
-      }
+        body {
+            padding-top: 2em;
+            padding-left: 2em;
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .heading-large {
+            font-family: Arial, sans-serif;
+            font-weight: 700;
+            text-transform: none;
+            font-size: 24px;
+            line-height: 1.0416666667;
+            display: block;
+            margin-top: 1.0416666667em;
+            margin-bottom: 0.4166666667em;
+        }
+        @media (min-width: 641px) {
+            .heading-large {
+            font-size: 36px;
+            line-height: 1.1111111111; }
+        }
+        @media (min-width: 641px) {
+            .heading-large {
+            margin-top: 1.25em;
+            margin-bottom: 0.5555555556em; }
+        }
+
+        .button {
+            background-color: #00823b;
+            position: relative;
+            display: -moz-inline-stack;
+            display: inline-block;
+            padding: .526315em .789473em .263157em;
+            border: none;
+            border-radius: 0;
+            outline: 1px solid transparent;
+            outline-offset: -1px;
+            -webkit-appearance: none;
+            -webkit-box-shadow: 0 2px 0 #003618;
+            box-shadow: 0 2px 0 #003618;
+            font-size: 1em;
+            line-height: 1.25;
+            text-decoration: none;
+            -webkit-font-smoothing: antialiased;
+            cursor: pointer;
+            color: #fff;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            vertical-align: top;
+        }
+        .button:visited {
+            background-color: #00823b;
+        }
+        .button:hover, .button:focus {
+            background-color: #00692f;
+        }
+        .button:active {
+            top: 2px;
+            -webkit-box-shadow: 0 0 0 #00823b;
+            box-shadow: 0 0 0 #00823b;
+        }
+
     </style>
 </head>
 
 <body onload="init()">
 <form action={{postUrl}} method=post name=saml-form>
-    <h1>Continue to next step</h1>
-    <p>Because Javascript is not enabled on your browser, you must press the continue button</p>
+    <h1 class="heading-large">Continue to next step</h1>
+    <div class="application-notice info-notice">
+        <p>Because Javascript is not enabled on your browser, you must press the continue button</p>
+    </div>
     <input type=hidden name={{samlMessageType}} value={{encodedSamlMessage}}>
     <input type=hidden name=RelayState value={{relayState}}>
-    <label>
-        {{submitText}}:
-        <input type=submit name=submitBtn value=Submit>
-    </label>
+    <input type=submit name=submitBtn value=Submit class="button">
 </form>
 </body>
 </html>
