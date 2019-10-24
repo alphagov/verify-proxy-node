@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     release: {{ .Release.Name }}
-    prometheus.io/scrape: true
+    prometheus.io/scrape: "true"
 spec:
   type: ClusterIP
   ports:

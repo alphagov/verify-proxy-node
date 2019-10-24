@@ -11,7 +11,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
-      prometheus.io/scrape: true
+      prometheus.io/scrape: "true"
   targetLabels:
   - release
   endpoints:
