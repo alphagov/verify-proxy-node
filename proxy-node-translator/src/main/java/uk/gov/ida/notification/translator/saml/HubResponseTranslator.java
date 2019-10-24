@@ -68,9 +68,9 @@ public class HubResponseTranslator {
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
-                AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME,
-                PersonIdentifierType.TYPE_NAME,
-                pid
+                    AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME,
+                    PersonIdentifierType.TYPE_NAME,
+                    pid
             ));
         }
 
