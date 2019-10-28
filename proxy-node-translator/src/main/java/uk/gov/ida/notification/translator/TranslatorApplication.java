@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.translator;
 
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -72,6 +73,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
+        bootstrap.addBundle(new PrometheusBundle());
     }
 
     @Override

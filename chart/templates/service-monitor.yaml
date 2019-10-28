@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-svc-monitor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      prometheus.io/scrape: "true"
+  targetLabels:
+  - release
+  endpoints:
+  - port: mgmt
+    path: /prometheus/metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.gsp-prometheus-operator-prometheus/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.gsp-prometheus-operator-prometheus/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.gsp-prometheus-operator-prometheus/key.pem
+      insecureSkipVerify: true  # prometheus does not support secure naming.

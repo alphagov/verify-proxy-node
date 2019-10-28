@@ -1,6 +1,7 @@
 package uk.gov.ida.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import engineering.reliability.gds.metrics.config.PrometheusConfiguration;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.EidasSamlParserServiceConfiguration;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
@@ -12,7 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class GatewayConfiguration extends Configuration {
+public class GatewayConfiguration extends Configuration implements PrometheusConfiguration {
 
     @Valid
     @NotNull
@@ -44,7 +45,6 @@ public class GatewayConfiguration extends Configuration {
     @JsonProperty
     private MetadataPublishingConfiguration metadataPublishingConfiguration;
 
-
     public TranslatorServiceConfiguration getTranslatorServiceConfiguration() { return translatorService; }
 
     public EidasSamlParserServiceConfiguration getEidasSamlParserServiceConfiguration() { return eidasSamlParserService; }
@@ -61,5 +61,10 @@ public class GatewayConfiguration extends Configuration {
 
     public MetadataPublishingConfiguration getMetadataPublishingConfiguration() {
         return metadataPublishingConfiguration;
+    }
+
+    @Override
+    public boolean isPrometheusEnabled() {
+        return true;
     }
 }

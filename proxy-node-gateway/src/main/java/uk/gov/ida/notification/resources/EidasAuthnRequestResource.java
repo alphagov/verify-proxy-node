@@ -4,6 +4,7 @@ import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
+import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
@@ -12,10 +13,10 @@ import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.session.GatewaySessionData;
 import uk.gov.ida.notification.session.storage.SessionStore;
+import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
-import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.notification.views.SamlFormView;
@@ -71,6 +72,7 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
+        MetricsUtils.REQUESTS.inc();
         final String sessionId = session.getId();
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
@@ -96,8 +98,9 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
-
-        return buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
+        SamlFormView samlFormView = buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
+        MetricsUtils.REQUESTS_SUCCESSFUL.inc();
+        return samlFormView;
     }
 
     private EidasSamlParserResponse parseEidasRequest(String encodedEidasAuthnRequest, String sessionId) {

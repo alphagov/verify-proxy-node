@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: esp-redis
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 spec:
   ports:
   - name: tcp-redis
