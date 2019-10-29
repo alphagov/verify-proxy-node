@@ -13,12 +13,6 @@ spec:
   secretName: {{ .Release.Name }}-connector-ingress-certificate
   dnsNames:
   - {{ include "stubConnector.host" . }}
-  acme:
-    config:
-    - dns01:
-        provider: route53
-      domains:
-      - {{ include "stubConnector.host" . }}
   issuerRef:
     name: letsencrypt-r53
     kind: ClusterIssuer
