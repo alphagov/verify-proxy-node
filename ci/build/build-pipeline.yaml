@@ -24,7 +24,6 @@ spec:
       username: ((harbor.harbor_username))
       password: ((harbor.harbor_password))
       harbor:
-        url: ((harbor.harbor_url))
         prevent_vul: "false"
       notary:
         url: ((harbor.notary_url))
@@ -68,8 +67,8 @@ spec:
       type: docker-image
       privileged: true
       source:
-        repository: govsvc/gsp-harbor-docker-image-resource
-        tag: 0.0.1553882420
+        repository: ((concourse.harbor-resource-image))
+        tag: ((concourse.harbor-resource-tag))
 
     resources:
 
