@@ -1,15 +1,17 @@
 tap "cloudfoundry/tap"
+tap "homebrew/cask"
 
-cask "docker"
-brew "docker-compose"
-brew "pre-commit"
-brew "xmlsectool"
 brew "cf-cli"
+brew "docker-compose"
 brew "jq"
-brew "yq"
-brew "md5sha1sum"
-# for virtualbox install you may have to go to system preferences > security and allow Oracle access at the bottom
-cask "virtualbox"
-cask "minikube"
 brew "kubernetes-cli"
 brew "kubernetes-helm"
+brew "md5sha1sum"
+brew "minikube"
+brew "pre-commit"
+brew "xmlsectool"
+brew "yq"
+
+cask "docker"
+cask "virtualbox" # for virtualbox install you may have to go to system preferences > security and allow Oracle access at the bottom
+
