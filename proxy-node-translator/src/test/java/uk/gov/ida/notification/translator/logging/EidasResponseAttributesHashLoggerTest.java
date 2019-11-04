@@ -12,6 +12,7 @@ import uk.gov.ida.saml.core.transformers.EidasResponseAttributesHashLogger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -31,23 +32,30 @@ public class EidasResponseAttributesHashLoggerTest {
     private Attributes attributes;
 
     @Mock
+    private Attributes.AttributesList<String> attributesList;
+
+    @Mock
+    private Attributes.AttributesList<DateTime> attributesListDateTime;
+
+    @Mock
     private EidasResponseAttributesHashLogger attributesHashLogger;
 
     @Test
     public void shouldOnlyIncludeFirstVerifiedFirstNameInHash() {
-        when(attributes.getFirstNames()).thenReturn(List.of(
-                new Attribute<>("FirstNameA", false, null, null),
+        when(attributes.getFirstNames()).thenReturn(attributesList);
+        when(attributes.getMiddleNames()).thenReturn(attributesList);
+        when(attributes.getSurnames()).thenReturn(attributesList);
+        when(attributes.getDatesOfBirth()).thenReturn(attributesListDateTime);
+        when(attributesList.getAllAttributes()).thenReturn(List.of(
                 new Attribute<>("FirstNameV1", true, null, null),
-                new Attribute<>("FirstNameB", false, null, null),
                 new Attribute<>("FirstNameV2", true, null, null)
-        ));
+                ))
+                .thenReturn(Collections.emptyList())
+                .thenReturn(Collections.emptyList());
 
         applyAttributesToLogger();
 
         verify(attributesHashLogger).setPid(PID);
-        verify(attributesHashLogger, times(1)).setFirstName(any());
-        verify(attributesHashLogger, never()).setFirstName("FirstNameA");
-        verify(attributesHashLogger, never()).setFirstName("FirstNameB");
         verify(attributesHashLogger).setFirstName("FirstNameV1");
         verify(attributesHashLogger, never()).setFirstName("FirstNameV2");
 
@@ -58,12 +66,20 @@ public class EidasResponseAttributesHashLoggerTest {
 
     @Test
     public void shouldIncludeAllMiddleNamesInHash() {
-        when(attributes.getMiddleNames()).thenReturn(List.of(
+        when(attributes.getFirstNames()).thenReturn(attributesList);
+        when(attributes.getMiddleNames()).thenReturn(attributesList);
+        when(attributes.getSurnames()).thenReturn(attributesList);
+        when(attributes.getDatesOfBirth()).thenReturn(attributesListDateTime);
+        when(attributesList.getAllAttributes())
+                .thenReturn(Collections.emptyList())
+                .thenReturn(List.of(
                 new Attribute<>("MiddleNameA", false, null, null),
                 new Attribute<>("MiddleNameV1", true, null, null),
                 new Attribute<>("MiddleNameC", false, null, null),
                 new Attribute<>("MiddleNameV2", true, null, null)
-        ));
+                ))
+                .thenReturn(Collections.emptyList());
+        when(attributesListDateTime.getAllAttributes()).thenReturn(Collections.emptyList());
 
         applyAttributesToLogger();
 
@@ -83,13 +99,20 @@ public class EidasResponseAttributesHashLoggerTest {
 
     @Test
     public void shouldIncludeAllSurnamesInHash() {
-        when(attributes.getSurnames()).thenReturn(List.of(
+        when(attributes.getFirstNames()).thenReturn(attributesList);
+        when(attributes.getMiddleNames()).thenReturn(attributesList);
+        when(attributes.getSurnames()).thenReturn(attributesList);
+        when(attributes.getDatesOfBirth()).thenReturn(attributesListDateTime);
+        when(attributesList.getAllAttributes())
+                .thenReturn(Collections.emptyList())
+                .thenReturn(Collections.emptyList())
+                .thenReturn(List.of(
                 new Attribute<>("SurnameV1", true, null, null),
                 new Attribute<>("SurnameA", false, null, null),
                 new Attribute<>("SurnameV2", true, null, null),
                 new Attribute<>("SurnameB", false, null, null)
         ));
-
+        when(attributesListDateTime.getAllAttributes()).thenReturn(Collections.emptyList());
         applyAttributesToLogger();
 
         verify(attributesHashLogger).setPid(PID);
@@ -109,27 +132,30 @@ public class EidasResponseAttributesHashLoggerTest {
     @Test
     public void shouldOnlyIncludeFirstVerifiedDateOfBirthInHash() {
         final DateTime[] datesOfBirth = new DateTime[]{
-                new DateTime(1990, 1, 1, 0, 0),
                 new DateTime(1985, 9, 7, 14, 0),
-                new DateTime(1984, 10, 1, 0, 0),
                 new DateTime(1977, 12, 6, 12, 0)
         };
 
-        when(attributes.getDatesOfBirth()).thenReturn(List.of(
-                new Attribute<>(datesOfBirth[0], false, null, null),
-                new Attribute<>(datesOfBirth[1], true, null, null),
-                new Attribute<>(datesOfBirth[2], false, null, null),
-                new Attribute<>(datesOfBirth[3], true, null, null)
+        when(attributes.getFirstNames()).thenReturn(attributesList);
+        when(attributes.getMiddleNames()).thenReturn(attributesList);
+        when(attributes.getSurnames()).thenReturn(attributesList);
+        when(attributes.getDatesOfBirth()).thenReturn(attributesListDateTime);
+
+        when(attributesList.getAllAttributes())
+                .thenReturn(Collections.emptyList())
+                .thenReturn(Collections.emptyList())
+                .thenReturn(Collections.emptyList());
+
+        when(attributesListDateTime.getAllAttributes()).thenReturn(List.of(
+                new Attribute<>(datesOfBirth[0], true, null, null),
+                new Attribute<>(datesOfBirth[1], true, null, null)
         ));
 
         applyAttributesToLogger();
 
         verify(attributesHashLogger).setPid(PID);
-        verify(attributesHashLogger, times(1)).setDateOfBirth(any());
-        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[0]);
-        verify(attributesHashLogger).setDateOfBirth(datesOfBirth[1]);
-        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[2]);
-        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[3]);
+        verify(attributesHashLogger).setDateOfBirth(datesOfBirth[0]);
+        verify(attributesHashLogger, never()).setDateOfBirth(datesOfBirth[1]);
 
         verify(attributesHashLogger, never()).addMiddleName(any());
         verify(attributesHashLogger, never()).addSurname(any());

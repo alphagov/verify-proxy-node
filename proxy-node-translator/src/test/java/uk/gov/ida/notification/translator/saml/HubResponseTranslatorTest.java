@@ -20,6 +20,7 @@ import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import java.net.URI;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createAttribute;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createDateTime;
@@ -121,13 +122,29 @@ public class HubResponseTranslatorTest {
     }
 
     @Test
-    public void translateShouldThrowWhenCurrentFirstNameNotValid() {
+    public void translateShouldReturnResponseWhenCurrentFirstNameNotVerifiedButNoFromOrToMakesItCurrent() {
+        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, null, null);
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
+        Attributes attributes = hubResponseContainer.getAttributes();
+        assertThat(attributes.getFirstNames().getValidAttributes().size()).isEqualTo(1);
+    }
+
+
+
+    @Test
+    public void translateShouldReturnResponseWhenCurrentFirstNameNotValidButCurrentFrom() {
         final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, AttributesBuilder.VALID_FROM, null);
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
+        Attributes attributes = hubResponseContainer.getAttributes();
+        assertThat(attributes.getFirstNames().getValidAttributes().size()).isEqualTo(1);
+    }
 
-        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
-                .isInstanceOf(HubResponseTranslationException.class)
-                .hasMessageContaining("No verified current first name present");
+    @Test
+    public void translateShouldReturnResponseWhenCurrentFirstNameNotValidButCurrentTo() {
+        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, null, DateTime.now().plusDays(1));
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
+        Attributes attributes = hubResponseContainer.getAttributes();
+        assertThat(attributes.getFirstNames().getValidAttributes().size()).isEqualTo(1);
     }
 
     @Test

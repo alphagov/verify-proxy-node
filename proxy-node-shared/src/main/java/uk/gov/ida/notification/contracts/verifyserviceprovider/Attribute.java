@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.DateTime;
@@ -54,13 +55,23 @@ public class Attribute<T> {
         return to;
     }
 
-
-    public boolean isValid() {
+    public boolean isVerifiedAndCurrent() {
         return this.verified && this.isCurrent() && this.value != null;
     }
 
     public boolean isCurrent() {
-        return (this.from != null && this.from.isBeforeNow()) &&
+        return (this.from == null || this.from.isBeforeNow()) &&
                 (this.to == null || this.to.isAfterNow());
+    }
+
+    @Override
+    @JsonIgnore
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Attribute{");
+        sb.append("verified=").append(verified);
+        sb.append(", has from=").append(from != null);
+        sb.append(", has to=").append(to != null);
+        sb.append('}');
+        return sb.toString();
     }
 }
