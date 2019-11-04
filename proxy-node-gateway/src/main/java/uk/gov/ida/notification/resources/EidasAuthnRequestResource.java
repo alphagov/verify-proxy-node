@@ -2,6 +2,7 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
+import io.prometheus.client.Counter;
 import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
 import uk.gov.ida.notification.MetricsUtils;
@@ -35,6 +36,14 @@ import java.net.URI;
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class EidasAuthnRequestResource {
 
+    private static final Counter REQUESTS = Counter.build(
+            MetricsUtils.LABEL_PREFIX + "_requests_total",
+            "Number of eIDAS SAML requests to Verify Proxy Node ")
+            .register();
+    private static final Counter REQUESTS_SUCCESSFUL = Counter.build(
+            MetricsUtils.LABEL_PREFIX + "_successful_requests_total",
+            "Number of successful eIDAS SAML requests to Verify Proxy Node")
+            .register();
     public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
     private final EidasSamlParserProxy eidasSamlParserService;
     private final VerifyServiceProviderProxy vspProxy;
@@ -72,7 +81,7 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        MetricsUtils.REQUESTS.inc();
+        REQUESTS.inc();
         final String sessionId = session.getId();
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
@@ -99,7 +108,7 @@ public class EidasAuthnRequestResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
         SamlFormView samlFormView = buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
-        MetricsUtils.REQUESTS_SUCCESSFUL.inc();
+        REQUESTS_SUCCESSFUL.inc();
         return samlFormView;
     }
 
