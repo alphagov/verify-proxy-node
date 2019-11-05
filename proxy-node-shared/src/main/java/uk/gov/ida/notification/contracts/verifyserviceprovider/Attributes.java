@@ -82,7 +82,7 @@ public class Attributes {
 
     @JsonIgnore
     public AttributesList<Address> getAddresses() {
-        return new AttributesList(datesOfBirth, "dateOfBirth");
+        return new AttributesList(addresses, "address");
     }
 
     // Prints date in EIDAS format YYYY-MM-dd
