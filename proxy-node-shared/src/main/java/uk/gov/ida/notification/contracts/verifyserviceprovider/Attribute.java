@@ -55,10 +55,6 @@ public class Attribute<T> {
         return to;
     }
 
-    public boolean isVerifiedAndCurrent() {
-        return this.verified && this.isCurrent() && this.value != null;
-    }
-
     public boolean isCurrent() {
         return (this.from == null || this.from.isBeforeNow()) &&
                 (this.to == null || this.to.isAfterNow());

@@ -106,16 +106,20 @@ public class Attributes {
 
         public List<Attribute<T>> getValidAttributes() {
 
-            var valid = getAllAttributes().stream()
-                    .filter(Attribute::isVerifiedAndCurrent)
+            var current = getAllAttributes().stream()
+                    .filter(Attribute::isCurrent)
                     .collect(Collectors.toList());
-            if (valid.isEmpty()) {
+
+            var verifiedAndCurrent = current.stream()
+                    .filter(Attribute::isVerified)
+                    .collect(Collectors.toList());
+
+            if (verifiedAndCurrent.isEmpty()) {
                 ProxyNodeLogger.info("No verified and current attributes: " + createAttributesMessage());
-                valid = getAllAttributes().stream()
-                        .filter(Attribute::isCurrent)
-                        .collect(Collectors.toList());
+                return current;
+            } else {
+                return verifiedAndCurrent;
             }
-            return valid;
         }
 
         public List<Attribute<T>> getAllAttributes() {
