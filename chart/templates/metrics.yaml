@@ -39,9 +39,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   actions:
-  - handler: prometheusbypath
+  - handler: {{ .Release.Name }}-prometheus-by-path-handler
     instances:
-    - requestcountbypath.metric
+    - {{ .Release.Name }}-metrics-request-count-by-path.metric
   match: (context.protocol == "http") && (match((request.useragent | "-"), "kube-probe*") == false)
 ---
 apiVersion: config.istio.io/v1alpha2
@@ -55,7 +55,7 @@ spec:
   compiledAdapter: prometheus
   params:
     metrics:
-    - instance_name: requestcountbypath.metric.{{ .Release.Namespace }}
+    - instance_name: {{ .Release.Name }}-metrics-request-count-by-path.metric.{{ .Release.Namespace }}
       kind: COUNTER
       label_names:
       - reporter
@@ -76,6 +76,6 @@ spec:
       - permissive_response_code
       - permissive_response_policyid
       - connection_security_policy
-      name: {{ .Release.Namespace | replace "-" "_" }}_requests_by_path_total
+      name: {{ .Release.Namespace | replace "-" "_" }}_{{ .Release.Name | replace "-" "_" }}_requests_by_path_total
     metricsExpirationPolicy:
       metricsExpiryDuration: 10m
