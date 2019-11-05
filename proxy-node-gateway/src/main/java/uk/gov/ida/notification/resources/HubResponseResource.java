@@ -2,6 +2,7 @@ package uk.gov.ida.notification.resources;
 
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
+import io.prometheus.client.Counter;
 import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
@@ -27,6 +28,14 @@ import javax.ws.rs.core.UriBuilder;
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class HubResponseResource {
 
+    private static final Counter RESPONSES = Counter.build(
+            MetricsUtils.LABEL_PREFIX + "_responses_total",
+            "Number of eIDAS SAML responses to Verify Proxy Node")
+            .register();
+    private static final Counter RESPONSES_SUCCESSFUL = Counter.build(
+            MetricsUtils.LABEL_PREFIX + "_successful_responses_total",
+            "Number of successful eIDAS SAML responses To Verify Proxy Node")
+            .register();
     static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
 
     private final SamlFormViewBuilder samlFormViewBuilder;
@@ -49,7 +58,7 @@ public class HubResponseResource {
         @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
-        MetricsUtils.RESPONSES.inc();
+        RESPONSES.inc();
         GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
 
         ProxyNodeLogger.info("Retrieved GatewaySessionData");
@@ -71,7 +80,7 @@ public class HubResponseResource {
                 eidasResponse,
                 sessionData.getEidasRelayState()
         );
-        MetricsUtils.RESPONSES_SUCCESSFUL.inc();
+        RESPONSES_SUCCESSFUL.inc();
         return samlFormView;
     }
 }
