@@ -143,7 +143,7 @@ public class HubResponseTranslator {
         return validDatesOfBirth.stream()
                 .map(Attribute::getValue)
                 .reduce(BinaryOperator.maxBy(DateTimeComparator.getDateOnlyInstance()))
-                .map(Attributes::getFormattedDate).get();
+                .map(Attributes::getDateInEidasFormat).get();
     }
 
     private static String combineStringAttributeValues(List<Attribute<String>> attributeStream) {
