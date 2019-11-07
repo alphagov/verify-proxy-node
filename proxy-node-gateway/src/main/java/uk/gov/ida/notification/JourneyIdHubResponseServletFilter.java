@@ -23,8 +23,11 @@ public class JourneyIdHubResponseServletFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         final String journeyId = (String) request.getSession().getAttribute(JOURNEY_ID_KEY);
         servletRequest.setAttribute(JOURNEY_ID_KEY, journeyId);
+        expireJourneyIdCookie(request, (HttpServletResponse) servletResponse);
         chain.doFilter(servletRequest, servletResponse);
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+    }
+
+    private void expireJourneyIdCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             Arrays.stream(cookies)
