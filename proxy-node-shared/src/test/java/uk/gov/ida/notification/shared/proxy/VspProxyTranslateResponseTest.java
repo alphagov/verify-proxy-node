@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.shared.proxy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -33,6 +35,9 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VspProxyTranslateResponseTest {
+
+    @Spy
+    private static JsonClient jsonClient = createJsonClient();
 
     @Path("/translate-response")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -90,15 +95,8 @@ public class VspProxyTranslateResponseTest {
     @ClassRule
     public static final DropwizardClientRule testVspClientErrorClientRule = new DropwizardClientRule(new TestVSPClientErrorResource());
 
-    @Spy
-    static JsonClient jsonClient = new JsonClient(
-            new ErrorHandlingClient(ClientBuilder.newClient()),
-            new JsonResponseProcessor(new ObjectMapper())
-    );
-
     @Test
     public void shouldReturnTranslatedHubResponseAuthnFailed() {
-
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspAuthnFailedClientRule.baseUri());
 
         TranslatedHubResponse response =
@@ -120,7 +118,6 @@ public class VspProxyTranslateResponseTest {
 
     @Test
     public void shouldReturnTranslatedHubResponse() {
-
         VerifyServiceProviderProxy vspProxy = new VerifyServiceProviderProxy(jsonClient, testVspIdentityVerifiedClientRule.baseUri());
 
         TranslatedHubResponse response =
@@ -148,4 +145,20 @@ public class VspProxyTranslateResponseTest {
         assertThatThrownBy(() -> vspProxy.getTranslatedHubResponse(
                 new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")));
     }
+
+    private static JsonClient createJsonClient() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        return new JsonClient(
+                new ErrorHandlingClient(
+                        ClientBuilder
+                                .newBuilder()
+                                .register(new JacksonJsonProvider(objectMapper))
+                                .build()
+                ),
+                new JsonResponseProcessor(objectMapper)
+        );
+    }
+
 }

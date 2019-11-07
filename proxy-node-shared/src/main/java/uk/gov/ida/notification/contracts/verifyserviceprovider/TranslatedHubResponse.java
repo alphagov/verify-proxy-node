@@ -1,10 +1,12 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.ida.eidas.logging.TranslatedHubResponseInterface;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
 
 import javax.validation.constraints.NotNull;
 
-public class TranslatedHubResponse {
+public class TranslatedHubResponse implements TranslatedHubResponseInterface {
 
     @NotNull
     @JsonProperty
@@ -20,7 +22,7 @@ public class TranslatedHubResponse {
 
     @NotNull
     @JsonProperty
-    private Attributes attributes;
+    private NonMatchingAttributes attributes;
 
     @SuppressWarnings("Needed for JSON serialisation")
     public TranslatedHubResponse() {
@@ -30,7 +32,7 @@ public class TranslatedHubResponse {
             VspScenario scenario,
             String pid,
             VspLevelOfAssurance levelOfAssurance,
-            Attributes attributes) {
+            NonMatchingAttributes attributes) {
         this.scenario = scenario;
         this.pid = pid;
         this.levelOfAssurance = levelOfAssurance;
@@ -49,7 +51,7 @@ public class TranslatedHubResponse {
         return levelOfAssurance;
     }
 
-    public Attributes getAttributes() {
+    public NonMatchingAttributes getAttributes() {
         return attributes;
     }
 }

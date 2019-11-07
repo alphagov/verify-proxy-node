@@ -10,13 +10,13 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingTransliterableAttribute;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingVerifiableAttribute;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.combineAttributeValues;
+import static uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes.combineAttributeValues;
+
 
 public class HubResponseTranslator {
 
@@ -119,8 +120,8 @@ public class HubResponseTranslator {
     }
 
     private static String getCombineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
-        final List<Attribute<String>> firstNames = hubResponseContainer.getAttributes().getFirstNames();
-        final List<Attribute<String>> middleNames = hubResponseContainer.getAttributes().getMiddleNames();
+        final List<NonMatchingTransliterableAttribute> firstNames = hubResponseContainer.getAttributes().getFirstNames();
+        final List<NonMatchingVerifiableAttribute<String>> middleNames = hubResponseContainer.getAttributes().getMiddleNames();
 
         final String firstNamesCombined = combineAttributeValues(getValidAttributes(firstNames));
 
@@ -142,16 +143,16 @@ public class HubResponseTranslator {
     private static String getLatestValidDateOfBirth(HubResponseContainer hubResponseContainer) {
         return getValidAttributes(hubResponseContainer.getAttributes().getDatesOfBirth())
                 .stream()
-                .map(Attribute::getValue)
+                .map(NonMatchingVerifiableAttribute::getValue)
                 .reduce(BinaryOperator.maxBy(DateTimeComparator.getDateOnlyInstance()))
-                .map(Attributes::getFormattedDate)
+                .map(date -> date.toString())
                 .orElseThrow(() -> new HubResponseTranslationException("No verified current date of birth present"));
     }
 
-    private static <T> List<Attribute<T>> getValidAttributes(List<Attribute<T>> attributes) {
+    private static <T> List<NonMatchingVerifiableAttribute<T>> getValidAttributes(List<? extends NonMatchingVerifiableAttribute<T>> attributes) {
         return Optional.ofNullable(attributes).orElse(Collections.emptyList())
                 .stream()
-                .filter(Attribute::isValid)
+                .filter(NonMatchingVerifiableAttribute::isValid)
                 .collect(Collectors.toList());
     }
 }

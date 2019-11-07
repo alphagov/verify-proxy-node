@@ -1,10 +1,10 @@
 package uk.gov.ida.notification.translator.saml;
 
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
 
 import java.net.URI;
 
@@ -13,7 +13,7 @@ public class HubResponseContainer {
     private String pid;
     private String eidasRequestId;
     private URI destinationURL;
-    private Attributes attributes;
+    private NonMatchingAttributes attributes;
     private VspScenario vspScenario;
     private VspLevelOfAssurance levelOfAssurance;
 
@@ -38,7 +38,7 @@ public class HubResponseContainer {
         return destinationURL.toString();
     }
 
-    Attributes getAttributes() {
+    NonMatchingAttributes getAttributes() {
         return attributes;
     }
 
