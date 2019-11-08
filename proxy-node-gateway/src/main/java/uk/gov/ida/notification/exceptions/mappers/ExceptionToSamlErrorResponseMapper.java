@@ -1,5 +1,7 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
+import io.prometheus.client.Counter;
+import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.exceptions.FailureResponseGenerationException;
@@ -20,6 +22,11 @@ import java.util.logging.Level;
 import static java.text.MessageFormat.format;
 
 public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<FailureSamlResponseException> {
+    // TODO multi-country PN will need a way to distinguish these counters per country
+    private static final Counter FAILURE_SAML_ERROR = Counter.build(
+            MetricsUtils.LABEL_PREFIX + "_failure_saml_error_responses_total",
+            "Number of failure eIDAS SAML responses To Verify Proxy Node")
+            .register();
 
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final TranslatorProxy translatorProxy;
@@ -64,6 +71,7 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
                 samlErrorResponse,
                 sessionData.getEidasRelayState());
 
+        FAILURE_SAML_ERROR.inc();
         return Response.ok().entity(samlFormView).build();
     }
 

@@ -27,7 +27,7 @@ import javax.ws.rs.core.UriBuilder;
 @IngressEgressLogging
 @Path(Urls.GatewayUrls.GATEWAY_ROOT)
 public class HubResponseResource {
-
+    // TODO multi-country PN will need a way to distinguish these counters per country
     private static final Counter RESPONSES = Counter.build(
             MetricsUtils.LABEL_PREFIX + "_responses_total",
             "Number of eIDAS SAML responses to Verify Proxy Node")
@@ -36,6 +36,7 @@ public class HubResponseResource {
             MetricsUtils.LABEL_PREFIX + "_successful_responses_total",
             "Number of successful eIDAS SAML responses To Verify Proxy Node")
             .register();
+
     static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
 
     private final SamlFormViewBuilder samlFormViewBuilder;
