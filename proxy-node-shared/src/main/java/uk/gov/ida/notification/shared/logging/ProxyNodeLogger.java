@@ -32,14 +32,14 @@ public class ProxyNodeLogger {
     }
 
     public static void logException(Throwable exception, Level level, String message) {
-        logInternal(level, message, exception);
+        log(level, message, exception);
     }
 
     private static void log(Level level, String message) {
-        logInternal(level, message, null);
+        log(level, message, null);
     }
 
-    private static void logInternal(Level level, String message, Throwable exception) {
+    private static void log(Level level, String message, Throwable exception) {
         if (exception != null) {
             LOG.log(level, message, exception);
         } else {
