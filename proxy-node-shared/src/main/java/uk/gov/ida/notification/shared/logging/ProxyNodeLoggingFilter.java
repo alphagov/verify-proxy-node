@@ -35,7 +35,7 @@ public class ProxyNodeLoggingFilter implements ContainerRequestFilter, Container
         }
 
         ProxyNodeLogger.addContext(PROXY_NODE_JOURNEY_ID, getJourneyId(requestContext));
-        ProxyNodeLogger.addContext(REFERER, requestContext.getHeaderString(HttpHeaders.REFERER));
+        ProxyNodeLogger.addContext(REFERER, Optional.ofNullable(requestContext.getHeaderString(HttpHeaders.REFERER)).orElse(""));
         Optional.ofNullable(requestContext.getUriInfo()).ifPresent(u -> ProxyNodeLogger.addContext(RESOURCE_PATH, u.getAbsolutePath().toString()));
         Optional.ofNullable(requestContext.getMediaType()).ifPresent(m -> ProxyNodeLogger.addContext(INGRESS_MEDIA_TYPE, m.toString()));
         ProxyNodeLogger.info(MESSAGE_INGRESS);
