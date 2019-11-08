@@ -14,9 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
-import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
-
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -39,35 +36,6 @@ public class ProxyNodeLoggerTest {
     @Before
     public void setUp() {
         LOGGER.addAppender(appender);
-    }
-
-    @Test
-    public void shouldNotLogProxyNodeLoggerAsTheLogLocation() {
-        ProxyNodeLogger.info("test");
-
-        verify(appender).doAppend(loggingEventCaptor.capture());
-
-        final ILoggingEvent logEvent = loggingEventCaptor.getValue();
-        assertThat(logEvent.getMDCPropertyMap().get(ProxyNodeMDCKey.LOG_LOCATION.name())).doesNotContain(ProxyNodeLogger.class.getName());
-        assertThat(logEvent.getMDCPropertyMap().get(ProxyNodeMDCKey.LOG_LOCATION.name())).contains("ProxyNodeLoggerTest.shouldNotLogProxyNodeLoggerAsTheLogLocation");
-    }
-
-    @Test
-    public void shouldAddExceptionContext() {
-        Exception cause = new Exception("cause-message");
-        Exception exception = new Exception("exception-message", cause);
-
-        ProxyNodeLogger.logException(exception, java.util.logging.Level.SEVERE, "log-message");
-
-        verify(appender).doAppend(loggingEventCaptor.capture());
-
-        final ILoggingEvent logEvent = loggingEventCaptor.getValue();
-        assertThat(logEvent.getLevel()).isEqualTo(Level.ERROR);
-        assertThat(logEvent.getMessage()).isEqualTo("log-message");
-
-        final Map<String, String> mdc = logEvent.getMDCPropertyMap();
-        assertThat(mdc.get(ProxyNodeMDCKey.EXCEPTION_MESSAGE.name())).isEqualTo("exception-message");
-        assertThat(mdc.get(ProxyNodeMDCKey.EXCEPTION_STACKTRACE.name())).contains("java.lang.Exception: exception-message");
     }
 
     @Test

@@ -187,7 +187,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
         Response eidasResponse = extractEidasResponseFromTranslator(buildSignedHubResponse());
 
-        verify(appender, Mockito.times(5)).doAppend(loggingEventArgumentCaptor.capture());
+        verify(appender, Mockito.times(4)).doAppend(loggingEventArgumentCaptor.capture());
 
         final List<ILoggingEvent> logEvents = loggingEventArgumentCaptor.getAllValues();
         final Map<String, String> mdcPropertyMap = logEvents.stream()
