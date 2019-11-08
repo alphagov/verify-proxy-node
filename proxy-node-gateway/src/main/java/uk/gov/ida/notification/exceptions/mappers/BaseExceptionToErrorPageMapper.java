@@ -1,5 +1,7 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
+import io.prometheus.client.Counter;
+import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.ws.rs.core.Context;
@@ -12,7 +14,11 @@ import java.util.logging.Level;
 import static java.text.MessageFormat.format;
 
 public abstract class BaseExceptionToErrorPageMapper<TException extends Exception> implements ExceptionMapper<TException> {
-
+    // TODO multi-country PN will need a way to distinguish these counters per country
+    private static final Counter FAILURE_ERROR_PAGE = Counter.build(
+            MetricsUtils.LABEL_PREFIX + "_failure_error_page",
+            "Number of failures reported to the user via a 303 redirect to a Verify error page, eg because an error could not be reported to a remote connector via SAML")
+            .register();
     private final URI errorPageRedirectUrl;
 
     private UriInfo uriInfo;
@@ -28,6 +34,7 @@ public abstract class BaseExceptionToErrorPageMapper<TException extends Exceptio
 
     @Override
     public Response toResponse(TException exception) {
+        FAILURE_ERROR_PAGE.inc();
         logException(exception);
         return Response.seeOther(errorPageRedirectUrl).build();
     }
