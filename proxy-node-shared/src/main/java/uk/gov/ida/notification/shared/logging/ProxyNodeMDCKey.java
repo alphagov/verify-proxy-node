@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.shared.logging;
 
 public enum ProxyNodeMDCKey {
-    LOG_LOCATION,
     HUB_REQUEST_ID,
     HUB_URL,
     EIDAS_REQUEST_ID,
@@ -11,8 +10,6 @@ public enum ProxyNodeMDCKey {
     CONNECTOR_PUBLIC_ENC_CERT_SUFFIX,
     SIGNING_PROVIDER,
     EIDAS_LOA,
-    EXCEPTION_STACKTRACE,
-    EXCEPTION_MESSAGE,
     SESSION_ID,
     REFERER,
     RESOURCE_PATH,

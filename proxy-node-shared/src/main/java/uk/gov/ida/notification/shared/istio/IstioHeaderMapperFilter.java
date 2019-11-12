@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.shared.istio;
 
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
-import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -25,8 +24,6 @@ public class IstioHeaderMapperFilter implements ContainerResponseFilter, Contain
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         istioHeaderStorage.appendIstioHeadersToResponseContextHeaders(responseContext);
-        // TODO: remove once istio tracing works
-        ProxyNodeLogger.info(istioHeaderStorage.toString());
         istioHeaderStorage.clear();
     }
 }
