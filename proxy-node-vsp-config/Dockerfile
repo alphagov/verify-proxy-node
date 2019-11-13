@@ -14,7 +14,7 @@ COPY --from=jre $JAVA_HOME $JAVA_HOME
 COPY build/install/verify-service-provider .
 
 RUN rm verify-service-provider.yml
-ADD https://raw.githubusercontent.com/alphagov/verify-proxy-node/master/proxy-node-vsp-config/verify-service-provider.yml verify-service-provider.yml
+ADD https://raw.githubusercontent.com/alphagov/verify-proxy-node/release/single-country-legacy/proxy-node-vsp-config/verify-service-provider.yml verify-service-provider.yml
 
 ENTRYPOINT ["bin/verify-service-provider"]
 CMD ["server", "verify-service-provider.yml"]
