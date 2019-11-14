@@ -114,12 +114,12 @@ public class Attributes {
                     .filter(Attribute::isVerified)
                     .collect(Collectors.toList());
 
-            if (verifiedAndCurrent.isEmpty()) {
-                ProxyNodeLogger.info("No verified and current attributes: " + createAttributesMessage());
-                return current;
-            } else {
+            if (!verifiedAndCurrent.isEmpty()) {
                 return verifiedAndCurrent;
             }
+
+            ProxyNodeLogger.info("No verified and current attributes: " + createAttributesMessage());
+            return current;
         }
 
         public List<Attribute<T>> getAllAttributes() {
