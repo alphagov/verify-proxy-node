@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-./gradlew clean test
+./gradlew --parallel clean test

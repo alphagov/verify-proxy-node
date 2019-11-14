@@ -43,7 +43,6 @@ import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EID
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ISSUER;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_REQUEST_ID;
-import static uk.gov.ida.notification.resources.EidasAuthnRequestResource.SUBMIT_BUTTON_TEXT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EidasAuthnRequestResourceTest {
@@ -138,7 +137,7 @@ public class EidasAuthnRequestResourceTest {
 
         verify(eidasSamlParserService).parse(captorEidasSamlParserRequest.capture(), any(String.class));
         verify(vspProxy).generateAuthnRequest(any(String.class));
-        verify(samlFormViewBuilder).buildRequest("http://hub.bub", SAMPLE_HUB_SAML_AUTHN_REQUEST, SUBMIT_BUTTON_TEXT, "journey id");
+        verify(samlFormViewBuilder).buildRequest("http://hub.bub", SAMPLE_HUB_SAML_AUTHN_REQUEST, "journey id");
         verify(session).getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name());
         verifyNoMoreInteractions(vspProxy, eidasSamlParserService, appender, samlFormViewBuilder, session);
         verifyNoMoreInteractions(sessionStore);
