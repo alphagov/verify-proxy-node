@@ -21,20 +21,20 @@ public class HubResponseAttributesHashLogger {
             return;
         }
 
-        attributes.getFirstNames().stream()
+        attributes.getFirstNames().getAllAttributes().stream()
                 .filter(Attribute::isVerified)
                 .findFirst()
                 .ifPresent(firstName -> logger.setFirstName(firstName.getValue()));
 
-        attributes.getMiddleNames().forEach(
+        attributes.getMiddleNames().getAllAttributes().forEach(
                 middleName -> logger.addMiddleName(middleName.getValue())
         );
 
-        attributes.getSurnames().forEach(
+        attributes.getSurnames().getAllAttributes().forEach(
                 surname -> logger.addSurname(surname.getValue())
         );
 
-        attributes.getDatesOfBirth().stream()
+        attributes.getDatesOfBirth().getAllAttributes().stream()
                 .filter(Attribute::isVerified)
                 .findFirst()
                 .ifPresent(dateOfBirth -> logger.setDateOfBirth(dateOfBirth.getValue()));

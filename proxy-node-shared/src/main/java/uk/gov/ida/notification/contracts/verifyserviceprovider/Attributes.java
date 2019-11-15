@@ -1,14 +1,16 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.ISODateTimeFormat;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Attributes {
@@ -53,40 +55,82 @@ public class Attributes {
         this.addresses = addresses;
     }
 
-    public List<Attribute<String>> getFirstNames() {
-        return firstNames != null ? firstNames : new ArrayList<>();
+    @JsonIgnore
+    public AttributesList<String> getFirstNames() {
+        return new AttributesList(firstNames, "firstName");
     }
 
-    public List<Attribute<String>> getMiddleNames() {
-        return middleNames != null ? middleNames : new ArrayList<>();
+    @JsonIgnore
+    public AttributesList<String> getMiddleNames() {
+        return new AttributesList(middleNames, "middleName");
     }
 
-    public List<Attribute<String>> getSurnames() {
-        return surnames != null ? surnames : new ArrayList<>();
+    @JsonIgnore
+    public AttributesList<String> getSurnames() {
+        return new AttributesList(surnames, "surname");
     }
 
-    public List<Attribute<DateTime>> getDatesOfBirth() {
-        return datesOfBirth != null ? datesOfBirth : new ArrayList<>();
+    @JsonIgnore
+    public AttributesList<DateTime> getDatesOfBirth() {
+        return new AttributesList(datesOfBirth, "dateOfBirth");
     }
 
+    @JsonIgnore
     public Attribute<String> getGender() {
         return gender;
     }
 
-    public List<Attribute<Address>> getAddresses() {
-        return addresses;
-    }
-
-    public static String combineAttributeValues(List<Attribute<String>> attributes) {
-        return attributes.stream()
-                .filter(Objects::nonNull)
-                .map(Attribute::getValue)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(" "));
+    @JsonIgnore
+    public AttributesList<Address> getAddresses() {
+        return new AttributesList(addresses, "address");
     }
 
     // Prints date in EIDAS format YYYY-MM-dd
-    public static String getFormattedDate(DateTime date) {
+    public static String getDateInEidasFormat(DateTime date) {
         return ISODateTimeFormat.date().withChronology(ISOChronology.getInstanceUTC()).print(date);
+    }
+
+    public class AttributesList<T> {
+
+        private final List<Attribute<T>> attributes;
+        private final String type;
+
+        AttributesList(List<Attribute<T>> attributes, String type) {
+            this.attributes = Optional.ofNullable(attributes).orElse(Collections.emptyList());
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public List<Attribute<T>> getValidAttributes() {
+
+            var current = getAllAttributes().stream()
+                    .filter(Attribute::isCurrent)
+                    .collect(Collectors.toList());
+
+            var verifiedAndCurrent = current.stream()
+                    .filter(Attribute::isVerified)
+                    .collect(Collectors.toList());
+
+            if (!verifiedAndCurrent.isEmpty()) {
+                return verifiedAndCurrent;
+            }
+
+            ProxyNodeLogger.info("No verified and current attributes: " + createAttributesMessage());
+            return current;
+        }
+
+        public List<Attribute<T>> getAllAttributes() {
+            return Collections.unmodifiableList(attributes);
+        }
+
+        public String createAttributesMessage() {
+            return "[ " + type + " " + attributes.stream()
+                    .map(Attribute::toString)
+                    .collect(Collectors.joining(", ")) + " ]";
+        }
+
     }
 }
