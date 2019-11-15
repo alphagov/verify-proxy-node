@@ -22,7 +22,7 @@ public class AttributesBuilder {
     public static final LocalDate VALID_FROM = createDateTime(2001, 1, 1);
     public static final LocalDate DATE_OF_BIRTH = createDateTime(1990, 1, 1);
 
-    private List<NonMatchingTransliterableAttribute> firstNames = new ArrayList<NonMatchingTransliterableAttribute>(singletonList(createNonMatchingTransliterableAttribute(FIRST_NAME)));
+    private List<NonMatchingTransliterableAttribute> firstNames = new ArrayList<>(singletonList(createNonMatchingTransliterableAttribute(FIRST_NAME)));
     private List<NonMatchingVerifiableAttribute<String>> middleNames = new ArrayList<>(singletonList(createNonMatchingVerifiableAttribute(MIDDLE_NAME)));
     private List<NonMatchingTransliterableAttribute> lastNames = new ArrayList<>(singletonList(createNonMatchingTransliterableAttribute(LAST_NAME)));
     private NonMatchingVerifiableAttribute<Gender> gender = createNonMatchingVerifiableAttribute(NOT_SPECIFIED);
