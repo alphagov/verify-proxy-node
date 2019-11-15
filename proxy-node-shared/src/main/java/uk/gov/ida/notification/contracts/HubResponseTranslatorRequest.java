@@ -2,7 +2,6 @@ package uk.gov.ida.notification.contracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
-import uk.gov.ida.eidas.logging.HubResponseTranslatorRequestInterface;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.notification.validations.ValidDestinationUri;
 import uk.gov.ida.notification.validations.ValidLOA;
@@ -12,7 +11,7 @@ import uk.gov.ida.notification.validations.ValidSamlId;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class HubResponseTranslatorRequest implements HubResponseTranslatorRequestInterface {
+public class HubResponseTranslatorRequest {
 
     @NotBlank
     @JsonProperty

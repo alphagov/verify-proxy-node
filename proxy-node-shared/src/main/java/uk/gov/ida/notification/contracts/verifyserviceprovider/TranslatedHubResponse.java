@@ -1,12 +1,11 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.ida.eidas.logging.TranslatedHubResponseInterface;
 import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
 
 import javax.validation.constraints.NotNull;
 
-public class TranslatedHubResponse implements TranslatedHubResponseInterface {
+public class TranslatedHubResponse {
 
     @NotNull
     @JsonProperty

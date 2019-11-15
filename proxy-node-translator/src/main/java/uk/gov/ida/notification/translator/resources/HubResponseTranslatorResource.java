@@ -64,7 +64,12 @@ public class HubResponseTranslatorResource {
         );
 
         EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
-        eidasAttributesLogger.logEidasAttributesAsHash(hubResponseTranslatorRequest, translatedHubResponse);
+        eidasAttributesLogger.logEidasAttributesAsHash(
+                translatedHubResponse.getAttributes(),
+                translatedHubResponse.getPid(),
+                hubResponseTranslatorRequest.getRequestId(),
+                hubResponseTranslatorRequest.getDestinationUrl()
+        );
         logSamlResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
