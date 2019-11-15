@@ -19,9 +19,9 @@
     </md:Extensions>
     <md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
         <md:NameIDFormat xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
-        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://proxy-node.invalid/SAML2/SSO/POST"
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://test-proxy-node.london.verify.govsvc.uk/SAML2/SSO/POST" 
             xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"/>
-        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://proxy-node.invalid/Redirect"
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://test-proxy-node.london.verify.govsvc.uk/Redirect" 
             xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"/>
         <saml2:Attribute FriendlyName="PersonIdentifier" Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" 
             xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"/>
