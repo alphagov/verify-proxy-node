@@ -1,9 +1,8 @@
 # Base builder image to build apps that need to talk to the HSM cient
+FROM amazonlinux:2.0.20191016.0
 
-FROM amazonlinux:2.0.20190508
-
-# Install JDK
-RUN amazon-linux-extras install java-openjdk11
+# Install Java
+RUN yum install -y java-11-amazon-corretto
 
 # Install AWS CloudHSM client and libs
 ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-2.0.0-3.el7.x86_64.rpm .
