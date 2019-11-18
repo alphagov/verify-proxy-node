@@ -78,7 +78,7 @@ spec:
       source:
         <<: *github_source
         ignore_paths: [cloudhsm, proxy-node-vsp-config, ci]
-        branch: master
+        branch: release/single-country-legacy
 
     - name: vsp-src
       icon: github-circle
@@ -93,7 +93,7 @@ spec:
       source:
         <<: *github_source
         paths: [proxy-node-vsp-config]
-        branch: master
+        branch: release/single-country-legacy
 
     - name: cloudhsm-config
       type: github
@@ -101,7 +101,7 @@ spec:
       source:
         <<: *github_source
         paths: [cloudhsm]
-        branch: master
+        branch: release/single-country-legacy
 
     - name: release
       type: github-release
