@@ -10,13 +10,13 @@ import uk.gov.ida.notification.views.SamlFormView;
 public class SamlFormViewBuilder {
     private SamlObjectMarshaller marshaller = new SamlObjectMarshaller();
 
-    public SamlFormView buildRequest(String url, AuthnRequest authnRequest, String submitText, String relayState) {
+    public SamlFormView buildRequest(String url, AuthnRequest authnRequest, String relayState) {
         String samlMessage = marshaller.transformToString(authnRequest);
         String encodedSamlMessage = Base64.encodeAsString(samlMessage);
-        return buildRequest(url, encodedSamlMessage, submitText, relayState);
+        return buildRequest(url, encodedSamlMessage, relayState);
     }
 
-    public SamlFormView buildRequest(String url, String encodedSamlMessage, String submitText, String relayState) {
+    public SamlFormView buildRequest(String url, String encodedSamlMessage, String relayState) {
         return new SamlFormView(url, SamlFormMessageType.SAML_REQUEST, encodedSamlMessage, relayState);
     }
 

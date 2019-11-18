@@ -22,7 +22,7 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
         String encodedAuthnRequest = Base64.encodeAsString(MARSHALLER.transformToString(authnRequest));
 
-        SamlFormView view = SAML_FORM_VIEW_BUILDER.buildRequest("url", authnRequest, "submit", "relay");
+        SamlFormView view = SAML_FORM_VIEW_BUILDER.buildRequest("url", authnRequest, "relay");
 
         assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
         assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
@@ -33,7 +33,7 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
     @Test
     public void shouldGenerateSAMLRequestFormFromEncodedSAMLMessage() {
         String encodedAuthnRequest = Base64.encodeAsString("a saml blob");
-        SamlFormView view = SAML_FORM_VIEW_BUILDER.buildRequest("url", encodedAuthnRequest, "submit", "relay");
+        SamlFormView view = SAML_FORM_VIEW_BUILDER.buildRequest("url", encodedAuthnRequest, "relay");
         assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
         assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
         assertThat("url").isEqualTo(view.getPostUrl());
