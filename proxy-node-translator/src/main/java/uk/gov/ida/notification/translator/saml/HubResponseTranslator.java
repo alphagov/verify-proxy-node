@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.translator.saml;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeComparator;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
 import se.litsec.eidas.opensaml.common.EidasConstants;
@@ -10,15 +9,16 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingVerifiableAttribute;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -115,18 +115,18 @@ public class HubResponseTranslator {
     }
 
     private static String getCombineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
-        var firstNames = hubResponseContainer.getAttributes().getFirstNames();
+        var firstNames = hubResponseContainer.getAttributes().getFirstNamesAttributesList();
         var validFirstNames = firstNames.getValidAttributes();
         if (validFirstNames.isEmpty()) {
             throw new HubResponseTranslationException("No verified current first name present: " + firstNames.createAttributesMessage());
         }
-        List<Attribute<String>> validMiddleNames = hubResponseContainer.getAttributes().getMiddleNames().getValidAttributes();
+        var validMiddleNames = hubResponseContainer.getAttributes().getMiddleNamesAttributesList().getValidAttributes();
         validFirstNames.addAll(validMiddleNames);
         return combineStringAttributeValues(validFirstNames);
     }
 
     private static String getCombinedSurnames(HubResponseContainer hubResponseContainer) {
-        var surnames = hubResponseContainer.getAttributes().getSurnames();
+        var surnames = hubResponseContainer.getAttributes().getSurnamesAttributesList();
         var validSurnames = surnames.getValidAttributes();
         if (validSurnames.isEmpty()) {
             throw new HubResponseTranslationException("No verified current surname present: " + surnames.createAttributesMessage());
@@ -135,18 +135,19 @@ public class HubResponseTranslator {
     }
 
     private static String getLatestValidDateOfBirth(HubResponseContainer hubResponseContainer) {
-        var datesOfBirth = hubResponseContainer.getAttributes().getDatesOfBirth();
+        var datesOfBirth = hubResponseContainer.getAttributes().getDatesOfBirthAttributesList();
         var validDatesOfBirth = datesOfBirth.getValidAttributes();
         if (validDatesOfBirth.isEmpty()) {
             throw new HubResponseTranslationException("No verified current date of birth present: " + datesOfBirth.createAttributesMessage());
         }
+
         return validDatesOfBirth.stream()
-                .map(Attribute::getValue)
-                .reduce(BinaryOperator.maxBy(DateTimeComparator.getDateOnlyInstance()))
-                .map(Attributes::getDateInEidasFormat).get();
+                .map(NonMatchingVerifiableAttribute::getValue)
+                .reduce(BinaryOperator.maxBy(Comparator.comparing(LocalDate::toEpochDay)))
+                .map(date -> date.toString()).get();
     }
 
-    private static String combineStringAttributeValues(List<Attribute<String>> attributeStream) {
-        return attributeStream.stream().map(Attribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
+    private static String combineStringAttributeValues(List<NonMatchingVerifiableAttribute<String>> attributeStream) {
+        return attributeStream.stream().map(NonMatchingVerifiableAttribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
     }
 }
