@@ -1,4 +1,3 @@
----
 apiVersion: concourse.k8s.io/v1beta1
 kind: Pipeline
 metadata:
