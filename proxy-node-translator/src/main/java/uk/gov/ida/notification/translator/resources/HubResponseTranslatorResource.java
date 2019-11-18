@@ -37,6 +37,7 @@ public class HubResponseTranslatorResource {
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
+    private final EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
 
     public HubResponseTranslatorResource(EidasResponseGenerator eidasResponseGenerator,
                                          VerifyServiceProviderProxy verifyServiceProviderProxy) {
@@ -58,10 +59,8 @@ public class HubResponseTranslatorResource {
                         )
                 );
 
-
-        EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
         eidasAttributesLogger.logEidasAttributesAsHash(
-                translatedHubResponse.getAttributes(),
+                translatedHubResponse.getAttributes().orElse(null),
                 translatedHubResponse.getPid(),
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl()

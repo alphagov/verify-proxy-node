@@ -28,6 +28,7 @@ import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseCancellation;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerified;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerifiedNoAttributes;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseRequestError;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
@@ -85,6 +86,15 @@ public class HubResponseTranslatorTest {
     }
 
     @Test
+    public void translateShouldThrowIfIdentityVerifiedButNoAttributes() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseIdentityVerifiedNoAttributes());
+
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("Attributes are null for VSP scenario: IDENTITY_VERIFIED");
+    }
+
+    @Test
     public void translateShouldThrowWhenNoFirstNamePresent() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutFirstName().build());
 
@@ -136,7 +146,7 @@ public class HubResponseTranslatorTest {
                 null
         );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes();
+        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
         assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
@@ -149,7 +159,7 @@ public class HubResponseTranslatorTest {
                 null
         );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes();
+        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
         assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
@@ -162,7 +172,7 @@ public class HubResponseTranslatorTest {
                 LocalDate.now().plusDays(1)
         );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes();
+        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
         assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 

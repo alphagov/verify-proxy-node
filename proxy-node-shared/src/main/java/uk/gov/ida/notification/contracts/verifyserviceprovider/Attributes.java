@@ -25,16 +25,21 @@ public class Attributes extends NonMatchingAttributes {
         super(firstNames, middleNames, surnames, datesOfBirth, gender, addresses);
     }
 
-    public static Attributes fromNonMatchingAttributes(NonMatchingAttributes nonMatchingAttributes) {
-
-        return new Attributes(
-                nonMatchingAttributes.getFirstNames(),
-                nonMatchingAttributes.getMiddleNames(),
-                nonMatchingAttributes.getSurnames(),
-                nonMatchingAttributes.getDatesOfBirth(),
-                nonMatchingAttributes.getGender(),
-                nonMatchingAttributes.getAddresses()
-        );
+    public static Optional<Attributes> fromNonMatchingAttributes(NonMatchingAttributes nonMatchingAttributes) {
+        if (nonMatchingAttributes == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(
+                    new Attributes(
+                        nonMatchingAttributes.getFirstNames(),
+                        nonMatchingAttributes.getMiddleNames(),
+                        nonMatchingAttributes.getSurnames(),
+                        nonMatchingAttributes.getDatesOfBirth(),
+                        nonMatchingAttributes.getGender(),
+                        nonMatchingAttributes.getAddresses()
+                    )
+            );
+        }
     }
 
     @JsonIgnore
@@ -63,7 +68,7 @@ public class Attributes extends NonMatchingAttributes {
     }
 
     @JsonIgnore
-    public AttributesList<Address> getAddressesAttributesList() {
+    public AttributesList<NonMatchingAddress> getAddressesAttributesList() {
         return new AttributesList(addresses, "address");
     }
 
