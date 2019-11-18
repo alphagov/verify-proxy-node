@@ -109,7 +109,7 @@ public class VspProxyTranslateResponseTest {
         assertThat(VspScenario.AUTHENTICATION_FAILED).isEqualTo(response.getScenario());
         assertThat("123456").isEqualTo(response.getPid());
         assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
-        assertThat(response.getAttributes()).isNull();
+        assertThat(response.getAttributes().isEmpty());
 
         Mockito.verify(jsonClient).post(
                 Mockito.argThat((VerifyServiceProviderTranslationRequest request) -> request.getLevelOfAssurance().equals("LEVEL_2")),

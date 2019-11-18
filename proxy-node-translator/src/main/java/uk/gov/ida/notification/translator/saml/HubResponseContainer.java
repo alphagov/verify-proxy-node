@@ -7,13 +7,14 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssuran
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 
 import java.net.URI;
+import java.util.Optional;
 
 public class HubResponseContainer {
 
     private String pid;
     private String eidasRequestId;
     private URI destinationURL;
-    private Attributes attributes;
+    private Optional<Attributes> attributes;
     private VspScenario vspScenario;
     private VspLevelOfAssurance levelOfAssurance;
 
@@ -38,7 +39,7 @@ public class HubResponseContainer {
         return destinationURL.toString();
     }
 
-    Attributes getAttributes() {
+    Optional<Attributes> getAttributes() {
         return attributes;
     }
 

@@ -9,6 +9,7 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
@@ -48,19 +49,20 @@ public class HubResponseTranslator {
         final String pid = pidPrefix + hubResponseContainer.getPid();
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
+            var attributes = getAttributesOrThrow(hubResponseContainer);
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                    getCombineFirstAndMiddleNames(hubResponseContainer)
+                    getCombineFirstAndMiddleNames(attributes)
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
-                    getCombinedSurnames(hubResponseContainer)
+                    getCombinedSurnames(attributes)
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                    getLatestValidDateOfBirth(hubResponseContainer)
+                    getLatestValidDateOfBirth(attributes)
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
@@ -114,19 +116,20 @@ public class HubResponseTranslator {
         }
     }
 
-    private static String getCombineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
-        var firstNames = hubResponseContainer.getAttributes().getFirstNamesAttributesList();
+    private static String getCombineFirstAndMiddleNames(Attributes attributes) {
+        var firstNames = attributes.getFirstNamesAttributesList();
         var validFirstNames = firstNames.getValidAttributes();
         if (validFirstNames.isEmpty()) {
             throw new HubResponseTranslationException("No verified current first name present: " + firstNames.createAttributesMessage());
         }
-        var validMiddleNames = hubResponseContainer.getAttributes().getMiddleNamesAttributesList().getValidAttributes();
+        var validMiddleNames = attributes.getMiddleNamesAttributesList().getValidAttributes();
         validFirstNames.addAll(validMiddleNames);
+
         return combineStringAttributeValues(validFirstNames);
     }
 
-    private static String getCombinedSurnames(HubResponseContainer hubResponseContainer) {
-        var surnames = hubResponseContainer.getAttributes().getSurnamesAttributesList();
+    private static String getCombinedSurnames(Attributes attributes) {
+        var surnames = attributes.getSurnamesAttributesList();
         var validSurnames = surnames.getValidAttributes();
         if (validSurnames.isEmpty()) {
             throw new HubResponseTranslationException("No verified current surname present: " + surnames.createAttributesMessage());
@@ -134,8 +137,8 @@ public class HubResponseTranslator {
         return combineStringAttributeValues(surnames.getValidAttributes());
     }
 
-    private static String getLatestValidDateOfBirth(HubResponseContainer hubResponseContainer) {
-        var datesOfBirth = hubResponseContainer.getAttributes().getDatesOfBirthAttributesList();
+    private static String getLatestValidDateOfBirth(Attributes attributes) {
+        var datesOfBirth = attributes.getDatesOfBirthAttributesList();
         var validDatesOfBirth = datesOfBirth.getValidAttributes();
         if (validDatesOfBirth.isEmpty()) {
             throw new HubResponseTranslationException("No verified current date of birth present: " + datesOfBirth.createAttributesMessage());
@@ -149,5 +152,13 @@ public class HubResponseTranslator {
 
     private static String combineStringAttributeValues(List<NonMatchingVerifiableAttribute<String>> attributeStream) {
         return attributeStream.stream().map(NonMatchingVerifiableAttribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
+    }
+
+    private static Attributes getAttributesOrThrow(HubResponseContainer hubResponseContainer) {
+        return hubResponseContainer
+                .getAttributes()
+                .orElseThrow(
+                        () -> new HubResponseTranslationException("Attributes are null for VSP scenario: " + hubResponseContainer.getVspScenario())
+                );
     }
 }

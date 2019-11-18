@@ -5,6 +5,8 @@ import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Optional;
+
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.fromNonMatchingAttributes;
 
 public class TranslatedHubResponse {
@@ -52,7 +54,7 @@ public class TranslatedHubResponse {
         return levelOfAssurance;
     }
 
-    public Attributes getAttributes() {
-        return attributes == null ? null : fromNonMatchingAttributes(attributes);
+    public Optional<Attributes> getAttributes() {
+        return fromNonMatchingAttributes(attributes);
     }
 }
