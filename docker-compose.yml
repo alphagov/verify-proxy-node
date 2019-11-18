@@ -1,0 +1,89 @@
+version: '3.7'
+
+services:
+  proxy-node-gateway:
+    image: eidas/proxy-node-gateway
+    build:
+      context: .
+      dockerfile: local-startup/Dockerfile
+      args:
+        component: proxy-node-gateway
+        USE_LOCAL_BUILD: ${USE_LOCAL_BUILD:-true}
+        VERIFY_USE_PUBLIC_BINARIES: ${VERIFY_USE_PUBLIC_BINARIES:-false}
+    env_file: ./local-startup/docker.env
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6602"
+    ports:
+      - "6600:6600"
+      - "6602:6602"
+    volumes:
+      - ./local-startup/metadata:/app/metadata
+
+  eidas-saml-parser:
+    image: eidas/eidas-saml-parser
+    build:
+      context: .
+      dockerfile: local-startup/Dockerfile
+      args:
+        component: eidas-saml-parser
+        USE_LOCAL_BUILD: ${USE_LOCAL_BUILD:-true}
+        VERIFY_USE_PUBLIC_BINARIES: ${VERIFY_USE_PUBLIC_BINARIES:-false}
+    depends_on:
+      - stub-connector
+    env_file: ./local-startup/docker.env
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6002"
+    ports:
+      - "6000:6000"
+      - "6002:6002"
+    volumes:
+      - ./local-startup/metadata:/app/metadata
+
+  translator:
+    image: eidas/translator
+    build:
+      context: .
+      dockerfile: local-startup/Dockerfile
+      args:
+        component: proxy-node-translator
+        USE_LOCAL_BUILD: ${USE_LOCAL_BUILD:-true}
+        VERIFY_USE_PUBLIC_BINARIES: ${VERIFY_USE_PUBLIC_BINARIES:-false}
+    env_file: ./local-startup/docker.env
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6662"
+    ports:
+      - "6660:6660"
+      - "6662:6662"
+    volumes:
+      - ./local-startup/pki/test:/app/pki
+      - ./local-startup/pki/verify-dev-pki:/app/verify-dev-pki
+
+  stub-connector:
+    image: eidas/stub-connector
+    build:
+      context: .
+      dockerfile: local-startup/Dockerfile
+      args:
+        component: stub-connector
+        USE_LOCAL_BUILD: ${USE_LOCAL_BUILD:-true}
+        VERIFY_USE_PUBLIC_BINARIES: ${VERIFY_USE_PUBLIC_BINARIES:-false}
+    env_file: ./local-startup/docker.env
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6612"
+    ports:
+      - "6610:6610"
+      - "6612:6612"
+    volumes:
+      - ./local-startup/metadata:/app/metadata
+      - ./local-startup/pki/test:/app/pki
+      - ./local-startup/pki/verify-dev-pki:/app/verify-dev-pki
+
+  verify-service-provider:
+    image: registry.london.verify.govsvc.uk/eidas/verify-service-provider:latest
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50302"
+    entrypoint: ["bin/verify-service-provider"]
+    command: ["development", "-u", "http://localhost:6600/SAML2/SSO/Response/POST"]
+    ports:
+      - "50300:50300"
+      - "50302:50302"

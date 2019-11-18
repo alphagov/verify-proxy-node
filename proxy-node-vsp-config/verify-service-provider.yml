@@ -26,14 +26,13 @@ serviceEntityIds: ${SERVICE_ENTITY_IDS:-[]}
 hashingEntityId: ${HASHING_ENTITY_ID:-}
 
 verifyHubConfiguration:
-  environment: ${VERIFY_ENVIRONMENT:-}
+  environment: ${VERIFY_ENVIRONMENT}
 
-samlSigningKey: ${SAML_SIGNING_KEY:-}
+samlSigningKey: ${VSP_SAML_SIGNING_KEY}
 
-samlPrimaryEncryptionKey: ${SAML_PRIMARY_ENCRYPTION_KEY:-}
+samlPrimaryEncryptionKey: ${VSP_SAML_PRIMARY_ENCRYPTION_KEY}
 
-samlSecondaryEncryptionKey: ${SAML_SECONDARY_ENCRYPTION_KEY:-}
+samlSecondaryEncryptionKey: ${VSP_SAML_SECONDARY_ENCRYPTION_KEY:-}
 
 europeanIdentity:
   enabled: ${EUROPEAN_IDENTITY_ENABLED:-false}
-

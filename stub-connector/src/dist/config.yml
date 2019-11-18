@@ -39,8 +39,8 @@ credentialConfiguration:
   hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-stub_connector_key}
   publicKey:
     type: ${CERT_TYPES:-encoded}
-    cert: ${SIGNING_CERT}
+    cert: ${CONNECTOR_SIGNING_CERT}
     name: stub_connector
   privateKey:
     type: ${KEY_TYPES:-encoded}
-    key: ${SIGNING_KEY}
+    key: ${CONNECTOR_SIGNING_KEY}
