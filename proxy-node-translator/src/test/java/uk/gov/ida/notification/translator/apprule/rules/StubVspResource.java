@@ -1,8 +1,8 @@
 package uk.gov.ida.notification.translator.apprule.rules;
 
-import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder;
+import uk.gov.ida.notification.contracts.verifyserviceprovider.VerifyServiceProviderTranslationRequest;
 import uk.gov.ida.notification.shared.Urls;
 
 import javax.ws.rs.Consumes;
@@ -19,7 +19,7 @@ public class StubVspResource {
 
     @POST
     @Path(Urls.VerifyServiceProviderUrls.TRANSLATE_HUB_RESPONSE_ENDPOINT)
-    public TranslatedHubResponse getTranslatedHubResponse(HubResponseTranslatorRequest hubResponseTranslatorRequest) {
+    public TranslatedHubResponse getTranslatedHubResponse(VerifyServiceProviderTranslationRequest verifyServiceProviderTranslationRequest) {
         return TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerified();
     }
 }
