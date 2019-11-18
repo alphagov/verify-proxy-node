@@ -44,7 +44,7 @@ public class EidasAuthnRequestResource {
             MetricsUtils.LABEL_PREFIX + "_successful_requests_total",
             "Number of successful eIDAS SAML requests to Verify Proxy Node")
             .register();
-    public static final String SUBMIT_BUTTON_TEXT = "Post Verify Authn Request to Hub";
+
     private final EidasSamlParserProxy eidasSamlParserService;
     private final VerifyServiceProviderProxy vspProxy;
     private final SamlFormViewBuilder samlFormViewBuilder;
@@ -123,6 +123,6 @@ public class EidasAuthnRequestResource {
     private SamlFormView buildSamlFormView(AuthnRequestResponse vspResponse, String relayState) {
         URI hubUrl = vspResponse.getSsoLocation();
         String samlRequest = vspResponse.getSamlRequest();
-        return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, SUBMIT_BUTTON_TEXT, relayState);
+        return samlFormViewBuilder.buildRequest(hubUrl.toString(), samlRequest, relayState);
     }
 }

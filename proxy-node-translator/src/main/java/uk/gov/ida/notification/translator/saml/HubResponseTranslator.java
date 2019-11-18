@@ -19,14 +19,10 @@ import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.combineAttributeValues;
 
 public class HubResponseTranslator {
 
@@ -119,39 +115,38 @@ public class HubResponseTranslator {
     }
 
     private static String getCombineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
-        final List<Attribute<String>> firstNames = hubResponseContainer.getAttributes().getFirstNames();
-        final List<Attribute<String>> middleNames = hubResponseContainer.getAttributes().getMiddleNames();
-
-        final String firstNamesCombined = combineAttributeValues(getValidAttributes(firstNames));
-
-        if (firstNamesCombined.isEmpty()) {
-            throw new HubResponseTranslationException("No verified current first name present");
+        var firstNames = hubResponseContainer.getAttributes().getFirstNames();
+        var validFirstNames = firstNames.getValidAttributes();
+        if (validFirstNames.isEmpty()) {
+            throw new HubResponseTranslationException("No verified current first name present: " + firstNames.createAttributesMessage());
         }
-
-        final String middleNamesCombined = combineAttributeValues(getValidAttributes(middleNames));
-
-        return middleNamesCombined.isEmpty() ? firstNamesCombined : firstNamesCombined + " " + middleNamesCombined;
+        List<Attribute<String>> validMiddleNames = hubResponseContainer.getAttributes().getMiddleNames().getValidAttributes();
+        validFirstNames.addAll(validMiddleNames);
+        return combineStringAttributeValues(validFirstNames);
     }
 
     private static String getCombinedSurnames(HubResponseContainer hubResponseContainer) {
-        return Optional.of(combineAttributeValues(getValidAttributes(hubResponseContainer.getAttributes().getSurnames())))
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> new HubResponseTranslationException("No verified current surname present"));
+        var surnames = hubResponseContainer.getAttributes().getSurnames();
+        var validSurnames = surnames.getValidAttributes();
+        if (validSurnames.isEmpty()) {
+            throw new HubResponseTranslationException("No verified current surname present: " + surnames.createAttributesMessage());
+        }
+        return combineStringAttributeValues(surnames.getValidAttributes());
     }
 
     private static String getLatestValidDateOfBirth(HubResponseContainer hubResponseContainer) {
-        return getValidAttributes(hubResponseContainer.getAttributes().getDatesOfBirth())
-                .stream()
+        var datesOfBirth = hubResponseContainer.getAttributes().getDatesOfBirth();
+        var validDatesOfBirth = datesOfBirth.getValidAttributes();
+        if (validDatesOfBirth.isEmpty()) {
+            throw new HubResponseTranslationException("No verified current date of birth present: " + datesOfBirth.createAttributesMessage());
+        }
+        return validDatesOfBirth.stream()
                 .map(Attribute::getValue)
                 .reduce(BinaryOperator.maxBy(DateTimeComparator.getDateOnlyInstance()))
-                .map(Attributes::getFormattedDate)
-                .orElseThrow(() -> new HubResponseTranslationException("No verified current date of birth present"));
+                .map(Attributes::getDateInEidasFormat).get();
     }
 
-    private static <T> List<Attribute<T>> getValidAttributes(List<Attribute<T>> attributes) {
-        return Optional.ofNullable(attributes).orElse(Collections.emptyList())
-                .stream()
-                .filter(Attribute::isValid)
-                .collect(Collectors.toList());
+    private static String combineStringAttributeValues(List<Attribute<String>> attributeStream) {
+        return attributeStream.stream().map(Attribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
     }
 }

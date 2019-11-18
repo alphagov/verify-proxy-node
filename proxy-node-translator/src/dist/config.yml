@@ -34,8 +34,8 @@ credentialConfiguration:
   hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-signing_key}
   publicKey:
     type: ${CERT_TYPES:-encoded}
-    cert: ${SIGNING_CERT}
+    cert: ${TRANSLATOR_SIGNING_CERT}
     name: proxy_node_signing
   privateKey:
     type: ${KEY_TYPES:-encoded}
-    key: ${SIGNING_KEY}
+    key: ${TRANSLATOR_SIGNING_KEY}

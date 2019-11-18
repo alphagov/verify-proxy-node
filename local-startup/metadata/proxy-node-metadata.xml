@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="7a845c01-5da6-4d6d-a004-876884a8e35f" entityID="http://proxy-node-gateway:6600/ServiceMetadata" validUntil="2020-07-18T16:20:10.172Z"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>eQFIwo8eq8aRYtnrXzIh56r/jP1bpmzWcp4p9wVdjHA=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+SAuuqtPvaYr2Oi0jRfaO2aA5p2acSboYOAJ7wQtSWrCgMWtvsiGP9MokFO8Mq9SUdrZuHcSihgNt
+ismFyJyn0kMoG3R8kd/7TdMj2AgRyZ33IhPZX2z1JBag948IAjkv8TEwHaRM5kfqTatejh2Xfiyw
+gDqkHpcrLkFrEtMzzSMMBC3F+NgufbAwlA3z8TFDVMAijLlc7uI4sQXfMvnyOlzp7N3m1M8su34h
+Iz4jd1s86jA+uuB4zeCABOtFWX4u/kFeZduhA9os4bcOhXH7qErb44dXkR7P/l68ktCS4bQmcOeX
+uLWIg/61XAv1WSs78oGHqb3HW8HuGUIewRDa1g==
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>
+z9IxTiVQFXw+ih9WAhWQrBF8vNL1YR2ggZZ/+cwr3jh6B7+BP/kr9uJYO+T/Q155Eu0XVDj1w0cV
+JkhOnBtZ8EjS2wwvfJWqXVTUMEOch8Vw47thMMNqRSMnO8H8u0sOgnvzubFxstG96zbo4Q7kRoe9
+Tx6qoF0QBOjtLtSqoRwWz7e5d6LXVoHrsznpWCYBPcu9VW7CKKNXB7qk22Xtmt6itmyARVZfzC5U
+/G17E5CBylV9IlppRv/1rCuB2kvsKVWeS+BupzIP+COCXNZQD9q3Rrip/jjJDv8lnS4kzMyFjIco
+yiQWnYOZYZsR7j16AWWARehjZ15T3kXM0zqlww==
+</ds:Modulus>
+<ds:Exponent>AQAB</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+<ds:X509Data>
+<ds:X509Certificate>
+MIID3zCCAsegAwIBAgIURAb40P9X6XE5G3fQ+i0hjbb1qn4wDQYJKoZIhvcNAQELBQAwdDELMAkG
+A1UEBhMCR0IxDzANBgNVBAgTBkxvbmRvbjEPMA0GA1UEBxMGTG9uZG9uMRcwFQYDVQQKEw5DYWJp
+bmV0IE9mZmljZTEMMAoGA1UECxMDR0RTMRwwGgYDVQQDExNJREEgTWV0YWRhdGEgQ0EgRGV2MCAX
+DTE4MTIyMDE2MjkwMFoYDzIxMTgxMTI2MTYyOTAwWjB7MQswCQYDVQQGEwJHQjEPMA0GA1UECBMG
+TG9uZG9uMQ8wDQYDVQQHEwZMb25kb24xFzAVBgNVBAoTDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQL
+EwNHRFMxIzAhBgNVBAMTGklEQSBNZXRhZGF0YSBTaWduaW5nIERldiBBMIIBIjANBgkqhkiG9w0B
+AQEFAAOCAQ8AMIIBCgKCAQEAz9IxTiVQFXw+ih9WAhWQrBF8vNL1YR2ggZZ/+cwr3jh6B7+BP/kr
+9uJYO+T/Q155Eu0XVDj1w0cVJkhOnBtZ8EjS2wwvfJWqXVTUMEOch8Vw47thMMNqRSMnO8H8u0sO
+gnvzubFxstG96zbo4Q7kRoe9Tx6qoF0QBOjtLtSqoRwWz7e5d6LXVoHrsznpWCYBPcu9VW7CKKNX
+B7qk22Xtmt6itmyARVZfzC5U/G17E5CBylV9IlppRv/1rCuB2kvsKVWeS+BupzIP+COCXNZQD9q3
+Rrip/jjJDv8lnS4kzMyFjIcoyiQWnYOZYZsR7j16AWWARehjZ15T3kXM0zqlwwIDAQABo2AwXjAO
+BgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUVtQAq9YOJcBVrsTJ36Lk2pk3
+/kEwHwYDVR0jBBgwFoAUa8yAXuX8mVNQkv4HpmFMFgiqiGIwDQYJKoZIhvcNAQELBQADggEBAKtX
+W0e6QhouPboyOmP49k8TVk8sDcPdP7xH8hKAmM13qA5CNRSGf1+LaEGJIthMpnsnzEPQWfYxo9RU
+KvgVa780ulwU7ceBAURgn8hS0vyeLzT3ohnRbBlbbF3TO30zj96OxV+luzxRDj6/MfXmkDZHeaeS
+XNGsO8KrTQ3gC/ZquapYZAkj/CO7QTAI2+l9Kk9xnjlIuNhPCCdkgPLAV+bpTBP4/rZo1RBvz7p9
+lySeHjYvJTSkJiBt1eql0HCvBP3dFEDDfVBFNE6Ikx5fjpPEgNEX/QJmRuyn8Wle9k6csQSLqSY4
+n3OR0p1+IXuZuxJHmudM0pUAOcgrP4dsuYs=
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature>
+    <md:Extensions>
+        <mdattr:EntityAttributes>
+            <saml2:Attribute Name="urn:oasis:names:tc:SAML:attribute:assurance-certification " NameFormat="urn:oasis:names:tc:saml2:2.0:attrname-format:uri">
+                <saml2:AttributeValue>http://eidas.europa.eu/LoA/substantial</saml2:AttributeValue>
+            </saml2:Attribute>
+        </mdattr:EntityAttributes>
+        <alg:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <alg:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256" MinKeySize="256"/>
+        <alg:SigningMethod Algorithm="http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1" MaxKeySize="4096" MinKeySize="2048"/>
+    </md:Extensions>
+    <md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <md:KeyDescriptor use="signing">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>
+                        MIIDgjCCAmqgAwIBAgIJAPJIiMUuZfbGMA0GCSqGSIb3DQEBCwUAMG4xCzAJBgNVBAYTAkdCMQ8w
+                        DQYDVQQHDAZMb25kb24xFzAVBgNVBAoMDkNhYmluZXQgT2ZmaWNlMQwwCgYDVQQLDANHRFMxJzAl
+                        BgNVBAMMHlZlcmlmeSBQcm94eSBOb2RlIFNBTUwgU2lnbmluZzAeFw0xOTA3MTkxNjIwMDVaFw0x
+                        OTA5MTkxNjIwMDVaMG4xCzAJBgNVBAYTAkdCMQ8wDQYDVQQHDAZMb25kb24xFzAVBgNVBAoMDkNh
+                        YmluZXQgT2ZmaWNlMQwwCgYDVQQLDANHRFMxJzAlBgNVBAMMHlZlcmlmeSBQcm94eSBOb2RlIFNB
+                        TUwgU2lnbmluZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdRy4D175LtZYBcm/rZ
+                        NDOORqiL8mclWLS1qAypjqB+UYyaHTsf8S2/zGrbwtKyC8QPMQQ4a4Hj4y2tzXCESJiJqVVrbAZb
+                        n4io1D2q8lGjKOCBmoo3XKECz9nx5wf5exipXFAv9q7z6NS71Od0Rk1NlNftz7fM6b6YoIWQ/NxR
+                        BNI9fr3z9UMgEO9osAm6j6Ce4+E4F+ofQbRGtKZtXmVJSDFgnbso6WCdFcSydkeUzNXMexeqEWBp
+                        9xg6DEzFFoHiAyiBmnetdQ/o4dGY0qndLZwConY9lY+v28nCfwH+fPtv78H1EBAZ9uPqZq1Yl7aM
+                        Fzvjp+oLGqg4epb6h3MCAwEAAaMjMCEwDgYDVR0PAQH/BAQDAgIEMA8GA1UdEwEB/wQFMAMBAf8w
+                        DQYJKoZIhvcNAQELBQADggEBAJWc550Vj7EeN54/VFh4HnEBi3isiq0bEJUh+8xWkEeUQBhYNh9k
+                        Ub37IoMEtL3oQ7A/7US/M0Bc0LHF7hEtk/jyQOzvpXXYWOq0msQNk1f2u8t6yxH5pI4NinvY4NH4
+                        re/P/YRf3lBZUKSx2HMKDSdPcu4ZhFhB4mNMKnQVFqaw1SmvTxC7tMQhMQqOlBd5skjaVLYme2nx
+                        QRQjdWhJSiH6gRICSArmF7TFvIpzWp7SZvBapkWeysOB1bFbCCdcScTaqAxJoKvqKq0TnyNVKRmw
+                        SUABIhMaYC1Ti8DHvmzuUQ0pl9nPW1MY14n2AkDPkgwr8y2I7axAm5c8WkPa1wY=
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:NameIDFormat>
+            urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+        </md:NameIDFormat>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:6600/SAML2/SSO/POST"/>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:6600/SAML2/SSO/Redirect"/>
+        <saml2:Attribute FriendlyName="PersonIdentifier" Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+        <saml2:Attribute FriendlyName="FamilyName" Name=" http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+        <saml2:Attribute FriendlyName="FirstName" Name=" http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+        <saml2:Attribute FriendlyName="DateOfBirth" Name=" http://eidas.europa.eu/attributes/naturalperson/DateOfBirth" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+    </md:IDPSSODescriptor>
+    <md:Organization>
+        <md:OrganizationName xml:lang="en">Government Digital Service</md:OrganizationName>
+        <md:OrganizationDisplayName xml:lang="en">GDS</md:OrganizationDisplayName>
+        <md:OrganizationURL xml:lang="en">https://www.gov.uk/verify</md:OrganizationURL>
+    </md:Organization>
+    <md:ContactPerson contactType="technical">
+        <md:Company>GDS</md:Company>
+        <md:GivenName>GOV.UK Verify</md:GivenName>
+        <md:SurName>Support</md:SurName>
+        <md:EmailAddress>idasupport@digital.cabinet-office.gov.uk</md:EmailAddress>
+    </md:ContactPerson>
+</md:EntityDescriptor>

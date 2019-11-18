@@ -44,9 +44,8 @@ public class SamlResponseExceptionMapperResourceRuleTest {
                 new SamlFormView("postUrl",
                                  "samlMessageType",
                                  "encodedSamlMessage",
-                                 "submitText"));
+                                 "relayState"));
     }
-
 
     @Test
     public void shouldMapSessionAlreadyExistsExceptionToExceptionToSamlErrorResponseMapper() {
