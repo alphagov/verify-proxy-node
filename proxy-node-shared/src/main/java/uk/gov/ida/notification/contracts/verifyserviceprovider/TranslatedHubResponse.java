@@ -43,12 +43,12 @@ public class TranslatedHubResponse {
         return scenario;
     }
 
-    public String getPid() {
-        return pid;
+    public Optional<String> getPid() {
+        return Optional.ofNullable(pid);
     }
 
-    public VspLevelOfAssurance getLevelOfAssurance() {
-        return levelOfAssurance;
+    public Optional<VspLevelOfAssurance> getLevelOfAssurance() {
+        return Optional.ofNullable(levelOfAssurance);
     }
 
     public Optional<Attributes> getAttributes() {
