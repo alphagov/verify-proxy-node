@@ -1,16 +1,7 @@
 # Base AWS Java app image
 
-ARG JAVA_HOME=/usr/local/openjdk-11
-FROM openjdk:11-jre-slim AS jre
-
-FROM amazonlinux:2.0.20190508
+FROM amazoncorretto:11
 WORKDIR /app
-
-# Install Java
-ARG JAVA_HOME
-ENV JAVA_HOME $JAVA_HOME
-ENV PATH=$PATH:$JAVA_HOME/bin
-COPY --from=jre $JAVA_HOME $JAVA_HOME
 
 # Install AWS CloudHSM Java library if needed
 ARG TALKS_TO_HSM=false
