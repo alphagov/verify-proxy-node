@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.translator.apprule.logging;
+package uk.gov.ida.notification.translator.logging;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -57,7 +57,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
 
         eidasAttributesLogger.logEidasAttributesAsHash(
                 translatedHubResponse.getAttributes().orElse(null),
-                translatedHubResponse.getPid(),
+                translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl()
         );

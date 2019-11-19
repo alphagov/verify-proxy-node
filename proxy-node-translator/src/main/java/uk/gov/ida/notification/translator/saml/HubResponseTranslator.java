@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -46,10 +47,17 @@ public class HubResponseTranslator {
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
-        final String pid = pidPrefix + hubResponseContainer.getPid();
+        final String pid = hubResponseContainer.getPid()
+                .map(p -> pidPrefix + p)
+                .orElse(null);
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
-            var attributes = getAttributesOrThrow(hubResponseContainer);
+            var attributes = hubResponseContainer
+                    .getAttributes()
+                    .orElseThrow(
+                            () -> new HubResponseTranslationException("Attributes are null for VSP scenario: " + hubResponseContainer.getVspScenario())
+                    );
+
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
                     getCombineFirstAndMiddleNames(attributes)
@@ -92,8 +100,11 @@ public class HubResponseTranslator {
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
-    private static String getMappedLoa(VspLevelOfAssurance vspLoa) {
-        switch (vspLoa) {
+    private static String getMappedLoa(Optional<VspLevelOfAssurance> vspLoa) {
+        if (vspLoa.isEmpty()) {
+            return null;
+        }
+        switch (vspLoa.get()) {
             case LEVEL_2:
                 return EidasConstants.EIDAS_LOA_SUBSTANTIAL;
             default:
@@ -152,13 +163,5 @@ public class HubResponseTranslator {
 
     private static String combineStringAttributeValues(List<NonMatchingVerifiableAttribute<String>> attributeStream) {
         return attributeStream.stream().map(NonMatchingVerifiableAttribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
-    }
-
-    private static Attributes getAttributesOrThrow(HubResponseContainer hubResponseContainer) {
-        return hubResponseContainer
-                .getAttributes()
-                .orElseThrow(
-                        () -> new HubResponseTranslationException("Attributes are null for VSP scenario: " + hubResponseContainer.getVspScenario())
-                );
     }
 }

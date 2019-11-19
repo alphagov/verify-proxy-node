@@ -107,8 +107,8 @@ public class VspProxyTranslateResponseTest {
                 );
 
         assertThat(VspScenario.AUTHENTICATION_FAILED).isEqualTo(response.getScenario());
-        assertThat("123456").isEqualTo(response.getPid());
-        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
+        assertThat("123456").isEqualTo(response.getPid().get());
+        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance().get());
         assertThat(response.getAttributes().isEmpty());
 
         Mockito.verify(jsonClient).post(
@@ -129,8 +129,8 @@ public class VspProxyTranslateResponseTest {
                 );
 
         assertThat(VspScenario.IDENTITY_VERIFIED).isEqualTo(response.getScenario());
-        assertThat("123456").isEqualTo(response.getPid());
-        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
+        assertThat("123456").isEqualTo(response.getPid().get());
+        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance().get());
     }
 
     @Test

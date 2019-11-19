@@ -61,7 +61,7 @@ public class HubResponseTranslatorResource {
 
         eidasAttributesLogger.logEidasAttributesAsHash(
                 translatedHubResponse.getAttributes().orElse(null),
-                translatedHubResponse.getPid(),
+                translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl()
         );
