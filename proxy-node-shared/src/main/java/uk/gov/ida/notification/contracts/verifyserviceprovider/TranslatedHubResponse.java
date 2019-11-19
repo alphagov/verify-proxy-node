@@ -15,15 +15,12 @@ public class TranslatedHubResponse {
     @JsonProperty
     private VspScenario scenario;
 
-    @NotNull
     @JsonProperty
     private String pid;
 
-    @NotNull
     @JsonProperty
     private VspLevelOfAssurance levelOfAssurance;
 
-    @NotNull
     @JsonProperty
     private NonMatchingAttributes attributes;
 
