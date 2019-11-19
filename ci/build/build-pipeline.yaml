@@ -13,6 +13,7 @@ spec:
       organization: alphagov
       owner: alphagov
       repository: verify-proxy-node
+      branch: release/single-country-legacy
       github_api_token: ((github.api-token))
       access_token: ((github.api-token))
       approvers: ((trusted-developers.github-accounts))
@@ -76,7 +77,6 @@ spec:
       source:
         <<: *github_source
         ignore_paths: [cloudhsm, proxy-node-vsp-config, ci]
-        branch: release/single-country-legacy
 
     - name: vsp-src
       icon: github-circle
@@ -91,7 +91,6 @@ spec:
       source:
         <<: *github_source
         paths: [proxy-node-vsp-config]
-        branch: release/single-country-legacy
 
     - name: cloudhsm-config
       type: github
@@ -99,7 +98,6 @@ spec:
       source:
         <<: *github_source
         paths: [cloudhsm]
-        branch: release/single-country-legacy
 
     - name: release
       type: github-release
