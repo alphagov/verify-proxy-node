@@ -40,7 +40,7 @@ spec:
       icon: tag
       source:
         <<: *github_source
-        tag_filter: "^v1\.\d+$"
+        tag_filter: ^v1\.\d+$
 
     - name: nightly
       type: time
