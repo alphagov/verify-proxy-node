@@ -1,14 +1,7 @@
-ARG JAVA_HOME=/usr/local/openjdk-11
-FROM openjdk:11-jre-slim AS jre
+# Custom VSP image using Amazon JDK
 
-FROM amazonlinux:2.0.20190508
+FROM amazoncorretto:11
 WORKDIR /verify-service-provider
-
-# Install Java
-ARG JAVA_HOME
-ENV JAVA_HOME $JAVA_HOME
-ENV PATH=$PATH:$JAVA_HOME/bin
-COPY --from=jre $JAVA_HOME $JAVA_HOME
 
 # Instal VSP app
 COPY build/install/verify-service-provider .
