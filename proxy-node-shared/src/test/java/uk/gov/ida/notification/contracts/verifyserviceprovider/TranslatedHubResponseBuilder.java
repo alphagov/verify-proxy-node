@@ -1,20 +1,22 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
-import org.joda.time.DateTime;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
+
+import java.time.LocalDate;
 
 public class TranslatedHubResponseBuilder {
 
     private String pid = "123456";
     private VspLevelOfAssurance loa = VspLevelOfAssurance.LEVEL_2;
     private VspScenario vspScenario = VspScenario.IDENTITY_VERIFIED;
-    private Attributes attributes = new AttributesBuilder().build();
+    private NonMatchingAttributes attributes = new AttributesBuilder().build();
 
     public TranslatedHubResponseBuilder withScenario(VspScenario scenario) {
         this.vspScenario = scenario;
         return this;
     }
 
-    public TranslatedHubResponseBuilder withAttributes(Attributes attributes) {
+    public TranslatedHubResponseBuilder withAttributes(NonMatchingAttributes attributes) {
         this.attributes = attributes;
         return this;
     }
@@ -103,9 +105,9 @@ public class TranslatedHubResponseBuilder {
                                 .withoutDateOfBirth()
                                 .withoutGender()
                                 .withoutFirstName()
-                                .addFirstName(AttributesBuilder.createAttribute("FirstNameA", false, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addFirstName(AttributesBuilder.createAttribute("FirstNameB", false, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addFirstName(AttributesBuilder.createAttribute("FirstNameV", true, createDateTime(2001, 1, 1, 12, 0), null))
+                                .addFirstName(AttributesBuilder.createNonMatchingTransliterableAttribute("FirstNameA", false, createDateTime(2001, 1, 1), null))
+                                .addFirstName(AttributesBuilder.createNonMatchingTransliterableAttribute("FirstNameB", false, createDateTime(2001, 1, 1), null))
+                                .addFirstName(AttributesBuilder.createNonMatchingTransliterableAttribute("FirstNameV", true, createDateTime(2001, 1, 1), null))
                                 .build()
                 ).build();
     }
@@ -120,22 +122,22 @@ public class TranslatedHubResponseBuilder {
                                 .withoutDateOfBirth()
                                 .withoutGender()
                                 .withoutFirstName()
-                                .addFirstName(AttributesBuilder.createAttribute("FirstNameA", false, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addFirstName(AttributesBuilder.createAttribute("FirstNameB", false, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addFirstName(AttributesBuilder.createAttribute("FirstNameV", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addMiddleName(AttributesBuilder.createAttribute("MiddleNameA", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addMiddleName(AttributesBuilder.createAttribute("MiddleNameB", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addMiddleName(AttributesBuilder.createAttribute("MiddleNameC", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addLastName(AttributesBuilder.createAttribute("SurnameA", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addLastName(AttributesBuilder.createAttribute("SurnameB", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addLastName(AttributesBuilder.createAttribute("SurnameC", true, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addDateOfBirth(AttributesBuilder.createAttribute(createDateTime(1990, 1, 1, 0, 0), false, createDateTime(2001, 1, 1, 12, 0), null))
-                                .addDateOfBirth(AttributesBuilder.createAttribute(createDateTime(1985, 9, 7, 14, 0), false, createDateTime(2005, 1, 1, 12, 0), null))
+                                .addFirstName(AttributesBuilder.createNonMatchingTransliterableAttribute("FirstNameA", false, createDateTime(2001, 1, 1), null))
+                                .addFirstName(AttributesBuilder.createNonMatchingTransliterableAttribute("FirstNameB", false, createDateTime(2001, 1, 1), null))
+                                .addFirstName(AttributesBuilder.createNonMatchingTransliterableAttribute("FirstNameV", true, createDateTime(2001, 1, 1), null))
+                                .addMiddleName(AttributesBuilder.createNonMatchingVerifiableAttribute("MiddleNameA", true, createDateTime(2001, 1, 1), null))
+                                .addMiddleName(AttributesBuilder.createNonMatchingVerifiableAttribute("MiddleNameB", true, createDateTime(2001, 1, 1), null))
+                                .addMiddleName(AttributesBuilder.createNonMatchingVerifiableAttribute("MiddleNameC", true, createDateTime(2001, 1, 1), null))
+                                .addLastName(AttributesBuilder.createNonMatchingTransliterableAttribute("SurnameA", true, createDateTime(2001, 1, 1), null))
+                                .addLastName(AttributesBuilder.createNonMatchingTransliterableAttribute("SurnameB", true, createDateTime(2001, 1, 1), null))
+                                .addLastName(AttributesBuilder.createNonMatchingTransliterableAttribute("SurnameC", true, createDateTime(2001, 1, 1), null))
+                                .addDateOfBirth(AttributesBuilder.createNonMatchingVerifiableAttribute(createDateTime(1990, 1, 1), false, createDateTime(2001, 1, 1), null))
+                                .addDateOfBirth(AttributesBuilder.createNonMatchingVerifiableAttribute(createDateTime(1985, 9, 7), false, createDateTime(2005, 1, 1), null))
                                 .build()
                 ).build();
     }
 
-    private static DateTime createDateTime(int year, int month, int day, int hour, int minute) {
-        return new DateTime().withYear(year).withMonthOfYear(month).withDayOfMonth(day).withHourOfDay(hour).withMinuteOfHour(minute);
+    private static LocalDate createDateTime(int year, int month, int day) {
+        return LocalDate.of(year, month, day);
     }
 }

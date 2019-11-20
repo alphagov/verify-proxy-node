@@ -1,8 +1,13 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
 
 import javax.validation.constraints.NotNull;
+
+import java.util.Optional;
+
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.fromNonMatchingAttributes;
 
 public class TranslatedHubResponse {
 
@@ -10,17 +15,14 @@ public class TranslatedHubResponse {
     @JsonProperty
     private VspScenario scenario;
 
-    @NotNull
     @JsonProperty
     private String pid;
 
-    @NotNull
     @JsonProperty
     private VspLevelOfAssurance levelOfAssurance;
 
-    @NotNull
     @JsonProperty
-    private Attributes attributes;
+    private NonMatchingAttributes attributes;
 
     @SuppressWarnings("Needed for JSON serialisation")
     public TranslatedHubResponse() {
@@ -30,7 +32,7 @@ public class TranslatedHubResponse {
             VspScenario scenario,
             String pid,
             VspLevelOfAssurance levelOfAssurance,
-            Attributes attributes) {
+            NonMatchingAttributes attributes) {
         this.scenario = scenario;
         this.pid = pid;
         this.levelOfAssurance = levelOfAssurance;
@@ -41,15 +43,15 @@ public class TranslatedHubResponse {
         return scenario;
     }
 
-    public String getPid() {
-        return pid;
+    public Optional<String> getPid() {
+        return Optional.ofNullable(pid);
     }
 
-    public VspLevelOfAssurance getLevelOfAssurance() {
-        return levelOfAssurance;
+    public Optional<VspLevelOfAssurance> getLevelOfAssurance() {
+        return Optional.ofNullable(levelOfAssurance);
     }
 
-    public Attributes getAttributes() {
-        return attributes;
+    public Optional<Attributes> getAttributes() {
+        return fromNonMatchingAttributes(attributes);
     }
 }
