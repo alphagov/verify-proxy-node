@@ -10,10 +10,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
+import uk.gov.ida.eidas.logging.EidasAttributesLogger;
+import uk.gov.ida.eidas.logging.EidasResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder;
-import uk.gov.ida.saml.core.transformers.EidasResponseAttributesHashLogger;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -26,7 +27,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 public class EidasResponseAttributesHashLoggerParameterizedTest {
-
     private static final String REQUEST_ID = "request-id";
     private static final String DESTINATION_URL = "http://connnector.eu";
 
@@ -53,7 +53,14 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
         Logger logger = (Logger) LoggerFactory.getLogger(EidasResponseAttributesHashLogger.class);
         logger.addAppender(appender);
 
-        HubResponseAttributesHashLogger.logResponseAttributesHash(hubResponseTranslatorRequest, translatedHubResponse);
+        EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
+
+        eidasAttributesLogger.logEidasAttributesAsHash(
+                translatedHubResponse.getAttributes().orElse(null),
+                translatedHubResponse.getPid().orElse(null),
+                hubResponseTranslatorRequest.getRequestId(),
+                hubResponseTranslatorRequest.getDestinationUrl()
+        );
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender).doAppend(loggingEventArgumentCaptor.capture());

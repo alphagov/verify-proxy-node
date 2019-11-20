@@ -1,13 +1,11 @@
 package uk.gov.ida.notification.translator.saml;
 
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -17,16 +15,20 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssuran
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingTransliterableAttribute;
 
 import java.net.URI;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createAttribute;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createDateTime;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createNonMatchingTransliterableAttribute;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseCancellation;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerified;
+import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerifiedNoAttributes;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseRequestError;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
@@ -84,6 +86,15 @@ public class HubResponseTranslatorTest {
     }
 
     @Test
+    public void translateShouldThrowIfIdentityVerifiedButNoAttributes() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseIdentityVerifiedNoAttributes());
+
+        assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
+                .isInstanceOf(HubResponseTranslationException.class)
+                .hasMessageContaining("Attributes are null for VSP scenario: IDENTITY_VERIFIED");
+    }
+
+    @Test
     public void translateShouldThrowWhenNoFirstNamePresent() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withoutFirstName().build());
 
@@ -112,8 +123,13 @@ public class HubResponseTranslatorTest {
 
     @Test
     public void translateShouldThrowWhenNoCurrentFirstName() {
-        final DateTime validTo = createDateTime(2018, 1, 1, 0, 0);
-        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, true, AttributesBuilder.VALID_FROM, validTo);
+        final LocalDate validTo = createDateTime(2018, 1, 1);
+        final NonMatchingTransliterableAttribute firstName = createNonMatchingTransliterableAttribute(
+                AttributesBuilder.FIRST_NAME,
+                true,
+                AttributesBuilder.VALID_FROM,
+                validTo
+        );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
 
         assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
@@ -123,35 +139,53 @@ public class HubResponseTranslatorTest {
 
     @Test
     public void translateShouldReturnResponseWhenCurrentFirstNameNotVerifiedButNoFromOrToMakesItCurrent() {
-        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, null, null);
+        final NonMatchingTransliterableAttribute firstName = createNonMatchingTransliterableAttribute(
+                AttributesBuilder.FIRST_NAME,
+                false,
+                null,
+                null
+        );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes();
-        assertThat(attributes.getFirstNames().getValidAttributes().size()).isEqualTo(1);
+        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+        assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
-
-
 
     @Test
     public void translateShouldReturnResponseWhenCurrentFirstNameNotValidButCurrentFrom() {
-        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, AttributesBuilder.VALID_FROM, null);
+        final NonMatchingTransliterableAttribute firstName = createNonMatchingTransliterableAttribute(
+                AttributesBuilder.FIRST_NAME,
+                false,
+                AttributesBuilder.VALID_FROM,
+                null
+        );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes();
-        assertThat(attributes.getFirstNames().getValidAttributes().size()).isEqualTo(1);
+        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+        assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
     @Test
     public void translateShouldReturnResponseWhenCurrentFirstNameNotValidButCurrentTo() {
-        final Attribute<String> firstName = createAttribute(AttributesBuilder.FIRST_NAME, false, null, DateTime.now().plusDays(1));
+        final NonMatchingTransliterableAttribute firstName = createNonMatchingTransliterableAttribute(
+                AttributesBuilder.FIRST_NAME,
+                false,
+                null,
+                LocalDate.now().plusDays(1)
+        );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes();
-        assertThat(attributes.getFirstNames().getValidAttributes().size()).isEqualTo(1);
+        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+        assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
     @Test
     public void translateShouldIgnoreExpiredExtraNames() {
-        final DateTime validTo = AttributesBuilder.VALID_FROM;
-        final DateTime validFrom = AttributesBuilder.VALID_FROM.minusYears(3);
-        final Attribute<String> firstName = createAttribute("Expired", true, validFrom, validTo);
+        final LocalDate validFrom = AttributesBuilder.VALID_FROM.minusYears(3);
+        final LocalDate validTo = AttributesBuilder.VALID_FROM;
+        final NonMatchingTransliterableAttribute firstName = createNonMatchingTransliterableAttribute(
+                "Expired",
+                true,
+                validFrom,
+                validTo
+        );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
 
         final Response response = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
@@ -163,7 +197,12 @@ public class HubResponseTranslatorTest {
 
     @Test
     public void translateShouldIgnoreUnverifiedExtraNames() {
-        final Attribute<String> firstName = createAttribute("Unverified", false, AttributesBuilder.VALID_FROM, null);
+        final NonMatchingTransliterableAttribute firstName = createNonMatchingTransliterableAttribute(
+                "Unverified",
+                false,
+                AttributesBuilder.VALID_FROM,
+                null
+        );
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
 
         final Response response = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
@@ -192,7 +231,7 @@ public class HubResponseTranslatorTest {
                 .hasMessageContaining("Received unsupported LOA from VSP: ");
     }
 
-    private HubResponseContainer buildHubResponseContainer(Attributes attributes) {
+    private HubResponseContainer buildHubResponseContainer(NonMatchingAttributes attributes) {
         return new HubResponseContainer(buildHubResponseTranslatorRequest(), new TranslatedHubResponseBuilder().withAttributes(attributes).build());
     }
 

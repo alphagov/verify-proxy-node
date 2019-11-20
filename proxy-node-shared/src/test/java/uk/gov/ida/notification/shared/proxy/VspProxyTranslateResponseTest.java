@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.shared.proxy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -33,6 +35,9 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VspProxyTranslateResponseTest {
+
+    @Spy
+    private static JsonClient jsonClient = createJsonClient();
 
     @Path("/translate-response")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -90,11 +95,6 @@ public class VspProxyTranslateResponseTest {
     @ClassRule
     public static final DropwizardClientRule testVspClientErrorClientRule = new DropwizardClientRule(new TestVSPClientErrorResource());
 
-    @Spy
-    static JsonClient jsonClient = new JsonClient(
-            new ErrorHandlingClient(ClientBuilder.newClient()),
-            new JsonResponseProcessor(new ObjectMapper())
-    );
 
     @Test
     public void shouldReturnTranslatedHubResponseAuthnFailed() {
@@ -107,9 +107,9 @@ public class VspProxyTranslateResponseTest {
                 );
 
         assertThat(VspScenario.AUTHENTICATION_FAILED).isEqualTo(response.getScenario());
-        assertThat("123456").isEqualTo(response.getPid());
-        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
-        assertThat(response.getAttributes()).isNull();
+        assertThat("123456").isEqualTo(response.getPid().get());
+        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance().get());
+        assertThat(response.getAttributes().isEmpty());
 
         Mockito.verify(jsonClient).post(
                 Mockito.argThat((VerifyServiceProviderTranslationRequest request) -> request.getLevelOfAssurance().equals("LEVEL_2")),
@@ -129,8 +129,8 @@ public class VspProxyTranslateResponseTest {
                 );
 
         assertThat(VspScenario.IDENTITY_VERIFIED).isEqualTo(response.getScenario());
-        assertThat("123456").isEqualTo(response.getPid());
-        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance());
+        assertThat("123456").isEqualTo(response.getPid().get());
+        assertThat(VspLevelOfAssurance.LEVEL_2).isEqualTo(response.getLevelOfAssurance().get());
     }
 
     @Test
@@ -147,5 +147,20 @@ public class VspProxyTranslateResponseTest {
 
         assertThatThrownBy(() -> vspProxy.getTranslatedHubResponse(
                 new VerifyServiceProviderTranslationRequest("SAMLResponse1234", "_1234", "LEVEL_2")));
+    }
+
+    private static JsonClient createJsonClient() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        return new JsonClient(
+                new ErrorHandlingClient(
+                        ClientBuilder
+                                .newBuilder()
+                                .register(new JacksonJsonProvider(objectMapper))
+                                .build()
+                ),
+                new JsonResponseProcessor(objectMapper)
+        );
     }
 }

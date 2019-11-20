@@ -7,6 +7,7 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssuran
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 
 import java.net.URI;
+import java.util.Optional;
 
 public class HubResponseContainer {
 
@@ -18,16 +19,16 @@ public class HubResponseContainer {
     private VspLevelOfAssurance levelOfAssurance;
 
     public HubResponseContainer(HubResponseTranslatorRequest hubResponseTranslatorRequest, TranslatedHubResponse translatedHubResponse) {
-        this.pid = translatedHubResponse.getPid();
+        this.pid = translatedHubResponse.getPid().orElse(null);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
-        this.attributes = translatedHubResponse.getAttributes();
+        this.attributes = translatedHubResponse.getAttributes().orElse(null);
         this.vspScenario = translatedHubResponse.getScenario();
-        this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance();
+        this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance().orElse(null);
     }
 
-    String getPid() {
-        return pid;
+    Optional<String> getPid() {
+        return Optional.ofNullable(pid);
     }
 
     String getEidasRequestId() {
@@ -38,15 +39,15 @@ public class HubResponseContainer {
         return destinationURL.toString();
     }
 
-    Attributes getAttributes() {
-        return attributes;
+    Optional<Attributes> getAttributes() {
+        return Optional.ofNullable(attributes);
     }
 
     VspScenario getVspScenario() {
         return vspScenario;
     }
 
-    VspLevelOfAssurance getLevelOfAssurance() {
-        return levelOfAssurance;
+    Optional<VspLevelOfAssurance> getLevelOfAssurance() {
+        return Optional.ofNullable(levelOfAssurance);
     }
 }

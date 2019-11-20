@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.translator.saml;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeComparator;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
 import se.litsec.eidas.opensaml.common.EidasConstants;
@@ -10,16 +9,19 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
-import uk.gov.ida.notification.contracts.verifyserviceprovider.Attribute;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingVerifiableAttribute;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -45,22 +47,30 @@ public class HubResponseTranslator {
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
-        final String pid = pidPrefix + hubResponseContainer.getPid();
+        final String pid = hubResponseContainer.getPid()
+                .map(p -> pidPrefix + p)
+                .orElse(null);
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
+            var attributes = hubResponseContainer
+                    .getAttributes()
+                    .orElseThrow(
+                            () -> new HubResponseTranslationException("Attributes are null for VSP scenario: " + hubResponseContainer.getVspScenario())
+                    );
+
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentGivenNameType.TYPE_NAME,
-                    getCombineFirstAndMiddleNames(hubResponseContainer)
+                    getCombineFirstAndMiddleNames(attributes)
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME, AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_FRIENDLY_NAME, CurrentFamilyNameType.TYPE_NAME,
-                    getCombinedSurnames(hubResponseContainer)
+                    getCombinedSurnames(attributes)
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(
                     AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME, AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_FRIENDLY_NAME, DateOfBirthType.TYPE_NAME,
-                    getLatestValidDateOfBirth(hubResponseContainer)
+                    getLatestValidDateOfBirth(attributes)
             ));
 
             eidasAttributeBuilders.add(new EidasAttributeBuilder(AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
@@ -90,8 +100,11 @@ public class HubResponseTranslator {
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
-    private static String getMappedLoa(VspLevelOfAssurance vspLoa) {
-        switch (vspLoa) {
+    private static String getMappedLoa(Optional<VspLevelOfAssurance> vspLoa) {
+        if (vspLoa.isEmpty()) {
+            return null;
+        }
+        switch (vspLoa.get()) {
             case LEVEL_2:
                 return EidasConstants.EIDAS_LOA_SUBSTANTIAL;
             default:
@@ -114,19 +127,20 @@ public class HubResponseTranslator {
         }
     }
 
-    private static String getCombineFirstAndMiddleNames(HubResponseContainer hubResponseContainer) {
-        var firstNames = hubResponseContainer.getAttributes().getFirstNames();
+    private static String getCombineFirstAndMiddleNames(Attributes attributes) {
+        var firstNames = attributes.getFirstNamesAttributesList();
         var validFirstNames = firstNames.getValidAttributes();
         if (validFirstNames.isEmpty()) {
             throw new HubResponseTranslationException("No verified current first name present: " + firstNames.createAttributesMessage());
         }
-        List<Attribute<String>> validMiddleNames = hubResponseContainer.getAttributes().getMiddleNames().getValidAttributes();
+        var validMiddleNames = attributes.getMiddleNamesAttributesList().getValidAttributes();
         validFirstNames.addAll(validMiddleNames);
+
         return combineStringAttributeValues(validFirstNames);
     }
 
-    private static String getCombinedSurnames(HubResponseContainer hubResponseContainer) {
-        var surnames = hubResponseContainer.getAttributes().getSurnames();
+    private static String getCombinedSurnames(Attributes attributes) {
+        var surnames = attributes.getSurnamesAttributesList();
         var validSurnames = surnames.getValidAttributes();
         if (validSurnames.isEmpty()) {
             throw new HubResponseTranslationException("No verified current surname present: " + surnames.createAttributesMessage());
@@ -134,19 +148,20 @@ public class HubResponseTranslator {
         return combineStringAttributeValues(surnames.getValidAttributes());
     }
 
-    private static String getLatestValidDateOfBirth(HubResponseContainer hubResponseContainer) {
-        var datesOfBirth = hubResponseContainer.getAttributes().getDatesOfBirth();
+    private static String getLatestValidDateOfBirth(Attributes attributes) {
+        var datesOfBirth = attributes.getDatesOfBirthAttributesList();
         var validDatesOfBirth = datesOfBirth.getValidAttributes();
         if (validDatesOfBirth.isEmpty()) {
             throw new HubResponseTranslationException("No verified current date of birth present: " + datesOfBirth.createAttributesMessage());
         }
+
         return validDatesOfBirth.stream()
-                .map(Attribute::getValue)
-                .reduce(BinaryOperator.maxBy(DateTimeComparator.getDateOnlyInstance()))
-                .map(Attributes::getDateInEidasFormat).get();
+                .map(NonMatchingVerifiableAttribute::getValue)
+                .reduce(BinaryOperator.maxBy(Comparator.comparing(LocalDate::toEpochDay)))
+                .map(date -> date.toString()).get();
     }
 
-    private static String combineStringAttributeValues(List<Attribute<String>> attributeStream) {
-        return attributeStream.stream().map(Attribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
+    private static String combineStringAttributeValues(List<NonMatchingVerifiableAttribute<String>> attributeStream) {
+        return attributeStream.stream().map(NonMatchingVerifiableAttribute::getValue).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
     }
 }

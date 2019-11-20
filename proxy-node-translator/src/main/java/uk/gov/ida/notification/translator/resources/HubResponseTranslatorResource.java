@@ -2,6 +2,8 @@ package uk.gov.ida.notification.translator.resources;
 
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
+import uk.gov.ida.eidas.logging.EidasAttributesLogger;
+import uk.gov.ida.eidas.logging.EidasResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -24,7 +26,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
 
-import static uk.gov.ida.notification.translator.logging.HubResponseAttributesHashLogger.logResponseAttributesHash;
 
 @Path(Urls.TranslatorUrls.TRANSLATOR_ROOT)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -36,6 +37,7 @@ public class HubResponseTranslatorResource {
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
+    private final EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
 
     public HubResponseTranslatorResource(EidasResponseGenerator eidasResponseGenerator,
                                          VerifyServiceProviderProxy verifyServiceProviderProxy) {
@@ -57,7 +59,12 @@ public class HubResponseTranslatorResource {
                         )
                 );
 
-        logResponseAttributesHash(hubResponseTranslatorRequest, translatedHubResponse);
+        eidasAttributesLogger.logEidasAttributesAsHash(
+                translatedHubResponse.getAttributes().orElse(null),
+                translatedHubResponse.getPid().orElse(null),
+                hubResponseTranslatorRequest.getRequestId(),
+                hubResponseTranslatorRequest.getDestinationUrl()
+        );
 
         final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(
                 new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
