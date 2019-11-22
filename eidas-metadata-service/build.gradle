@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+group 'uk.gov.ida.eidas.metadataservice'
+version '1.0-SPIKE'
+
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.dropwizard:dropwizard-core:1.3.16'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+mainClassName = 'uk.gov.ida.eidas.metadataservice.MetadataServiceApplication'
