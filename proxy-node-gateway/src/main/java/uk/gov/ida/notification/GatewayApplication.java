@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.configuration.RedisServiceConfiguration;
+import uk.gov.ida.notification.exceptions.mappers.NotFoundExceptionResponseMapper;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.ErrorPageRedirectResponseValidationExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.ExceptionToSamlErrorResponseMapper;
@@ -20,9 +21,10 @@ import uk.gov.ida.notification.exceptions.mappers.MissingMetadataExceptionMapper
 import uk.gov.ida.notification.healthcheck.ProxyNodeHealthCheck;
 import uk.gov.ida.notification.proxy.EidasSamlParserProxy;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
-import uk.gov.ida.notification.resources.AssetsResource;
+import uk.gov.ida.notification.resources.SimpleResource;
 import uk.gov.ida.notification.resources.EidasAuthnRequestResource;
 import uk.gov.ida.notification.resources.HubResponseResource;
+import uk.gov.ida.notification.resources.SimpleResource;
 import uk.gov.ida.notification.session.storage.InMemoryStorage;
 import uk.gov.ida.notification.session.storage.RedisStorage;
 import uk.gov.ida.notification.session.storage.SessionStore;
@@ -95,7 +97,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
                 .buildTranslatorProxy(environment);
 
         registerProviders(environment);
-        registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage);
+        registerResources(configuration, environment, samlFormViewBuilder, translatorProxy, sessionStorage, configuration.getErrorPageRedirectUrl());
         registerExceptionMappers(environment, samlFormViewBuilder, translatorProxy, sessionStorage, configuration.getErrorPageRedirectUrl());
         registerInjections(environment);
     }
@@ -149,6 +151,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         environment.jersey().register(new MissingMetadataExceptionMapper());
         environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore));
+        environment.jersey().register(new NotFoundExceptionResponseMapper());
         environment.jersey().register(new ErrorPageExceptionMapper(errorPageRedirectUrl));
         environment.jersey().register(new ErrorPageRedirectResponseValidationExceptionMapper(errorPageRedirectUrl));
         environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
@@ -159,7 +162,9 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             Environment environment,
             SamlFormViewBuilder samlFormViewBuilder,
             TranslatorProxy translatorProxy,
-            SessionStore sessionStorage) {
+            SessionStore sessionStorage,
+            URI errorPageRedirectUrl
+            ) {
 
         EidasSamlParserProxy espProxy = configuration
                 .getEidasSamlParserServiceConfiguration()
@@ -171,7 +176,7 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
 
         environment.lifecycle().manage(sessionStorage);
 
-        environment.jersey().register(AssetsResource.class);
+        environment.jersey().register(new SimpleResource(errorPageRedirectUrl));
         environment.jersey().register(new EidasAuthnRequestResource(
                 espProxy,
                 vspProxy,

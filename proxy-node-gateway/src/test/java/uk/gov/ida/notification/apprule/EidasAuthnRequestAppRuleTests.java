@@ -139,8 +139,15 @@ public class EidasAuthnRequestAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void accessingWrongPathRedirectsToErrorPage() throws URISyntaxException {
+    public void accessingWrongPathGenerates404() throws URISyntaxException {
         final Response response = proxyNodeAppRule.target("/invalid-path", false).request().get();
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    public void accessingRootRedirectsToErrorPage() throws URISyntaxException {
+        final Response response = proxyNodeAppRule.target("/", false).request().get();
 
         assertThat(response.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
         assertThat(response.getHeaderString("Location")).isEqualTo(ERROR_PAGE_REDIRECT_URL);
