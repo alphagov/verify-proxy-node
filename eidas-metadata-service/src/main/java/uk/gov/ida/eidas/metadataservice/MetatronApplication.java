@@ -4,24 +4,24 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public class MetadataServiceApplication extends Application<MetadataServiceConfiguration> {
+public class MetatronApplication extends Application<MetatronConfiguration> {
 
     public static void main(final String[] args) throws Exception {
-        new MetadataServiceApplication().run(args);
+        new MetatronApplication().run(args);
     }
 
     @Override
     public String getName() {
-        return "MetadataService";
+        return "Metatron - service in disguise";
     }
 
     @Override
-    public void initialize(final Bootstrap<MetadataServiceConfiguration> bootstrap) {
+    public void initialize(final Bootstrap<MetatronConfiguration> bootstrap) {
         // TODO: application initialization
     }
 
     @Override
-    public void run(final MetadataServiceConfiguration configuration,
+    public void run(final MetatronConfiguration configuration,
                     final Environment environment) {
         // TODO: implement application
     }

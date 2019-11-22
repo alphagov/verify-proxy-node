@@ -22,4 +22,4 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-mainClassName = 'uk.gov.ida.eidas.metadataservice.MetadataServiceApplication'
+mainClassName = 'uk.gov.ida.eidas.metadataservice.MetatronApplication'
