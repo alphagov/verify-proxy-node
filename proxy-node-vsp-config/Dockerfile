@@ -1,6 +1,7 @@
 # Custom VSP image using Amazon JDK
 
 FROM amazoncorretto:11
+ENV LANG C.UTF-8
 WORKDIR /verify-service-provider
 
 # Instal VSP app

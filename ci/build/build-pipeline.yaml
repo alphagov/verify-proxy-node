@@ -219,7 +219,6 @@ spec:
               - |
                 cd vsp-src
                 rm -f .dockerignore
-                export GRADLE_OPTS="-Dfile.encoding=utf-8"
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
                 ./gradlew --console verbose test installDist
 
@@ -270,9 +269,9 @@ spec:
 
       - task: run-tests
         attempts: 2
+        image: cloudhsm-jce-image
         config:
           platform: linux
-          image_resource: *openjdk_image
           inputs:
           - name: src
           outputs:
@@ -286,7 +285,6 @@ spec:
               - -euc
               - |
                 cd src
-                export GRADLE_OPTS="-Dfile.encoding=utf-8"
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
                 ./gradlew --console verbose --parallel -PCI test
 
@@ -308,7 +306,6 @@ spec:
               - -elc
               - |
                 cd src
-                export GRADLE_OPTS="-Dfile.encoding=utf-8"
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
                 ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 

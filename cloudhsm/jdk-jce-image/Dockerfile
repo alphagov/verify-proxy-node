@@ -1,6 +1,7 @@
 # Base builder image to build apps that need to talk to the HSM cient
 
 FROM amazoncorretto:11
+ENV LANG C.UTF-8
 
 # Install AWS CloudHSM client and libs
 ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-2.0.0-3.el7.x86_64.rpm .
