@@ -124,28 +124,28 @@ spec:
       icon: code-tags-check
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/acceptance-tests
+        repository: registry.((cluster.domain))/eidas/proxy-node-acceptance-tests
 
     - name: gateway-image
       type: harbor
       icon: gate
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/gateway
+        repository: registry.((cluster.domain))/eidas/proxy-node-gateway
 
     - name: translator-image
       type: harbor
       icon: file-xml
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/translator
+        repository: registry.((cluster.domain))/eidas/proxy-node-translator
 
     - name: parser-image
       type: harbor
       icon: page-next
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/parser
+        repository: registry.((cluster.domain))/eidas/proxy-node-saml-parser
 
     - name: stub-connector-image
       type: harbor
