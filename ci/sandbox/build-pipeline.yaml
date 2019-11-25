@@ -4,7 +4,7 @@ kind: Pipeline
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: build-release
+  name: build-test-sandbox
 spec:
   exposed: true
   config:
@@ -72,7 +72,7 @@ spec:
     resources:
 
     - name: src
-      type: github
+      type: git
       icon: github-circle
       source:
         <<: *github_source
@@ -88,14 +88,14 @@ spec:
 
     - name: vsp-config
       icon: check-outline
-      type: github
+      type: git
       source:
         <<: *github_source
         paths: [proxy-node-vsp-config]
         branch: sandbox
 
     - name: cloudhsm-config
-      type: github
+      type: git
       icon: folder-key-network-outline
       source:
         <<: *github_source
@@ -263,9 +263,9 @@ spec:
 
       - task: run-tests
         attempts: 2
+        image: cloudhsm-jce-image
         config:
           platform: linux
-          image_resource: *openjdk_image
           inputs:
           - name: src
           outputs:

@@ -267,9 +267,9 @@ spec:
 
       - task: run-tests
         attempts: 2
+        image: cloudhsm-jce-image
         config:
           platform: linux
-          image_resource: *openjdk_image
           inputs:
           - name: src
           outputs:

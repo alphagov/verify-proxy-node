@@ -1,6 +1,7 @@
 # Base AWS Java app image
 
 FROM amazoncorretto:11
+ENV LANG C.UTF-8
 WORKDIR /app
 
 # Install AWS CloudHSM Java library if needed
