@@ -11,6 +11,7 @@ version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
 apply plugin: 'application'
 mainClassName = 'uk.gov.ida.notification.eidassaml.EidasSamlApplication'
+applicationDefaultJvmArgs = ["-Dfile.encoding=utf-8"]
 
 run {
     args 'server', './src/dist/config.yml'
