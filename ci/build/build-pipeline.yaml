@@ -650,6 +650,6 @@ spec:
         params:
           name: chart/tag
           tag: chart/tag
-          commitsh: chart/short_ref
+          commitish: chart/short_ref
           globs:
           - chart/*.tgz*
