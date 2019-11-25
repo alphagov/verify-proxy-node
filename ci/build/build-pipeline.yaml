@@ -127,28 +127,28 @@ spec:
       icon: code-tags-check
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/acceptance-tests
+        repository: registry.((cluster.domain))/eidas/proxy-node-acceptance-tests
 
     - name: gateway-image
       type: harbor
       icon: gate
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/gateway
+        repository: registry.((cluster.domain))/eidas/proxy-node-gateway
 
     - name: translator-image
       type: harbor
       icon: file-xml
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/translator
+        repository: registry.((cluster.domain))/eidas/proxy-node-translator
 
     - name: parser-image
       type: harbor
       icon: page-next
       source:
         <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/parser
+        repository: registry.((cluster.domain))/eidas/proxy-node-saml-parser
 
     - name: stub-connector-image
       type: harbor
@@ -180,13 +180,13 @@ spec:
 
     groups:
       - name: deployment
-        jobs: [build-vsp-image, build-proxy-node, package, test, release]
+        jobs: [build-vsp-image, build-proxy-node, package]
       - name: proxy-node
-        jobs: [build-proxy-node, package, test, release]
+        jobs: [build-proxy-node, package]
       - name: components
         jobs: [build-cloudhsm, build-vsp-image]
       - name: all
-        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package, test, release]
+        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package]
 
     jobs:
 
@@ -503,153 +503,153 @@ spec:
           import_file: alpine-image/rootfs.tar
           <<: *image_tag
 
-    - name: test
-      serial: true
-      serial_groups: [package]
-      plan:
-
-      - in_parallel:
-          steps:
-          - get: chart
-            passed: [package]
-            trigger: true
-          - get: tests-image
-            passed: [build-proxy-node]
-
-      - task: extract-chart
-        image: chart
-        config:
-          platform: linux
-          outputs:
-          - name: chart
-          run:
-            path: /bin/sh
-            args:
-            - -euc
-            - |
-              echo "Extracting chart package from the release image..."
-              cp -r /proxy-node-chart-package/* chart/
-
-      - task: render-chart-package
-        config:
-          platform: linux
-          image_resource: *task_toolbox
-          inputs:
-          - name: chart
-          outputs:
-          - name: manifests
-          params:
-            CLUSTER_NAME: ((cluster.name))
-            CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
-            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
-            RELEASE_NAME: test
-            CLOUDHSM_IP: ((cluster.cloudHsmIp))
-          run:
-            path: /bin/bash
-            args:
-            - -euc
-            - |
-              echo "Preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
-              gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
-              echo "Verifying package signature..."
-              helm verify ./chart/*.tgz
-              echo "OK!"
-              echo "Rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
-              helm template \
-                --name "${RELEASE_NAME}" \
-                --namespace "${RELEASE_NAMESPACE}" \
-                --set "global.cluster.name=${CLUSTER_NAME}" \
-                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
-                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
-                --set "stubConnector.enabled=true" \
-                --set "vsp.secretName=vsp" \
-                --output-dir "./manifests/" \
-                ./chart/*.tgz
-
-      - task: deploy-chart-package
-        timeout: 10m
-        config:
-          platform: linux
-          image_resource: *task_toolbox
-          inputs:
-          - name: manifests
-          params:
-            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
-            KUBERNETES_TOKEN: ((namespace-deployer.token))
-            KUBERNETES_API: kubernetes.default.svc
-            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
-            RELEASE_NAME: test
-            APP_NAME: proxy-node
-          run:
-            path: /bin/bash
-            args:
-            - -euc
-            - |
-              echo "Configuring kubectl"
-              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
-              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
-              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
-              kubectl config set-context deployer --user deployer --cluster self
-              kubectl config use-context deployer
-
-              echo "Applying chart to ${RELEASE_NAMESPACE} namespace..."
-              kapp deploy \
-                -y \
-                --namespace "${RELEASE_NAMESPACE}" \
-                --allow-ns "${RELEASE_NAMESPACE}" \
-                --app "${RELEASE_NAME}-${APP_NAME}" \
-                --diff-changes \
-                -f ./manifests/
-
-      - task: test-chart-package
-        image: tests-image
-        attempts: 2
-        timeout: 5m
-        config:
-          platform: linux
-          params:
-            PROXY_NODE_URL: "https://test-proxy-node.((cluster.domain))"
-            STUB_CONNECTOR_URL: "https://test-connector.((cluster.domain))"
-            STUB_IDP_USER: "stub-idp-demo-one"
-            SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
-          run:
-            path: /bin/bash
-            args:
-            - -euc
-            - |
-              cd /
-              bundle exec cucumber --strict --tags "not @ignore"
-
-    - name: release
-      serial: true
-      serial_groups: [package]
-      plan:
-
-      - get: chart
-        passed: [test]
-        trigger: true
-
-      - task: extract-chart
-        image: chart
-        config:
-          platform: linux
-          outputs:
-          - name: chart
-          run:
-            path: /bin/sh
-            args:
-            - -euc
-            - |
-              echo "Extracting chart package from the release image..."
-              cp -r /proxy-node-chart-package/* chart/
-
-      - put: release
-        params:
-          name: chart/tag
-          tag: chart/tag
-          globs:
-          - chart/*.tgz*
+#    - name: test
+#      serial: true
+#      serial_groups: [package]
+#      plan:
+#
+#      - in_parallel:
+#          steps:
+#          - get: chart
+#            passed: [package]
+#            trigger: true
+#          - get: tests-image
+#            passed: [build-proxy-node]
+#
+#      - task: extract-chart
+#        image: chart
+#        config:
+#          platform: linux
+#          outputs:
+#          - name: chart
+#          run:
+#            path: /bin/sh
+#            args:
+#            - -euc
+#            - |
+#              echo "Extracting chart package from the release image..."
+#              cp -r /proxy-node-chart-package/* chart/
+#
+#      - task: render-chart-package
+#        config:
+#          platform: linux
+#          image_resource: *task_toolbox
+#          inputs:
+#          - name: chart
+#          outputs:
+#          - name: manifests
+#          params:
+#            CLUSTER_NAME: ((cluster.name))
+#            CLUSTER_DOMAIN: ((cluster.domain))
+#            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+#            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+#            RELEASE_NAME: test
+#            CLOUDHSM_IP: ((cluster.cloudHsmIp))
+#          run:
+#            path: /bin/bash
+#            args:
+#            - -euc
+#            - |
+#              echo "Preparing keyring..."
+#              echo "${CLUSTER_PRIVATE_KEY}" > key
+#              gpg --import key
+#              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+#              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+#              echo "Verifying package signature..."
+#              helm verify ./chart/*.tgz
+#              echo "OK!"
+#              echo "Rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+#              helm template \
+#                --name "${RELEASE_NAME}" \
+#                --namespace "${RELEASE_NAMESPACE}" \
+#                --set "global.cluster.name=${CLUSTER_NAME}" \
+#                --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+#                --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+#                --set "stubConnector.enabled=true" \
+#                --set "vsp.secretName=vsp" \
+#                --output-dir "./manifests/" \
+#                ./chart/*.tgz
+#
+#      - task: deploy-chart-package
+#        timeout: 10m
+#        config:
+#          platform: linux
+#          image_resource: *task_toolbox
+#          inputs:
+#          - name: manifests
+#          params:
+#            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+#            KUBERNETES_TOKEN: ((namespace-deployer.token))
+#            KUBERNETES_API: kubernetes.default.svc
+#            RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+#            RELEASE_NAME: test
+#            APP_NAME: proxy-node
+#          run:
+#            path: /bin/bash
+#            args:
+#            - -euc
+#            - |
+#              echo "Configuring kubectl"
+#              echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+#              kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+#              kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+#              kubectl config set-context deployer --user deployer --cluster self
+#              kubectl config use-context deployer
+#
+#              echo "Applying chart to ${RELEASE_NAMESPACE} namespace..."
+#              kapp deploy \
+#                -y \
+#                --namespace "${RELEASE_NAMESPACE}" \
+#                --allow-ns "${RELEASE_NAMESPACE}" \
+#                --app "${RELEASE_NAME}-${APP_NAME}" \
+#                --diff-changes \
+#                -f ./manifests/
+#
+#      - task: test-chart-package
+#        image: tests-image
+#        attempts: 2
+#        timeout: 5m
+#        config:
+#          platform: linux
+#          params:
+#            PROXY_NODE_URL: "https://test-proxy-node.((cluster.domain))"
+#            STUB_CONNECTOR_URL: "https://test-connector.((cluster.domain))"
+#            STUB_IDP_USER: "stub-idp-demo-one"
+#            SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
+#          run:
+#            path: /bin/bash
+#            args:
+#            - -euc
+#            - |
+#              cd /
+#              bundle exec cucumber --strict --tags "not @ignore"
+#
+#    - name: release
+#      serial: true
+#      serial_groups: [package]
+#      plan:
+#
+#      - get: chart
+#        passed: [test]
+#        trigger: true
+#
+#      - task: extract-chart
+#        image: chart
+#        config:
+#          platform: linux
+#          outputs:
+#          - name: chart
+#          run:
+#            path: /bin/sh
+#            args:
+#            - -euc
+#            - |
+#              echo "Extracting chart package from the release image..."
+#              cp -r /proxy-node-chart-package/* chart/
+#
+#      - put: release
+#        params:
+#          name: chart/tag
+#          tag: chart/tag
+#          globs:
+#          - chart/*.tgz*
