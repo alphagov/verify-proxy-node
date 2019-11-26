@@ -1,7 +1,0 @@
-logging:
-  level: INFO
-  loggers:
-    uk.gov.ida.eidas.metadataservice: DEBUG
-config:
-  truststore: ../truststore.yml
-  countries: ../countries.yml

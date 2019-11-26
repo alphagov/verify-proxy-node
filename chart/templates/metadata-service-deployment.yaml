@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-metadata-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: metadata-service
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.metadata-service.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metadata-service
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metadata-service
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: talksToHsm
+                operator: Exists
+            topologyKey: "kubernetes.io/hostname"
+      restartPolicy: Always
+      containers:
+      - name: metadata-service
+        image: "{{ .Values.metadata-service.image.repository }}:{{ .Values.metadata-service.image.tag }}"
+        imagePullPolicy: {{ .Values.esp.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+        - name: mgmt
+          containerPort: 6001
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: mgmt
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        env:
+        - name: PORT
+          value: "80"
+#        - name: METADATA_REFRESH_DELAY
+#          value: "60000"
+        - name: PROXY_NODE_AUTHN_REQUEST_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-proxy-node-metadata
+              key: postURL
+        - name: CONNECTOR_NODE_ENTITY_ID
+          value: {{ include "connector.entityID" . }}
+        - name: CONNECTOR_NODE_METADATA_URL
+          value: {{ include "connector.metadata.url" . }}
+{{- if .Values.stubConnector.enabled }}
+        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: metadataSigningTruststoreBase64
+        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-connector-metadata
+              key: metadataSigningTruststorePassword
+{{- else }}
+        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
+          value: {{ .Values.connector.metadataSigningTruststoreBase64 }}
+        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
+          value: {{ .Values.connector.metadataSigningTruststorePassword }}
+{{- end }}
+        - name: REDIS_SERVER_URI
+          value: redis://{{ .Release.Name }}-esp-redis:6379/

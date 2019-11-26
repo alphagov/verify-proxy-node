@@ -31,6 +31,7 @@ proxy-node-shared/build/
 proxy-node-translator/build/
 proxy-node-test/build/
 stub-connector/build/
+eidas-metadata-service/build/
 .gradletasknamecache
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
