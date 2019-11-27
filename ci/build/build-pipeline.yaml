@@ -493,6 +493,7 @@ spec:
                 --key "${KEY_ID}" \
                 "./${CHART_NAME}"
               cp chart-version/tag proxy-node-chart-package/
+              cp ./src/.git/short_ref proxy-node-chart-package/
               tar -rf alpine-image/rootfs.tar proxy-node-chart-package/
 
       - put: chart
@@ -649,5 +650,6 @@ spec:
         params:
           name: chart/tag
           tag: chart/tag
+          commitish: chart/short_ref
           globs:
           - chart/*.tgz*
