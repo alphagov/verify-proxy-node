@@ -40,6 +40,7 @@ spec:
       icon: tag
       source:
         <<: *github_source
+        tag_filter: ^v2\.\d+$
 
     - name: daily
       type: time
