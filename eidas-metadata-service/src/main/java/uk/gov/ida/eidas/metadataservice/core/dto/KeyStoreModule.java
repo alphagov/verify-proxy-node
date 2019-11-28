@@ -24,13 +24,20 @@ public class KeyStoreModule extends SimpleModule {
 
     public class KeyStoreDeserializer extends StdDeserializer<KeyStore> {
 
-        public KeyStoreDeserializer() {
+        protected KeyStoreDeserializer() {
             super((JavaType) null);
         }
 
-
-        public KeyStoreDeserializer(Class<?> vc) {
+        protected KeyStoreDeserializer(Class<?> vc) {
             super(vc);
+        }
+
+        protected KeyStoreDeserializer(JavaType valueType) {
+            super(valueType);
+        }
+
+        protected KeyStoreDeserializer(StdDeserializer<?> src) {
+            super(src);
         }
 
         @Override
