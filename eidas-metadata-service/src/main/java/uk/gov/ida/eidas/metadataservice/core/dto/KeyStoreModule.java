@@ -48,7 +48,7 @@ public class KeyStoreModule extends SimpleModule {
             try {
                 byte[] decoded = Base64.getDecoder().decode(node.asText());
                 keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                keyStore.load(new ByteArrayInputStream(decoded), "xxxxxxxxxxx".toCharArray());
+                keyStore.load(new ByteArrayInputStream(decoded), "marshmallow".toCharArray());
             } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
                 keyStore = null;
                 // Skeleton app

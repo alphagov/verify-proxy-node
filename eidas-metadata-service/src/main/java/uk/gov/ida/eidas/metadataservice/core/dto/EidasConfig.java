@@ -14,14 +14,14 @@ public class EidasConfig {
     private List<EidasCountryConfig> countries = new ArrayList<>();
 
     @JsonProperty
-    private KeyStore keystore;
+    private KeyStore truststore;
 
     public Collection<EidasCountryConfig> getCountries() {
         return countries;
     }
 
     public KeyStore getKeyStore() {
-        return this.keystore;
+        return this.truststore;
     }
 
     public void retainAll(Function<EidasConfig, Collection<EidasCountryConfig>> filterFunction) {
