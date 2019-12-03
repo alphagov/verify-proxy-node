@@ -108,6 +108,7 @@ spec:
       source:
         uri: https://github.com/alphagov/verify-eidas-config.git
         branch: sandbox
+        paths: [test]
         username: "re-autom8-ci"
         password: ((github.api-token))
 
@@ -528,8 +529,7 @@ spec:
               - -euc
               - |
                 cd eidas-config/tools
-                ./gradlew run --args="--mode=config --environment=TEST"
-                mv config.yml countriesConfig.yml
+                ./gradlew run --args="generate-config --environment=test"
 
       - task: create-config-map
         config:
@@ -558,9 +558,9 @@ spec:
                 kubectl config use-context deployer
 
                 echo "generating configMap resource definition from file"
-                kubectl -n "${NAMESPACE}" create configmap test-countries-config --from-file=countriesConfig.yml -o yaml --dry-run \
+                kubectl -n "${NAMESPACE}" create configmap test-countries-config --from-file=countriesConfig.yaml -o yaml --dry-run \
                   | yq -y '.metadata += {"annotations": {"kapp.k14s.io/versioned": "", "kapp.k14s.io/num-versions":"5"}}' \
-                  | tee ../../manifests/countriesConfigMap.yml
+                  | tee ../../manifests/countriesConfigMap.yaml
 
       - task: extract-chart
         image: chart
