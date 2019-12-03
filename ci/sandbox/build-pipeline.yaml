@@ -102,6 +102,15 @@ spec:
         paths: [cloudhsm]
         branch: sandbox
 
+    - name: eidas-config
+      type: git
+      icon: bugle
+      source:
+        uri: https://github.com/alphagov/verify-eidas-config.git
+        branch: sandbox
+        username: "re-autom8-ci"
+        password: ((github.api-token))
+
     - name: alpine-image
       type: docker-image
       icon: toolbox
@@ -502,6 +511,56 @@ spec:
             trigger: true
           - get: tests-image
             passed: [build-proxy-node]
+          - get: eidas-config
+            trigger: true
+
+      - task: generate-config
+        config:
+          platform: linux
+          image_resource: *openjdk_image
+          inputs:
+            - name: eidas-config
+          outputs:
+            - name: eidas-config
+          run:
+            path: /bin/sh
+            args:
+              - -euc
+              - |
+                cd eidas-config/tools
+                ./gradlew run --args="--mode=config --environment=TEST"
+                mv config.yml countriesConfig.yml
+
+      - task: create-config-map
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+            - name: eidas-config
+          outputs:
+            - name: manifests
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            NAMESPACE: ((namespace-deployer.namespace))
+          run:
+            path: /bin/sh
+            args:
+              - -euc
+              - |
+                cd eidas-config/tools
+
+                echo "configuring kubectl"
+                echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                kubectl config set-context deployer --user deployer --cluster self
+                kubectl config use-context deployer
+
+                echo "generating configMap resource definition from file"
+                kubectl -n "${NAMESPACE}" create configmap test-countries-config --from-file=countriesConfig.yml -o yaml --dry-run \
+                  | yq -y '.metadata += {"annotations": {"kapp.k14s.io/versioned": "", "kapp.k14s.io/num-versions":"5"}}' \
+                  | tee ../../manifests/countriesConfigMap.yml
 
       - task: extract-chart
         image: chart
@@ -523,6 +582,7 @@ spec:
           image_resource: *task_toolbox
           inputs:
           - name: chart
+          - name: manifests
           outputs:
           - name: manifests
           params:
