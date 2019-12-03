@@ -1,10 +1,12 @@
+plugins { id 'java-library' }
 dependencies {
-    compile configurations.opensaml,
+    implementation configurations.opensaml,
             configurations.verify_saml,
-            configurations.verify_saml_test,
             configurations.common,
-            configurations.proxy_node_test,
             project(':proxy-node-shared')
+
+    api configurations.verify_saml_test,
+            configurations.proxy_node_test
 }
 
 group = 'uk.gov.ida.notification.test'

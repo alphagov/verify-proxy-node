@@ -6,7 +6,7 @@ repositories {
 }
 
 dependencies {
-    compile configurations.dropwizard,
+    implementation configurations.dropwizard,
             configurations.dropwizard_assets,
             configurations.opensaml,
             configurations.eidas_saml,
@@ -15,9 +15,9 @@ dependencies {
             project(':proxy-node-shared')
 
     if (project.hasProperty('cloudhsm')) {
-        compile name: 'cloudhsm-2.0.0'
-        compile name: 'log4j-api-2.8'
-        compile name: 'log4j-core-2.8'
+        implementation name: 'cloudhsm-2.0.0'
+        implementation name: 'log4j-api-2.8'
+        implementation name: 'log4j-core-2.8'
     }
 }
 

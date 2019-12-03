@@ -3,9 +3,8 @@ package uk.gov.ida.notification.contracts.verifyserviceprovider;
 import uk.gov.ida.saml.core.domain.Gender;
 import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAddress;
 import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingVerifiableAttribute;
 import uk.gov.ida.verifyserviceprovider.dto.NonMatchingTransliterableAttribute;
-
+import uk.gov.ida.verifyserviceprovider.dto.NonMatchingVerifiableAttribute;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -96,29 +95,27 @@ public class AttributesBuilder {
         return new NonMatchingVerifiableAttribute<>(value, verified, validFrom, validTo);
     }
 
-    private NonMatchingTransliterableAttribute createNonMatchingTransliterableAttribute(String value) {
-        return new NonMatchingTransliterableAttribute(value, value,true, VALID_FROM, null);
-    }
-
     public static NonMatchingTransliterableAttribute createNonMatchingTransliterableAttribute(
             String value,
             boolean verified,
             LocalDate validFrom,
-            LocalDate validTo
-    ) {
-        return new NonMatchingTransliterableAttribute(value, value,verified, validFrom, validTo);
-    }
-
-    private <T> NonMatchingVerifiableAttribute<T> createNonMatchingVerifiableAttribute(T value) {
-        return new NonMatchingVerifiableAttribute<T>(value, true, VALID_FROM, null);
+            LocalDate validTo) {
+        return new NonMatchingTransliterableAttribute(value, value, verified, validFrom, validTo);
     }
 
     public static <T> NonMatchingVerifiableAttribute<T> createNonMatchingVerifiableAttribute(
             T value,
             boolean verified,
             LocalDate validFrom,
-            LocalDate validTo
-    ) {
+            LocalDate validTo) {
         return new NonMatchingVerifiableAttribute<T>(value, verified, validFrom, validTo);
+    }
+
+    private NonMatchingTransliterableAttribute createNonMatchingTransliterableAttribute(String value) {
+        return new NonMatchingTransliterableAttribute(value, value, true, VALID_FROM, null);
+    }
+
+    private <T> NonMatchingVerifiableAttribute<T> createNonMatchingVerifiableAttribute(T value) {
+        return new NonMatchingVerifiableAttribute<T>(value, true, VALID_FROM, null);
     }
 }
