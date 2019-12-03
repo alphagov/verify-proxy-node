@@ -621,7 +621,7 @@ spec:
             - -euc
             - |
               cd /
-              bundle exec cucumber --strict --tags "not @ignore"
+              bundle exec cucumber features/proxy_node.feature --strict --tags "not @ignore"
 
     - name: release
       serial: true
