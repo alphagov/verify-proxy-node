@@ -30,6 +30,13 @@ esp:
     tag: f33a370c0a7be474ab84aa0fb882925f299054aff3199d42ba72fc9eb7b2ed6f
     pullPolicy: IfNotPresent
 
+metatron:
+  replicaCount: 1
+  image:
+    repository: registry.tools.verify.govsvc.uk/eidas/metatron@sha256
+    tag:
+    pullPolicy: IfNotPresent
+
 gateway:
   replicaCount: 1
   image:

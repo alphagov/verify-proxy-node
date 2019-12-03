@@ -148,6 +148,13 @@ spec:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/proxy-node-saml-parser
 
+    - name: metatron-image
+      type: harbor
+      icon: turtle
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/metatron
+
     - name: stub-connector-image
       type: harbor
       icon: power-plug
@@ -333,6 +340,13 @@ spec:
               build_args:
                 component: eidas-saml-parser
               <<: *image_tag
+          - put: metatron-image
+            get_params: {skip_download: true}
+            params:
+              build: src
+              build_args:
+                component: metatron
+              <<: *image_tag
           - put: stub-connector-image
             get_params: {skip_download: true}
             params:
@@ -368,6 +382,10 @@ spec:
             passed: [build-proxy-node]
             trigger: true
             params: {skip_download: true}
+          - get: metatron-image
+            passed: [build-proxy-node]
+            trigger: true
+            params: {skip_download: true}
           - get: stub-connector-image
             passed: [build-proxy-node]
             trigger: true
@@ -392,6 +410,7 @@ spec:
           - name: gateway-image
           - name: translator-image
           - name: parser-image
+          - name: metatron-image
           - name: stub-connector-image
           - name: cloudhsm-client-image
           - name: verify-service-provider-image
@@ -409,6 +428,10 @@ spec:
                   image:
                     repository: $(cat parser-image/repository)@$(cat parser-image/digest | cut -d ':' -f 1)
                     tag: $(cat parser-image/digest | cut -d ':' -f 2)
+                metatron:
+                  image:
+                    repository: $(cat metatron-image/repository)@$(cat metatron-image/digest | cut -d ':' -f 1)
+                    tag: $(cat metatron-image/digest | cut -d ':' -f 2)
                 gateway:
                   image:
                     repository: $(cat gateway-image/repository)@$(cat gateway-image/digest | cut -d ':' -f 1)
