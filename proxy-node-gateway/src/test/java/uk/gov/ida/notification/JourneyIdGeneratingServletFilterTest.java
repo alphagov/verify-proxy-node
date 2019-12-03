@@ -15,7 +15,6 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.JOURNEY_ID_KEY;
 
@@ -52,6 +51,6 @@ public class JourneyIdGeneratingServletFilterTest {
         verify(request).setAttribute(JOURNEY_ID_KEY, journeyId);
         verify(chain).doFilter(request, response);
         verifyNoMoreInteractions(chain, request, session, idGenerationStrategy);
-        verifyZeroInteractions(response);
+        verifyNoMoreInteractions(response);
     }
 }

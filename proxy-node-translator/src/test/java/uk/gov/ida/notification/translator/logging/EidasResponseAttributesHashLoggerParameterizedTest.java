@@ -59,8 +59,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
                 translatedHubResponse.getAttributes().orElse(null),
                 translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
-                hubResponseTranslatorRequest.getDestinationUrl()
-        );
+                hubResponseTranslatorRequest.getDestinationUrl());
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender).doAppend(loggingEventArgumentCaptor.capture());

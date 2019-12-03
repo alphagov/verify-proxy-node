@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,6 +41,6 @@ public class InvalidateSessionServletFilterTest {
         inOrder.verify(request).getSession(false);
         inOrder.verify(session).invalidate();
         inOrder.verifyNoMoreInteractions();
-        verifyZeroInteractions(response);
+        verifyNoInteractions(response);
     }
 }
