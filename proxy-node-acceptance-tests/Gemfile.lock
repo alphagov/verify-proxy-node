@@ -66,8 +66,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  capybara
-  capybara-screenshot
+  capybara (>= 3.18.0)
+  capybara-screenshot (>= 1.0.22)
   cucumber
   geckodriver-helper
   selenium-webdriver

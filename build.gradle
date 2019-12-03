@@ -41,6 +41,8 @@ ext {
 
 subprojects {
 
+    task allDeps(type: DependencyReportTask) {} // run `./gradlew allDeps` for a dep report across all modules
+
     apply plugin: 'java'
     apply plugin: 'maven'
 
@@ -116,6 +118,7 @@ subprojects {
                 substitute module("com.fasterxml.jackson.core:jackson-databind") because "https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-467014" with module("com.fasterxml.jackson.core:jackson-databind:2.10.0.pr3")
                 substitute module("ca.juliusdavies:not-yet-commons-ssl:0.3.9") because "https://snyk.io/vuln/SNYK-JAVA-CAJULIUSDAVIES-30073" with module("ca.juliusdavies:not-yet-commons-ssl:0.3.11")
                 substitute module("org.apache.santuario:xmlsec") because "https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281" with module("org.apache.santuario:xmlsec:2.1.4")
+                substitute module("com.nimbusds:nimbus-jose-jwt") because "https://snyk.io/vuln/SNYK-JAVA-COMNIMBUSDS-536068" with module("com.nimbusds:nimbus-jose-jwt:8.2.1")
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
