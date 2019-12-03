@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Optional;
 
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.fromNonMatchingAttributes;
