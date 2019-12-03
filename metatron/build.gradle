@@ -1,0 +1,16 @@
+group 'uk.gov.ida.eidas.metadataservice'
+version '1.0-SPIKE'
+
+dependencies {
+    compile configurations.dropwizard,
+            configurations.common,
+            'com.sun.xml.bind:jaxb-core:2.3.0',
+            'com.sun.xml.bind:jaxb-impl:2.3.0'
+}
+
+apply plugin: 'application'
+mainClassName = 'uk.gov.ida.eidas.metatron.MetatronApplication'
+
+run {
+    args 'server', './src/dist/config.yml'
+}
