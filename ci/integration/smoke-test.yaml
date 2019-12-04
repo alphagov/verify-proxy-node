@@ -54,6 +54,7 @@ spec:
 
       - get: every-10m-9-5
         trigger: true
+      - get: tests-image
 
       - task: test-chart-package
         image: tests-image
