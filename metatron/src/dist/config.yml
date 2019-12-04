@@ -8,8 +8,6 @@ server:
   requestLog:
     appenders:
       - type: console
-        layout:
-          ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
 
 logging:
   level: ${LOG_LEVEL:-INFO}

@@ -4,6 +4,8 @@ version '1.0-SPIKE'
 dependencies {
     compile configurations.dropwizard,
             configurations.common,
+            configurations.verify_saml,
+            configurations.opensaml,
             'com.sun.xml.bind:jaxb-core:2.3.0',
             'com.sun.xml.bind:jaxb-impl:2.3.0'
 }

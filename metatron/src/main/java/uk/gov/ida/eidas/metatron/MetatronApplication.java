@@ -1,6 +1,7 @@
 package uk.gov.ida.eidas.metatron;
 
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -11,6 +12,7 @@ import uk.gov.ida.eidas.metatron.core.dto.KeyStoreModule;
 import uk.gov.ida.eidas.metatron.health.MetatronHealthCheck;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
 
+import javax.ws.rs.client.Client;
 import java.io.IOException;
 
 public class MetatronApplication extends Application<MetatronConfiguration> {
@@ -55,7 +57,14 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
 
         String config = System.getenv("COUNTRIES_CONFIG_FILE");
 
-        environment.jersey().register(new MetatronResource(ConfigLoaderUtil.loadConfig(config)));
+        Client client = new JerseyClientBuilder(environment).build(getName());
+
+        environment.jersey().register(
+                new MetatronResource(
+                        ConfigLoaderUtil.loadConfig(config),
+                        client
+                )
+        );
     }
 
 }
