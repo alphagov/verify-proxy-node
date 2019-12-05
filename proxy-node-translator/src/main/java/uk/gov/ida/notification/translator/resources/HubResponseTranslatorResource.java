@@ -2,8 +2,7 @@ package uk.gov.ida.notification.translator.resources;
 
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
-import uk.gov.ida.eidas.logging.EidasAttributesLogger;
-import uk.gov.ida.eidas.logging.EidasResponseAttributesHashLogger;
+import uk.gov.ida.eidas.logging.EidasAuthnResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -36,7 +35,6 @@ public class HubResponseTranslatorResource {
 
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
-    private final EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
 
     public HubResponseTranslatorResource(EidasResponseGenerator eidasResponseGenerator,
                                          VerifyServiceProviderProxy verifyServiceProviderProxy) {
@@ -58,7 +56,7 @@ public class HubResponseTranslatorResource {
                         )
                 );
 
-        eidasAttributesLogger.logEidasAttributesAsHash(
+        EidasAuthnResponseAttributesHashLogger.logEidasAttributesHash(
                 translatedHubResponse.getAttributes().orElse(null),
                 translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
