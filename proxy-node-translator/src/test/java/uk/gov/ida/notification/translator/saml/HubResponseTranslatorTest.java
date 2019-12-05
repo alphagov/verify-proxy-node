@@ -14,9 +14,9 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResp
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.saml.core.domain.NonMatchingAttributes;
+import uk.gov.ida.saml.core.domain.NonMatchingTransliterableAttribute;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingTransliterableAttribute;
 
 import java.net.URI;
 import java.time.LocalDate;
