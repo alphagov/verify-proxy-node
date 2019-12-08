@@ -73,4 +73,4 @@ spec:
             - -euc
             - |
               cd /
-              bundle exec cucumber features/smoke_test.feature --strict --tags "not @ignore"
+              bundle exec cucumber features/smoke/integration.feature --strict --tags "not @ignore"
