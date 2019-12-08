@@ -51,6 +51,25 @@ Given("the user accesses the gateway response url directly") do
   visit(ENV.fetch('PROXY_NODE_URL') + '/SAML2/SSO/Response/POST')
 end
 
+Given("the user visits the Netherlands Connector Node Stub Page") do
+  visit('https://demo-portal.minez.nl/demoportal/etoegang')
+end
+
+And('they choose the UK as the country to verify with') do
+  assert_text('Kies hoe u wilt inloggen')
+  click_link('English')
+  assert_text('Choose how to log in')
+  select "EU Login", :from => "authnServiceId"
+  click_button('Continue')
+  assert_text('Which country is your ID from?')
+  find('#country-GB').click
+  click_button('Continue')
+end
+
+Then('they should arrive at the Verify Hub blue page') do
+  assert_text('Sign in with GOV.UK Verify')
+end
+
 Then('they should arrive at the success page') do
   assert_text('Response successfully received')
   assert_text('Jack Cornelius')
