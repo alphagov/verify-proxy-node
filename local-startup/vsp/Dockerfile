@@ -1,0 +1,11 @@
+# Custom VSP image using Amazon JDK
+
+FROM registry.london.verify.govsvc.uk/eidas/verify-service-provider
+WORKDIR /verify-service-provider
+
+# Replace config file with the local version
+RUN rm verify-service-provider.yml
+ADD verify-service-provider-local-hub.yml verify-service-provider.yml
+
+ENTRYPOINT ["bin/verify-service-provider"]
+CMD ["server", "verify-service-provider.yml"]

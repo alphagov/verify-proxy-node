@@ -1,0 +1,53 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: ${PORT:-50400}
+  requestLog:
+    appenders:
+      - type: console
+        layout:
+          ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
+
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  appenders:
+    - type: ${LOGGING_APPENDER:-logstash-console}
+    - type: file
+      currentLogFilename: logs/verify-service-provider.log
+      archivedLogFilenamePattern: logs/verify-service-provider.log.%d.gz
+
+clockSkew: ${CLOCK_SKEW:-PT30s}
+
+serviceEntityIds: ${SERVICE_ENTITY_IDS:-[]}
+
+hashingEntityId: ${HASHING_ENTITY_ID:-}
+
+verifyHubConfiguration:
+  ssoLocation: ${HUB_SSO_LOCATION}
+  metadata:
+    uri: ${HUB_METADATA_URL}
+    expectedEntityId: ${HUB_ENTITY_ID}
+    trustStore:
+      type: ${TRUSTSTORE_TYPES:-encoded}
+      store: ${HUB_METADATA_TRUSTSTORE}
+      password: ${HUB_TRUSTSTORE_PASSWORD:-puppet}
+    hubTrustStore:
+      type: ${TRUSTSTORE_TYPES:-encoded}
+      store: ${HUB_METADATA_TRUSTSTORE}
+      password: ${HUB_TRUSTSTORE_PASSWORD:-puppet}
+    idpTrustStore:
+      type: ${TRUSTSTORE_TYPES:-encoded}
+      store: ${HUB_METADATA_TRUSTSTORE}
+      password: ${HUB_METADATA_TRUSTSTORE_PASSWORD:-puppet}
+
+samlSigningKey: ${VSP_SAML_SIGNING_KEY}
+
+samlPrimaryEncryptionKey: ${VSP_SAML_ENCRYPTION_KEY}
+
+samlSecondaryEncryptionKey: ${VSP_SAML_SECONDARY_ENCRYPTION_KEY:-}
+
+europeanIdentity:
+  enabled: ${EUROPEAN_IDENTITY_ENABLED:-false}
