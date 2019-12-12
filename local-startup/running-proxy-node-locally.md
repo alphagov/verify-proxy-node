@@ -4,8 +4,6 @@ This directory contains resources to run a Proxy Node deployment locally with Do
 
 - The Translator (and all other components) is configured to use a file credential configuration, which means it uses a set of pk8 files on the disk to sign and encrypt messages. Hence, the HSM functionality is not tested. The next step would be to investigate whether we can run a [SoftHSM](https://www.opendnssec.org/softhsm/) instance locally to simulate a real HSM for the Translator.
 
-- The VSP runs in `development` mode which means it talks to the IDA Compliance Tool which acts as a pretend Verify Hub. The Compliance Tool doesn't generate a SAML message but a number of URLs to simulate Hub responses. None of those responses contain any assertions, though, so the translation functionality is not tested in a local journey. The next step would be to either spin up the Hub locally and connect to that but that's computationally expensive. An alternative may be to try to run the Compliance Tool locally and configure it to return SAML messages with assertions.
-
 - The PKI and metadata files are provided statically rather being generated dynamically. This means the provided signed metadata files and all the keys and certs can't be changed easily. This is okay for now but in the future we'd want to review the existing PKI and metadata generation scripts and use them for local running.
 
     The metadata xml files have been manually signed with `xmlsectool` and cannot be changed without re-signing. The metadata truststores have been generated manually with `keytool` and need to be re-generated if metadata gets re-signed with a different cert chain. The certs and private keys used by the apps are symlinked from `verify-dev-pki`. 
@@ -79,3 +77,36 @@ At this point it's useful to install the [JSONView](https://chrome.google.com/we
 
 The Tool generates a SAML response with the destination specified by the VSP. The `docker-compose.yml` file starts the VSP in development mode and provides the Gateway's URL on localhost. The VSP then instructs the Compliance Tool to generate SAML messages with the destination of `http://localhost:GATEWAY_PORT/PATH`. This is the reason we can't use the staging or integration Hub instance as we'd have to add a service configuration with an assertion consumer endpoint containing `localhost`.
 
+## Running with a local Hub or IDP
+
+By default, the VSP runs in [`development` mode](https://github.com/alphagov/verify-service-provider#development) which connects to an instance of the IDA Compliance Tool operated by the Verify team. The Compliance Tool returns canned SAML responses which don't include any assertions.
+
+To fully test the response processing logic, it is possible to run the Proxy Node locally with the VSP configured to generate Authentication Requests for a locally running Hub or IDP. Run `./startup-docker.sh --local-hub` to enable this mode.
+
+This runs the VSP with an alternative config that points it to a Hub or IDP specified in the [docker.env file](docker.env). Note that only one instance of the VSP should be run at any one time - either one with the regular Compliance Tool config or the local Hub config.
+
+### Local Hub/IDP configuration
+
+The default configuration works with the Verify Hub run locally using scripts in [ida-hub-acceptance-tests](https://github.com/alphagov/ida-hub-acceptance-tests). Run `./hub-startup.sh --no-test-rp` to spin up an instance of the Hub to test the Proxy Node against.
+
+However, the configuration can be adjusted to point to any Hub or IDP running locally by changing these values in the [docker.env file](docker.env):
+
+```dotenv
+# VSP running against local Hub
+HUB_METADATA_URL=http://host.docker.internal:55000/local/metadata.xml
+HUB_ENTITY_ID=https://local.signin.service.gov.uk
+HUB_SSO_LOCATION=http://localhost:50300/SAML2/SSO
+VSP_SAML_SIGNING_KEY=
+VSP_SAML_ENCRYPTION_KEY=
+```
+
+`HUB_ENTITY_ID` is the entity ID published in the Hub metadata, and `HUB_METADATA_URL` is the URL at which the metadata is reachable by the VSP from within the Docker network. If the metadata server runs on `localhost` outside of the Docker network the URL needs to point to `host.docker.internal` which is a Docker DNS pointing to `localhost` from within the Docker network.
+
+`HUB_SSO_LOCATION` is the endpoint which the VSP will include in the SAML Authentication Requests which are posted to the Hub from the user's browser. Hence, it has to contain `localhost` if the Hub runs outside Docker as it needs to be reachable from outside the Docker network.
+
+Adjust these values based on whether you also run your metadata and Hub or IDP inside or outside the Docker network. 
+
+Provide base64 encoded PKCS keys for SAML signing and encryption for the VSP and configure your Hub to trust the corresponding certificates.
+You will need to replace the [hub-metadata.trustore file](vsp/hub-metadata.truststore) with one that contains the Hub's metadata signing cert so the VSP can trust and import it.
+
+Finally, the Hub or IDP will need to publish valid "federation" metadata with at least its own signing and encryption certs. You can model that metadata on this [example from verify-metadata](https://github.com/alphagov/verify-metadata/blob/master/signed/local/metadata.xml) and use the scripts in that repository to generate your own. 
