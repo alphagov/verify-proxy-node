@@ -1,5 +1,8 @@
 version: '3.7'
 
+networks:
+  default:
+
 services:
   proxy-node-gateway:
     image: eidas/proxy-node-gateway
@@ -81,9 +84,25 @@ services:
   verify-service-provider:
     image: registry.london.verify.govsvc.uk/eidas/verify-service-provider:latest
     environment:
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50302"
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50402"
     entrypoint: ["bin/verify-service-provider"]
-    command: ["development", "-u", "http://localhost:6600/SAML2/SSO/Response/POST"]
+    command: ["development", "-p", "50400", "-u", "http://localhost:6600/SAML2/SSO/Response/POST"]
     ports:
-      - "50300:50300"
-      - "50302:50302"
+      - "50400:50400"
+      - "50402:50402"
+
+  verify-service-provider-local-hub:
+    image: eidas/verify-service-provider
+    build:
+      context: local-startup/vsp
+    env_file: ./local-startup/docker.env
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50402"
+    networks:
+      default:
+        aliases: [verify-service-provider]
+    ports:
+      - "50400:50400"
+      - "50402:50402"
+    volumes:
+      - ./local-startup/vsp/hub-metadata.truststore:/app/hub-metadata.truststore

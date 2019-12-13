@@ -6,7 +6,8 @@ export RUN_TESTS=${RUN_TESTS:-false}
 export USE_LOCAL_BUILD=${USE_LOCAL_BUILD:-true}
 export VERIFY_USE_PUBLIC_BINARIES=${VERIFY_USE_PUBLIC_BINARIES:-false}
 
-BUILD_IMAGES=false; if [ "${1:-}" = "--build" ]; then BUILD_IMAGES=true; export USE_LOCAL_BUILD=true; fi
+if [[ "$*" =~ "--build" ]]; then BUILD_IMAGES=true; export USE_LOCAL_BUILD=true; else BUILD_IMAGES=false; fi
+if [[ "$*" =~ "--local-hub" ]]; then VSP=verify-service-provider-local-hub; else VSP=verify-service-provider; fi
 
 if ${BUILD_IMAGES}; then
   echo "Building apps..." && ./gradlew --parallel installDist
@@ -14,7 +15,7 @@ if ${BUILD_IMAGES}; then
 fi
 
 echo "Starting Gateway, Translator, Stub Connector, VSP..."
-docker-compose up -d stub-connector proxy-node-gateway translator verify-service-provider
+docker-compose up -d stub-connector proxy-node-gateway translator $VSP
 
 # ESP won't start without Connector metadata
 printf "Waiting for Stub Connector"
