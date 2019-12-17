@@ -8,6 +8,8 @@ metadata:
     app.kubernetes.io/name: esp-redis
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    timestamp: {{ .Release.Time }}
 spec:
   replicas: 1
   strategy:

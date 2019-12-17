@@ -9,6 +9,8 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    timestamp: {{ .Release.Time }}
 spec:
   replicas: {{ .Values.stubConnector.replicaCount }}
   strategy:
