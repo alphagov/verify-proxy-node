@@ -176,15 +176,23 @@ spec:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/verify-service-provider
 
+    - name: nightly
+      type: time
+      icon: update
+      source:
+        interval: 1h
+        start: 3:00 AM
+        stop: 4:00 AM
+
     groups:
       - name: deployment
-        jobs: [build-vsp-image, build-proxy-node, package, test, release]
+        jobs: [build-vsp-image, build-proxy-node, package, test, release, delete]
       - name: proxy-node
-        jobs: [build-proxy-node, package, test, release]
+        jobs: [build-proxy-node, package, test, release, delete]
       - name: components
         jobs: [build-cloudhsm, build-vsp-image]
       - name: all
-        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package, test, release]
+        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package, test, release, delete]
 
     jobs:
 
@@ -502,6 +510,46 @@ spec:
           import_file: alpine-image/rootfs.tar
           <<: *image_tag
 
+    - name: delete
+      serial: true
+      serial_groups: [package]
+      plan:
+        - get: nightly
+          trigger: true
+        - get: chart
+          passed: [package]
+          trigger: true
+
+        - task: delete-test-release
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: test
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "Configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  echo "Deleting app ${RELEASE_NAME}-${APP_NAME} in namespace${RELEASE_NAMESPACE}"
+                  kapp delete \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}"
+
     - name: test
       serial: true
       serial_groups: [package]
@@ -510,7 +558,7 @@ spec:
       - in_parallel:
           steps:
           - get: chart
-            passed: [package]
+            passed: [delete]
             trigger: true
           - get: tests-image
             passed: [build-proxy-node]
