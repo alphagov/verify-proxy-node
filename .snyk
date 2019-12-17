@@ -5,9 +5,5 @@ ignore:
   SNYK-JAVA-CAJULIUSDAVIES-30073:
     - '*':
         reason: Fix not available
-        expires: 2020-01-15T00:00:00.000Z
-  SNYK-JAVA-COMFASTERXMLJACKSONCORE-455617:
-    - '*':
-        reason: Fix not yet available in Dropwizard
-        expires: 2019-11-30T19:21:05.816Z
+        expires: 2020-03-15T00:00:00.000Z
 patch: {}
