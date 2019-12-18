@@ -536,12 +536,11 @@ spec:
           outputs:
             - name: eidas-config
           run:
-            path: /bin/sh
+            dir: eidas-config/tools
+            path: gradlew
             args:
-              - -euc
-              - |
-                cd eidas-config/tools
-                ./gradlew run --args="generate-config --environment=test"
+              - run
+              - --args="generate-config --environment=test"
 
       - task: create-config-map
         config:
