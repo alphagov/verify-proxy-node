@@ -10,15 +10,15 @@ data:
     {
       "annotations": {
         "list": [
-          {
-            "builtIn": 1,
-            "datasource": "-- Grafana --",
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "type": "dashboard"
-          }
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
         ]
       },
       "editable": true,
@@ -26,300 +26,262 @@ data:
       "graphTooltip": 0,
       "links": [],
       "panels": [
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "Cloudwatch",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 10,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
         {
-          "alert": {
-            "alertRuleTags": {},
-            "conditions": [
-              {
-                "evaluator": {
-                  "params": [
-                    1000
-                  ],
-                  "type": "gt"
-                },
-                "operator": {
-                  "type": "and"
-                },
-                "query": {
-                  "params": [
-                    "A",
-                    "5m",
-                    "now"
-                  ]
-                },
-                "reducer": {
-                  "params": [],
-                  "type": "avg"
-                },
-                "type": "query"
-              }
+          "dimensions": {
+            "Region": "eu-west-2"
+          },
+          "expression": "",
+          "highResolution": false,
+          "id": "",
+          "metricName": "HsmKeysSessionOccupied",
+          "namespace": "AWS/CloudHSM",
+          "period": "",
+          "refId": "A",
+          "region": "default",
+          "returnData": false,
+          "statistics": [
+            "Maximum"
+          ]
+        }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "HSM Monitoring",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "cacheTimeout": null,
+        "description": "Errors where the user could not be sent back to the eIDAS connector node, i.e. their journey ended in failure on a Verify error page.",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 6,
+        "links": [],
+        "options": {
+          "displayMode": "lcd",
+          "fieldOptions": {
+            "calcs": [
+              "mean"
             ],
-            "executionErrorState": "alerting",
-            "for": "5m",
-            "frequency": "1m",
-            "handler": 1,
-            "name": "HSM alert",
-            "noDataState": "no_data",
-            "notifications": []
-          },
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "Cloudwatch",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 0
-          },
-          "id": 10,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
+            "defaults": {
+              "mappings": [],
+              "max": 2,
+              "min": 0,
+              "thresholds": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              },
+              {
+                "color": "dark-red",
+                "value": 8
+              }
+              ]
+            },
+            "override": {},
             "values": false
           },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "alias": "",
-              "dimensions": {
-                "Region": "eu-west-2"
-              },
-              "expression": "",
-              "highResolution": false,
-              "id": "",
-              "metricName": "HsmKeysSessionOccupied",
-              "namespace": "AWS/CloudHSM",
-              "period": "",
-              "refId": "A",
-              "region": "default",
-              "returnData": false,
-              "statistics": [
-                "Maximum"
-              ]
-            }
-          ],
-          "thresholds": [
-            {
-              "colorMode": "critical",
-              "fill": true,
-              "line": true,
-              "op": "gt",
-              "value": 1000,
-              "yaxis": "left"
-            }
-          ],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "HSM Monitoring",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "orientation": "horizontal"
         },
+        "pluginVersion": "6.3.5",
+        "targets": [
         {
-          "links": [],
-          "options": {
-            "displayMode": "gradient",
-            "fieldOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "defaults": {
-                "mappings": [],
-                "max": 10,
-                "min": 0,
-                "thresholds": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "override": {},
-              "values": false
-            },
-            "orientation": "horizontal"
-          },
-          "pluginVersion": "6.3.5",
-          "targets": [
-            {
-              "expr": "sum(increase(verify_proxy_node_successful_responses_total{namespace=\"verify-proxy-node-prod\"}[24h])) by (release)",
-              "legendFormat": "{{release}}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "eIDAS Responses (last 24h)",
-          "type": "bargauge"
-        },
-        {
-          "cacheTimeout": null,
-          "description": "Errors where the user could not be sent back to the eIDAS connector node, i.e. their journey ended in failure on a Verify error page.",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 0
-          },
-          "id": 6,
-          "links": [],
-          "options": {
-            "displayMode": "lcd",
-            "fieldOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "defaults": {
-                "mappings": [],
-                "max": 2,
-                "min": 0,
-                "thresholds": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 0.05
-                  },
-                  {
-                    "color": "dark-red",
-                    "value": 8
-                  }
-                ]
-              },
-              "override": {},
-              "values": false
-            },
-            "orientation": "horizontal"
-          },
-          "pluginVersion": "6.3.5",
-          "targets": [
-            {
-              "expr": "increase(verify_proxy_node_failure_error_page{namespace=\"verify-proxy-node-prod\"}[1h])",
-              "instant": false,
-              "legendFormat": "{{release}}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Errors pages (1h)",
-          "type": "bargauge"
-        },
-        {
-          "cacheTimeout": null,
-          "description": "Errors where the user was sent back to the eIDAS connector node due to a failure to register or sign in.",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 8
-          },
-          "id": 8,
-          "links": [],
-          "options": {
-            "displayMode": "lcd",
-            "fieldOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "defaults": {
-                "mappings": [],
-                "max": 5,
-                "min": 0,
-                "thresholds": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0.05
-                  },
-                  {
-                    "color": "dark-red",
-                    "value": 4
-                  }
-                ]
-              },
-              "override": {},
-              "values": false
-            },
-            "orientation": "horizontal"
-          },
-          "pluginVersion": "6.3.5",
-          "targets": [
-            {
-              "expr": "\nincrease(verify_proxy_node_failure_saml_error_responses_total{namespace=\"verify-proxy-node-prod\"}[1h])",
-              "instant": false,
-              "legendFormat": "{{release}}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Error responses (1h)",
-          "type": "bargauge"
+          "expr": "increase(verify_proxy_node_failure_error_page{namespace=\"verify-proxy-node-prod\"}[1h])",
+          "instant": false,
+          "legendFormat": "{{release}}",
+          "refId": "A"
         }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Errors pages (1h)",
+        "type": "bargauge"
+      },
+      {
+        "gridPos": {
+          "h": 3,
+          "w": 6,
+          "x": 0,
+          "y": 8
+        },
+        "id": 4,
+        "links": [],
+        "options": {
+          "displayMode": "gradient",
+          "fieldOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "defaults": {
+              "mappings": [],
+              "max": 10,
+              "min": 0,
+              "thresholds": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+              ]
+            },
+            "override": {},
+            "values": false
+          },
+          "orientation": "horizontal"
+        },
+        "pluginVersion": "6.3.5",
+        "targets": [
+        {
+          "expr": "sum(increase(verify_proxy_node_successful_responses_total{namespace=\"verify-proxy-node-prod\"}[24h])) by (release)",
+          "legendFormat": "{{release}}",
+          "refId": "A"
+        }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "eIDAS Responses (last 24h)",
+        "type": "bargauge"
+      },
+      {
+        "cacheTimeout": null,
+        "description": "Errors where the user was sent back to the eIDAS connector node due to a failure to register or sign in.",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "id": 8,
+        "links": [],
+        "options": {
+          "displayMode": "lcd",
+          "fieldOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "defaults": {
+              "mappings": [],
+              "max": 5,
+              "min": 0,
+              "thresholds": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.05
+              },
+              {
+                "color": "dark-red",
+                "value": 4
+              }
+              ]
+            },
+            "override": {},
+            "values": false
+          },
+          "orientation": "horizontal"
+        },
+        "pluginVersion": "6.3.5",
+        "targets": [
+        {
+          "expr": "\nincrease(verify_proxy_node_failure_saml_error_responses_total{namespace=\"verify-proxy-node-prod\"}[1h])",
+          "instant": false,
+          "legendFormat": "{{release}}",
+          "refId": "A"
+        }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Error responses (1h)",
+        "type": "bargauge"
+      }
       ],
       "refresh": "10s",
       "schemaVersion": 19,
