@@ -588,7 +588,8 @@ spec:
             path: ./gradlew
             args:
               - run
-              - --args="generate-config --environment=test"
+              - --args
+              - "generate-config --environment=test"
 
       - task: create-config-map
         config:
