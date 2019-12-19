@@ -147,9 +147,10 @@ public class GatewayApplication extends Application<GatewayConfiguration> {
             SessionStore sessionStore,
             URI errorPageRedirectUrl) {
 
+        ErrorPageExceptionMapper errorPageExceptionMapper = new ErrorPageExceptionMapper(errorPageRedirectUrl);
         environment.jersey().register(new MissingMetadataExceptionMapper());
-        environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore));
-        environment.jersey().register(new ErrorPageExceptionMapper(errorPageRedirectUrl));
+        environment.jersey().register(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore, errorPageExceptionMapper));
+        environment.jersey().register(errorPageExceptionMapper);
         environment.jersey().register(new ErrorPageRedirectResponseValidationExceptionMapper(errorPageRedirectUrl));
         environment.jersey().register(new GenericExceptionMapper(errorPageRedirectUrl));
     }

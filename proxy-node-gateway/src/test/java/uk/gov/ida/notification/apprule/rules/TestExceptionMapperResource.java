@@ -26,6 +26,7 @@ public class TestExceptionMapperResource {
     public static final String SESSION_ID = "aSessionId";
     public static final String HUB_REQUEST_ID = "aHubRequestId";
     public static final String EIDAS_REQUEST_ID = "anEidasRequestId";
+    public static final String HUB_ERROR_PAGE_CONTENT = "hub error page";
 
     @GET
     @Path("/SessionAlreadyExistsException")
@@ -80,6 +81,12 @@ public class TestExceptionMapperResource {
     @Path("/RedisSerializationException")
     public Response getRedisSerializationException() {
         throw new RedisSerializationException("This is a message", new Exception("This caused a RedisSerializationException"));
+    }
+
+    @GET
+    @Path("/HubErrorPage")
+    public Response getHubErrorPage() {
+        return Response.ok(HUB_ERROR_PAGE_CONTENT).build();
     }
 
     @GET

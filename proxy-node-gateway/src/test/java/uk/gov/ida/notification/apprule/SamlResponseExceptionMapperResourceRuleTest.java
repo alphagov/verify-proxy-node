@@ -3,10 +3,13 @@ package uk.gov.ida.notification.apprule;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.ida.common.ExceptionType;
+import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.apprule.rules.TestExceptionMapperResource;
+import uk.gov.ida.notification.exceptions.mappers.ErrorPageExceptionMapper;
 import uk.gov.ida.notification.exceptions.mappers.ExceptionToSamlErrorResponseMapper;
 import uk.gov.ida.notification.proxy.TranslatorProxy;
 import uk.gov.ida.notification.session.GatewaySessionData;
@@ -14,6 +17,9 @@ import uk.gov.ida.notification.session.storage.SessionStore;
 import uk.gov.ida.notification.views.SamlFormView;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,14 +30,16 @@ import static org.mockito.Mockito.when;
 
 public class SamlResponseExceptionMapperResourceRuleTest {
 
-    private static final SamlFormViewBuilder samlFormViewBuilder = mock(SamlFormViewBuilder.class);
-    private static final TranslatorProxy translatorProxy = mock(TranslatorProxy.class);
-    private static final SessionStore sessionStore = mock(SessionStore.class);
+    private SamlFormViewBuilder samlFormViewBuilder = mock(SamlFormViewBuilder.class);
+    private TranslatorProxy translatorProxy = mock(TranslatorProxy.class);
+    private SessionStore sessionStore = mock(SessionStore.class);
+    private UriInfo uriInfo = mock(UriInfo.class);
+    private ErrorPageExceptionMapper errorPageExceptionMapper = new ErrorPageExceptionMapper(URI.create("/HubErrorPage"));
 
-    @ClassRule
-    public static final ResourceTestRule resources = ResourceTestRule.builder()
+    @Rule
+    public ResourceTestRule resources = ResourceTestRule.builder()
             .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-            .addProvider(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore))
+            .addProvider(new ExceptionToSamlErrorResponseMapper(samlFormViewBuilder, translatorProxy, sessionStore, errorPageExceptionMapper))
             .addResource(new TestExceptionMapperResource())
             .build();
 
@@ -75,6 +83,21 @@ public class SamlResponseExceptionMapperResourceRuleTest {
                 .get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(checkResponseEntityIsSamlFormResponse(response.readEntity(String.class))).isTrue();
+    }
+
+    @Test
+    public void shouldRedirectToHubErrorPageWhenExceptionOnCreateSAMLErrorResponse() {
+        errorPageExceptionMapper.setUriInfo(uriInfo);
+        ApplicationException applicationException = ApplicationException.createUnauditedException(
+                ExceptionType.REMOTE_SERVER_ERROR,
+                UUID.randomUUID());
+        when(translatorProxy.getSamlErrorResponse(any())).thenThrow(applicationException);
+        Response response = resources.getJerseyTest()
+                .target("/TranslatorResponseException")
+                .request()
+                .get();
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
+        assertThat(response.readEntity(String.class)).isEqualTo(TestExceptionMapperResource.HUB_ERROR_PAGE_CONTENT);
     }
 
     private boolean checkResponseEntityIsSamlFormResponse(String responseEntity) {

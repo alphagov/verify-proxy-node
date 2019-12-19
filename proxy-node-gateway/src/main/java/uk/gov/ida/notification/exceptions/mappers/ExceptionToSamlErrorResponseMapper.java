@@ -1,6 +1,7 @@
 package uk.gov.ida.notification.exceptions.mappers;
 
 import io.prometheus.client.Counter;
+import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
@@ -31,14 +32,16 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
     private final SamlFormViewBuilder samlFormViewBuilder;
     private final TranslatorProxy translatorProxy;
     private final SessionStore sessionStorage;
+    private final ErrorPageExceptionMapper errorPageExceptionMapper;
 
     private HttpServletRequest httpServletRequest;
     private UriInfo uriInfo;
 
-    public ExceptionToSamlErrorResponseMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage) {
+    public ExceptionToSamlErrorResponseMapper(SamlFormViewBuilder samlFormViewBuilder, TranslatorProxy translatorProxy, SessionStore sessionStorage, ErrorPageExceptionMapper errorPageExceptionMapper) {
         this.samlFormViewBuilder = samlFormViewBuilder;
         this.translatorProxy = translatorProxy;
         this.sessionStorage = sessionStorage;
+        this.errorPageExceptionMapper = errorPageExceptionMapper;
     }
 
     @Context
@@ -59,20 +62,25 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
         final String sessionId = httpServletRequest.getSession().getId();
         final GatewaySessionData sessionData = getSessionData(sessionId);
 
-        final String samlErrorResponse = translatorProxy.getSamlErrorResponse(
-                new SamlFailureResponseGenerationRequest(
-                        exception.getResponseStatus(),
-                        sessionData.getEidasRequestId(),
-                        sessionData.getEidasDestination()
-                ));
+        final String samlErrorResponse;
+        try {
+            samlErrorResponse = translatorProxy.getSamlErrorResponse(
+                    new SamlFailureResponseGenerationRequest(
+                            exception.getResponseStatus(),
+                            sessionData.getEidasRequestId(),
+                            sessionData.getEidasDestination()
+                    ));
+            final SamlFormView samlFormView = samlFormViewBuilder.buildResponse(
+                    sessionData.getEidasDestination(),
+                    samlErrorResponse,
+                    sessionData.getEidasRelayState());
+            FAILURE_SAML_ERROR.inc();
+            return Response.ok().entity(samlFormView).build();
+        } catch (ApplicationException e) {
+            return errorPageExceptionMapper.toResponse(new FailureResponseGenerationException(e, sessionData.getEidasRequestId()));
+        }
 
-        final SamlFormView samlFormView = samlFormViewBuilder.buildResponse(
-                sessionData.getEidasDestination(),
-                samlErrorResponse,
-                sessionData.getEidasRelayState());
 
-        FAILURE_SAML_ERROR.inc();
-        return Response.ok().entity(samlFormView).build();
     }
 
     private GatewaySessionData getSessionData(String sessionId) {
