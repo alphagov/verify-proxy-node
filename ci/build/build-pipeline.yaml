@@ -585,7 +585,7 @@ spec:
             - name: eidas-config
           run:
             dir: eidas-config/tools
-            path: gradlew
+            path: ./gradlew
             args:
               - run
               - --args="generate-config --environment=test"
