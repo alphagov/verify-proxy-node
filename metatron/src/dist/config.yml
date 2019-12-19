@@ -1,0 +1,17 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: ${PORT:-6670}
+  adminConnectors:
+    - type: http
+      port: ${ADMIN_PORT:-6671}
+  requestLog:
+    appenders:
+      - type: console
+        layout:
+          ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
+
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  appenders:
+    - type: ${LOGGING_APPENDER:-logstash-console}

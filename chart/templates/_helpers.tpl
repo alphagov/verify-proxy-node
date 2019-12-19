@@ -3,6 +3,10 @@
 {{- printf "%s.%s.%s.%s" .Chart.Name "eidas" .Release.Name (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "metatron.host" -}}
+{{- printf "%s.%s.%s" "metatron.eidas" .Release.Name (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "gateway.entityID" -}}
 {{- printf "https://%s%s" (include "gateway.host" .) .Values.gateway.metadataPath -}}
 {{- end -}}

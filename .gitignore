@@ -24,13 +24,7 @@ buildNumber.properties
 
 # Gradle
 .gradle
-/build/
-eidas-saml-parser/build/
-proxy-node-gateway/build/
-proxy-node-shared/build/
-proxy-node-translator/build/
-proxy-node-test/build/
-stub-connector/build/
+**/build
 .gradletasknamecache
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
