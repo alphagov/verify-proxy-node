@@ -6,4 +6,8 @@ ignore:
     - '*':
         reason: Fix not available
         expires: 2020-03-15T00:00:00.000Z
+  SNYK-JAVA-ORGYAML-537645:
+    - '*':
+        reason: Fix not available, and used for reading config, not at runtime
+        expires: 2020-01-15T00:00:00.000Z
 patch: {}

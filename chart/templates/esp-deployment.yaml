@@ -70,14 +70,11 @@ spec:
 {{- if .Values.stubConnector.enabled }}
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: metadataSigningTruststoreBase64
+            configMapKeyRef:
+              name: test-pki-configmap
+              key: stub_connector.truststore.base64
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: metadataSigningTruststorePassword
+          value: {{ .Values.connector.metadataSigningTruststorePassword }}
 {{- else }}
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           value: {{ .Values.connector.metadataSigningTruststoreBase64 }}
