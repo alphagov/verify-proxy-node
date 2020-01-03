@@ -6,8 +6,6 @@ import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.encryption.Decrypter;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
-import uk.gov.ida.notification.configuration.CloudHsmCredentialConfiguration;
-import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.saml.security.DecrypterFactory;
 
 import java.util.Collections;
@@ -18,10 +16,6 @@ public class ResponseAssertionDecrypter {
 
     public ResponseAssertionDecrypter(Credential credential) {
         this.decrypter = new DecrypterFactory().createDecrypter(Collections.singletonList(credential));
-        if (credential.getEntityId() != null && credential.getEntityId().equals(CloudHsmCredentialConfiguration.ID)) {
-            ProxyNodeLogger.info("Using CloudHSM so set JCA provider to Cavium");
-            this.decrypter.setJCAProviderName("Cavium");
-        }
     }
 
     public Response decrypt(Response response) throws DecryptionException {

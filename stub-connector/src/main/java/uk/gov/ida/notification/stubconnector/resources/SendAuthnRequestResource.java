@@ -21,8 +21,6 @@ import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import uk.gov.ida.common.shared.configuration.EncodedPrivateKeyConfiguration;
 import uk.gov.ida.common.shared.configuration.X509CertificateConfiguration;
-import uk.gov.ida.notification.configuration.CredentialConfiguration;
-import uk.gov.ida.notification.configuration.KeyFileCredentialConfiguration;
 import uk.gov.ida.notification.saml.SignatureSigningParametersHelper;
 import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.stubconnector.EidasAuthnRequestContextFactory;
@@ -117,18 +115,20 @@ public class SendAuthnRequestResource {
         @Session HttpSession session,
         @Context HttpServletResponse httpServletResponse
     ) throws Throwable {
-        JCEMapper.setProviderId("BC");
 
-        KeyFileCredentialConfiguration invalidCredentialConfiguration = new KeyFileCredentialConfiguration(
-            new X509CertificateConfiguration(TEST_PUBLIC_CERT),
-            new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
+        ConnectorNodeCredentialConfiguration invalidCredentialConfiguration = new ConnectorNodeCredentialConfiguration(
+                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+                new X509CertificateConfiguration(TEST_PUBLIC_CERT),
+                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY),
+                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY),
+                new EncodedPrivateKeyConfiguration(TEST_PRIVATE_KEY)
         );
         MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, invalidCredentialConfiguration);
         encode(httpServletResponse, context);
 
         Response response = Response.ok().build();
 
-        JCEMapper.setProviderId("Cavium");
         return response;
     }
 
@@ -155,7 +155,7 @@ public class SendAuthnRequestResource {
     private MessageContext generateAuthnRequestContext(
         HttpSession session,
         EidasLoaEnum loaType,
-        CredentialConfiguration credentialConfiguration
+        ConnectorNodeCredentialConfiguration credentialConfiguration
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
         String connectorEntityId = configuration.getConnectorNodeEntityId().toString();
@@ -169,7 +169,7 @@ public class SendAuthnRequestResource {
         );
 
         SignatureSigningParameters signingParameters = SignatureSigningParametersHelper.build(
-            credentialConfiguration.getCredential(),
+            credentialConfiguration.getSamlSigningCredential(),
             credentialConfiguration.getAlgorithm());
 
         MessageContext context = contextFactory.generate(

@@ -24,8 +24,9 @@ import uk.gov.ida.notification.saml.metadata.Metadata;
 import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
-import uk.gov.ida.notification.shared.metadata.MetadataPublishingBundle;
 import uk.gov.ida.notification.stubconnector.exceptions.mappers.TemplatedResponseWebApplicationExceptionMapper;
+import uk.gov.ida.notification.stubconnector.metadata.MetadataGenerator;
+import uk.gov.ida.notification.stubconnector.resources.MetadataResource;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
 import uk.gov.ida.saml.metadata.MetadataConfiguration;
@@ -84,8 +85,7 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new LogstashBundle());
         bootstrap.addBundle(new AssetsBundle("/assets/favicon.ico", "/favicon.ico"));
-        bootstrap.addBundle(new MetadataPublishingBundle<>(StubConnectorConfiguration::getMetadataPublishingConfiguration));
-
+        // TODO reinstate a MetadataPublishingBundle for resources /ConnectorMetadata and /ConnectorMetadataSigningCertificates
         proxyNodeMetadataResolverBundle = new MetadataResolverBundle<>(configuration -> Optional.of(configuration.getProxyNodeMetadataConfiguration()));
         bootstrap.addBundle(proxyNodeMetadataResolverBundle);
     }
@@ -124,10 +124,13 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
     }
 
     private void registerResources(StubConnectorConfiguration configuration, Environment environment) {
-        ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(configuration.getCredentialConfiguration().getCredential());
+        ResponseAssertionDecrypter decrypter = new ResponseAssertionDecrypter(configuration.getCredentialConfiguration().getSamlEncryptionCredential());
+        MetadataGenerator metadataGenerator = new MetadataGenerator(configuration);
+        MetadataResource metadataResource = new MetadataResource(metadataGenerator);
 
         environment.jersey().register(new SendAuthnRequestResource(configuration, proxyNodeMetadata));
         environment.jersey().register(new ReceiveResponseResource(configuration, decrypter, proxyNodeMetadataResolverBundle));
+        environment.jersey().register(metadataResource);
     }
 
     private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {

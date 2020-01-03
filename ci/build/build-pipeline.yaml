@@ -347,7 +347,6 @@ spec:
               build: src
               build_args:
                 component: stub-connector
-                TALKS_TO_HSM: true
               <<: *image_tag
           - put: tests-image
             get_params: {skip_download: true}

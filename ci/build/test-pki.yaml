@@ -1,0 +1,83 @@
+---
+apiVersion: concourse.k8s.io/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: build-test-pki
+spec:
+  exposed: true
+  config:
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: ((concourse.task-toolbox-image))
+        tag: ((concourse.task-toolbox-tag))
+
+    resources:
+
+    - name: verify-dev-pki
+      type: git
+      source:
+        uri: https://github.com/alphagov/verify-dev-pki.git
+
+    jobs:
+
+    - name: build-test-pki
+      plan:
+      - get: verify-dev-pki
+        trigger: true
+      - task: assemble-pki
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: openjdk
+              tag: 11
+          inputs:
+            - name: verify-dev-pki
+          outputs:
+            - name: pki
+          run:
+            path: /bin/sh
+            args:
+              - -euc
+              - |
+                echo "create a truststore containing metadata-ca and ida-root-ca"
+                keytool -keystore ./stub_connector.truststore -import -v -file verify-dev-pki/src/main/resources/ca-certificates/ida-root-ca.pem.test -storepass marshmallow -trustcacerts -noprompt -alias ida-root-ca.pem.test
+                keytool -keystore ./stub_connector.truststore -import -v -file verify-dev-pki/src/main/resources/ca-certificates/ida-metadata-ca.pem.test -storepass marshmallow -trustcacerts -noprompt -alias ida-metadata-ca.pem.test
+                openssl base64 -A -in stub_connector.truststore > pki/stub_connector.truststore.base64
+
+                echo "copy keys and certs to pki/"
+                cp verify-dev-pki/src/main/resources/dev-keys/metadata_signing_a.crt                pki/metadata_signing.crt
+                cp verify-dev-pki/src/main/resources/dev-keys/stub_country_signing_primary.crt      pki/saml_signing.crt
+                cp verify-dev-pki/src/main/resources/dev-keys/metadata_signing_a.pk8                pki/metadata_signing.pk8
+                cp verify-dev-pki/src/main/resources/dev-keys/stub_country_signing_primary.pk8      pki/saml_signing.pk8
+
+      - task: apply-test-pki-configmap
+        config:
+          platform: linux
+          image_resource: *task_toolbox
+          inputs:
+            - name: pki
+          params:
+            KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+            KUBERNETES_TOKEN: ((namespace-deployer.token))
+            NAMESPACE: ((namespace-deployer.namespace))
+          run:
+            path: /bin/sh
+            args:
+              - -euc
+              - |
+                echo "configuring kubectl"
+                echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                kubectl config set-context deployer --user deployer --cluster self
+                kubectl config use-context deployer
+
+                echo "generating test-pki configMap from pki/, with data keys:"
+                ls pki/
+                kubectl -n "${NAMESPACE}" create configmap test-pki-configmap --from-file=pki --dry-run -o yaml | kubectl apply -f -
