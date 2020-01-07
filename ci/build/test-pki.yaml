@@ -27,7 +27,6 @@ spec:
     - name: build-test-pki
       plan:
       - get: verify-dev-pki
-        trigger: true
       - task: assemble-pki
         config:
           platform: linux

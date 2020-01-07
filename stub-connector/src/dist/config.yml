@@ -18,6 +18,7 @@ logging:
 
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
 connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID}
+connectorNodeMetadataExpiryMonths: ${CONNECTOR_NODE_METADATA_EXPIRY_MONTHS:-1}
 
 proxyNodeMetadataConfiguration:
   url: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}

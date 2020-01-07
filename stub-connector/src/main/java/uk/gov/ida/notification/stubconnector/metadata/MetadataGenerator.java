@@ -64,7 +64,7 @@ public class MetadataGenerator {
         String xml = renderTemplate(CONNECTOR_TEMPLATE_XML_MUSTACHE, config);
         EntityDescriptor entityDescriptor = ObjectUtils.unmarshall(new ByteArrayInputStream(xml.getBytes()), EntityDescriptor.class);
         entityDescriptor.setID("_" + UUID.randomUUID().toString());
-        entityDescriptor.setValidUntil(DateTime.now().plusWeeks(2));
+        entityDescriptor.setValidUntil(DateTime.now().plusMonths(configuration.getConnectorNodeMetadataExpiryMonths()));
         updateSsoDescriptors(entityDescriptor);
         sign(entityDescriptor);
         return entityDescriptor;

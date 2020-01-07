@@ -2,7 +2,6 @@ package uk.gov.ida.notification.stubconnector;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-import uk.gov.ida.notification.stubconnector.resources.ConnectorNodeCredentialConfiguration;
 import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
@@ -21,6 +20,12 @@ public class StubConnectorConfiguration extends Configuration {
     @NotNull
     @JsonProperty
     private URI connectorNodeEntityId;
+
+    /**
+     * Period of validity of connector node metadata in months,
+     */
+    @JsonProperty
+    private Integer connectorNodeMetadataExpiryMonths = 1;
 
     @Valid
     @NotNull
@@ -58,5 +63,9 @@ public class StubConnectorConfiguration extends Configuration {
 
     public Map<String, String> getConnectorNodeTemplateConfig() {
         return connectorNodeTemplateConfig;
+    }
+
+    public Integer getConnectorNodeMetadataExpiryMonths() {
+        return connectorNodeMetadataExpiryMonths;
     }
 }

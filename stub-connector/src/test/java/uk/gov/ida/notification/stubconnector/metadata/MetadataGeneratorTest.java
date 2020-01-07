@@ -11,7 +11,7 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import uk.gov.ida.common.shared.configuration.EncodedPrivateKeyConfiguration;
 import uk.gov.ida.common.shared.configuration.X509CertificateConfiguration;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
-import uk.gov.ida.notification.stubconnector.resources.ConnectorNodeCredentialConfiguration;
+import uk.gov.ida.notification.stubconnector.ConnectorNodeCredentialConfiguration;
 import uk.gov.ida.saml.core.test.TestCertificateStrings;
 
 import java.net.URI;
@@ -48,6 +48,7 @@ public class MetadataGeneratorTest {
         );
 
         when(configuration.getConnectorNodeEntityId()).thenReturn(URI.create(ENTITY_ID));
+        when(configuration.getConnectorNodeMetadataExpiryMonths()).thenReturn(1);
         when(configuration.getCredentialConfiguration()).thenReturn(credentialConfiguration);
         when(configuration.getConnectorNodeTemplateConfig()).thenReturn(templateConfig);
 

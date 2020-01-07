@@ -23,6 +23,7 @@ import uk.gov.ida.common.shared.configuration.EncodedPrivateKeyConfiguration;
 import uk.gov.ida.common.shared.configuration.X509CertificateConfiguration;
 import uk.gov.ida.notification.saml.SignatureSigningParametersHelper;
 import uk.gov.ida.notification.saml.metadata.Metadata;
+import uk.gov.ida.notification.stubconnector.ConnectorNodeCredentialConfiguration;
 import uk.gov.ida.notification.stubconnector.EidasAuthnRequestContextFactory;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 import uk.gov.ida.notification.stubconnector.views.StartPageView;

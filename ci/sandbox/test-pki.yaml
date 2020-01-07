@@ -27,7 +27,6 @@ spec:
     - name: build-test-pki
       plan:
       - get: verify-dev-pki
-        trigger: true
       - task: assemble-pki
         config:
           platform: linux
@@ -49,6 +48,9 @@ spec:
                 keytool -keystore ./stub_connector.truststore -import -v -file verify-dev-pki/src/main/resources/ca-certificates/ida-root-ca.pem.test -storepass marshmallow -trustcacerts -noprompt -alias ida-root-ca.pem.test
                 keytool -keystore ./stub_connector.truststore -import -v -file verify-dev-pki/src/main/resources/ca-certificates/ida-metadata-ca.pem.test -storepass marshmallow -trustcacerts -noprompt -alias ida-metadata-ca.pem.test
                 openssl base64 -A -in stub_connector.truststore > pki/stub_connector.truststore.base64
+
+                echo "cat metadata CA certs to pki/metadataCACerts"
+                cat verify-dev-pki/src/main/resources/ca-certificates/ida-metadata-ca.pem.test verify-dev-pki/src/main/resources/ca-certificates/ida-root-ca.pem.test > pki/metadataCACerts
 
                 echo "copy keys and certs to pki/"
                 cp verify-dev-pki/src/main/resources/dev-keys/metadata_signing_a.crt                pki/metadata_signing.crt

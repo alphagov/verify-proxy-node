@@ -1,4 +1,4 @@
-package uk.gov.ida.notification.stubconnector.resources;
+package uk.gov.ida.notification.stubconnector;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
