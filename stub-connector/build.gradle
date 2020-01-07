@@ -5,6 +5,7 @@ dependencies {
             configurations.eidas_saml,
             configurations.common,
             configurations.dev_pki,
+            configurations.aws_stuff,
             project(':proxy-node-shared')
 
 }

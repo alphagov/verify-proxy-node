@@ -16,42 +16,42 @@ logging:
   appenders:
     - type: ${LOGGING_APPENDER:-logstash-console}
 
-connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
-connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID}
+connectorNodeBaseUrl: "https://stub-connector.eidas.test.london.sandbox.govsvc.uk"
+connectorNodeEntityId: "https://stub-connector.eidas.test.london.sandbox.govsvc.uk/ConnectorMetadata"
 
 proxyNodeMetadataConfiguration:
-  url: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
-  expectedEntityId: ${PROXY_NODE_ENTITY_ID}
+  url: "https://proxy-node.eidas.test.london.sandbox.govsvc.uk/ServiceMetadata"
+  expectedEntityId: "https://proxy-node.eidas.test.london.sandbox.govsvc.uk/ServiceMetadata"
   jerseyClientName: proxy-node-metadata-client
   trustStore:
     type: ${TRUSTSTORE_TYPES:-encoded}
-    store: ${PROXY_NODE_METADATA_TRUSTSTORE}
-    password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
+    store: "MIIFBgIBAzCCBL8GCSqGSIb3DQEHAaCCBLAEggSsMIIEqDCCBKQGCSqGSIb3DQEHBqCCBJUwggSRAgEAMIIEigYJKoZIhvcNAQcBMCkGCiqGSIb3DQEMAQYwGwQUFc96egCyoDD4o0Ywv+TXL8DpxngCAwDDUICCBFDr8Uq0Gl9hPgnrgu116dt6S3GlA+U/wYVqB6rhxJ0TbAuJToBNZUOOkND1hcBpQQ0Qjsch94ZYjYx5U7P8QIEa+ygzHMxwOaKM5F5KdkXOUNPhb/gmhD7u24WpLKjs+XDYPnGY6Ps3RjJ/yRSg5RFmSRL3WzftfJRtdwcioRJI5GdRrG5fD66hJop3JZpEA62SLEPjLFavS1FB8p9hhVnG3G2tNPwxNACCzWs5ttzvnPx3mC0HLmAGWG0lOPkJ/sRtTSlIcsYlffsDDMS9ZWQkXEYPHeKYmf4J/YY65ReomFk3bA1Za6ku8pclw+lfsJPmSmKqjG+vzPTHDNy4UfxAIhnngMpy4mOJX7Hh/Cjvr+QKMEedT13SU8T6tDJU7HzKaqbprcs6d4PuY6AB34xhYyJY//IHlILLPL7GR2lE5xm4W3rpoEfkyQMel39NvRgHeIDQJhcFo4Lulhrpw1FehcVol8IloeBaPQL9YuV20vi+0so86sYpNOrXQ0QXIYgCbbvaUnwe0uqLovygGmKwmzdqGn2457cG3VRTfyJ+0udowOIuzuBmCvWtUnamS4/P4pVoI73kFW6CsUe1/5NDnBSu8ttMLFNATd1JjCoFFgUkIg8U8Ga4VU1dF6wHEgQ2+msGluARNVe+ObeRvSCFxR0eTbfg34HFzCwZSv2/MJTaVWU5vGTbZFQpoTvEjKEC12f1buKLCPDyqAbwdf0GJRlACRnutPyOAigBpYxIJuOi+LPY1naCdYKlj2Sgvkf9E3QDTC0hk43DsBN7+P8jURuksh55wsrtxlWHtCdlHDDGPY5UrWzz5u2VMGYhmrZHKbtWeNVX3vcHLRAVPtb29QquY/4AJfb4O1R+c6UJlNAN5rMJW3rBG0U6QWDEhJwZKAhsPJEc4SJfHNv3a39cIu0bHJh7QAVDjn2eLbArPS5VtlkFy99dLVa8bDFZz8DYhfb+fsvMYlzg7Bu+p6X5RY4Na3jrCcuaMXlcxP4JvNKzC3FmcfEOzvhnkBXtDGkfTsM9sDtFxE2UPXAmokF14xJtgBS77396VJCFwWAyWhL9AnOkrWmUOqJj2T+loXtkCQNU67GO3F1rVRfcEf49CmZxjN6A4wsmeZu9memESuzg4wSQ3Arqqmx45ehA4SpY4zyqUMQsVmSgjPfQ3GZmAoumDLquWoaVpMF7TEYTBsP2+wzI6g8GR4cto8X8ZMSHjMKaPZzSdzt4sXlmDiT5ISgEXoAmae3OOYScxf7lXRO/3BshVQAvcHWRk83JV7QRrQ5zvmusZ6Vs66/5v5QLfsJIQ5WnZ7DxGYf5yWGZ12kMkuZGYvLg6N0yETs+e72syBgJ3gG9jIWPtgamAo91n6pezIQC9uf2ZQJcF38lRU9RXrYbCUPTPHgOhjEp0VEOruPhFNkslCctBGTXEJ+eHBqU6KZNvCxCKgpWeNAa7wJKWVZ9p8TYP2Am24XrH5YwPjAhMAkGBSsOAwIaBQAEFLt1DHRg7DkUqVZbyfhQ+Q+SF1jSBBTAnZatSQIGIROhgmc7WjvmjzFaUAIDAYag"
+    password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD:-mashmallow}
 
 credentialConfiguration:
   metadataSigningPublicKey:
     type: ${CERT_TYPES:-file}
-    cert: ${METADATA_SIGNING_PUBLIC_KEY:-/app/pki/metadata_signing.crt}
+    cert: ${METADATA_SIGNING_PUBLIC_KEY:-/Users/christopherwynne/GDS/verify-proxy-node/stub-connector/pki/metadata_signing.crt}
   metadataSigningPrivateKey:
     type: ${CERT_TYPES:-file}
-    key: ${METADATA_SIGNING_PRIVATE_KEY:-/app/pki/metadata_signing.pk8}
+    key: ${METADATA_SIGNING_PRIVATE_KEY:-/Users/christopherwynne/GDS/verify-proxy-node/stub-connector/pki/metadata_signing.pk8}
   samlSigningPublicKey:
     type: ${CERT_TYPES:-file}
-    cert: ${SAML_SIGNING_PUBLIC_KEY:-/app/pki/saml_signing.crt}
+    cert: ${SAML_SIGNING_PUBLIC_KEY:-/Users/christopherwynne/GDS/verify-proxy-node/stub-connector/pki/saml_signing.crt}
   samlSigningPrivateKey:
     type: ${CERT_TYPES:-file}
-    key: ${SAML_SIGNING_PRIVATE_KEY:-/app/pki/saml_signing.pk8}
+    key: ${SAML_SIGNING_PRIVATE_KEY:-/Users/christopherwynne/GDS/verify-proxy-node/stub-connector/pki/saml_signing.pk8}
   samlEncryptionPublicKey:
     type: ${CERT_TYPES:-file}
-    cert: ${METADATA_ENCRYPTION_PUBLIC_KEY:-/app/pki/saml_signing.crt}
+    cert: ${METADATA_ENCRYPTION_PUBLIC_KEY:-/Users/christopherwynne/GDS/verify-proxy-node/stub-connector/pki/saml_signing.crt}
   samlEncryptionPrivateKey:
     type: ${CERT_TYPES:-file}
-    key: ${METADATA_ENCRYPTION_PRIVATE_KEY:-/app/pki/saml_signing.pk8}
+    key: ${METADATA_ENCRYPTION_PRIVATE_KEY:-/Users/christopherwynne/GDS/verify-proxy-node/stub-connector/pki/saml_signing.pk8}
 
 connectorNodeTemplateConfig: # configuration for connector node mustache template
-  entity_id: ${CONNECTOR_NODE_ENTITY_ID}
-  acs_url: ${CONNECTOR_NODE_ACS_URL}
+  entity_id: "https://stub-connector.eidas.test.london.sandbox.govsvc.uk/ConnectorMetadata"
+  acs_url: "https://stub-connector.eidas.test.london.sandbox.govsvc.uk/SAML2/Response/POST"
   want_signed_assertions: ${WANT_SIGNED_ASSERTIONS:-true}
   organization_name: ${ORGANIZATION_NAME:-eu_stub_country}
   organization_display_name: ${ORGANIZATION_DISPLAY_NAME:-EU Stub Country}
-  organization_url: ${CONNECTOR_NODE_BASE_URL}
+  organization_url: "https://stub-connector.eidas.test.london.sandbox.govsvc.uk"

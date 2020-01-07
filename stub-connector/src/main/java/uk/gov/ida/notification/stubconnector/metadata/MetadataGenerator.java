@@ -19,11 +19,19 @@ import org.opensaml.security.credential.UsageType;
 import org.opensaml.xmlsec.SignatureSigningParameters;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.Signature;
+import org.opensaml.xmlsec.signature.impl.SignatureBuilder;
+import org.opensaml.xmlsec.signature.impl.SignatureImpl;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
 import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import se.litsec.opensaml.utils.ObjectUtils;
+import software.amazon.awssdk.core.SdkBytes;
+
+import software.amazon.awssdk.services.kms.KmsClient;
+import software.amazon.awssdk.services.kms.model.SignRequest;
+import software.amazon.awssdk.services.kms.model.SignResponse;
 import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 
 import java.io.ByteArrayInputStream;
@@ -66,11 +74,27 @@ public class MetadataGenerator {
         entityDescriptor.setID("_" + UUID.randomUUID().toString());
         entityDescriptor.setValidUntil(DateTime.now().plusWeeks(2));
         updateSsoDescriptors(entityDescriptor);
-        sign(entityDescriptor);
+        sign(entityDescriptor, xml);
         return entityDescriptor;
     }
 
-    private void sign(EntityDescriptor entityDescriptor) throws SecurityException, MarshallingException, SignatureException {
+    private void sign(EntityDescriptor entityDescriptor, String xml) throws SecurityException, MarshallingException, SignatureException {
+        KmsClient client = KmsClient.create();
+        SignRequest signRequest = SignRequest.builder()
+                .messageType("RAW")
+                .keyId("dcdc859f-78f5-4752-a6aa-feba894d5d37")
+                .message(
+                        SdkBytes.fromInputStream(new ByteArrayInputStream(xml.getBytes()))
+                )
+                .signingAlgorithm("RSASSA_PSS_SHA_256")
+                .build();
+        SignResponse sign = client.sign(signRequest);
+        client.close();
+
+        SignatureImpl signature = new SignatureBuilder().buildObject();
+        signature.setXMLSignature();
+        entityDescriptor.setSignature(new Signature());
+
         SignatureSigningParameters signingParams = new SignatureSigningParameters();
         signingParams.setSignatureAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256);
         signingParams.setSignatureCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
