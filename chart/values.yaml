@@ -20,6 +20,7 @@ connector:
     scheme: https
     port: 443
     path: /ConnectorMetadata
+    assertionConsumerServicePath: /SAML2/Response/POST
   metadataSigningTruststoreBase64:
   metadataSigningTruststorePassword: marshmallow
 

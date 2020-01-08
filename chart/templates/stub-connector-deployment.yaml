@@ -28,24 +28,16 @@ spec:
     spec:
       restartPolicy: Always
       volumes:
-      - name: hsm-client-crt
-        secret:
-          secretName: {{ .Release.Name }}-connector-metadata
-      - name: connector-metadata-volume
-        secret:
-          secretName: {{ .Release.Name }}-connector-metadata
-          items:
-          - key: metadata.xml
-            path: metadata.xml
-          - key: metadataCACerts
-            path: metadataCACerts
+      - name: test-pki-volume
+        configMap:
+          name: test-pki-configmap
       containers:
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
         imagePullPolicy: {{ .Values.stubConnector.image.pullPolicy }}
         volumeMounts:
-        - name: connector-metadata-volume
-          mountPath: /app/metadata
+        - name: test-pki-volume
+          mountPath: /app/pki
           readOnly: true
         ports:
         - name: http
@@ -70,6 +62,8 @@ spec:
           value: https://{{ include "stubConnector.host" . }}
         - name: CONNECTOR_NODE_ENTITY_ID
           value: {{ include "connector.entityID" . }}
+        - name: CONNECTOR_NODE_ACS_URL
+          value: {{ include "connector.metadata.assertionConsumerService.url" . }}
         - name: PROXY_NODE_ENTITY_ID
           valueFrom:
             secretKeyRef:
@@ -90,42 +84,4 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-proxy-node-metadata
               key: metadataSigningTruststorePassword
-        - name: SIGNER_CONFIG_TYPE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: samlSigningKeyType
-        - name: HSM_SIGNING_KEY_LABEL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: samlSigningKeyLabel
-        - name: CONNECTOR_SIGNING_CERT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: samlSigningCertBase64
-        - name: HSM_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: hsmUser
-        - name: HSM_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: hsmPassword
-      - name: hsm-client
-        image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
-        imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
-        env:
-        - name: HSM_IP
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-connector-metadata
-              key: hsmIP
-        volumeMounts:
-        - name: hsm-client-crt
-          mountPath: /opt/cloudhsm/etc/customerCA.crt
-          subPath: hsmCustomerCA.crt
 {{- end -}}

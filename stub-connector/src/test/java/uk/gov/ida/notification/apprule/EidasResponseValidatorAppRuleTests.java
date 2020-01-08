@@ -1,20 +1,28 @@
 package uk.gov.ida.notification.apprule;
 
 import io.dropwizard.testing.junit.DropwizardClientRule;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.joda.time.DateTime;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.Organization;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import se.litsec.eidas.opensaml.ext.attributes.AttributeConstants;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
+import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
@@ -26,6 +34,7 @@ import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -60,6 +69,22 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
         final AuthnRequest authnRequest = getEidasAuthnRequest();
 
         assertThat(authnRequest.getIssuer().getValue()).isEqualTo(ENTITY_ID);
+    }
+
+    @Test
+    public void shouldGetStubConnectorMetadata() throws URISyntaxException, XMLParserException, UnmarshallingException {
+        EntityDescriptor connectorMetadata = getConnectorMetadata();
+        SPSSODescriptor spssoDescriptor = connectorMetadata.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
+        Organization organization = connectorMetadata.getOrganization();
+        AssertionConsumerService assertionConsumerService = spssoDescriptor.getAssertionConsumerServices().get(0);
+        assertThat(spssoDescriptor.getWantAssertionsSigned()).isTrue();
+        assertThat(connectorMetadata.getEntityID()).isEqualTo(ENTITY_ID);
+        assertThat(assertionConsumerService.getLocation()).isEqualTo(ACS_URL);
+        assertThat(organization.getOrganizationNames().get(0).getValue()).isEqualTo(ENTITY_ORG_NAME);
+        assertThat(organization.getDisplayNames().get(0).getValue()).isEqualTo(ENTITY_ORG_DISPLAY_NAME);
+        assertThat(organization.getURLs().get(0).getValue()).isEqualTo(ENTITY_ORG_URL);
+        assertThat(connectorMetadata.isSigned()).isTrue();
+        assertThat(connectorMetadata.isValid()).isTrue();
     }
 
     @Test
@@ -113,6 +138,11 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
         String html = getEidasRequest(stubConnectorAppRule);
         String decodedSaml = HtmlHelpers.getValueFromForm(html, "SAMLRequest");
         return new SamlParser().parseSamlString(decodedSaml);
+    }
+
+    private EntityDescriptor getConnectorMetadata() throws URISyntaxException, UnmarshallingException, XMLParserException {
+        String html = getConnectorMetadata(stubConnectorAppRule);
+        return ObjectUtils.unmarshall(new ByteArrayInputStream(html.getBytes()), EntityDescriptor.class);
     }
 
     private String getAuthnRequestIdFromSession() throws IOException, URISyntaxException {
