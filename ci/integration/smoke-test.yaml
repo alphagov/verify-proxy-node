@@ -23,6 +23,14 @@ spec:
           targets: ((harbor.notary_targets_passphrase))
           delegation: ((harbor.notary_delegation_passphrase))
 
+    slack-on-failure: &slack-on-failure
+      on_failure:
+        put: notify
+        params:
+          text: |
+            Proxy Node Integration Smoke failed on the `$BUILD_PIPELINE_NAME.$BUILD_JOB_NAME` step.
+            https://ci.london.verify.govsvc.uk/teams/proxy-node-integration/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
     resource_types:
 
     - name: harbor
@@ -31,6 +39,11 @@ spec:
       source:
         repository: ((concourse.harbor-resource-image))
         tag: ((concourse.harbor-resource-tag))
+
+    - name: slack-notification
+      type: docker-image
+      source:
+        repository: cfcommunity/slack-notification-resource
 
     resources:
 
@@ -47,9 +60,15 @@ spec:
         <<: *harbor_source
         repository: registry.((cluster.domain))/eidas/acceptance-tests
 
+    - name: notify
+      type: slack-notification
+      source:
+        url: ((slack-notifications.url))
+
     jobs:
 
     - name: smoke-test-integration
+      *slack-on-failure
       plan:
 
       - get: every-10m-9-5

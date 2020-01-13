@@ -25,6 +25,14 @@ spec:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
 
+    slack-on-failure: &slack-on-failure
+      on_failure:
+        put: notify
+        params:
+          text: |
+            Proxy Node pipeline failed on the `$BUILD_PIPELINE_NAME.$BUILD_JOB_NAME` step.
+            https://ci.london.verify.govsvc.uk/teams/proxy-node-integration/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
     resource_types:
 
     - name: github
@@ -32,6 +40,11 @@ spec:
       source:
         repository: ((concourse.github-resource-image))
         tag: ((concourse.github-resource-tag))
+
+    - name: slack-notification
+      type: docker-image
+      source:
+        repository: cfcommunity/slack-notification-resource
 
     resources:
 
@@ -50,10 +63,16 @@ spec:
         start: 8:00 AM
         stop: 8:00 PM
 
+    - name: notify
+      type: slack-notification
+      source:
+        url: ((slack-notifications.url))
+
     jobs:
 
     - name: deploy-dk-integration
       serial: true
+      *slack-on-failure
       plan:
 
       - get: release
@@ -147,6 +166,7 @@ spec:
 
     - name: deploy-nl-integration
       serial: true
+      *slack-on-failure
       plan:
 
       - get: release
@@ -239,6 +259,7 @@ spec:
 
     - name: deploy-se-integration
       serial: true
+      *slack-on-failure
       plan:
 
       - get: release
@@ -331,6 +352,7 @@ spec:
 
     - name: deploy-cz-integration
       serial: true
+      *slack-on-failure
       plan:
 
       - get: release
@@ -423,6 +445,7 @@ spec:
 
     - name: deploy-it-integration
       serial: true
+      *slack-on-failure
       plan:
 
       - get: release
@@ -515,6 +538,7 @@ spec:
 
     - name: deploy-test-integration
       serial: true
+      *slack-on-failure
       plan:
 
         - get: release
@@ -600,6 +624,7 @@ spec:
 
     - name: deploy-mt-integration
       serial: true
+      *slack-on-failure
       plan:
 
         - get: release
