@@ -18,12 +18,7 @@ logging:
 
 connectorNodeBaseUrl: ${CONNECTOR_NODE_BASE_URL}
 connectorNodeEntityId: ${CONNECTOR_NODE_ENTITY_ID}
-
-metadataPublishingConfiguration:
-  metadataFilePath: ${CONNECTOR_METADATA_FILE_PATH:-/app/metadata/metadata.xml}
-  metadataPublishPath: ${CONNECTOR_METADATA_PUBLISH_PATH:-/ConnectorMetadata}
-  metadataCACertsFilePath: ${CONNECTOR_METADATA_CA_CERTS_FILE_PATH:-/app/metadata/metadataCACerts}
-  metadataCertsPublishPath: ${CONNECTOR_METADATA_CERTS_PUBLISH_PATH:-/ConnectorMetadataSigningCertificates}
+connectorNodeMetadataExpiryMonths: ${CONNECTOR_NODE_METADATA_EXPIRY_MONTHS:-1}
 
 proxyNodeMetadataConfiguration:
   url: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
@@ -35,12 +30,29 @@ proxyNodeMetadataConfiguration:
     password: ${PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
 
 credentialConfiguration:
-  type: ${SIGNER_CONFIG_TYPE:-file}
-  hsmKeyLabel: ${HSM_SIGNING_KEY_LABEL:-stub_connector_key}
-  publicKey:
-    type: ${CERT_TYPES:-encoded}
-    cert: ${CONNECTOR_SIGNING_CERT}
-    name: stub_connector
-  privateKey:
-    type: ${KEY_TYPES:-encoded}
-    key: ${CONNECTOR_SIGNING_KEY}
+  metadataSigningPublicKey:
+    type: ${CERT_TYPES:-file}
+    cert: ${METADATA_SIGNING_PUBLIC_KEY:-/app/pki/metadata_signing.crt}
+  metadataSigningPrivateKey:
+    type: ${CERT_TYPES:-file}
+    key: ${METADATA_SIGNING_PRIVATE_KEY:-/app/pki/metadata_signing.pk8}
+  samlSigningPublicKey:
+    type: ${CERT_TYPES:-file}
+    cert: ${SAML_SIGNING_PUBLIC_KEY:-/app/pki/saml_signing.crt}
+  samlSigningPrivateKey:
+    type: ${CERT_TYPES:-file}
+    key: ${SAML_SIGNING_PRIVATE_KEY:-/app/pki/saml_signing.pk8}
+  samlEncryptionPublicKey:
+    type: ${CERT_TYPES:-file}
+    cert: ${METADATA_ENCRYPTION_PUBLIC_KEY:-/app/pki/saml_signing.crt}
+  samlEncryptionPrivateKey:
+    type: ${CERT_TYPES:-file}
+    key: ${METADATA_ENCRYPTION_PRIVATE_KEY:-/app/pki/saml_signing.pk8}
+
+connectorNodeTemplateConfig: # configuration for connector node mustache template
+  entity_id: ${CONNECTOR_NODE_ENTITY_ID}
+  acs_url: ${CONNECTOR_NODE_ACS_URL}
+  want_signed_assertions: ${WANT_SIGNED_ASSERTIONS:-true}
+  organization_name: ${ORGANIZATION_NAME:-eu_stub_country}
+  organization_display_name: ${ORGANIZATION_DISPLAY_NAME:-EU Stub Country}
+  organization_url: ${CONNECTOR_NODE_BASE_URL}

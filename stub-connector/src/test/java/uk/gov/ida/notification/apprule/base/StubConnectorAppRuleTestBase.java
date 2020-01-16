@@ -25,12 +25,10 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
     protected static final String METADATA_CERTS_PUBLISH_PATH = "/proxy-node-md-certs-publish-path";
     protected static final String METADATA_PUBLISH_PATH = "/stub-connector-md-publish-path";
     protected static final String ENTITY_ID = "http://stub-connector/Connector";
-
-    private static final String METADATA_FILE_PATH =
-            StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/test-stub-connector-metadata.xml").getPath();
-
-    private static final String METADATA_CA_CERTS_FILE_PATH =
-            StubConnectorAppRuleTestBase.class.getClassLoader().getResource("metadata/metadataCACerts").getPath();
+    protected static final String ACS_URL = "http://stub-connector/SAML2/Response/POST";
+    public static final String ENTITY_ORG_NAME = "stub country org name";
+    public static final String ENTITY_ORG_DISPLAY_NAME = "stub country org display name";
+    public static final String ENTITY_ORG_URL = "http://stub-connector/homepage";
 
     private Map<String, NewCookie> cookies;
 
@@ -44,6 +42,11 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
         }
 
         return message;
+    }
+
+    protected String getConnectorMetadata(StubConnectorAppRule stubConnectorAppRule) throws URISyntaxException {
+        final Response response = stubConnectorAppRule.target("/ConnectorMetadata").request().get();
+        return response.readEntity(String.class);
     }
 
     protected String postEidasResponse(StubConnectorAppRule stubConnectorAppRule, String samlForm) throws URISyntaxException {
@@ -68,16 +71,28 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
                 ConfigOverride.config("proxyNodeMetadataConfiguration.trustStore.store", METADATA_TRUSTSTORE.getAbsolutePath()),
                 ConfigOverride.config("proxyNodeMetadataConfiguration.trustStore.password", METADATA_TRUSTSTORE.getPassword()),
 
-                ConfigOverride.config("credentialConfiguration.type", "file"),
-                ConfigOverride.config("credentialConfiguration.publicKey.type", "x509"),
-                ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_CERT),
-                ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY),
+                ConfigOverride.config("credentialConfiguration.metadataSigningPublicKey.cert", TEST_PUBLIC_CERT),
+                ConfigOverride.config("credentialConfiguration.samlSigningPublicKey.cert", TEST_PUBLIC_CERT),
+                ConfigOverride.config("credentialConfiguration.samlEncryptionPublicKey.cert", TEST_PUBLIC_CERT),
+                ConfigOverride.config("credentialConfiguration.metadataSigningPrivateKey.key", TEST_PRIVATE_KEY),
+                ConfigOverride.config("credentialConfiguration.samlSigningPrivateKey.key", TEST_PRIVATE_KEY),
+                ConfigOverride.config("credentialConfiguration.samlEncryptionPrivateKey.key", TEST_PRIVATE_KEY),
 
-                ConfigOverride.config("metadataPublishingConfiguration.metadataFilePath", METADATA_FILE_PATH),
-                ConfigOverride.config("metadataPublishingConfiguration.metadataPublishPath", METADATA_PUBLISH_PATH),
-                ConfigOverride.config("metadataPublishingConfiguration.metadataCertsPublishPath", METADATA_CERTS_PUBLISH_PATH),
-                ConfigOverride.config("metadataPublishingConfiguration.metadataCACertsFilePath", METADATA_CA_CERTS_FILE_PATH)
-        ) {
+                ConfigOverride.config("credentialConfiguration.metadataSigningPublicKey.type", "x509"),
+                ConfigOverride.config("credentialConfiguration.samlSigningPublicKey.type", "x509"),
+                ConfigOverride.config("credentialConfiguration.samlEncryptionPublicKey.type", "x509"),
+                ConfigOverride.config("credentialConfiguration.metadataSigningPrivateKey.type", "encoded"),
+                ConfigOverride.config("credentialConfiguration.samlSigningPrivateKey.type", "encoded"),
+                ConfigOverride.config("credentialConfiguration.samlEncryptionPrivateKey.type", "encoded"),
+
+                ConfigOverride.config("connectorNodeTemplateConfig.entity_id", ENTITY_ID),
+                ConfigOverride.config("connectorNodeTemplateConfig.acs_url", ACS_URL),
+                ConfigOverride.config("connectorNodeTemplateConfig.organization_name", ENTITY_ORG_NAME),
+                ConfigOverride.config("connectorNodeTemplateConfig.organization_display_name", ENTITY_ORG_DISPLAY_NAME),
+                ConfigOverride.config("connectorNodeTemplateConfig.organization_url", ENTITY_ORG_URL),
+                ConfigOverride.config("connectorNodeTemplateConfig.want_signed_assertions", "true")
+
+                ) {
             @Override
             protected void before() {
                 waitForMetadata(proxyNodeMetadataUrl);

@@ -31,6 +31,10 @@
 {{ printf "%s://%s%s" .Values.connector.metadata.scheme (include "connector.metadata.host" .) .Values.connector.metadata.path }}
 {{- end -}}
 
+{{- define "connector.metadata.assertionConsumerService.url" -}}
+{{ printf "%s://%s%s" .Values.connector.metadata.scheme (include "connector.metadata.host" .) .Values.connector.metadata.assertionConsumerServicePath }}
+{{- end -}}
+
 {{- define "connector.entityID" -}}
 {{- if .Values.stubConnector.enabled -}}
 {{ include "connector.metadata.url" . }}
