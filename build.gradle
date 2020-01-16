@@ -88,6 +88,7 @@ subprojects {
             jcenter()
         } else {
             maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+            mavenCentral()
         }
     }
 
@@ -109,6 +110,7 @@ subprojects {
         verify_saml_test
         proxy_node_test
         soft_hsm
+        aws_stuff
     }
 //    If any configurations are added/changed please ensure their dependencies are still being tested and monitored by
 //    Snyk. See the Snyk directory in the root of the project.
@@ -120,8 +122,13 @@ subprojects {
                 substitute module("org.apache.santuario:xmlsec") because "https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281" with module("org.apache.santuario:xmlsec:2.1.4")
                 substitute module("com.nimbusds:nimbus-jose-jwt") because "https://snyk.io/vuln/SNYK-JAVA-COMNIMBUSDS-536068" with module("com.nimbusds:nimbus-jose-jwt:8.2.1")
                 exclude group: "commons-beanutils", module: "commons-beanutils"
+                substitute module("org.bouncycastle:bcprov-jdk15on") because "It can't be fucking debugged" with module("org.bouncycastle:bcprov-debug-jdk15on:1.62")
             }
         }
+
+        aws_stuff(
+                "software.amazon.awssdk:kms:2.10.42"
+        )
 
         common(
                 "javax.xml.bind:jaxb-api:2.3.0",
