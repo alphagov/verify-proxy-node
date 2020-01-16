@@ -9,8 +9,6 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-  annotations:
-    timestamp: {{ .Release.Time }}
 spec:
   replicas: {{ .Values.stubConnector.replicaCount }}
   strategy:
@@ -25,6 +23,8 @@ spec:
         app.kubernetes.io/name: connector
         app.kubernetes.io/instance: {{ .Release.Name }}
         talksToHsm: "true"
+      annotations:
+        timestamp: {{ .Release.Time }}
     spec:
       restartPolicy: Always
       volumes:
