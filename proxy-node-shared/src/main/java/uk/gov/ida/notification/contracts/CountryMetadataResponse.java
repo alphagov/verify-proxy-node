@@ -1,35 +1,38 @@
 package uk.gov.ida.notification.contracts;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
+import uk.gov.ida.notification.validations.ValidDestinationUri;
+import uk.gov.ida.notification.validations.ValidPEM;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 
-public class MetatronResponseWithAnnotations implements MetatronResponse {
+public class CountryMetadataResponse {
 
     @NotBlank
-    @NotNull
+    @ValidPEM
     private String samlSigningCertX509;
 
     @NotBlank
-    @NotNull
+    @ValidPEM
     private String samlEncryptionCertX509;
 
     @NotNull
+    @ValidDestinationUri
     private URI destination;
 
     @NotBlank
-    @NotNull
     private String entityId;
 
     @NotBlank
-    @NotNull
+    @Length(min = 2, max = 2)
     private String countryCode;
 
     // Needed for serialisation
-    public MetatronResponseWithAnnotations() {}
+    public CountryMetadataResponse() {}
 
-    public MetatronResponseWithAnnotations(
+    public CountryMetadataResponse(
             String samlSigningCertX509,
             String samlEncryptionCertX509,
             URI destination,
