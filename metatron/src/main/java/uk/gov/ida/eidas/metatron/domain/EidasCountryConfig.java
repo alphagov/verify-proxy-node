@@ -1,10 +1,14 @@
-package uk.gov.ida.eidas.metatron.core.dto;
+package uk.gov.ida.eidas.metatron.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.net.URI;
+import java.security.KeyStore;
+import java.util.Objects;
+import java.util.Optional;
 
 public class EidasCountryConfig {
 
@@ -19,47 +23,39 @@ public class EidasCountryConfig {
     @JsonProperty
     @Valid
     @NotNull
-    private String connectorMetadata;
+    private URI connectorMetadata;
     @JsonProperty
     @Valid
     @NotNull
     private boolean enabled;
+    @JsonProperty
+    private KeyStore metadataTruststore;
+    @JsonProperty
+    private KeyStore tlsTruststore;
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getCountryCode() {
         return countryCode;
     }
 
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
-    }
-
     @JsonIgnore
     public String getEntityId() {
+        return connectorMetadata.toString();
+    }
+
+    public URI getConnectorMetadata() {
         return connectorMetadata;
     }
 
-    public String getConnectorMetadata() {
-        return connectorMetadata;
+    public KeyStore getMetadataTruststore() {
+        return this.metadataTruststore;
     }
 
-    public void setConnectorMetadata(String connectorMetadata) {
-        this.connectorMetadata = connectorMetadata;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public Optional<KeyStore> getTlsTruststore() {
+        return Objects.nonNull(this.tlsTruststore) ? Optional.of(this.tlsTruststore) : Optional.empty();
     }
 
     @Override
@@ -73,7 +69,7 @@ public class EidasCountryConfig {
                 .append("<td>country code:</td><td>").append(getCountryCode()).append("</td>")
                 .append("</tr>")
                 .append("<tr>")
-                .append("<td>metadata url:</td><td>").append(href(getConnectorMetadata())).append("</td>")
+                .append("<td>metadata url:</td><td>").append(href(getConnectorMetadata().toString())).append("</td>")
                 .append("</tr>")
                 .append("<tr>")
                 .append("<td>entity id:</td><td>").append(href(getEntityId())).append("</td>")
