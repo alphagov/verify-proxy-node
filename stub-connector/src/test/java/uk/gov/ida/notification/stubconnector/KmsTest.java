@@ -18,14 +18,13 @@ import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import uk.gov.ida.saml.core.IdaSamlBootstrap;
+import uk.gov.ida.saml.core.test.builders.AuthnRequestBuilder;
 import uk.gov.ida.saml.deserializers.OpenSamlXMLObjectUnmarshaller;
 import uk.gov.ida.saml.deserializers.parser.SamlObjectParser;
 import uk.gov.ida.saml.security.CredentialFactorySignatureValidator;
 import uk.gov.ida.saml.security.SigningCredentialFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.Security;
@@ -60,14 +59,6 @@ public class KmsTest {
             IdaSamlBootstrap.bootstrap();
 
             AuthnRequest authnRequest = AuthnRequestBuilder.anAuthnRequest().withoutSignatureElement().build();
-
-            // Create opensaml AuthnRequest without signature, from file. This is to simulate if we'd created one in an
-            // app somewhere and needed to sign it.
-            File unsignedFile = new File(getClass().getClassLoader().getResource("unsigned_authn.xml").getFile());
-            byte[] unsignedBytes = Files.readAllBytes(unsignedFile.toPath());
-            OpenSamlXMLObjectUnmarshaller<AuthnRequest> unmarshaller = new OpenSamlXMLObjectUnmarshaller<>(new SamlObjectParser());
-            String unsignedString = new String(unsignedBytes);
-            AuthnRequest authnRequestFromFile = unmarshaller.fromString(unsignedString);
 
             // Get the XML string of the Authn request, ready to pass to a canonicalizer
             Element authnRequestElement = XMLObjectSupport.marshall(authnRequest);
@@ -108,9 +99,7 @@ public class KmsTest {
             signatureMethod.setAttribute("Algorithm", ALGO_ID_SIGNATURE_RSA_SHA256_MGF1);
             signedInfo.appendChild(signatureMethod);
 
-            // This is just pulling the ID from the Authn request. It already has one as the XML the Authn request is
-            // loaded from was originally already signed. If it didn't already exist, we could just create a UUID and
-            // add it to the Authn request element and reference it here.
+            // This is just pulling the ID from the Authn request.
             Element reference = doc.createElement("ds:Reference");
             reference.setAttribute("URI", "#" + authnRequest.getID());
             signedInfo.appendChild(reference);
@@ -140,20 +129,19 @@ public class KmsTest {
 
             MessageDigest signedInfoMd = MessageDigest.getInstance("SHA-256");
             byte[] signedInfoDigest = signedInfoMd.digest(canonSignedInfoBytes);
-            String signedInfoB64Digest = new String(Base64.getEncoder().encode(signedInfoDigest));
 
-            // Sign the canonicalized bytes of the SignedInfo block. Originally I thought I needed to sign the base64
-            // encoded digest of the c14nzed SignedInfo block, however the validation fell over. It works with this.
-            // Shrug.
+            // Sign the canonicalized bytes of the SignedInfo block. It seems to work if you set the messageType to
+            // "RAW" and sign the canonicalized signedInfo bytes directly, OR if you set messageType to "DIGEST" and
+            // sign a SHA-256 digest of the canonicalized signedInfo bytes...
             // This sets up and uses the KmsClient, with a hard coded KeyId that I already created.
-            // Message Type can be "RAW" or "DIGEST". We need to use "RAW".
+            // Message Type can be "RAW" or "DIGEST".
             // The signing algorithm string is specified in the AWS docs.
             KmsClient client = KmsClient.create();
             SignRequest signRequest = SignRequest.builder()
                     .messageType("DIGEST")
                     .keyId(KMS_KEY_ID)
                     .message(
-                            SdkBytes.fromInputStream(new ByteArrayInputStream(signedInfoDigest)) // Is this right? Should we be signing the B64 of the digest of this?
+                            SdkBytes.fromInputStream(new ByteArrayInputStream(signedInfoDigest))
                     )
                     .signingAlgorithm("RSASSA_PSS_SHA_256")
                     .build();
@@ -187,12 +175,16 @@ public class KmsTest {
             SdkBytes sdkBytes = getPublicKeyResponse.publicKey();
             RSAPublicKey publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(sdkBytes.asByteArray()));
 
-            // Get the modulus from the public key. When getting a byteArray from a big int, the first byte is the sign
-            // (+ or -) of the value. We don't want it so we remove it. This means that the modulus is no 384 bytes
-            // instead of 385, which is what we want (key length / 8, or 3072/8)
+            // Get the modulus from the public key.
+//            // When getting a byteArray from a big int, the first byte is the sign
+//            // (+ or -) of the value. We don't want it so we remove it. This means that the modulus is no 384 bytes
+//            // instead of 385, which is what we want (key length / 8, or 3072/8)
             byte[] signedModulusBigIntBytes = publicKey.getModulus().toByteArray();
-            byte[] unsignedBigIntBytes = new byte[384];
-            System.arraycopy(signedModulusBigIntBytes, 1, unsignedBigIntBytes, 0, 384);
+//            byte[] unsignedBigIntBytes = new byte[384];
+//            System.arraycopy(signedModulusBigIntBytes, 1, unsignedBigIntBytes, 0, 384);
+
+            // It looks like we don't need to do the above jiggery pokery. Just including the signed bytes seems to
+            // work. Going to leave it here just in case.
             String modulusB64 = new String(Base64.getEncoder().encode(signedModulusBigIntBytes));
 
             // Get the exponent from the public key. Not sure why we don't need to remove the first byte, like the
@@ -212,6 +204,7 @@ public class KmsTest {
             // Unmarshall the XML back into an opensaml Authn request. This is so we can make sure we've created a valid
             // object. It also means that we can be more sure future operations will be happening to a "familiar"
             // object.
+            OpenSamlXMLObjectUnmarshaller<AuthnRequest> unmarshaller = new OpenSamlXMLObjectUnmarshaller<>(new SamlObjectParser());
             String serializedSignedAuthnRequest = SerializeSupport.nodeToString(authnRequestElement);
             AuthnRequest signedAuthnRequest = unmarshaller.fromString(serializedSignedAuthnRequest);
 
