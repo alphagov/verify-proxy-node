@@ -59,13 +59,15 @@ public class KmsTest {
             Security.addProvider(new BouncyCastleProvider());
             IdaSamlBootstrap.bootstrap();
 
+            AuthnRequest authnRequest = AuthnRequestBuilder.anAuthnRequest().withoutSignatureElement().build();
+
             // Create opensaml AuthnRequest without signature, from file. This is to simulate if we'd created one in an
             // app somewhere and needed to sign it.
             File unsignedFile = new File(getClass().getClassLoader().getResource("unsigned_authn.xml").getFile());
             byte[] unsignedBytes = Files.readAllBytes(unsignedFile.toPath());
             OpenSamlXMLObjectUnmarshaller<AuthnRequest> unmarshaller = new OpenSamlXMLObjectUnmarshaller<>(new SamlObjectParser());
             String unsignedString = new String(unsignedBytes);
-            AuthnRequest authnRequest = unmarshaller.fromString(unsignedString);
+            AuthnRequest authnRequestFromFile = unmarshaller.fromString(unsignedString);
 
             // Get the XML string of the Authn request, ready to pass to a canonicalizer
             Element authnRequestElement = XMLObjectSupport.marshall(authnRequest);
@@ -136,9 +138,9 @@ public class KmsTest {
             // Now get the canonicalized version of the signed info block. This is what we'll end up signing.
             byte[] canonSignedInfoBytes = canon.canonicalizeSubtree(signedInfo);
 
-//            MessageDigest signedInfoMd = MessageDigest.getInstance("SHA-256");
-//            byte[] signedInfoDigest = signedInfoMd.digest(canonSignedInfoBytes);
-//            String signedInfoB64Digest = new String(Base64.getEncoder().encode(signedInfoDigest));
+            MessageDigest signedInfoMd = MessageDigest.getInstance("SHA-256");
+            byte[] signedInfoDigest = signedInfoMd.digest(canonSignedInfoBytes);
+            String signedInfoB64Digest = new String(Base64.getEncoder().encode(signedInfoDigest));
 
             // Sign the canonicalized bytes of the SignedInfo block. Originally I thought I needed to sign the base64
             // encoded digest of the c14nzed SignedInfo block, however the validation fell over. It works with this.
@@ -148,10 +150,10 @@ public class KmsTest {
             // The signing algorithm string is specified in the AWS docs.
             KmsClient client = KmsClient.create();
             SignRequest signRequest = SignRequest.builder()
-                    .messageType("RAW")
+                    .messageType("DIGEST")
                     .keyId(KMS_KEY_ID)
                     .message(
-                            SdkBytes.fromInputStream(new ByteArrayInputStream(canonSignedInfoBytes)) // Is this right? Should we be signing the B64 of the digest of this?
+                            SdkBytes.fromInputStream(new ByteArrayInputStream(signedInfoDigest)) // Is this right? Should we be signing the B64 of the digest of this?
                     )
                     .signingAlgorithm("RSASSA_PSS_SHA_256")
                     .build();
@@ -230,7 +232,7 @@ public class KmsTest {
                 throw new RuntimeException("The opensaml signature is bad.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }
