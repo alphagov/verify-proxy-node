@@ -23,7 +23,6 @@ install:
 script:
   - ./gradlew --no-daemon --parallel test
   - snyk/test.sh
-  - libs/check-dependencies.sh
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

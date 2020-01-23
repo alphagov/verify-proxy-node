@@ -1,10 +1,12 @@
+plugins { id 'java-library' }
 dependencies {
-    compile configurations.dropwizard,
+    implementation configurations.dropwizard,
             configurations.opensaml,
-            configurations.eidas_saml,
             configurations.ida_utils,
-            configurations.verify_saml,
             configurations.common
+
+    api configurations.verify_saml,
+            configurations.eidas_saml
 }
 
 group = 'uk.gov.ida.notification.shared'

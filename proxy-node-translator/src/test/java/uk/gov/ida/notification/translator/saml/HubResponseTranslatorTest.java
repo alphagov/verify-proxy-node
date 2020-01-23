@@ -14,9 +14,9 @@ import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResp
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationException;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
+import uk.gov.ida.saml.core.domain.NonMatchingAttributes;
+import uk.gov.ida.saml.core.domain.NonMatchingTransliterableAttribute;
 import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingTransliterableAttribute;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -68,8 +68,7 @@ public class HubResponseTranslatorTest {
     @Test
     public void translateShouldReturnResponseForCancelledStatus() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseCancellation());
-
-        Response cancelledResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
+        final Response cancelledResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(cancelledResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForCancelledStatus(cancelledResponse);
@@ -78,8 +77,7 @@ public class HubResponseTranslatorTest {
     @Test
     public void translateShouldReturnResponseForAuthenticationFailedStatus() {
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(buildTranslatedHubResponseAuthenticationFailed());
-
-        Response authnFailedResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
+        final Response authnFailedResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(authnFailedResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForAuthenticationFailedStatus(authnFailedResponse);
@@ -128,8 +126,8 @@ public class HubResponseTranslatorTest {
                 AttributesBuilder.FIRST_NAME,
                 true,
                 AttributesBuilder.VALID_FROM,
-                validTo
-        );
+                validTo);
+
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
 
         assertThatThrownBy(() -> TRANSLATOR.getTranslatedHubResponse(hubResponseContainer))
@@ -143,10 +141,11 @@ public class HubResponseTranslatorTest {
                 AttributesBuilder.FIRST_NAME,
                 false,
                 null,
-                null
-        );
+                null);
+
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+        final Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+
         assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
@@ -156,10 +155,11 @@ public class HubResponseTranslatorTest {
                 AttributesBuilder.FIRST_NAME,
                 false,
                 AttributesBuilder.VALID_FROM,
-                null
-        );
+                null);
+
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+        final Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+
         assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
@@ -169,10 +169,11 @@ public class HubResponseTranslatorTest {
                 AttributesBuilder.FIRST_NAME,
                 false,
                 null,
-                LocalDate.now().plusDays(1)
-        );
+                LocalDate.now().plusDays(1));
+
         final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.withFirstName(firstName).build());
-        Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+        final Attributes attributes = hubResponseContainer.getAttributes().orElseThrow();
+
         assertThat(attributes.getFirstNamesAttributesList().getValidAttributes().size()).isEqualTo(1);
     }
 
@@ -184,10 +185,9 @@ public class HubResponseTranslatorTest {
                 "Expired",
                 true,
                 validFrom,
-                validTo
-        );
-        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
+                validTo);
 
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
         final Response response = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);
@@ -201,10 +201,9 @@ public class HubResponseTranslatorTest {
                 "Unverified",
                 false,
                 AttributesBuilder.VALID_FROM,
-                null
-        );
-        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
+                null);
 
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainer(attributesBuilder.addFirstName(firstName).build());
         final Response response = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer);
 
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(response);

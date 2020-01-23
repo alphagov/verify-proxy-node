@@ -1,5 +1,5 @@
 dependencies {
-    compile configurations.dropwizard,
+    implementation configurations.dropwizard,
             configurations.dropwizard_assets,
             configurations.opensaml,
             configurations.eidas_saml,

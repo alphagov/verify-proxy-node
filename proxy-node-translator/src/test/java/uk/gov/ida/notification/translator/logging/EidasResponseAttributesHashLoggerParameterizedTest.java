@@ -10,8 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
-import uk.gov.ida.eidas.logging.EidasAttributesLogger;
-import uk.gov.ida.eidas.logging.EidasResponseAttributesHashLogger;
+import uk.gov.ida.eidas.logging.EidasAuthnResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder;
@@ -50,17 +49,14 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
 
     @Test
     public void shouldLogHashForTranslatedHubResponses() {
-        Logger logger = (Logger) LoggerFactory.getLogger(EidasResponseAttributesHashLogger.class);
+        Logger logger = (Logger) LoggerFactory.getLogger(EidasAuthnResponseAttributesHashLogger.class);
         logger.addAppender(appender);
 
-        EidasAttributesLogger eidasAttributesLogger = new EidasAttributesLogger(EidasResponseAttributesHashLogger::instance, null);
-
-        eidasAttributesLogger.logEidasAttributesAsHash(
+        EidasAuthnResponseAttributesHashLogger.logEidasAttributesHash(
                 translatedHubResponse.getAttributes().orElse(null),
                 translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
-                hubResponseTranslatorRequest.getDestinationUrl()
-        );
+                hubResponseTranslatorRequest.getDestinationUrl());
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender).doAppend(loggingEventArgumentCaptor.capture());
@@ -69,7 +65,7 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
         Map<String, String> mdcPropertyMap = loggingEvent.getMDCPropertyMap();
 
         assertThat(
-                mdcPropertyMap.get(EidasResponseAttributesHashLogger.MDC_KEY_EIDAS_USER_HASH))
+                mdcPropertyMap.get(EidasAuthnResponseAttributesHashLogger.MDC_KEY_EIDAS_USER_HASH))
                 .as("EidasResponse Hash Test Failure.\n" +
                         "Method used to calculate the hash (or the test data) may have changed.\n" +
                         "Caution: Hash calculation must be identical in both the Proxy Node and the Hub.")
