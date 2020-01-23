@@ -1,17 +1,15 @@
 package uk.gov.ida.notification.shared.proxy;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,22 +29,34 @@ public class ProxyNodeJsonClientTest {
     @Mock
     private static IstioHeaderStorage istioHeaderStorage;
 
-    @Spy
-    @InjectMocks
-    private static ProxyNodeJsonClient proxyNodeJsonClient;
+    private ProxyNodeJsonClient proxyNodeJsonClient;
+    private Map<String, String> headers;
+    private URI uri;
 
-    @Test
-    public void shouldSendIstioHeadersInPostRequest() throws URISyntaxException {
-        Map<String, String> headers = new HashMap<>();
-
+    @Before
+    public void setUp() throws Exception {
+        proxyNodeJsonClient = new ProxyNodeJsonClient(errorHandlingClient, responseProcessor, istioHeaderStorage);
+        uri = new URI("http://foo.bar");
+        headers = new HashMap<>();
         headers.put("header-1", "value1");
         headers.put("header-2", "value2");
 
         when(istioHeaderStorage.getIstioHeaders()).thenReturn(headers);
+    }
 
-        URI uri = new URI("http://foo.bar");
+    @Test
+    public void getShouldSendIstioHeadersInRequest() {
+        proxyNodeJsonClient.get(uri, Object.class);
+
+        verify(errorHandlingClient).get(uri, headers);
+    }
+
+    @Test
+    public void postShouldSendIstioHeadersInRequest() {
         Object postBody = new Object();
+
         proxyNodeJsonClient.post(postBody, uri, Object.class);
+
         verify(errorHandlingClient).post(eq(uri), eq(headers), eq(postBody));
     }
 }

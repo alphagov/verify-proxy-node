@@ -20,6 +20,10 @@ public class ProxyNodeJsonClient {
         this.istioHeaderStorage = istioHeaderStorage;
     }
 
+    public <T> T get(URI uri, Class<T> clazz) {
+        return jsonClient.get(uri, clazz, getHeaders());
+    }
+
     public <T> T post(Object postBody, URI uri, Class<T> clazz) {
         return jsonClient.post(postBody, uri, clazz, getHeaders());
     }
