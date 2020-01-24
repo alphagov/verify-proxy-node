@@ -1,10 +1,10 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import uk.gov.ida.saml.core.domain.Gender;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAddress;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingTransliterableAttribute;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingVerifiableAttribute;
+import uk.gov.ida.saml.core.domain.NonMatchingAddress;
+import uk.gov.ida.saml.core.domain.NonMatchingAttributes;
+import uk.gov.ida.saml.core.domain.NonMatchingTransliterableAttribute;
+import uk.gov.ida.saml.core.domain.NonMatchingVerifiableAttribute;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
