@@ -1,8 +1,9 @@
 dependencies {
-    compile configurations.dropwizard,
+    implementation configurations.dropwizard,
             configurations.common,
             configurations.ida_utils,
             project(':proxy-node-shared')
+
         configurations.all {
             exclude group: "se.litsec.eidas", module: "eidas-opensaml3"
             exclude group: "org.opensaml", module: "opensaml-storage-impl"

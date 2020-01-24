@@ -1,10 +1,9 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
+import uk.gov.ida.saml.core.domain.NonMatchingAttributes;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Optional;
 
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes.fromNonMatchingAttributes;

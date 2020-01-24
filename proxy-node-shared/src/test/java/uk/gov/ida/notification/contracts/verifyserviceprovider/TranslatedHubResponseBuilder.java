@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.contracts.verifyserviceprovider;
 
-import uk.gov.ida.verifyserviceprovider.dto.NonMatchingAttributes;
+import uk.gov.ida.saml.core.domain.NonMatchingAttributes;
 
 import java.time.LocalDate;
 

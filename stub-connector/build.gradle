@@ -1,12 +1,11 @@
 dependencies {
-    compile configurations.dropwizard,
+    implementation configurations.dropwizard,
             configurations.dropwizard_assets,
             configurations.opensaml,
             configurations.eidas_saml,
             configurations.common,
             configurations.dev_pki,
             project(':proxy-node-shared')
-
 }
 
 group = 'uk.gov.ida.notification.stubconnector'
