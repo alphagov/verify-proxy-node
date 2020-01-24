@@ -158,7 +158,7 @@ public class HubResponseTranslator {
         return validDatesOfBirth.stream()
                 .map(NonMatchingVerifiableAttribute::getValue)
                 .reduce(BinaryOperator.maxBy(Comparator.comparing(LocalDate::toEpochDay)))
-                .map(date -> date.toString()).get();
+                .map(LocalDate::toString).get();
     }
 
     private static String combineStringAttributeValues(List<NonMatchingVerifiableAttribute<String>> attributeStream) {

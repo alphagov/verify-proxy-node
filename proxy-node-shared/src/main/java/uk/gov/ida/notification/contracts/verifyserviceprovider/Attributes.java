@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Attributes extends NonMatchingAttributes {
+
     public Attributes(
             List<NonMatchingTransliterableAttribute> firstNames,
             List<NonMatchingVerifiableAttribute<String>> middleNames,
@@ -25,18 +26,18 @@ public class Attributes extends NonMatchingAttributes {
         super(firstNames, middleNames, surnames, datesOfBirth, gender, addresses);
     }
 
-    public static Optional<Attributes> fromNonMatchingAttributes(NonMatchingAttributes nonMatchingAttributes) {
+    static Optional<Attributes> fromNonMatchingAttributes(NonMatchingAttributes nonMatchingAttributes) {
         if (nonMatchingAttributes == null) {
             return Optional.empty();
         } else {
             return Optional.of(
                     new Attributes(
-                        nonMatchingAttributes.getFirstNames(),
-                        nonMatchingAttributes.getMiddleNames(),
-                        nonMatchingAttributes.getSurnames(),
-                        nonMatchingAttributes.getDatesOfBirth(),
-                        nonMatchingAttributes.getGender(),
-                        nonMatchingAttributes.getAddresses()
+                            nonMatchingAttributes.getFirstNames(),
+                            nonMatchingAttributes.getMiddleNames(),
+                            nonMatchingAttributes.getSurnames(),
+                            nonMatchingAttributes.getDatesOfBirth(),
+                            nonMatchingAttributes.getGender(),
+                            nonMatchingAttributes.getAddresses()
                     )
             );
         }
@@ -44,22 +45,22 @@ public class Attributes extends NonMatchingAttributes {
 
     @JsonIgnore
     public AttributesList<String> getFirstNamesAttributesList() {
-        return new AttributesList(firstNames, "firstName");
+        return new AttributesList<>(firstNames, "firstName");
     }
 
     @JsonIgnore
     public AttributesList<String> getMiddleNamesAttributesList() {
-        return new AttributesList(middleNames, "middleName");
+        return new AttributesList<>(middleNames, "middleName");
     }
 
     @JsonIgnore
     public AttributesList<String> getSurnamesAttributesList() {
-        return new AttributesList(surnames, "surname");
+        return new AttributesList<>(surnames, "surname");
     }
 
     @JsonIgnore
     public AttributesList<LocalDate> getDatesOfBirthAttributesList() {
-        return new AttributesList(datesOfBirth, "dateOfBirth");
+        return new AttributesList<>(datesOfBirth, "dateOfBirth");
     }
 
     @JsonIgnore
@@ -69,15 +70,15 @@ public class Attributes extends NonMatchingAttributes {
 
     @JsonIgnore
     public AttributesList<NonMatchingAddress> getAddressesAttributesList() {
-        return new AttributesList(addresses, "address");
+        return new AttributesList<>(addresses, "address");
     }
 
     public class AttributesList<T> {
 
-        private final List<NonMatchingVerifiableAttribute<T>> attributes;
+        private final List<? extends NonMatchingVerifiableAttribute<T>> attributes;
         private final String type;
 
-        AttributesList(List<NonMatchingVerifiableAttribute<T>> attributes, String type) {
+        AttributesList(List<? extends NonMatchingVerifiableAttribute<T>> attributes, String type) {
             this.attributes = Optional.ofNullable(attributes).orElse(Collections.emptyList());
             this.type = type;
         }
@@ -104,15 +105,14 @@ public class Attributes extends NonMatchingAttributes {
             return current;
         }
 
-        public List<NonMatchingVerifiableAttribute<T>> getAllAttributes() {
-            return Collections.unmodifiableList(attributes);
-        }
-
         public String createAttributesMessage() {
             return "[ " + type + " " + attributes.stream()
                     .map(NonMatchingVerifiableAttribute::toString)
                     .collect(Collectors.joining(", ")) + " ]";
         }
 
+        List<NonMatchingVerifiableAttribute<T>> getAllAttributes() {
+            return Collections.unmodifiableList(attributes);
+        }
     }
 }
