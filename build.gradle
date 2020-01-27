@@ -89,7 +89,6 @@ subprojects {
         verify_saml
         verify_saml_test
         proxy_node_test
-        soft_hsm
     }
 //    If any configurations are added/changed please ensure their dependencies are still being tested and monitored by
 //    Snyk. See the Snyk directory in the root of the project.
