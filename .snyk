@@ -8,6 +8,6 @@ ignore:
         expires: 2020-03-15T00:00:00.000Z
   SNYK-JAVA-ORGYAML-537645:
     - '*':
-        reason: Fix not available, and used for reading config, not at runtime
+        reason: Fix not available, and used for reading config, not at runtime. See https://govukverify.atlassian.net/browse/EID-1881
         expires: 2020-03-15T00:00:00.000Z
 patch: {}
