@@ -55,7 +55,7 @@ public class EidasCountryConfig {
     }
 
     public Optional<KeyStore> getTlsTruststore() {
-        return Objects.nonNull(this.tlsTruststore) ? Optional.of(this.tlsTruststore) : Optional.empty();
+        return Optional.ofNullable(this.tlsTruststore);
     }
 
     @Override
