@@ -1,4 +1,4 @@
-package uk.gov.ida.eidas.metatron.core.dto;
+package uk.gov.ida.eidas.metatron.domain;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -48,11 +49,10 @@ public class KeyStoreModule extends SimpleModule {
             try {
                 byte[] decoded = Base64.getDecoder().decode(node.asText());
                 keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                keyStore.load(new ByteArrayInputStream(decoded), "marshmallow".toCharArray());
+                keyStore.load(new ByteArrayInputStream(decoded), "".toCharArray());
             } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
                 keyStore = null;
-                // Skeleton app
-                System.out.println("Things didn't go the way you thought they would");
+                ProxyNodeLogger.logException(e, "Could not deserialize keystore: " + node.asText());
             }
 
             return keyStore;

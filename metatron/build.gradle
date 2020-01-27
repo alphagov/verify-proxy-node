@@ -4,8 +4,11 @@ version '1.0-SPIKE'
 dependencies {
     compile configurations.dropwizard,
             configurations.common,
-            'com.sun.xml.bind:jaxb-core:2.3.0',
-            'com.sun.xml.bind:jaxb-impl:2.3.0'
+            configurations.verify_saml,
+            configurations.opensaml,
+            project(':proxy-node-shared')
+
+    testCompile 'com.github.stefanbirkner:system-rules:1.19.0'
 }
 
 apply plugin: 'application'

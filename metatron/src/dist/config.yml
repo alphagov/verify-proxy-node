@@ -10,8 +10,9 @@ server:
       - type: console
         layout:
           ${REQUEST_LOG_LAYOUT_TYPE:-type: access-json}
-
 logging:
   level: ${LOG_LEVEL:-INFO}
   appenders:
     - type: ${LOGGING_APPENDER:-logstash-console}
+
+countriesConfig: ${COUNTRIES_CONFIG_FILE}

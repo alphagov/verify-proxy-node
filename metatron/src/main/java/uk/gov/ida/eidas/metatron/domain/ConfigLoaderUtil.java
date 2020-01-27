@@ -1,4 +1,4 @@
-package uk.gov.ida.eidas.metatron.core.dto;
+package uk.gov.ida.eidas.metatron.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -10,7 +10,6 @@ public class ConfigLoaderUtil {
     public static EidasConfig loadConfig(String configLocation) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         objectMapper.registerModule(new KeyStoreModule());
-
         return objectMapper.readValue(new File(configLocation), EidasConfig.class);
     }
 }
