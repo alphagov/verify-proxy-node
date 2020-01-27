@@ -7,17 +7,13 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import uk.gov.ida.eidas.metatron.domain.EidasConfig;
 import uk.gov.ida.eidas.metatron.domain.EidasCountryConfig;
 import uk.gov.ida.eidas.metatron.domain.MetadataResolverService;
-import uk.gov.ida.eidas.metatron.health.MetadataHealth;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Iterator;
-import java.util.List;
 
 @Path("/")
 public class MetatronResource {
@@ -62,24 +58,11 @@ public class MetatronResource {
     @GET
     @Path("/metadata/{entityId}")
     public String metadata(@PathParam("entityId") String entityId) throws ResolverException {
-        this.metadataResolverService.getHealth().stream().forEach(h-> System.out.println(h.getEntityId()));
         CriteriaSet criteria = new CriteriaSet(new EntityIdCriterion(entityId));
         EntityDescriptor entityDescriptor = this.metadataResolverService.getMetadataResolver(entityId).resolveSingle(criteria);
         return entityDescriptor.getEntityID();
     }
 
-    @GET
-    @Path("/metadata/last-refresh/{entityId}")
-    public String lastRefresh(@PathParam("entityId") String entityId) {
-        return this.metadataResolverService.getLastRefresh(entityId);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/metadata/health")
-    public List<MetadataHealth> metadataHealth() {
-        return this.metadataResolverService.getHealth();
-    }
 }
 
 

@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.security.KeyStore;
-import java.util.Objects;
 import java.util.Optional;
 
 public class EidasCountryConfig {
@@ -29,6 +28,7 @@ public class EidasCountryConfig {
     @NotNull
     private boolean enabled;
     @JsonProperty
+    @NotNull
     private KeyStore metadataTruststore;
     @JsonProperty
     private KeyStore tlsTruststore;
@@ -56,28 +56,5 @@ public class EidasCountryConfig {
 
     public Optional<KeyStore> getTlsTruststore() {
         return Optional.ofNullable(this.tlsTruststore);
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer stringBuffer = new StringBuffer("<table>");
-        stringBuffer
-                .append("<tr>")
-                .append("<td>name:</td><td>").append(getName()).append("</td>")
-                .append("</tr>")
-                .append("<tr>")
-                .append("<td>country code:</td><td>").append(getCountryCode()).append("</td>")
-                .append("</tr>")
-                .append("<tr>")
-                .append("<td>metadata url:</td><td>").append(href(getConnectorMetadata().toString())).append("</td>")
-                .append("</tr>")
-                .append("<tr>")
-                .append("<td>entity id:</td><td>").append(href(getEntityId())).append("</td>")
-                .append("</tr>")
-                .append("</table>");
-        return stringBuffer.toString();
-    }
-    private String href(String url) {
-        return "<a href='" + url + "'>" + url + "</a>";
     }
 }

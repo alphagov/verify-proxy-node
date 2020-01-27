@@ -15,6 +15,7 @@ import uk.gov.ida.eidas.metatron.domain.KeyStoreModule;
 import uk.gov.ida.eidas.metatron.domain.MetadataResolverService;
 import uk.gov.ida.eidas.metatron.health.MetatronHealthCheck;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
+import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
 
 import java.io.IOException;
 import java.security.Security;
@@ -62,8 +63,8 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
         InitializationService.initialize();
 
         EidasConfig countriesConfig = ConfigLoaderUtil.loadConfig(configuration.getCountriesConfig());
-
-        MetadataResolverService resolverService = new MetadataResolverService(countriesConfig);
+        MetadataResolverFactory metadataResolverFactory = new MetadataResolverFactory();
+        MetadataResolverService resolverService = new MetadataResolverService(countriesConfig, metadataResolverFactory);
 
         final MetatronHealthCheck healthCheck = new MetatronHealthCheck();
         environment.healthChecks().register("Metatron", healthCheck);

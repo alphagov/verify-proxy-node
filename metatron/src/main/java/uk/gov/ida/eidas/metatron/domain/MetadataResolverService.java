@@ -3,8 +3,6 @@ package uk.gov.ida.eidas.metatron.domain;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
-import org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver;
-import uk.gov.ida.eidas.metatron.health.MetadataHealth;
 import uk.gov.ida.saml.metadata.ExpiredCertificateMetadataFilter;
 import uk.gov.ida.saml.metadata.PKIXSignatureValidationFilterProvider;
 import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
@@ -14,35 +12,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MetadataResolverService {
 
-    private static long MIN_REFRESH_DELAY_MS = 60_000;
-    private static long MAX_REFRESH_DELAY_MS = 600_000;
+    protected static long MIN_REFRESH_DELAY_MS = 60_000;
+    protected static long MAX_REFRESH_DELAY_MS = 600_000;
 
     private Map<String, MetadataResolver> metadataResolverMap;
     private ExpiredCertificateMetadataFilter expiredCertificateMetadataFilter;
     private MetadataResolverFactory metadataResolverFactory;
 
-    public MetadataResolverService(EidasConfig countriesConfig) {
-        this.metadataResolverFactory = new MetadataResolverFactory();
+    public MetadataResolverService(EidasConfig countriesConfig, MetadataResolverFactory metadataResolverFactory) {
+        this.metadataResolverFactory = metadataResolverFactory;
         this.metadataResolverMap = new HashMap<>();
         this.expiredCertificateMetadataFilter = new ExpiredCertificateMetadataFilter();
 
-        countriesConfig.getCountries().forEach(country -> {
-                    metadataResolverMap.put(country.getEntityId(), getMetadataResolver(country));
-                }
-        );
-    }
-
-    public String getLastRefresh(String entityId) {
-        return ((AbstractReloadingMetadataResolver) this.metadataResolverMap.get(entityId)).getLastRefresh().toString();
-    }
-
-    public List<MetadataHealth> getHealth() {
-        List<MetadataHealth> metadataHealth = new ArrayList<>();
-        this.metadataResolverMap.keySet().stream().forEach(k -> metadataHealth.add(new MetadataHealth(k, (AbstractReloadingMetadataResolver) metadataResolverMap.get(k))));
-        return metadataHealth;
+        metadataResolverMap = countriesConfig.getCountries().stream().collect(
+                Collectors.toMap(EidasCountryConfig::getEntityId, this::createMetadataResolver));
     }
 
     public MetadataResolver getMetadataResolver(String entityId) {
@@ -50,10 +37,9 @@ public class MetadataResolverService {
     }
 
     private Client getClient(EidasCountryConfig country) {
-        return country.getTlsTruststore().isPresent() ?
-                JerseyClientBuilder.newBuilder().trustStore(country.getTlsTruststore().get()).build()
-                :
-                JerseyClientBuilder.newClient();
+        return country.getTlsTruststore().isPresent()
+                ? JerseyClientBuilder.newBuilder().trustStore(country.getTlsTruststore().get()).build()
+                : JerseyClientBuilder.newClient();
     }
 
     private List<MetadataFilter> getFilters(EidasCountryConfig country) {
@@ -63,7 +49,7 @@ public class MetadataResolverService {
         return filters;
     }
 
-    private MetadataResolver getMetadataResolver(EidasCountryConfig country) {
+    private MetadataResolver createMetadataResolver(EidasCountryConfig country) {
         MetadataResolver resolver = this.metadataResolverFactory.create(
                 getClient(country),
                 country.getConnectorMetadata(),
