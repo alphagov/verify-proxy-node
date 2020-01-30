@@ -19,31 +19,15 @@ spec:
       approvers: ((trusted-developers.github-accounts))
       required_approval_count: 0
 
-    harbor_source: &harbor_source
-      username: ((harbor.harbor_username))
-      password: ((harbor.harbor_password))
-      harbor:
-        prevent_vul: "false"
-      notary:
-        url: ((harbor.notary_url))
-        root_key: ((harbor.root_key))
-        delegate_key: ((harbor.ci_key))
-        passphrase:
-          root: ((harbor.notary_root_passphrase))
-          snapshot: ((harbor.notary_snapshot_passphrase))
-          targets: ((harbor.notary_targets_passphrase))
-          delegation: ((harbor.notary_delegation_passphrase))
+    image_put_params: &image_put_params
+      image: image/image.tar
+      additional_tags: src/.git/short_ref
 
     task_toolbox: &task_toolbox
       type: docker-image
       source:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
-
-    image_tag: &image_tag
-      tag_file: src/.git/short_ref
-      tag_as_latest: true
-      tag_prefix: v
 
     gradle_cache_path: &gradle_cache_path
       path: home/gradle/.gradle
@@ -54,6 +38,19 @@ spec:
         repository: amazoncorretto
         tag: 11
 
+    build_config: &build_config
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: vito/oci-build-task
+        version:
+          digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+      caches:
+      - path: cache
+      run:
+        path: build
+
     resource_types:
 
     - name: github
@@ -61,13 +58,6 @@ spec:
       source:
         repository: ((concourse.github-resource-image))
         tag: ((concourse.github-resource-tag))
-
-    - name: harbor
-      type: docker-image
-      privileged: true
-      source:
-        repository: ((concourse.harbor-resource-image))
-        tag: ((concourse.harbor-resource-tag))
 
     resources:
 
@@ -102,75 +92,69 @@ spec:
         paths: [cloudhsm]
         branch: sandbox
 
-    - name: alpine-image
-      type: docker-image
-      icon: toolbox
-      source:
-        repository: alpine
-        tag: 3
-
     - name: chart
-      type: harbor
+      type: registry-image
       icon: file-document
-      source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/proxy-node-release
+      source: &ecr_source
+       username: ((pipeline.ImageRegistryUsername))
+       password: ((pipeline.ImageRegistryPassword))
+       repository: ((chart.ImageRepositoryURI))
 
     - name: tests-image
-      type: harbor
+      type: registry-image
       icon: code-tags-check
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/acceptance-tests
+        <<: *ecr_source
+        repository: ((tests.ImageRepositoryURI))
 
     - name: gateway-image
-      type: harbor
+      type: registry-image
       icon: gate
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/gateway
+        <<: *ecr_source
+        repository: ((gateway.ImageRepositoryURI))
 
     - name: translator-image
-      type: harbor
+      type: registry-image
       icon: file-xml
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/translator
+        <<: *ecr_source
+        repository: ((translator.ImageRepositoryURI))
 
     - name: parser-image
-      type: harbor
+      type: registry-image
       icon: page-next
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/parser
+        <<: *ecr_source
+        repository: ((parser.ImageRepositoryURI))
 
     - name: stub-connector-image
-      type: harbor
+      type: registry-image
       icon: power-plug
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/stub-connector
+        <<: *ecr_source
+        repository: ((stub-connector.ImageRepositoryURI))
 
     - name: cloudhsm-client-image
-      type: harbor
+      type: registry-image
       icon: folder-key-network
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/cloudhsm-client
+        <<: *ecr_source
+        repository: ((cloudhsm-client.ImageRepositoryURI))
 
     - name: cloudhsm-jce-image
-      type: harbor
+      type: registry-image
       icon: puzzle
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/cloudhsm-jce-gradle
+        <<: *ecr_source
+        repository: ((cloudhsm-jce.ImageRepositoryURI))
 
     - name: verify-service-provider-image
-      type: harbor
+      type: registry-image
       icon: marker-check
       source:
-        <<: *harbor_source
-        repository: registry.((cluster.domain))/eidas/verify-service-provider
+        <<: *ecr_source
+        repository: ((verify-service-provider.ImageRepositoryURI))
 
     groups:
       - name: deployment
@@ -216,13 +200,22 @@ spec:
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
                 ./gradlew --console verbose test installDist
 
+      - task: build-vsp
+        privileged: true
+        config:
+          <<: *build_config
+          params:
+            CONTEXT: vsp-src
+            DOCKERFILE: vsp-config/proxy-node-vsp-config/Dockerfile
+          inputs:
+          - name: vsp-src
+          - name: vsp-config
+          outputs:
+          - name: image
       - put: verify-service-provider-image
-        get_params: {skip_download: true}
         params:
-          build: vsp-src
-          dockerfile: vsp-config/proxy-node-vsp-config/Dockerfile
-          <<: *image_tag
-          tag_file: vsp-config/.git/short_ref
+          <<: *image_put_params
+          additional_tags: vsp-config/.git/short_ref
 
     - name: build-cloudhsm
       serial: true
@@ -234,20 +227,39 @@ spec:
           limit: 3
           fail_fast: true
           steps:
-          - put: cloudhsm-client-image
-            get_params: {skip_download: true}
-            params:
-              cache: true
-              build: cloudhsm-config/cloudhsm
-              <<: *image_tag
-              tag_file: cloudhsm-config/.git/short_ref
-          - put: cloudhsm-jce-image
-            get_params: {skip_download: true}
-            params:
-              cache: true
-              build: cloudhsm-config/cloudhsm/jdk-jce-image
-              <<: *image_tag
-              tag_file: cloudhsm-config/.git/short_ref
+          - do:
+            - task: build-cloudhsm
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: cloudhsm-config/cloudhsm
+                inputs:
+                - name: cloudhsm-config
+                outputs:
+                - name: cloudhsm-image-file
+                  path: image
+            - put: cloudhsm-client-image
+              params:
+                image: cloudhsm-image-file/image.tar
+                additional_tags: cloudhsm-config/.git/short_ref
+
+          - do:
+            - task: build-cloudhsm-jce
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: cloudhsm-config/cloudhsm/jdk-jce-image
+                inputs:
+                - name: cloudhsm-config
+                outputs:
+                - name: cloudhsm-jce-image-file
+                  path: image
+            - put: cloudhsm-jce-image
+              params:
+                image: cloudhsm-jce-image-file/image.tar
+                additional_tags: cloudhsm-config/.git/short_ref
 
     - name: build-proxy-node
       serial: true
@@ -304,44 +316,95 @@ spec:
                 ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
       - in_parallel:
-          limit: 3
           fail_fast: true
           steps:
-          - put: gateway-image
-            get_params: {skip_download: true}
-            params:
-              build: src
-              build_args:
-                component: proxy-node-gateway
-              <<: *image_tag
-          - put: translator-image
-            get_params: {skip_download: true}
-            params:
-              build: src
-              build_args:
-                component: proxy-node-translator
-                TALKS_TO_HSM: true
-              <<: *image_tag
-          - put: parser-image
-            get_params: {skip_download: true}
-            params:
-              build: src
-              build_args:
-                component: eidas-saml-parser
-              <<: *image_tag
-          - put: stub-connector-image
-            get_params: {skip_download: true}
-            params:
-              build: src
-              build_args:
-                component: stub-connector
-                TALKS_TO_HSM: true
-              <<: *image_tag
-          - put: tests-image
-            get_params: {skip_download: true}
-            params:
-              build: src/proxy-node-acceptance-tests
-              <<: *image_tag
+          - do:
+            - task: gateway-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: proxy-node-gateway
+                inputs:
+                - name: src
+                outputs:
+                - name: gateway-image-file
+                  path: image
+            - put: gateway-image
+              params:
+                <<: *image_put_params
+                image: gateway-image-file/image.tar
+
+          - do:
+            - task: translator-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: proxy-node-translator
+                  BUILD_ARG_TALKS_TO_HSM: "true"
+                inputs:
+                - name: src
+                outputs:
+                - name: translator-image-file
+                  path: image
+            - put: translator-image
+              params:
+                <<: *image_put_params
+                image: translator-image-file/image.tar
+
+          - do:
+            - task: parser-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: eidas-saml-parser
+                inputs:
+                - name: src
+                outputs:
+                - name: parser-image-file
+                  path: image
+            - put: parser-image
+              params:
+                <<: *image_put_params
+                image: parser-image-file/image.tar
+
+          - do:
+            - task: stub-connector-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: stub-connector
+                inputs:
+                - name: src
+                outputs:
+                - name: stub-connector-image-file
+            - put: stub-connector-image
+              params:
+                <<: *image_put_params
+                image: stub-connector-image-file/image.tar
+
+          - do:
+            - task: tests-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src/proxy-node-acceptance-tests
+                inputs:
+                - name: src
+                outputs:
+                - name: tests-image-file
+            - put: tests-image
+              params:
+                <<: *image_put_params
+                image: tests-image-file/image.tar
 
     - name: package
       serial: true
@@ -355,28 +418,20 @@ spec:
           - get: gateway-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: translator-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: parser-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: stub-connector-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: verify-service-provider-image
             passed: [build-vsp-image]
             trigger: true
-            params: {skip_download: true}
           - get: cloudhsm-client-image
             passed: [build-cloudhsm]
-            params: {skip_download: true}
-          - get: alpine-image
-            params: {rootfs: true}
 
       - task: generate-chart-values
         config:
@@ -392,6 +447,13 @@ spec:
           - name: verify-service-provider-image
           outputs:
           - name: chart-values
+          params:
+            PARSER_REPOSITORY_URI: ((parser.ImageRepositoryURI))
+            GATEWAY_REPOSITORY_URI: ((gateway.ImageRepositoryURI))
+            TRANSLATOR_REPOSITORY_URI: ((translator.ImageRepositoryURI))
+            CLOUDHSM_CLIENT_REPOSITORY_URI: ((cloudhsm-client.ImageRepositoryURI))
+            VERIFY_SERIVCE_PROVIDER_REPOSITORY_URI: ((verify-service-provider.ImageRepositoryURI))
+            STUB_CONNECTOR_REPOSITORY_URI: ((stub-connector.ImageRepositoryURI))
           run:
             path: /bin/bash
             args:
@@ -402,27 +464,27 @@ spec:
                 cat << EOF > ./overrides.yaml
                 esp:
                   image:
-                    repository: $(cat parser-image/repository)@$(cat parser-image/digest | cut -d ':' -f 1)
+                    repository: $PARSER_REPOSITORY_URI@$(cat parser-image/digest | cut -d ':' -f 1)
                     tag: $(cat parser-image/digest | cut -d ':' -f 2)
                 gateway:
                   image:
-                    repository: $(cat gateway-image/repository)@$(cat gateway-image/digest | cut -d ':' -f 1)
+                    repository: $GATEWAY_REPOSITORY_URI@$(cat gateway-image/digest | cut -d ':' -f 1)
                     tag: $(cat gateway-image/digest | cut -d ':' -f 2)
                 translator:
                   image:
-                    repository: $(cat translator-image/repository)@$(cat translator-image/digest | cut -d ':' -f 1)
+                    repository: $TRANSLATOR_REPOSITORY_URI@$(cat translator-image/digest | cut -d ':' -f 1)
                     tag: $(cat translator-image/digest | cut -d ':' -f 2)
                 hsm:
                   image:
-                    repository: $(cat cloudhsm-client-image/repository)@$(cat cloudhsm-client-image/digest | cut -d ':' -f 1)
+                    repository: $CLOUDHSM_CLIENT_REPOSITORY_URI@$(cat cloudhsm-client-image/digest | cut -d ':' -f 1)
                     tag: $(cat cloudhsm-client-image/digest | cut -d ':' -f 2)
                 vsp:
                   image:
-                    repository: $(cat verify-service-provider-image/repository)@$(cat verify-service-provider-image/digest | cut -d ':' -f 1)
+                    repository: $VERIFY_SERIVCE_PROVIDER_REPOSITORY_URI@$(cat verify-service-provider-image/digest | cut -d ':' -f 1)
                     tag: $(cat verify-service-provider-image/digest | cut -d ':' -f 2)
                 stubConnector:
                   image:
-                    repository: $(cat stub-connector-image/repository)@$(cat stub-connector-image/digest | cut -d ':' -f 1)
+                    repository: $STUB_CONNECTOR_REPOSITORY_URI@$(cat stub-connector-image/digest | cut -d ':' -f 1)
                     tag: $(cat stub-connector-image/digest | cut -d ':' -f 2)
                 EOF
                 echo "merging with chart values..."
@@ -451,9 +513,8 @@ spec:
           - name: src
           - name: chart-version
           - name: chart-values
-          - name: alpine-image
           outputs:
-          - name: alpine-image
+          - name: proxy-node-chart-package
           params:
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
           run:
@@ -483,13 +544,37 @@ spec:
                 --key "${KEY_ID}" \
                 "./${CHART_NAME}"
               cp chart-version/tag proxy-node-chart-package/
-              tar -rf alpine-image/rootfs.tar proxy-node-chart-package/
+
+      - task: build-chart-package-image
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: vito/oci-build-task
+            version:
+              digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+          caches:
+          - path: cache
+          inputs:
+          - name: proxy-node-chart-package
+          outputs:
+          - name: chart-image-file
+            path: image
+          run:
+            path: /bin/ash
+            args:
+            - -euc
+            - |
+              echo -e "FROM alpine:3" > ./Dockerfile
+              echo -e "COPY proxy-node-chart-package /proxy-node-chart-package/" >> ./Dockerfile
+              CONTEXT=. build
 
       - put: chart
-        get_params: {skip_download: true}
         params:
-          import_file: alpine-image/rootfs.tar
-          <<: *image_tag
+          image: chart-image-file/image.tar
+          additional_tags: src/.git/short_ref
 
     - name: test
       serial: true
