@@ -77,7 +77,6 @@ Snyk is run by our Travis builds and does two things, test and monitor. We use t
 * If there is currently no solution, you can temporarily ignore the vulnerability. You'll need the Snyk ID of the issue which you can grab from the last segment of the URL of the issue - find it in the Travis build logs where the vulnerability is reported.
 * Run `snyk ignore --id=<IssueID> --reason='The reason you're ignoring it'` and commit the `.snyk` file generated. Push.
 
-
 ## License
 
 [MIT](https://github.com/alphagov/verify-proxy-node/blob/master/LICENCE)
