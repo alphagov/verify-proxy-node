@@ -1,17 +1,40 @@
 package uk.gov.ida.eidas.metatron.domain;
 
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.criteria.UsageCriterion;
+import org.opensaml.security.x509.X509Credential;
+import uk.gov.ida.eidas.metatron.exceptions.MetatronClientException;
+import uk.gov.ida.eidas.metatron.exceptions.MetatronServerException;
+import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.saml.metadata.ExpiredCertificateMetadataFilter;
+import uk.gov.ida.saml.metadata.JerseyClientMetadataResolver;
 import uk.gov.ida.saml.metadata.PKIXSignatureValidationFilterProvider;
+import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
 import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
 
 import javax.ws.rs.client.Client;
+import javax.xml.namespace.QName;
+import java.net.URI;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MetadataResolverService {
@@ -19,21 +42,33 @@ public class MetadataResolverService {
     protected static long MIN_REFRESH_DELAY_MS = 60_000;
     protected static long MAX_REFRESH_DELAY_MS = 600_000;
 
-    private Map<String, MetadataResolver> metadataResolverMap;
-    private ExpiredCertificateMetadataFilter expiredCertificateMetadataFilter;
-    private MetadataResolverFactory metadataResolverFactory;
+    private final Map<EidasCountryConfig, MetadataResolver> metadataResolverMap;
+    private final ExpiredCertificateMetadataFilter expiredCertificateMetadataFilter;
+    private final MetadataResolverFactory metadataResolverFactory;
+    private final CredentialResolverFactory credentialResolverFactory;
 
-    public MetadataResolverService(EidasConfig countriesConfig, MetadataResolverFactory metadataResolverFactory) {
+    public MetadataResolverService(
+            EidasConfig countriesConfig,
+            MetadataResolverFactory metadataResolverFactory,
+            CredentialResolverFactory credentialResolverFactory) {
         this.metadataResolverFactory = metadataResolverFactory;
-        this.metadataResolverMap = new HashMap<>();
+        this.credentialResolverFactory = credentialResolverFactory;
         this.expiredCertificateMetadataFilter = new ExpiredCertificateMetadataFilter();
-
-        metadataResolverMap = countriesConfig.getCountries().stream().collect(
-                Collectors.toMap(EidasCountryConfig::getEntityId, this::createMetadataResolver));
+        this.metadataResolverMap = countriesConfig.getCountries().stream()
+                .collect(Collectors.toMap(Function.identity(), this::createMetadataResolver));
     }
 
-    public MetadataResolver getMetadataResolver(String entityId) {
-        return metadataResolverMap.get(entityId);
+    public CountryMetadataResponse getCountryMetadataResponse(URI entityId) {
+        EidasCountryConfig countryConfig = getCountryConfig(entityId);
+        URI location = getAssertionConsumerServiceLocation(countryConfig);
+        String encryptionX509 = getCertificateAsX509(countryConfig, UsageType.ENCRYPTION);
+        String signingX509 = getCertificateAsX509(countryConfig, UsageType.SIGNING);
+        return new CountryMetadataResponse(
+                signingX509,
+                encryptionX509,
+                location,
+                countryConfig.getEntityId().toString(),
+                countryConfig.getCountryCode());
     }
 
     private Client getClient(EidasCountryConfig country) {
@@ -58,5 +93,74 @@ public class MetadataResolverService {
                 MAX_REFRESH_DELAY_MS);
         return resolver;
     }
-}
 
+    private EidasCountryConfig getCountryConfig(URI entityId) {
+        EidasCountryConfig eidasCountryConfig = metadataResolverMap.keySet().stream()
+                .filter(c -> entityId.equals(c.getEntityId()))
+                .findFirst()
+                .orElseThrow(() -> new MetatronClientException(String.format("No metadata entry for entityID %s", entityId)));
+        if (!eidasCountryConfig.isEnabled()) {
+            throw new MetatronClientException(String.format("EntityID %s is not enabled", entityId));
+        }
+        return eidasCountryConfig;
+    }
+
+    private MetadataResolver getMetadataResolver(EidasCountryConfig eidasCountryConfig) {
+        return metadataResolverMap.get(eidasCountryConfig);
+    }
+
+    private String getCertificateAsX509(EidasCountryConfig countryConfig, UsageType usageType) {
+        X509Credential credential = (X509Credential) getCredential(usageType, countryConfig, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+        try {
+            return Base64.getEncoder().encodeToString(credential.getEntityCertificate().getEncoded());
+        } catch (CertificateEncodingException e) {
+            throw new MetatronServerException(String.format("Error encoding the %s certificate with entityID %s", usageType, countryConfig.getEntityId()), e);
+        }
+    }
+
+    private Credential getCredential(UsageType usageType, EidasCountryConfig eidasCountryConfig, QName descriptorQname) {
+        String entityId = eidasCountryConfig.getEntityId().toString();
+        CriteriaSet criteria = new CriteriaSet();
+        criteria.add(new EntityIdCriterion(entityId));
+        criteria.add(new EntityRoleCriterion(descriptorQname));
+        criteria.add(new UsageCriterion(usageType));
+        try {
+            MetadataResolver metadataResolver = getMetadataResolver(eidasCountryConfig);
+            MetadataCredentialResolver metadataCredentialResolver = credentialResolverFactory.create(metadataResolver);
+            Credential credential = metadataCredentialResolver.resolveSingle(criteria);
+            if (credential == null) {
+                throw new MetatronServerException(String.format("Missing %s certificate from Connector Metadata for entityID %s", usageType, entityId));
+            }
+            return credential;
+        } catch (ResolverException | ComponentInitializationException ex) {
+            throw new MetatronServerException(String.format("Unable to resolve metadata credentials from Connector Metadata for entityID %s", entityId), ex);
+        }
+    }
+
+    private URI getAssertionConsumerServiceLocation(EidasCountryConfig countryConfig) {
+        MetadataResolver metadataResolver = getMetadataResolver(countryConfig);
+        String entityId = countryConfig.getEntityId().toString();
+        CriteriaSet criteria = new CriteriaSet(new EntityIdCriterion(entityId));
+        EntityDescriptor entityDescriptor;
+        try {
+            entityDescriptor = metadataResolver.resolveSingle(criteria);
+        } catch (ResolverException e) {
+            throw new MetatronServerException(String.format("Unable to resolve metadata for entityID %s. Last successful refresh was: %s",
+                    entityId,
+                    ((JerseyClientMetadataResolver) metadataResolver).getLastSuccessfulRefresh()), e);
+        }
+        if (entityDescriptor == null) {
+            throw new MetatronServerException(String.format("Unable to resolve metadata for entityID %s. Last successful refresh was: %s",
+                    entityId,
+                    ((JerseyClientMetadataResolver) metadataResolver).getLastSuccessfulRefresh()));
+        }
+        SPSSODescriptor spssoDescriptor = entityDescriptor.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
+        return spssoDescriptor.getAssertionConsumerServices().stream()
+                .map(AssertionConsumerService::getLocation)
+                .map(URI::create)
+                .findFirst()
+                .orElseThrow(() -> new MetatronServerException(String.format("Missing Assertion Consumer Service Location for entityID %s", entityId)));
+
+    }
+
+}

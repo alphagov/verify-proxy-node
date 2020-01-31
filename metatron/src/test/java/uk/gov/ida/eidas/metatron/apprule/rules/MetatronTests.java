@@ -1,6 +1,7 @@
 package uk.gov.ida.eidas.metatron.apprule.rules;
 
 import io.dropwizard.client.JerseyClientBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientProperties;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -13,6 +14,7 @@ import org.opensaml.saml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.xmlsec.signature.Signature;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
+import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.saml.core.test.OpenSAMLRunner;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.builders.SignatureBuilder;
@@ -27,6 +29,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,7 +85,12 @@ public class MetatronTests {
         Response response = getClient().target(getUriString(entityId)).request().get();
 
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
-        assertThat(response.readEntity(String.class)).isEqualTo(entityId);
+        CountryMetadataResponse actual = response.readEntity(CountryMetadataResponse.class);
+        assertThat(actual.getCountryCode()).isEqualTo("VO");
+        assertThat(actual.getDestination()).isEqualTo(URI.create("http://foo.com/bar"));
+        assertThat(actual.getEntityId()).isEqualTo(entityId);
+        assertThatCertsMatch(actual.getSamlEncryptionCertX509(), TEST_RP_PUBLIC_ENCRYPTION_CERT);
+        assertThatCertsMatch(actual.getSamlSigningCertX509(), TEST_RP_PUBLIC_SIGNING_CERT);
     }
 
     @Test
@@ -91,7 +99,12 @@ public class MetatronTests {
         Response response = getClient().target(getUriString(entityId)).request().get();
 
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
-        assertThat(response.readEntity(String.class)).isEqualTo(entityId);
+        CountryMetadataResponse actual = response.readEntity(CountryMetadataResponse.class);
+        assertThat(actual.getCountryCode()).isEqualTo("VT");
+        assertThat(actual.getDestination()).isEqualTo(URI.create("http://foo.com/bar"));
+        assertThat(actual.getEntityId()).isEqualTo(entityId);
+        assertThatCertsMatch(actual.getSamlEncryptionCertX509(), TEST_RP_PUBLIC_ENCRYPTION_CERT);
+        assertThatCertsMatch(actual.getSamlSigningCertX509(), TEST_RP_PUBLIC_SIGNING_CERT);
     }
 
     @Test
@@ -104,7 +117,7 @@ public class MetatronTests {
 
     @Test
     public void untrustedReturns500() {
-        String entityId = getEntityId(TestMetadataResource.SIGNED_UNTRUSTED);
+        String entityId = getEntityId(TestMetadataResource.UNTRUSTED);
         Response response = getClient().target(getUriString(entityId)).request().get();
 
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
@@ -118,12 +131,36 @@ public class MetatronTests {
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
+    @Test
+    public void metadataMarkedDisabledInConfigIsBadRequest() {
+        String entityId = getEntityId(TestMetadataResource.DISABLED);
+        Response response = getClient().target(getUriString(entityId)).request().get();
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.BAD_REQUEST);
+        assertResponseIsAnErrorMap(response);
+    }
+
+    @Test
+    public void metadataThrowsError() {
+        String entityId = getEntityId(TestMetadataResource.THROWS_ERROR);
+        Response response = getClient().target(getUriString(entityId)).request().get();
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
+        assertResponseIsAnErrorMap(response);
+    }
+
+    @Test
+    public void entityNotRegistered() {
+        String entityId = getEntityId(TestMetadataResource.DOES_NOT_EXIST);
+        Response response = getClient().target(getUriString(entityId)).request().get();
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.BAD_REQUEST);
+        assertResponseIsAnErrorMap(response);
+    }
+
     private String getEntityId(String name) {
         return "http://localhost:" + testMetadataServer.getPort() + "/application/" + name + "/Metadata";
     }
 
     private String getUriString(String entityId) {
-        return "http://" + UriBuilder.fromMethod(MetatronResource.class, "metadata").host("localhost").port(metatronAppRule.getLocalPort()).build(entityId).toString();
+        return "http://" + UriBuilder.fromMethod(MetatronResource.class, "getCountryMetadataResponse").host("localhost").port(metatronAppRule.getLocalPort()).build(entityId).toString();
     }
 
     private Client getClient() {
@@ -136,13 +173,26 @@ public class MetatronTests {
         return client;
     }
 
+    private void assertThatCertsMatch(String samlEncryptionCertX509, String testRpPublicEncryptionCert) {
+        assertThat(StringUtils.right(samlEncryptionCertX509, 10)).isEqualTo(StringUtils.right(testRpPublicEncryptionCert, 10));
+    }
+
+    private void assertResponseIsAnErrorMap(Response response) {
+        Map map = response.readEntity(Map.class);
+        assertThat(map.containsKey("code")).isTrue();
+        assertThat(map.containsKey("message")).isTrue();
+    }
+
     @Path("/")
     public static class TestMetadataResource {
         public static final String VALID_ONE = "valid-one";
         public static final String VALID_TWO = "valid-two";
         public static final String EXPIRED = "expired";
         public static final String UNSIGNED = "unsigned";
-        public static final String SIGNED_UNTRUSTED = "signed-untrusted";
+        public static final String UNTRUSTED = "untrusted";
+        public static final String DISABLED = "disabled";
+        public static final String THROWS_ERROR = "error";
+        public static final String DOES_NOT_EXIST = "does-not-exist";
 
 
         private Map<String, String> connectorMetadatas;
@@ -160,7 +210,9 @@ public class MetatronTests {
             final String VALID_TWO_VALID_ENTITY_ID = buildEntityId(port, VALID_TWO);
             final String EXPIRED_ENTITY_ID = buildEntityId(port, EXPIRED);
             final String UNSIGNED_ENTITY_ID = buildEntityId(port, UNSIGNED);
-            final String SIGNED_UNTRUSTED_ENTITY_ID = buildEntityId(port, SIGNED_UNTRUSTED);
+            final String UNTRUSTED_ENTITY_ID = buildEntityId(port, UNTRUSTED);
+            final String DISABLED_ENTITY_ID = buildEntityId(port, DISABLED);
+            final String THROWS_ERROR_ENTITY_ID = buildEntityId(port, THROWS_ERROR);
 
 
             connectorMetadatas.put(
@@ -184,9 +236,20 @@ public class MetatronTests {
                             buildUnsignedConnectorEntityDescriptor(UNSIGNED_ENTITY_ID)));
 
             connectorMetadatas.put(
-                    SIGNED_UNTRUSTED,
+                    UNTRUSTED,
                     metadataFactory.singleEntityMetadata(
-                            buildConnectorEntityDescriptor(SIGNED_UNTRUSTED_ENTITY_ID)));
+                            buildConnectorEntityDescriptor(UNTRUSTED_ENTITY_ID)));
+
+            connectorMetadatas.put(
+                    DISABLED,
+                    metadataFactory.singleEntityMetadata(
+                            buildConnectorEntityDescriptor(DISABLED_ENTITY_ID)));
+
+            connectorMetadatas.put(
+                    THROWS_ERROR,
+                    metadataFactory.singleEntityMetadata(
+                            buildConnectorEntityDescriptor(THROWS_ERROR_ENTITY_ID)));
+
 
         }
 
@@ -256,8 +319,12 @@ public class MetatronTests {
 
         @GET
         @Path("/{country}/Metadata")
-        public String truststore(@PathParam("country") String country) {
-            return connectorMetadatas.get(country);
+        public Response truststore(@PathParam("country") String country) {
+
+            if (THROWS_ERROR.equals(country)) {
+                return Response.serverError().build();
+            }
+            return Response.ok(connectorMetadatas.get(country)).build();
         }
     }
 

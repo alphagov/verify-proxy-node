@@ -14,7 +14,10 @@ import uk.gov.ida.eidas.metatron.domain.EidasConfig;
 import uk.gov.ida.eidas.metatron.domain.KeyStoreModule;
 import uk.gov.ida.eidas.metatron.domain.MetadataResolverService;
 import uk.gov.ida.eidas.metatron.health.MetatronHealthCheck;
+import uk.gov.ida.eidas.metatron.exceptions.MetatronClientExceptionMapper;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
+import uk.gov.ida.eidas.metatron.exceptions.MetatronServerExceptionMapper;
+import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
 import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
 
 import java.io.IOException;
@@ -64,12 +67,15 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
 
         EidasConfig countriesConfig = ConfigLoaderUtil.loadConfig(configuration.getCountriesConfig());
         MetadataResolverFactory metadataResolverFactory = new MetadataResolverFactory();
-        MetadataResolverService resolverService = new MetadataResolverService(countriesConfig, metadataResolverFactory);
+        CredentialResolverFactory credentialResolverFactory = new CredentialResolverFactory();
+        MetadataResolverService resolverService = new MetadataResolverService(countriesConfig, metadataResolverFactory, credentialResolverFactory);
 
         final MetatronHealthCheck healthCheck = new MetatronHealthCheck();
         environment.healthChecks().register("Metatron", healthCheck);
 
-        environment.jersey().register(new MetatronResource(countriesConfig, resolverService));
+        environment.jersey().register(new MetatronResource(resolverService));
+        environment.jersey().register(MetatronClientExceptionMapper.class);
+        environment.jersey().register(MetatronServerExceptionMapper.class);
 
     }
 

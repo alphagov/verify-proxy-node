@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.security.KeyStore;
+import java.util.Objects;
 import java.util.Optional;
 
 public class EidasCountryConfig {
@@ -15,21 +16,26 @@ public class EidasCountryConfig {
     @Valid
     @NotNull
     private String name;
+
     @JsonProperty
     @Valid
     @NotNull
     private String countryCode;
+
     @JsonProperty
     @Valid
     @NotNull
     private URI connectorMetadata;
+
     @JsonProperty
     @Valid
     @NotNull
     private boolean enabled;
+
     @JsonProperty
     @NotNull
     private KeyStore metadataTruststore;
+
     @JsonProperty
     private KeyStore tlsTruststore;
 
@@ -42,8 +48,8 @@ public class EidasCountryConfig {
     }
 
     @JsonIgnore
-    public String getEntityId() {
-        return connectorMetadata.toString();
+    public URI getEntityId() {
+        return connectorMetadata;
     }
 
     public URI getConnectorMetadata() {
@@ -56,5 +62,26 @@ public class EidasCountryConfig {
 
     public Optional<KeyStore> getTlsTruststore() {
         return Optional.ofNullable(this.tlsTruststore);
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        EidasCountryConfig that = (EidasCountryConfig) o;
+        return getConnectorMetadata().equals(that.getConnectorMetadata());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getConnectorMetadata());
     }
 }
