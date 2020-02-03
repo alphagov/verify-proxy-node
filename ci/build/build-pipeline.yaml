@@ -474,16 +474,16 @@ spec:
           - name: verify-service-provider-image
           outputs:
           - name: chart-values
+          params:
+            PARSER_REPOSITORY_URI: ((parser.ImageRepositoryURI))
+            METATRON_REPOSITORY_URI: ((metatron.ImageRepositoryURI))
+            GATEWAY_REPOSITORY_URI: ((gateway.ImageRepositoryURI))
+            TRANSLATOR_REPOSITORY_URI: ((translator.ImageRepositoryURI))
+            CLOUDHSM_CLIENT_REPOSITORY_URI: ((cloudhsm-client.ImageRepositoryURI))
+            VERIFY_SERIVCE_PROVIDER_REPOSITORY_URI: ((verify-service-provider.ImageRepositoryURI))
+            STUB_CONNECTOR_REPOSITORY_URI: ((stub-connector.ImageRepositoryURI))
           run:
             path: /bin/bash
-            params:
-              PARSER_REPOSITORY_URI: ((parser.ImageRepositoryURI))
-              METATRON_REPOSITORY_URI: ((metatron.ImageRepositoryURI))
-              GATEWAY_REPOSITORY_URI: ((gateway.ImageRepositoryURI))
-              TRANSLATOR_REPOSITORY_URI: ((translator.ImageRepositoryURI))
-              CLOUDHSM_CLIENT_REPOSITORY_URI: ((cloudhsm-client.ImageRepositoryURI))
-              VERIFY_SERIVCE_PROVIDER_REPOSITORY_URI: ((verify-service-provider.ImageRepositoryURI))
-              STUB_CONNECTOR_REPOSITORY_URI: ((stub-connector.ImageRepositoryURI))
             args:
               - -euc
               - |
