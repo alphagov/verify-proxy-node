@@ -351,7 +351,7 @@ spec:
               params:
                 CONTEXT: src
                 BUILD_ARG_component: proxy-node-translator
-                BUILD_ARG_TALKS_TO_HSM: true
+                BUILD_ARG_TALKS_TO_HSM: "true"
               inputs:
               - name: src
           - put: translator-image
