@@ -231,7 +231,6 @@ spec:
             type: registry-image
             source:
               repository: vito/oci-build-task
-              tag: cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
           params:
             CONTEXT: vsp-src
             DOCKERFILE: vsp-config/proxy-node-vsp-config/Dockerfile
