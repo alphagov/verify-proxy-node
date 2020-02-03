@@ -36,7 +36,7 @@ public class BasicCredentialBuilder {
     public BasicCredentialBuilder withPrivateSigningKey(String privateSigningKey) {
         this.privateSigningKey = privateSigningKey;
         return this;
-    }
+    } 
 
     public BasicCredential build() throws Exception {
         String publicCert = BEGIN_CERT + publicSigningCert + END_CERT;
