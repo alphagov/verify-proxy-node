@@ -256,35 +256,31 @@ spec:
       plan:
       - get: cloudhsm-config
         trigger: true
-      - in_parallel:
-          limit: 3
-          fail_fast: true
-          steps:
-          - task: build-cloudhsm
-            privileged: true
-            config:
-              <<: *build_config
-              params:
-                CONTEXT: cloudhsm-config/cloudhsm
-              inputs:
-              - name: cloudhsm-config
-          - put: cloudhsm-client-image
-            params:
-              <<: *image_put_params
-              additional_tags: cloudhsm-config/.git/short_ref
+      - task: build-cloudhsm
+        privileged: true
+        config:
+          <<: *build_config
+          params:
+            CONTEXT: cloudhsm-config/cloudhsm
+          inputs:
+          - name: cloudhsm-config
+      - put: cloudhsm-client-image
+        params:
+          <<: *image_put_params
+          additional_tags: cloudhsm-config/.git/short_ref
 
-          - task: build-cloudhsm-jce
-            privileged: true
-            config:
-              <<: *build_config
-              params:
-                CONTEXT: cloudhsm-config/cloudhsm/jdk-jce-image
-              inputs:
-              - name: cloudhsm-config
-          - put: cloudhsm-jce-image
-            params:
-              <<: *image_put_params
-              additional_tags: cloudhsm-config/.git/short_ref
+      - task: build-cloudhsm-jce
+        privileged: true
+        config:
+          <<: *build_config
+          params:
+            CONTEXT: cloudhsm-config/cloudhsm/jdk-jce-image
+          inputs:
+          - name: cloudhsm-config
+      - put: cloudhsm-jce-image
+        params:
+          <<: *image_put_params
+          additional_tags: cloudhsm-config/.git/short_ref
     - name: build-proxy-node
       serial: true
       serial_groups: [build-proxy-node]
