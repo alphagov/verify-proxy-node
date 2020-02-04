@@ -490,7 +490,8 @@ spec:
           - get: cloudhsm-client-image
             passed: [build-cloudhsm]
           - get: alpine-image
-            params: {rootfs: true}
+            params:
+              format: oci
           - get: release
 
       - task: generate-chart-values
@@ -617,11 +618,11 @@ spec:
                 "./${CHART_NAME}"
               cp chart-version/tag proxy-node-chart-package/
               cp ./src/.git/ref proxy-node-chart-package/
-              tar -rf alpine-image/rootfs.tar proxy-node-chart-package/
+              tar -rf alpine-image/image.tar proxy-node-chart-package/
 
       - put: chart
         params:
-          image: alpine-image/rootfs.tar
+          image: alpine-image/image.tar
           additional_tags: src/.git/short_ref
 
     - name: delete
