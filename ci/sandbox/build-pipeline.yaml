@@ -38,6 +38,19 @@ spec:
         repository: amazoncorretto
         tag: 11
 
+    build_config: &build_config
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: vito/oci-build-task
+        version:
+          digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+      caches:
+      - path: cache
+      run:
+        path: build
+
     resource_types:
 
     - name: github
@@ -213,14 +226,8 @@ spec:
 
       - task: build-vsp
         privileged: true
-        config: &build_config
-          platform: linux
-          image_resource:
-            type: registry-image
-            source:
-              repository: vito/oci-build-task
-            version:
-              digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+        config:
+          <<: *build_config
           params:
             CONTEXT: vsp-src
             DOCKERFILE: vsp-config/proxy-node-vsp-config/Dockerfile
@@ -229,10 +236,6 @@ spec:
           - name: vsp-config
           outputs:
           - name: image
-          caches:
-          - path: cache
-          run:
-            path: build
       - put: verify-service-provider-image
         params:
           <<: *image_put_params
