@@ -490,7 +490,6 @@ spec:
           - get: cloudhsm-client-image
             passed: [build-cloudhsm]
           - get: alpine-image
-            params: {rootfs: true}
           - get: release
 
       - task: generate-chart-values
