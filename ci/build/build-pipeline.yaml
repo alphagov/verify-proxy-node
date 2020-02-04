@@ -38,6 +38,19 @@ spec:
         repository: amazoncorretto
         tag: 11
 
+    build_config: &build_config
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: vito/oci-build-task
+        version:
+          digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+      caches:
+      - path: cache
+      run:
+        path: build
+
     resource_types:
 
     - name: github
@@ -225,14 +238,8 @@ spec:
 
       - task: build-vsp
         privileged: true
-        config: &build_config
-          platform: linux
-          image_resource:
-            type: registry-image
-            source:
-              repository: vito/oci-build-task
-            version:
-              digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+        config:
+          <<: *build_config
           params:
             CONTEXT: vsp-src
             DOCKERFILE: vsp-config/proxy-node-vsp-config/Dockerfile
@@ -241,10 +248,6 @@ spec:
           - name: vsp-config
           outputs:
           - name: image
-          caches:
-          - path: cache
-          run:
-            path: build
       - put: verify-service-provider-image
         params:
           <<: *image_put_params
@@ -256,31 +259,42 @@ spec:
       plan:
       - get: cloudhsm-config
         trigger: true
-      - task: build-cloudhsm
-        privileged: true
-        config:
-          <<: *build_config
-          params:
-            CONTEXT: cloudhsm-config/cloudhsm
-          inputs:
-          - name: cloudhsm-config
-      - put: cloudhsm-client-image
-        params:
-          <<: *image_put_params
-          additional_tags: cloudhsm-config/.git/short_ref
+      - in_parallel:
+          fail_fast: true
+          steps:
+          - do:
+            - task: build-cloudhsm
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: cloudhsm-config/cloudhsm
+                inputs:
+                - name: cloudhsm-config
+                outputs:
+                - name: cloudhsm-image-file
+                  path: image
+            - put: cloudhsm-client-image
+              params:
+                image: cloudhsm-image-file/image.tar
+                additional_tags: cloudhsm-config/.git/short_ref
 
-      - task: build-cloudhsm-jce
-        privileged: true
-        config:
-          <<: *build_config
-          params:
-            CONTEXT: cloudhsm-config/cloudhsm/jdk-jce-image
-          inputs:
-          - name: cloudhsm-config
-      - put: cloudhsm-jce-image
-        params:
-          <<: *image_put_params
-          additional_tags: cloudhsm-config/.git/short_ref
+          - do:
+            - task: build-cloudhsm-jce
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: cloudhsm-config/cloudhsm/jdk-jce-image
+                inputs:
+                - name: cloudhsm-config
+                outputs:
+                - name: cloudhsm-jce-image-file
+                  path: image
+            - put: cloudhsm-jce-image
+              params:
+                image: cloudhsm-jce-image-file/image.tar
+                additional_tags: cloudhsm-config/.git/short_ref
     - name: build-proxy-node
       serial: true
       serial_groups: [build-proxy-node]
@@ -336,86 +350,115 @@ spec:
                 ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
       - in_parallel:
-          limit: 3
           fail_fast: true
           steps:
-          - task: gateway-build
-            privileged: true
-            config:
-              <<: *build_config
+          - do:
+            - task: gateway-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: proxy-node-gateway
+                inputs:
+                - name: src
+                outputs:
+                - name: gateway-image-file
+                  path: image
+            - put: gateway-image
               params:
-                CONTEXT: src
-                BUILD_ARG_component: proxy-node-gateway
-              inputs:
-              - name: src
-          - put: gateway-image
-            params:
-              <<: *image_put_params
+                <<: *image_put_params
+                image: gateway-image-file/image.tar
 
-          - task: translator-build
-            privileged: true
-            config:
-              <<: *build_config
+          - do:
+            - task: translator-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: proxy-node-translator
+                  BUILD_ARG_TALKS_TO_HSM: "true"
+                inputs:
+                - name: src
+                outputs:
+                - name: translator-image-file
+                  path: image
+            - put: translator-image
               params:
-                CONTEXT: src
-                BUILD_ARG_component: proxy-node-translator
-                BUILD_ARG_TALKS_TO_HSM: "true"
-              inputs:
-              - name: src
-          - put: translator-image
-            params:
-              <<: *image_put_params
+                <<: *image_put_params
+                image: translator-image-file/image.tar
 
-          - task: parser-build
-            privileged: true
-            config:
-              <<: *build_config
+          - do:
+            - task: parser-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: eidas-saml-parser
+                inputs:
+                - name: src
+                outputs:
+                - name: parser-image-file
+                  path: image
+            - put: parser-image
               params:
-                CONTEXT: src
-                BUILD_ARG_component: eidas-saml-parser
-              inputs:
-              - name: src
-          - put: parser-image
-            params:
-              <<: *image_put_params
+                <<: *image_put_params
+                image: parser-image-file/image.tar
 
-          - task: metatron-build
-            privileged: true
-            config:
-              <<: *build_config
+          - do:
+            - task: metatron-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: metatron
+                inputs:
+                - name: src
+                outputs:
+                - name: metatron-image-file
+                  path: image
+            - put: metatron-image
               params:
-                CONTEXT: src
-                BUILD_ARG_component: metatron
-              inputs:
-              - name: src
-          - put: metatron-image
-            params:
-              <<: *image_put_params
+                <<: *image_put_params
+                image: metatron-image-file/image.tar
 
-          - task: stub-connector-build
-            privileged: true
-            config:
-              <<: *build_config
+          - do:
+            - task: stub-connector-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src
+                  BUILD_ARG_component: stub-connector
+                inputs:
+                - name: src
+                outputs:
+                - name: stub-connector-image-file
+                  path: image
+            - put: stub-connector-image
               params:
-                CONTEXT: src
-                BUILD_ARG_component: stub-connector
-              inputs:
-              - name: src
-          - put: stub-connector-image
-            params:
-              <<: *image_put_params
+                <<: *image_put_params
+                image: stub-connector-image-file/image.tar
 
-          - task: tests-build
-            privileged: true
-            config:
-              <<: *build_config
+          - do:
+            - task: tests-build
+              privileged: true
+              config:
+                <<: *build_config
+                params:
+                  CONTEXT: src/proxy-node-acceptance-tests
+                inputs:
+                - name: src
+                outputs:
+                - name: tests-image-file
+                  path: image
+            - put: tests-image
               params:
-                CONTEXT: src/proxy-node-acceptance-tests
-              inputs:
-              - name: src
-          - put: tests-image
-            params:
-              <<: *image_put_params
+                <<: *image_put_params
+                image: tests-image-file/image.tar
 
     - name: package
       serial: true
