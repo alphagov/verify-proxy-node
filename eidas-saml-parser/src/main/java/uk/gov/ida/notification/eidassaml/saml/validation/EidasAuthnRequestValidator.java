@@ -4,6 +4,9 @@ import com.google.common.base.Strings;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.signature.support.SignatureValidator;
+import org.slf4j.event.Level;
 import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.opensaml.saml2.common.response.MessageReplayChecker;
@@ -17,6 +20,7 @@ import uk.gov.ida.notification.exceptions.authnrequest.InvalidAuthnRequestExcept
 import uk.gov.ida.notification.saml.deprecate.DestinationValidator;
 import uk.gov.ida.notification.saml.deprecate.SamlValidationException;
 import uk.gov.ida.notification.saml.validation.components.LoaValidator;
+import uk.gov.ida.saml.core.validation.SamlTransformationErrorException;
 
 import javax.xml.namespace.QName;
 
@@ -49,9 +53,19 @@ public class EidasAuthnRequestValidator {
         this.assertionConsumerServiceValidator = assertionConsumerServiceValidator;
     }
 
-    public void validate(AuthnRequest request) {
+    public void validate(AuthnRequest request, Credential signingCredential) {
+
         if (request == null) {
             throw new InvalidAuthnRequestException("Null request");
+        }
+
+        try {
+            SignatureValidator.validate(
+                    request.getSignature(),
+                    signingCredential
+            );
+        } catch (Exception exception) {
+            throw new SamlTransformationErrorException(exception.getMessage(), Level.WARN);
         }
 
         if (Strings.isNullOrEmpty(request.getID())) {

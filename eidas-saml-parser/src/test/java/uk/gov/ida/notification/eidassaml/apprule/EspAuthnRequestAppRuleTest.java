@@ -56,7 +56,8 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         MDC.clear();
         request = new EidasAuthnRequestBuilder()
                 .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
-                .withDestination("http://proxy-node/eidasAuthnRequest");
+                .withDestination("http://proxy-node/eidasAuthnRequest")
+                .withAssertionConsumerServiceURL("http://assertionConsumerService.net");
     }
 
     @Test
@@ -72,7 +73,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(eidasSamlParserAppRule, requestWithIncorrectSigningKey),
-                "Error during AuthnRequest Signature Validation: SAML Validation Specification: Signature was not valid."
+                "Signature cryptographic validation not successful"
         );
     }
 
@@ -82,7 +83,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
         assertErrorResponseWithMessage(
                 postEidasAuthnRequest(eidasSamlParserAppRule, unsignedRequest),
-                "Error during AuthnRequest Signature Validation: SAML Validation Specification: Message has no signature."
+                "Signature cannot be null"
         );
     }
 
@@ -90,7 +91,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public void shouldReturnHTTP400WhenAuthnRequestIssuerMissing() throws Exception {
         assertBadRequestWithMessage(
                 request.withIssuer(""),
-                "Error during AuthnRequest Signature Validation: SAML Validation Specification: SAML 'Issuer' element has no value."
+                "Issuer is missing"
         );
     }
 
@@ -226,16 +227,6 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     }
 
     @Test
-    public void shouldConsumeMetadata() throws Exception {
-        Response response = eidasSamlParserAppRule.target("healthcheck", eidasSamlParserAppRule.getAdminPort())
-                .request()
-                .get();
-
-        final String healthCheck = response.readEntity(String.class);
-        assertThat(healthCheck).contains("\"connector-metadata\":{\"healthy\":true}");
-    }
-
-    @Test
     public void shouldLogAuthnRequestAttributes() throws Exception {
         Appender<ILoggingEvent> appender = mock(Appender.class);
         Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
@@ -300,6 +291,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
     private void assertErrorResponseWithMessage(Response response, String errorMessageContains) {
         assertErrorResponse(response);
-        assertThat(response.readEntity(String.class)).contains(errorMessageContains);
+        String entity = response.readEntity(String.class);
+        assertThat(entity).contains(errorMessageContains);
     }
 }

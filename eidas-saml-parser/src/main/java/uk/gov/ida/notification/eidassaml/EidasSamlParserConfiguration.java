@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import engineering.reliability.gds.metrics.config.PrometheusConfiguration;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.ReplayCheckerConfiguration;
-import uk.gov.ida.saml.metadata.TrustStoreBackedMetadataConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -19,19 +18,19 @@ public class EidasSamlParserConfiguration extends Configuration implements Prome
 
     @JsonProperty
     @Valid
-    private ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
+    private final ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
 
-    @JsonProperty
     @Valid
     @NotNull
-    private TrustStoreBackedMetadataConfiguration connectorMetadataConfiguration;
+    @JsonProperty
+    private URI metatronUri;
+
+    public URI getMetatronUrl() {
+        return metatronUri;
+    }
 
     public ReplayCheckerConfiguration getReplayChecker() {
         return replayChecker;
-    }
-
-    public TrustStoreBackedMetadataConfiguration getConnectorMetadataConfiguration() {
-        return connectorMetadataConfiguration;
     }
 
     public URI getProxyNodeAuthnRequestUrl() {

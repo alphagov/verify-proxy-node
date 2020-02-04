@@ -26,7 +26,7 @@ public class EidasSamlParserServiceConfiguration extends Configuration {
 
     @JsonProperty
     @Valid
-    private JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
+    private final JerseyClientConfiguration clientConfig = new JerseyClientConfiguration();
 
     public URI getURL() {
         return url;

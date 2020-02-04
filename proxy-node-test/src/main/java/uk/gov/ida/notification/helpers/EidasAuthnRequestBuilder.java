@@ -1,15 +1,17 @@
 package uk.gov.ida.notification.helpers;
 
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
-import org.w3c.dom.Attr;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.algorithm.descriptors.SignatureRSASHA256;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.Signer;
+import org.w3c.dom.*;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.saml.core.test.builders.SignatureBuilder;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
@@ -27,6 +29,7 @@ public class EidasAuthnRequestBuilder {
     private final String ds = "http://www.w3.org/2000/09/xmldsig#";
     private final String eidas = "http://eidas.europa.eu/saml-extensions";
     private HashMap<String, String> namespaceMap;
+    private Credential signingCredential;
 
     public EidasAuthnRequestBuilder() throws Exception {
         parser = new SamlParser();
@@ -39,9 +42,22 @@ public class EidasAuthnRequestBuilder {
         }};
     }
 
-    public AuthnRequest build() throws TransformerException {
+    public AuthnRequest build() throws TransformerException, SignatureException, MarshallingException {
         String authnRequestString = XmlHelpers.serializeDomElementToString(authnRequestDocument.getDocumentElement());
-        return parser.parseSamlString(authnRequestString);
+        AuthnRequest authnRequest = parser.parseSamlString(authnRequestString);
+        if (this.signingCredential != null) {
+            SignatureBuilder signatureBuilder = SignatureBuilder
+                    .aSignature()
+                    .withSignatureAlgorithm(new SignatureRSASHA256())
+                    .withSigningCredential(this.signingCredential);
+            authnRequest.setSignature(signatureBuilder.build());
+            XMLObjectProviderRegistrySupport
+                    .getMarshallerFactory()
+                    .getMarshaller(authnRequest)
+                    .marshall(authnRequest);
+            Signer.signObject(authnRequest.getSignature());
+        }
+        return authnRequest;
     }
 
     public EidasAuthnRequestBuilder withSpType(String spType) throws XPathExpressionException {
@@ -167,6 +183,11 @@ public class EidasAuthnRequestBuilder {
 
     public EidasAuthnRequestBuilder withoutRequestedAttributes() throws XPathExpressionException {
         removeNode("//eidas:RequestedAttributes");
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withSigningCredential(Credential credential) {
+        this.signingCredential = credential;
         return this;
     }
 
