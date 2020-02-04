@@ -16,17 +16,12 @@ logging:
   appenders:
     - type: ${LOGGING_APPENDER:-logstash-console}
 
-connectorMetadataConfiguration:
-  url: ${CONNECTOR_NODE_METADATA_URL:-https://DefaultNotUsed}
-  expectedEntityId: ${CONNECTOR_NODE_ENTITY_ID:-DefaultNotUsed}
-  jerseyClientName: connector-metadata-client
-  maxRefreshDelay: ${METADATA_REFRESH_DELAY:-600000}
-  trustStore:
-    type: ${TRUSTSTORE_TYPES:-encoded}
-    store: ${CONNECTOR_NODE_METADATA_TRUSTSTORE:-DefaultNotUsed}
-    password: ${CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD:-marshmallow}
+metatronUri: ${METATRON_URL:-https://DefaultNotUsed}
+
+url: http://foo.com
 
 replayChecker:
   redisUrl: ${REDIS_SERVER_URI:-https://DefaultNotUsed}
 
 proxyNodeAuthnRequestUrl: ${PROXY_NODE_AUTHN_REQUEST_ENDPOINT:-DefaultNotUsed}
+

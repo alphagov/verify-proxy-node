@@ -2,10 +2,9 @@ package uk.gov.ida.notification.eidassaml.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
-import keystore.KeyStoreResource;
+import org.junit.ClassRule;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -19,9 +18,11 @@ import java.util.Base64;
 
 public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
-    private static final KeyStoreResource METADATA_TRUSTSTORE = createMetadataTruststore();
     protected static final SamlObjectSigner SAML_OBJECT_SIGNER = createSamlObjectSigner();
     private static final SamlObjectMarshaller SAML_OBJECT_MARSHALLER = new SamlObjectMarshaller();
+
+    @ClassRule
+    public static final DropwizardClientRule metatronService = createInitialisedClientRule(new TestMetatronResource());
 
     protected static Response postEidasAuthnRequest(EidasSamlParserAppRule eidasSamlParserAppRule, AuthnRequest authnRequest) throws URISyntaxException {
         return eidasSamlParserAppRule
@@ -47,15 +48,11 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
         final String connectorMetadataUrl = metadataClientRule.baseUri() + "/connector-node/Metadata";
         return new EidasSamlParserAppRule(
                 ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
-                ConfigOverride.config("connectorMetadataConfiguration.url", connectorMetadataUrl),
-                ConfigOverride.config("connectorMetadataConfiguration.expectedEntityId", TestMetadataResource.CONNECTOR_ENTITY_ID),
-                ConfigOverride.config("connectorMetadataConfiguration.trustStore.type", "file"),
-                ConfigOverride.config("connectorMetadataConfiguration.trustStore.store", METADATA_TRUSTSTORE.getAbsolutePath()),
-                ConfigOverride.config("connectorMetadataConfiguration.trustStore.password", METADATA_TRUSTSTORE.getPassword())
-        ) {
+                ConfigOverride.config("metatronUri", metatronService.baseUri().toString())
+        )
+        {
             @Override
             protected void before() {
-                waitForMetadata(connectorMetadataUrl);
                 super.before();
             }
         };

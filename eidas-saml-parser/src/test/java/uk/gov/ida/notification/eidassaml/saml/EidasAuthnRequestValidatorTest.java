@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.eidassaml.saml;
 
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -10,9 +11,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import se.litsec.eidas.opensaml.ext.RequestedAttributes;
 import se.litsec.eidas.opensaml.ext.SPType;
 import se.litsec.eidas.opensaml.ext.SPTypeEnumeration;
@@ -115,19 +119,19 @@ public class EidasAuthnRequestValidatorTest {
     }
 
     @Test
-    public void shouldNotThrowIfAuthRequestHasIsPassiveFlagMissing() throws TransformerException, XPathExpressionException {
+    public void shouldNotThrowIfAuthRequestHasIsPassiveFlagMissing() throws TransformerException, XPathExpressionException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         AuthnRequest request = eidasAuthnRequestBuilder.withoutIsPassive().build();
         eidasAuthnRequestValidator.validate(request);
     }
 
     @Test
-    public void shouldNotThrowIfAuthRequestHasIsPassiveFlagSetToFalse() throws TransformerException, XPathExpressionException {
+    public void shouldNotThrowIfAuthRequestHasIsPassiveFlagSetToFalse() throws TransformerException, XPathExpressionException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         AuthnRequest request = eidasAuthnRequestBuilder.withIsPassive(false).build();
         eidasAuthnRequestValidator.validate(request);
     }
 
     @Test
-    public void shouldThrowIfAuthRequestHasIsPassiveFlagSetToTrue() throws TransformerException, XPathExpressionException {
+    public void shouldThrowIfAuthRequestHasIsPassiveFlagSetToTrue() throws TransformerException, XPathExpressionException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Request should not require zero user interaction (isPassive should be missing or false)");
 
@@ -136,13 +140,13 @@ public class EidasAuthnRequestValidatorTest {
     }
 
     @Test
-    public void shouldNotThrowIfAuthRequestHasForceAuthSetToTrue() throws TransformerException, XPathExpressionException {
+    public void shouldNotThrowIfAuthRequestHasForceAuthSetToTrue() throws TransformerException, XPathExpressionException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         AuthnRequest request = eidasAuthnRequestBuilder.withForceAuthn(true).build();
         eidasAuthnRequestValidator.validate(request);
     }
 
     @Test
-    public void shouldNotThrowIfAuthRequestHasForceAuthSetToFalse() throws TransformerException, XPathExpressionException {
+    public void shouldNotThrowIfAuthRequestHasForceAuthSetToFalse() throws TransformerException, XPathExpressionException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Request should require fresh authentication (forceAuthn should be true)");
 
@@ -151,7 +155,7 @@ public class EidasAuthnRequestValidatorTest {
     }
 
     @Test
-    public void shouldThrowIfAuthRequestHasForceAuthMissing() throws TransformerException, XPathExpressionException {
+    public void shouldThrowIfAuthRequestHasForceAuthMissing() throws TransformerException, XPathExpressionException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Request should require fresh authentication (forceAuthn should be true)");
 
@@ -160,7 +164,7 @@ public class EidasAuthnRequestValidatorTest {
     }
 
     @Test
-    public void shouldThrowIfAuthnRequestHasProtocolBinding() throws XPathExpressionException, TransformerException {
+    public void shouldThrowIfAuthnRequestHasProtocolBinding() throws XPathExpressionException, TransformerException, SignatureException, MarshallingException, XMLParserException, UnmarshallingException {
         expectedException.expect(InvalidAuthnRequestException.class);
         expectedException.expectMessage("Bad Authn Request from Connector Node: Request should not specify protocol binding");
 
