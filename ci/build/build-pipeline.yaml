@@ -106,13 +106,6 @@ spec:
         <<: *github_source
         tag_filter: ^v2\.\d+$
 
-    - name: alpine-image
-      type: registry-image
-      icon: toolbox
-      source:
-        repository: alpine
-        tag: 3
-
     - name: chart
       type: registry-image
       icon: file-document
@@ -489,9 +482,6 @@ spec:
             trigger: true
           - get: cloudhsm-client-image
             passed: [build-cloudhsm]
-          - get: alpine-image
-            params:
-              format: oci
           - get: release
 
       - task: generate-chart-values
@@ -585,9 +575,8 @@ spec:
           - name: src
           - name: chart-version
           - name: chart-values
-          - name: alpine-image
           outputs:
-          - name: alpine-image
+          - name: proxy-node-chart-package
           params:
             CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
           run:
@@ -618,11 +607,36 @@ spec:
                 "./${CHART_NAME}"
               cp chart-version/tag proxy-node-chart-package/
               cp ./src/.git/ref proxy-node-chart-package/
-              tar -rf alpine-image/image.tar proxy-node-chart-package/
+
+      - task: build-chart-package-image
+        platform: linux
+        image_resource:
+          type: registry-image
+          source:
+            repository: vito/oci-build-task
+          version:
+            digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+        caches:
+        - path: cache
+        inputs:
+        - name: proxy-node-chart-package
+        outputs:
+        - name: chart-image-file
+          path: image
+        run:
+          path: /bin/ash
+          args:
+          - -euc
+          - |
+            cat <<<EOF > ./Dockerfile
+            FROM alpine:3
+            COPY proxy-node-chart-package /
+            EOF
+            CONTEXT=. build
 
       - put: chart
         params:
-          image: alpine-image/image.tar
+          image: chart-image-file/image.tar
           additional_tags: src/.git/short_ref
 
     - name: delete
