@@ -589,30 +589,31 @@ spec:
               cp chart-version/tag proxy-node-chart-package/
 
       - task: build-chart-package-image
-        platform: linux
-        image_resource:
-          type: registry-image
-          source:
-            repository: vito/oci-build-task
-          version:
-            digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
-        caches:
-        - path: cache
-        inputs:
-        - name: proxy-node-chart-package
-        outputs:
-        - name: chart-image-file
-          path: image
-        run:
-          path: /bin/ash
-          args:
-          - -euc
-          - |
-            cat <<<EOF > ./Dockerfile
-            FROM alpine:3
-            COPY proxy-node-chart-package /
-            EOF
-            CONTEXT=. build
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: vito/oci-build-task
+            version:
+              digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
+          caches:
+          - path: cache
+          inputs:
+          - name: proxy-node-chart-package
+          outputs:
+          - name: chart-image-file
+            path: image
+          run:
+            path: /bin/ash
+            args:
+            - -euc
+            - |
+              cat <<<EOF > ./Dockerfile
+              FROM alpine:3
+              COPY proxy-node-chart-package /
+              EOF
+              CONTEXT=. build
 
       - put: chart
         params:
