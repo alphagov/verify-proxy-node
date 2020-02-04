@@ -257,7 +257,6 @@ spec:
       - get: cloudhsm-config
         trigger: true
       - in_parallel:
-          limit: 3
           fail_fast: true
           steps:
           - do:
@@ -348,7 +347,6 @@ spec:
                 ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
       - in_parallel:
-          limit: 3
           fail_fast: true
           steps:
           - do:
