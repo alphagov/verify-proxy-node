@@ -103,7 +103,7 @@ spec:
         password: ((github.api-token))
 
     - name: alpine-image
-      type: docker-image
+      type: registry-image
       icon: toolbox
       source:
         repository: alpine

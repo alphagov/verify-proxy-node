@@ -107,7 +107,7 @@ spec:
         tag_filter: ^v2\.\d+$
 
     - name: alpine-image
-      type: docker-image
+      type: registry-image
       icon: toolbox
       source:
         repository: alpine
