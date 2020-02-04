@@ -611,7 +611,7 @@ spec:
             - -euc
             - |
               echo -e "FROM alpine:3" > ./Dockerfile
-              echo -e "COPY proxy-node-chart-package /" >> ./Dockerfile
+              echo -e "COPY proxy-node-chart-package /proxy-node-chart-package/" >> ./Dockerfile
               CONTEXT=. build
 
       - put: chart
