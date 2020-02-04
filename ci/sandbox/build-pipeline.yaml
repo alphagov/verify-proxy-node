@@ -459,30 +459,23 @@ spec:
           - get: gateway-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: translator-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: parser-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: metatron-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: stub-connector-image
             passed: [build-proxy-node]
             trigger: true
-            params: {skip_download: true}
           - get: verify-service-provider-image
             passed: [build-vsp-image]
             trigger: true
-            params: {skip_download: true}
           - get: cloudhsm-client-image
             passed: [build-cloudhsm]
-            params: {skip_download: true}
           - get: alpine-image
             params: {rootfs: true}
 
