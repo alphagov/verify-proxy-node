@@ -27,7 +27,6 @@ import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
 import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
 
 import javax.ws.rs.client.Client;
-import javax.xml.namespace.QName;
 import java.net.URI;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 public class MetadataResolverService {
 
     protected static long MIN_REFRESH_DELAY_MS = 60_000;
@@ -59,7 +57,7 @@ public class MetadataResolverService {
     }
 
     public CountryMetadataResponse getCountryMetadataResponse(URI entityId) {
-        EidasCountryConfig countryConfig = getCountryConfig(entityId);
+        EidasCountryConfig countryConfig = getEnabledCountryConfig(entityId);
         URI location = getAssertionConsumerServiceLocation(countryConfig);
         String encryptionX509 = getCertificateAsX509(countryConfig, UsageType.ENCRYPTION);
         String signingX509 = getCertificateAsX509(countryConfig, UsageType.SIGNING);
@@ -94,7 +92,7 @@ public class MetadataResolverService {
         return resolver;
     }
 
-    private EidasCountryConfig getCountryConfig(URI entityId) {
+    private EidasCountryConfig getEnabledCountryConfig(URI entityId) {
         EidasCountryConfig eidasCountryConfig = metadataResolverMap.keySet().stream()
                 .filter(c -> entityId.equals(c.getEntityId()))
                 .findFirst()
@@ -105,12 +103,8 @@ public class MetadataResolverService {
         return eidasCountryConfig;
     }
 
-    private MetadataResolver getMetadataResolver(EidasCountryConfig eidasCountryConfig) {
-        return metadataResolverMap.get(eidasCountryConfig);
-    }
-
     private String getCertificateAsX509(EidasCountryConfig countryConfig, UsageType usageType) {
-        X509Credential credential = (X509Credential) getCredential(usageType, countryConfig, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+        X509Credential credential = (X509Credential) getCredential(usageType, countryConfig);
         try {
             return Base64.getEncoder().encodeToString(credential.getEntityCertificate().getEncoded());
         } catch (CertificateEncodingException e) {
@@ -118,14 +112,14 @@ public class MetadataResolverService {
         }
     }
 
-    private Credential getCredential(UsageType usageType, EidasCountryConfig eidasCountryConfig, QName descriptorQname) {
+    private Credential getCredential(UsageType usageType, EidasCountryConfig eidasCountryConfig) {
         String entityId = eidasCountryConfig.getEntityId().toString();
         CriteriaSet criteria = new CriteriaSet();
         criteria.add(new EntityIdCriterion(entityId));
-        criteria.add(new EntityRoleCriterion(descriptorQname));
+        criteria.add(new EntityRoleCriterion(SPSSODescriptor.DEFAULT_ELEMENT_NAME));
         criteria.add(new UsageCriterion(usageType));
         try {
-            MetadataResolver metadataResolver = getMetadataResolver(eidasCountryConfig);
+            MetadataResolver metadataResolver = metadataResolverMap.get(eidasCountryConfig);
             MetadataCredentialResolver metadataCredentialResolver = credentialResolverFactory.create(metadataResolver);
             Credential credential = metadataCredentialResolver.resolveSingle(criteria);
             if (credential == null) {
@@ -138,7 +132,7 @@ public class MetadataResolverService {
     }
 
     private URI getAssertionConsumerServiceLocation(EidasCountryConfig countryConfig) {
-        MetadataResolver metadataResolver = getMetadataResolver(countryConfig);
+        MetadataResolver metadataResolver = metadataResolverMap.get(countryConfig);
         String entityId = countryConfig.getEntityId().toString();
         CriteriaSet criteria = new CriteriaSet(new EntityIdCriterion(entityId));
         EntityDescriptor entityDescriptor;
