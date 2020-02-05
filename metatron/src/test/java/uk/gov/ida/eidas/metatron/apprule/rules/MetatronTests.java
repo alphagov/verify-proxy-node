@@ -1,7 +1,6 @@
 package uk.gov.ida.eidas.metatron.apprule.rules;
 
 import io.dropwizard.client.JerseyClientBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientProperties;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -13,6 +12,7 @@ import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.xmlsec.signature.Signature;
+import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
 import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.saml.core.test.OpenSAMLRunner;
@@ -30,6 +30,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,9 +84,8 @@ public class MetatronTests {
     public void firstValidResolvesOk() {
         String entityId = getEntityId(TestMetadataResource.VALID_ONE);
         Response response = getClient().target(getUriString(entityId)).request().get();
-
-        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         CountryMetadataResponse actual = response.readEntity(CountryMetadataResponse.class);
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(actual.getCountryCode()).isEqualTo("VO");
         assertThat(actual.getDestination()).isEqualTo(URI.create("http://foo.com/bar"));
         assertThat(actual.getEntityId()).isEqualTo(entityId);
@@ -97,9 +97,8 @@ public class MetatronTests {
     public void secondValidResolvesOk() {
         String entityId = getEntityId(TestMetadataResource.VALID_TWO);
         Response response = getClient().target(getUriString(entityId)).request().get();
-
-        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         CountryMetadataResponse actual = response.readEntity(CountryMetadataResponse.class);
+        assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(actual.getCountryCode()).isEqualTo("VT");
         assertThat(actual.getDestination()).isEqualTo(URI.create("http://foo.com/bar"));
         assertThat(actual.getEntityId()).isEqualTo(entityId);
@@ -111,7 +110,6 @@ public class MetatronTests {
     public void expiredReturns500() {
         String entityId = getEntityId(TestMetadataResource.EXPIRED);
         Response response = getClient().target(getUriString(entityId)).request().get();
-
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
@@ -119,7 +117,6 @@ public class MetatronTests {
     public void untrustedReturns500() {
         String entityId = getEntityId(TestMetadataResource.UNTRUSTED);
         Response response = getClient().target(getUriString(entityId)).request().get();
-
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
@@ -127,12 +124,11 @@ public class MetatronTests {
     public void unsignedReturns500() {
         String entityId = getEntityId(TestMetadataResource.UNSIGNED);
         Response response = getClient().target(getUriString(entityId)).request().get();
-
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
     @Test
-    public void metadataMarkedDisabledInConfigIsBadRequest() {
+    public void metadataMarkedDisabledInConfigIsBadRequestFromClient() {
         String entityId = getEntityId(TestMetadataResource.DISABLED);
         Response response = getClient().target(getUriString(entityId)).request().get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.BAD_REQUEST);
@@ -140,7 +136,7 @@ public class MetatronTests {
     }
 
     @Test
-    public void metadataThrowsError() {
+    public void metadataEndpointThrows500Error() {
         String entityId = getEntityId(TestMetadataResource.THROWS_ERROR);
         Response response = getClient().target(getUriString(entityId)).request().get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR);
@@ -148,7 +144,7 @@ public class MetatronTests {
     }
 
     @Test
-    public void entityNotRegistered() {
+    public void entityIdNotRegistered() {
         String entityId = getEntityId(TestMetadataResource.DOES_NOT_EXIST);
         Response response = getClient().target(getUriString(entityId)).request().get();
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.BAD_REQUEST);
@@ -173,14 +169,17 @@ public class MetatronTests {
         return client;
     }
 
-    private void assertThatCertsMatch(String samlEncryptionCertX509, String testRpPublicEncryptionCert) {
-        assertThat(StringUtils.right(samlEncryptionCertX509, 10)).isEqualTo(StringUtils.right(testRpPublicEncryptionCert, 10));
-    }
-
     private void assertResponseIsAnErrorMap(Response response) {
         Map map = response.readEntity(Map.class);
         assertThat(map.containsKey("code")).isTrue();
         assertThat(map.containsKey("message")).isTrue();
+    }
+
+    private void assertThatCertsMatch(String actualCert, String expectedCert) {
+        X509CertificateFactory factory = new X509CertificateFactory();
+        X509Certificate actual = factory.createCertificate(actualCert);
+        X509Certificate expected = factory.createCertificate(expectedCert);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Path("/")
