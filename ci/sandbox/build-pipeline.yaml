@@ -591,6 +591,7 @@ spec:
               cp chart-version/tag proxy-node-chart-package/
 
       - task: build-chart-package-image
+        privileged: true
         config:
           platform: linux
           image_resource:
