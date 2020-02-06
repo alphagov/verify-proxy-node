@@ -20,4 +20,6 @@ spec:
           host: {{ .Release.Name }}-connector
           port:
             number: 80
+  exportTo:
+  - "."
 {{- end -}}

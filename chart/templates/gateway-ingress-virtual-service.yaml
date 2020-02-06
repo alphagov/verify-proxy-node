@@ -19,3 +19,5 @@ spec:
           host: {{ .Release.Name }}-gateway
           port:
             number: 80
+  exportTo:
+  - "."
