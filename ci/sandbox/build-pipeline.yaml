@@ -436,6 +436,7 @@ spec:
                 - name: src
                 outputs:
                 - name: tests-image-file
+                  path: image
             - put: tests-image
               params:
                 <<: *image_put_params
