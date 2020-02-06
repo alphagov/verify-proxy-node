@@ -81,3 +81,4 @@ Snyk is run by our Travis builds and does two things, test and monitor. We use t
 ## License
 
 [MIT](https://github.com/alphagov/verify-proxy-node/blob/master/LICENCE)
+
