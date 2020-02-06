@@ -419,6 +419,7 @@ spec:
                 - name: src
                 outputs:
                 - name: stub-connector-image-file
+                  path: image
             - put: stub-connector-image
               params:
                 <<: *image_put_params
