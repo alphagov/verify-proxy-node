@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.security.KeyStore;
-import java.util.Objects;
 import java.util.Optional;
 
 public class EidasCountryConfig {
@@ -68,20 +67,4 @@ public class EidasCountryConfig {
         return enabled;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        EidasCountryConfig that = (EidasCountryConfig) o;
-        return getConnectorMetadata().equals(that.getConnectorMetadata());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getConnectorMetadata());
-    }
 }
