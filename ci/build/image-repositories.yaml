@@ -1,0 +1,81 @@
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: chart
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: tests
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: gateway
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: translator
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: parser
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: stub-connector
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: cloudhsm-client
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: cloudhsm-jce
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+---
+apiVersion: storage.govsvc.uk/v1beta1
+kind: ImageRepository
+metadata:
+  name: verify-service-provider
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
