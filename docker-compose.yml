@@ -106,3 +106,23 @@ services:
       - "50402:50402"
     volumes:
       - ./local-startup/vsp/hub-metadata.truststore:/app/hub-metadata.truststore
+
+  metatron:
+    image: eidas/metatron
+    build:
+      context: .
+      dockerfile: local-startup/Dockerfile
+      args:
+        component: metatron
+        USE_LOCAL_BUILD: ${USE_LOCAL_BUILD:-true}
+        VERIFY_USE_PUBLIC_BINARIES: ${VERIFY_USE_PUBLIC_BINARIES:-false}
+    depends_on:
+      - stub-connector
+    env_file: ./local-startup/docker.env
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6672"
+    ports:
+      - "6670:6670"
+      - "6672:6672"
+    volumes:
+      - ./local-startup/metadata:/app/metadata
