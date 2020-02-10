@@ -19,3 +19,5 @@ spec:
           host: {{ .Release.Name }}-metatron
           port:
             number: 80
+  exportTo:
+  - "."
