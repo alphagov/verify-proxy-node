@@ -59,6 +59,11 @@ spec:
         repository: ((concourse.github-resource-image))
         tag: ((concourse.github-resource-tag))
 
+    - name: slack-notification
+      type: docker-image
+      source:
+        repository: cfcommunity/slack-notification-resource
+
     resources:
 
     - name: src
@@ -185,6 +190,11 @@ spec:
         start: 3:00 AM
         stop: 4:00 AM
 
+    - name: slack-notify
+      type: slack-notification
+      source:
+        url: ((slack-notification.url)) # slack webhook url derived from a sealed secret
+
     groups:
       - name: deployment
         jobs: [build-vsp-image, build-proxy-node, package, test, release, delete]
@@ -200,6 +210,12 @@ spec:
     - name: build-vsp-image
       serial: true
       serial_groups: [build-vsp]
+      on_failure: &slack-on-failure
+        put: slack-notify
+        params:
+          text: |
+            Proxy Node `$BUILD_PIPELINE_NAME` pipeline failed on the `$BUILD_JOB_NAME` step.
+            See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
       plan:
       - in_parallel:
           steps:
@@ -249,6 +265,7 @@ spec:
     - name: build-cloudhsm
       serial: true
       serial_groups: [build-proxy-node]
+      on_failure: *slack-on-failure
       plan:
       - get: cloudhsm-config
         trigger: true
@@ -291,6 +308,7 @@ spec:
     - name: build-proxy-node
       serial: true
       serial_groups: [build-proxy-node]
+      on_failure: *slack-on-failure
       plan:
       - in_parallel:
           steps:
@@ -456,6 +474,7 @@ spec:
     - name: package
       serial: true
       serial_groups: [package, build-vsp, build-proxy-node]
+      on_failure: *slack-on-failure
       plan:
       - in_parallel:
           steps:
@@ -642,6 +661,7 @@ spec:
     - name: delete
       serial: true
       serial_groups: [package]
+      on_failure: *slack-on-failure
       plan:
       - get: nightly
         trigger: true
@@ -682,6 +702,7 @@ spec:
     - name: test
       serial: true
       serial_groups: [package]
+      on_failure: *slack-on-failure
       plan:
 
       - in_parallel:
@@ -853,6 +874,7 @@ spec:
     - name: release
       serial: true
       serial_groups: [package]
+      on_failure: *slack-on-failure
       plan:
 
       - get: chart
