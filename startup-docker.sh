@@ -25,7 +25,7 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:6610/Con
 done
 echo
 
-echo "Starting eIDAS SAML Parser..."
-docker-compose up -d eidas-saml-parser
+echo "Starting eIDAS SAML Parser and Metatron..."
+docker-compose up -d eidas-saml-parser metatron
 
 echo "Go to http://localhost:6610/ to initiate a journey"

@@ -1,6 +1,6 @@
 # Base builder image
 
-FROM gradle:5.5.1-jdk11 AS build
+FROM gradle:6.0.1-jdk11 AS build
 WORKDIR /app
 
 ARG component
