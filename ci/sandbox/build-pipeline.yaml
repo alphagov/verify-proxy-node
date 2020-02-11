@@ -561,7 +561,7 @@ spec:
           outputs:
           - name: proxy-node-chart-package
           params:
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PRIVATE_KEY: ((artefact-signing-key.privateKey))
           run:
             path: /bin/bash
             args:
@@ -709,7 +709,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: test
             CLOUDHSM_IP: ((cluster.cloudHsmIp))
@@ -719,10 +719,9 @@ spec:
             - -euc
             - |
               echo "Preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
+              echo "${CLUSTER_PUBLIC_KEY}" > key
               gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              gpg --export > ~/.gnupg/pubring.gpg
               echo "Verifying package signature..."
               helm verify ./chart/*.tgz
               echo "OK!"
