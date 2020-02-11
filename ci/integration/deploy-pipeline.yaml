@@ -73,7 +73,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: dk-integration
             CONNECTOR_NODE_NATIONALITY_CODE: DK
@@ -88,10 +88,9 @@ spec:
             - -euc
             - |
               echo "preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
+              echo "${CLUSTER_PUBLIC_KEY}" > key
               gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              gpg --export > ~/.gnupg/pubring.gpg
               echo "verifying package"
               helm verify ./release/*.tgz
               echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -166,7 +165,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: nl-integration
             CONNECTOR_NODE_NATIONALITY_CODE: NL
@@ -181,10 +180,9 @@ spec:
             - -euc
             - |
               echo "preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
+              echo "${CLUSTER_PUBLIC_KEY}" > key
               gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              gpg --export > ~/.gnupg/pubring.gpg
               echo "verifying package"
               helm verify ./release/*.tgz
               echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -258,7 +256,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: se-integration
             CONNECTOR_NODE_NATIONALITY_CODE: SE
@@ -273,10 +271,9 @@ spec:
             - -euc
             - |
               echo "preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
+              echo "${CLUSTER_PUBLIC_KEY}" > key
               gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              gpg --export > ~/.gnupg/pubring.gpg
               echo "verifying package"
               helm verify ./release/*.tgz
               echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -350,7 +347,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: cz-integration
             CONNECTOR_NODE_NATIONALITY_CODE: CZ
@@ -365,10 +362,9 @@ spec:
             - -euc
             - |
               echo "preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
+              echo "${CLUSTER_PUBLIC_KEY}" > key
               gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              gpg --export > ~/.gnupg/pubring.gpg
               echo "verifying package"
               helm verify ./release/*.tgz
               echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -442,7 +438,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: it-integration
             CONNECTOR_NODE_NATIONALITY_CODE: IT
@@ -457,10 +453,9 @@ spec:
             - -euc
             - |
               echo "preparing keyring..."
-              echo "${CLUSTER_PRIVATE_KEY}" > key
+              echo "${CLUSTER_PUBLIC_KEY}" > key
               gpg --import key
-              gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-              KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+              gpg --export > ~/.gnupg/pubring.gpg
               echo "verifying package"
               helm verify ./release/*.tgz
               echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -534,7 +529,7 @@ spec:
             params:
               CLUSTER_NAME: ((cluster.name))
               CLUSTER_DOMAIN: ((cluster.domain))
-              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
               RELEASE_NAMESPACE: ((namespace-deployer.namespace))
               RELEASE_NAME: test-integration
               CLOUDHSM_IP: ((cluster.cloudHsmIp))
@@ -544,10 +539,9 @@ spec:
                 - -euc
                 - |
                   echo "preparing keyring..."
-                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  echo "${CLUSTER_PUBLIC_KEY}" > key
                   gpg --import key
-                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  gpg --export > ~/.gnupg/pubring.gpg
                   echo "verifying package"
                   helm verify ./release/*.tgz
                   echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -619,7 +613,7 @@ spec:
             params:
               CLUSTER_NAME: ((cluster.name))
               CLUSTER_DOMAIN: ((cluster.domain))
-              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
               RELEASE_NAMESPACE: ((namespace-deployer.namespace))
               RELEASE_NAME: mt-integration
               CONNECTOR_NODE_NATIONALITY_CODE: MT
@@ -634,10 +628,9 @@ spec:
                 - -euc
                 - |
                   echo "preparing keyring..."
-                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  echo "${CLUSTER_PUBLIC_KEY}" > key
                   gpg --import key
-                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  gpg --export > ~/.gnupg/pubring.gpg
                   echo "verifying package"
                   helm verify ./release/*.tgz
                   echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
