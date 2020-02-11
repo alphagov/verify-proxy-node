@@ -561,7 +561,7 @@ spec:
           outputs:
           - name: proxy-node-chart-package
           params:
-            CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+            CLUSTER_PRIVATE_KEY: ((artefact-signing-key.privateKey))
           run:
             path: /bin/bash
             args:
