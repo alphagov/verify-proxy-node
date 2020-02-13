@@ -85,6 +85,7 @@ public class TestRedisSessions {
                 "anEidasRequestId",
                 "anEidasDestination",
                 "anEidasConnectorPublicKey",
-                "anEidasRelayState");
+                "anEidasRelayState",
+                "eidasIssuer");
     }
 }

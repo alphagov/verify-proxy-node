@@ -17,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.net.URI;
 import java.util.logging.Level;
 
 import static java.text.MessageFormat.format;
@@ -63,7 +64,8 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
                 new SamlFailureResponseGenerationRequest(
                         exception.getResponseStatus(),
                         sessionData.getEidasRequestId(),
-                        sessionData.getEidasDestination()
+                        sessionData.getEidasDestination(),
+                        URI.create(sessionData.getEidasIssuer())
                 ));
 
         final SamlFormView samlFormView = samlFormViewBuilder.buildResponse(

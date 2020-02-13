@@ -5,6 +5,7 @@ import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
+import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -47,7 +48,7 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
     protected static EidasSamlParserAppRule createEidasSamlParserRule(DropwizardClientRule metadataClientRule) {
         return new EidasSamlParserAppRule(
                 ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
-                ConfigOverride.config("metatronUri", metatronService.baseUri().toString() + "/metadata")
+                ConfigOverride.config("metatronUri", metatronService.baseUri().toString())
         )
         {
             @Override

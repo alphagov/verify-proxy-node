@@ -82,6 +82,7 @@ public class TranslatorProxyTest {
                 "eidas_request_id",
                 "level_of_assurance",
                 UriBuilder.fromUri("http://connector.node").build(),
+                UriBuilder.fromUri("http://connector.node/ConnectorMetadata").build(),
                 "connector_encryption_certificate"
         );
 
@@ -109,6 +110,7 @@ public class TranslatorProxyTest {
                 "eidas_request_id",
                 "level_of_assurance",
                 UriBuilder.fromUri("http://connector.node").build(),
+                UriBuilder.fromUri("http://connector.node/ConnectorMetadata").build(),
                 "connector_encryption_certificate"
         );
 
@@ -135,6 +137,7 @@ public class TranslatorProxyTest {
                 "eidas_request_id",
                 "level_of_assurance",
                 UriBuilder.fromUri("http://connector.node").build(),
+                UriBuilder.fromUri("http://connector.node/ConnectorMetadata").build(),
                 "connector_encryption_certificate"
         );
 

@@ -41,19 +41,26 @@ public class GatewaySessionData {
     @JsonProperty
     private final String eidasConnectorPublicKey;
 
+    @NotNull
+    @NotEmpty
+    @JsonProperty
+    private final String eidasIssuer;
+
     @JsonCreator
     public GatewaySessionData(
         @JsonProperty("HUB_REQUEST_ID") String hubRequestId,
         @JsonProperty("EIDAS_REQUEST_ID") String eidasRequestId,
         @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
         @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
-        @JsonProperty("eidasRelayState") String eidasRelayState
+        @JsonProperty("eidasRelayState") String eidasRelayState,
+        @JsonProperty("eidasIssuer") String eidasIssuer
     ) {
        this.hubRequestId = hubRequestId;
        this.eidasRequestId = eidasRequestId;
        this.eidasDestination = eidasDestination;
        this.eidasConnectorPublicKey = eidasConnectorPublicKey;
        this.eidasRelayState = eidasRelayState;
+       this.eidasIssuer = eidasIssuer;
     }
 
     public GatewaySessionData(
@@ -66,6 +73,7 @@ public class GatewaySessionData {
         this.eidasDestination = eidasSamlParserResponse.getDestination();
         this.eidasRelayState = eidasRelayState;
         this.eidasConnectorPublicKey = eidasSamlParserResponse.getConnectorEncryptionPublicCertificate();
+        this.eidasIssuer = eidasSamlParserResponse.getIssuer();
         validate();
     }
 
@@ -96,5 +104,10 @@ public class GatewaySessionData {
 
     public String getEidasRelayState() { return this.eidasRelayState; }
 
-    public String getEidasConnectorPublicKey() { return this.eidasConnectorPublicKey; }
+    public String getEidasConnectorPublicKey() {
+        return this.eidasConnectorPublicKey; }
+
+    public String getEidasIssuer() {
+        return eidasIssuer;
+    }
 }

@@ -2,6 +2,8 @@ package uk.gov.ida.notification.translator;
 
 import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -10,7 +12,11 @@ import io.dropwizard.views.ViewBundle;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+
+import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
+import uk.gov.ida.jerseyclient.ErrorHandlingClient;
+import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.exceptions.mappers.ApplicationExceptionMapper;
@@ -23,12 +29,16 @@ import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
+import uk.gov.ida.notification.shared.proxy.MetatronProxy;
+import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResource;
 import uk.gov.ida.notification.translator.saml.EidasFailureResponseGenerator;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
+
+import javax.ws.rs.client.Client;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
 
@@ -86,7 +96,6 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         registerExceptionMappers(environment);
         registerResources(configuration, environment);
         registerInjections(environment);
-
     }
 
     private void registerExceptionMappers(Environment environment) {
@@ -97,24 +106,24 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
-        final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration);
+        final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration, environment);
         final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
         final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy);
 
         environment.jersey().register(hubResponseTranslatorResource);
     }
 
-    private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration) {
+    private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration, Environment environment) {
+
+        MetatronProxy metatronProxy = buildMetatronProxy(configuration, environment);
+
         final HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 EidasResponseBuilder::instance,
-                configuration.getConnectorNodeIssuerId(),
-                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString(),
-                configuration.getConnectorNodeNationalityCode()
+                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
 
         final EidasFailureResponseGenerator failureResponseGenerator = new EidasFailureResponseGenerator(
                 EidasResponseBuilder::instance,
-                configuration.getConnectorNodeIssuerId(),
                 configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
         );
 
@@ -123,7 +132,13 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                                                                        credentialConfiguration.getAlgorithm(),
                                                                        credentialConfiguration.getKeyHandle());
 
-        return new EidasResponseGenerator(hubResponseTranslator, failureResponseGenerator, samlObjectSigner);
+        return new EidasResponseGenerator(
+                hubResponseTranslator,
+                failureResponseGenerator,
+                samlObjectSigner,
+                metatronProxy,
+                new X509CertificateFactory()
+        );
     }
 
     private void registerInjections(Environment environment) {
@@ -133,5 +148,16 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
                 bindAsContract(IstioHeaderStorage.class);
             }
         });
+    }
+
+    public MetatronProxy buildMetatronProxy(TranslatorConfiguration configuration, Environment environment) {
+        JerseyClientConfiguration jerseyConfig = new JerseyClientConfiguration();
+        Client client = new JerseyClientBuilder(environment).using(jerseyConfig).build("metatron-client");
+        ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
+                new ErrorHandlingClient(client),
+                new JsonResponseProcessor(environment.getObjectMapper()),
+                new IstioHeaderStorage()
+        );
+        return new MetatronProxy(jsonClient, configuration.getMetatronUri());
     }
 }

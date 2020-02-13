@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
+import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseTestAssertions;
 import uk.gov.ida.notification.helpers.BasicCredentialBuilder;
 import uk.gov.ida.notification.helpers.HubAssertionBuilder;
@@ -43,10 +44,12 @@ import uk.gov.ida.saml.security.SigningCredentialFactory;
 
 import javax.ws.rs.client.Entity;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
@@ -204,6 +207,20 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         assertThat(logEvents).filteredOn(e -> e.getMessage().equals(MESSAGE_EGRESS)).hasSize(1);
     }
 
+    @Test
+    public void failureResponseEndpointShouldReturnASamlFailureResponse() throws Exception {
+        var failureResponseGenerationRequest = new SamlFailureResponseGenerationRequest(
+                BAD_REQUEST, "this_a_badly_generated_saml_request", "http://destinationUrl", URI.create("http://entity_id")
+        );
+        var failureResponse = translatorAppRule
+                .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.GENERATE_FAILURE_RESPONSE_PATH)
+                .request()
+                .post(Entity.json(failureResponseGenerationRequest));
+        Response response = new SamlParser().parseSamlString(Base64.decodeAsString(failureResponse.readEntity(String.class)));
+        
+        assertThat(response.getStatus().getStatusCode().getValue()).isEqualTo("urn:oasis:names:tc:SAML:2.0:status:Requester");
+    }
+
     private Response extractEidasResponseFromTranslator(Response hubResponse) throws Exception {
         String translatorResponse = postHubResponseToTranslator(hubResponse).readEntity(String.class);
         return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
@@ -219,13 +236,11 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
                 STUB_COUNTRY_PUBLIC_PRIMARY_CERT
             );
 
-        return translatorAppRule
-            .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
-            .request()
-            .post(Entity.json(hubResponseTranslatorRequest));
+        return postToTranslator(hubResponseTranslatorRequest,  Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH);
     }
 
     private javax.ws.rs.core.Response postHubResponseToTranslator(Response hubResponse) throws Exception {
@@ -238,11 +253,16 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
                         URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
                         STUB_COUNTRY_PUBLIC_PRIMARY_CERT
                 );
 
+        return postToTranslator(hubResponseTranslatorRequest,  Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH);
+    }
+
+    private javax.ws.rs.core.Response postToTranslator(HubResponseTranslatorRequest hubResponseTranslatorRequest, String response_path) throws URISyntaxException {
         return translatorAppRule
-                .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
+                .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + response_path)
                 .request()
                 .post(Entity.json(hubResponseTranslatorRequest));
     }

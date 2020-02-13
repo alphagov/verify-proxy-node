@@ -70,6 +70,7 @@ public class HubResponseResource {
             sessionData.getEidasRequestId(),
             LEVEL_OF_ASSURANCE,
             UriBuilder.fromUri(sessionData.getEidasDestination()).build(),
+            UriBuilder.fromUri(sessionData.getEidasIssuer()).build(),
             sessionData.getEidasConnectorPublicKey()
         );
 
