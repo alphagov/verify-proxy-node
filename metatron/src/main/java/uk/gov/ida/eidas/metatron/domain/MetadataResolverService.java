@@ -141,7 +141,7 @@ public class MetadataResolverService {
             throw new MetatronServerException(String.format("Unable to resolve entityDescriptor with given criteria for entityId %s", entityId), e);
         }
         if (entityDescriptor == null) {
-            throw new MetatronServerException(String.format("No entityDescriptor for entityId %s"));
+            throw new MetatronServerException(String.format("No entityDescriptor for entityId %s", entityId));
         }
         SPSSODescriptor spssoDescriptor = entityDescriptor.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         return spssoDescriptor.getAssertionConsumerServices().stream()
