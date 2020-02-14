@@ -592,6 +592,94 @@ spec:
                   echo "deleting ${RELEASE_NAMESPACE} connector pod"
                   kubectl -n ${RELEASE_NAMESPACE} delete pod -l app.kubernetes.io/name=connector
 
+    - name: deploy-hmrc-integration
+      serial: true
+      plan:
+
+        - get: release
+          trigger: true
+
+        - get: daily
+          trigger: true
+
+        - task: render-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: release
+            outputs:
+              - name: manifests
+            params:
+              CLUSTER_NAME: ((cluster.name))
+              CLUSTER_DOMAIN: ((cluster.domain))
+              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: hmrc-integration
+              CLOUDHSM_IP: ((cluster.cloudHsmIp))
+              HUB_SSO_LOCATION: https://test-www.tax.service.gov.uk/uum/identity
+              HUB_METADATA_URL: https://test-www.tax.service.gov.uk/uum/metadata/
+              HUB_ENTITY_ID: https://test-www.tax.service.gov.uk/uum/metadata/
+              HUB_METADATA_TRUSTSTORE: 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
+              HUB_METADATA_TRUSTSTORE_PASSWORD: uumpassword
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "preparing keyring..."
+                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  gpg --import key
+                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
+                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  echo "verifying package"
+                  helm verify ./release/*.tgz
+                  echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                  helm template \
+                    --name "${RELEASE_NAME}" \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --set "global.cluster.name=${CLUSTER_NAME}" \
+                    --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                    --set "stubConnector.enabled=true" \
+                    --output-dir "./manifests/" \
+                    ./release/*.tgz
+
+        - task: deploy-manifests
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: hmrc-integration
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                  kapp deploy \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --allow-ns "${RELEASE_NAMESPACE}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}" \
+                    --diff-changes \
+                    -f ./manifests/
+
     - name: deploy-mt-integration
       serial: true
       plan:
