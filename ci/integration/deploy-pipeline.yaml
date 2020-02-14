@@ -613,7 +613,7 @@ spec:
             params:
               CLUSTER_NAME: ((cluster.name))
               CLUSTER_DOMAIN: ((cluster.domain))
-              CLUSTER_PRIVATE_KEY: ((cluster.privateKey))
+              CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
               RELEASE_NAMESPACE: ((namespace-deployer.namespace))
               RELEASE_NAME: hmrc-integration
               CLOUDHSM_IP: ((cluster.cloudHsmIp))
