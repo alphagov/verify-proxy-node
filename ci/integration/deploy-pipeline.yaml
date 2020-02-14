@@ -771,3 +771,4 @@ spec:
                     --app "${RELEASE_NAME}-${APP_NAME}" \
                     --diff-changes \
                     -f ./manifests/
+
