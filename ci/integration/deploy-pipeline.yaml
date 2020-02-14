@@ -628,10 +628,9 @@ spec:
                 - -euc
                 - |
                   echo "preparing keyring..."
-                  echo "${CLUSTER_PRIVATE_KEY}" > key
+                  echo "${CLUSTER_PUBLIC_KEY}" > key
                   gpg --import key
-                  gpg --export-secret-keys > ~/.gnupg/pubring.gpg
-                  KEY_ID="$(gpg --list-secret-keys --with-colons  | awk -F: '/uid:/ {print $10}' | head -n1)"
+                  gpg --export > ~/.gnupg/pubring.gpg
                   echo "verifying package"
                   helm verify ./release/*.tgz
                   echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
@@ -679,6 +678,8 @@ spec:
                     --app "${RELEASE_NAME}-${APP_NAME}" \
                     --diff-changes \
                     -f ./manifests/
+                  echo "deleting ${RELEASE_NAMESPACE} connector pod"
+                  kubectl -n ${RELEASE_NAMESPACE} delete pod -l app.kubernetes.io/name=connector
 
     - name: deploy-mt-integration
       serial: true
