@@ -1,4 +1,3 @@
----
 apiVersion: concourse.govsvc.uk/v1beta1
 kind: Pipeline
 metadata:
@@ -771,4 +770,3 @@ spec:
                     --app "${RELEASE_NAME}-${APP_NAME}" \
                     --diff-changes \
                     -f ./manifests/
-
