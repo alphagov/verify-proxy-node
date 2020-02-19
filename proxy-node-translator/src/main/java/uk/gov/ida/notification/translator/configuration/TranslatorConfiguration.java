@@ -27,15 +27,9 @@ public class TranslatorConfiguration extends Configuration implements Prometheus
     @JsonProperty
     private CredentialConfiguration credentialConfiguration;
 
-    @Valid
     @NotNull
     @JsonProperty
-    private String connectorNodeIssuerId;
-
-    @Valid
-    @NotNull
-    @JsonProperty
-    private String connectorNodeNationalityCode;
+    private URI metatronUri;
 
     public URI getProxyNodeMetadataForConnectorNodeUrl() {
         return proxyNodeMetadataForConnectorNodeUrl;
@@ -45,16 +39,16 @@ public class TranslatorConfiguration extends Configuration implements Prometheus
         return vspConfiguration;
     }
 
-    public String getConnectorNodeIssuerId() { return connectorNodeIssuerId; }
-
     public CredentialConfiguration getCredentialConfiguration() {
         return credentialConfiguration;
     }
 
-    public String getConnectorNodeNationalityCode() { return connectorNodeNationalityCode; }
-
     @Override
     public boolean isPrometheusEnabled() {
         return true;
+    }
+
+    public URI getMetatronUri() {
+        return metatronUri;
     }
 }

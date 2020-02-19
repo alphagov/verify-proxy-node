@@ -5,6 +5,8 @@ import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.ida.notification.validations.ValidDestinationUriString;
 import uk.gov.ida.notification.validations.ValidSamlId;
 
+import java.net.URI;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
@@ -24,14 +26,23 @@ public class SamlFailureResponseGenerationRequest {
     @ValidDestinationUriString
     private String destinationUrl;
 
+    @NotNull
+    @JsonProperty
+    private URI entityId;
+
     @SuppressWarnings("Needed for JSON serialisation")
     public SamlFailureResponseGenerationRequest() {
     }
 
-    public SamlFailureResponseGenerationRequest(Response.Status responseStatus, String eidasRequestId, String destinationUrl) {
+    public SamlFailureResponseGenerationRequest(
+            Response.Status responseStatus,
+            String eidasRequestId,
+            String destinationUrl,
+            URI entityId) {
         this.responseStatus = responseStatus;
         this.eidasRequestId = eidasRequestId;
         this.destinationUrl = destinationUrl;
+        this.entityId = entityId;
     }
 
     public Response.Status getResponseStatus() {
@@ -44,5 +55,9 @@ public class SamlFailureResponseGenerationRequest {
 
     public String getDestinationUrl() {
         return destinationUrl;
+    }
+
+    public URI getEntityId() {
+        return entityId;
     }
 }

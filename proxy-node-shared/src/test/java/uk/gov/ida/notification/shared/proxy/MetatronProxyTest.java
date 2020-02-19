@@ -46,7 +46,6 @@ public class MetatronProxyTest {
                 jsonClient,
                 UriBuilder
                         .fromUri(testMetatronClientRule.baseUri())
-                        .path("/metadata")
                         .build()
         );
 
@@ -65,7 +64,6 @@ public class MetatronProxyTest {
                 jsonClient,
                 UriBuilder
                         .fromUri(testMetatronServerErrorClientRule.baseUri())
-                        .path("/metadata")
                         .build()
         );
 
@@ -83,7 +81,6 @@ public class MetatronProxyTest {
                 jsonClient,
                 UriBuilder
                         .fromUri(testMetatronClientErrorClientRule.baseUri())
-                        .path("/metadata")
                         .build()
         );
 

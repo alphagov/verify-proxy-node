@@ -18,10 +18,6 @@ logging:
 
 proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
 
-connectorNodeIssuerId: ${CONNECTOR_NODE_ISSUER_ID}
-
-connectorNodeNationalityCode: ${CONNECTOR_NODE_NATIONALITY_CODE}
-
 vspConfiguration:
   url: ${VERIFY_SERVICE_PROVIDER_URL}
   clientConfig:
@@ -39,3 +35,6 @@ credentialConfiguration:
   privateKey:
     type: ${KEY_TYPES:-encoded}
     key: ${TRANSLATOR_SIGNING_KEY}
+
+metatronUri: ${METATRON_URI}
+

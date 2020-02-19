@@ -84,7 +84,7 @@ public class TestRedisSessions {
         return new GatewaySessionData("aHubRequestId",
                 "anEidasRequestId",
                 "anEidasDestination",
-                "anEidasConnectorPublicKey",
-                "anEidasRelayState");
+                "anEidasRelayState",
+                "eidasIssuer");
     }
 }

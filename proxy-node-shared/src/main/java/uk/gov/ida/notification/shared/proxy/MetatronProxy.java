@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 public class MetatronProxy {
     private final ProxyNodeJsonClient metatronClient;
     private final URI metatronUri;
+    private static final String METADATA_PATH = "metadata";
 
     public MetatronProxy(
             ProxyNodeJsonClient metatronClient,
@@ -26,6 +27,7 @@ public class MetatronProxy {
             return metatronClient.get(
                     UriBuilder
                             .fromUri(metatronUri)
+                            .path(METADATA_PATH)
                             .path(URLEncoder.encode(entityId, StandardCharsets.UTF_8.toString()))
                             .build(),
                     CountryMetadataResponse.class

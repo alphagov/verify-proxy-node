@@ -14,6 +14,7 @@ public class HubResponseContainer {
     private String pid;
     private String eidasRequestId;
     private URI destinationURL;
+    private URI issuer;
     private Attributes attributes;
     private VspScenario vspScenario;
     private VspLevelOfAssurance levelOfAssurance;
@@ -22,6 +23,7 @@ public class HubResponseContainer {
         this.pid = translatedHubResponse.getPid().orElse(null);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
+        this.issuer = hubResponseTranslatorRequest.getEidasIssuerEntityId();
         this.attributes = translatedHubResponse.getAttributes().orElse(null);
         this.vspScenario = translatedHubResponse.getScenario();
         this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance().orElse(null);
@@ -37,6 +39,10 @@ public class HubResponseContainer {
 
     String getDestinationURL() {
         return destinationURL.toString();
+    }
+
+    public URI getIssuer() {
+        return issuer;
     }
 
     Optional<Attributes> getAttributes() {

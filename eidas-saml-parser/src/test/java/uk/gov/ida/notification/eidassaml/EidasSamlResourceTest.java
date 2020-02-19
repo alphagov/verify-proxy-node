@@ -93,7 +93,7 @@ public class EidasSamlResourceTest {
                 .readEntity(EidasSamlParserResponse.class);
 
         assertThat(response.getRequestId()).isEqualTo(requestId);
-        assertThat(response.getIssuer()).isEqualTo(issuerAsString);
+        assertThat(response.getIssuerEntityId()).isEqualTo(issuerAsString);
         assertThat(response.getConnectorEncryptionPublicCertificate()).isEqualTo(TEST_RP_PUBLIC_ENCRYPTION_CERT);
         assertThat(response.getDestination()).isEqualTo(TEST_CONNECTOR_DESTINATION);
 

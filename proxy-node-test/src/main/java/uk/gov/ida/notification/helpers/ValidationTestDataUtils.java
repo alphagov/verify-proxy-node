@@ -12,7 +12,7 @@ public class ValidationTestDataUtils {
 
     public static final String SAMPLE_DESTINATION_URL = "http://proxy-node/SAML2/SSO/Response";
 
-    public static final String SAMPLE_ISSUER = "sample_issuer";
+    public static final String SAMPLE_ENTITY_ID = "http://entityId";
 
     public static final String SAMPLE_CONNECTOR_ENCRYPTION_CERTIFICATE =
         "MIID3jCCAsagAwIBAgIUUT6I3z4MM3dm/ilYlSyP3zsmExcwDQYJKoZIhvcNAQEL\n" +

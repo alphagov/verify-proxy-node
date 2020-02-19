@@ -70,7 +70,7 @@ public class HubResponseResource {
             sessionData.getEidasRequestId(),
             LEVEL_OF_ASSURANCE,
             UriBuilder.fromUri(sessionData.getEidasDestination()).build(),
-            sessionData.getEidasConnectorPublicKey()
+            UriBuilder.fromUri(sessionData.getEidasIssuerEntityId()).build()
         );
 
         String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, session.getId());

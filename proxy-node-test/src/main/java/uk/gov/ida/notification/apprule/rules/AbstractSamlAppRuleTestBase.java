@@ -17,8 +17,8 @@ import java.util.Scanner;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PRIVATE_SIGNING_KEY;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_SECONDARY_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_SECONDARY_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.builders.CertificateBuilder.aCertificate;
 
 public abstract class AbstractSamlAppRuleTestBase {
@@ -61,8 +61,14 @@ public abstract class AbstractSamlAppRuleTestBase {
 
     protected static SamlObjectSigner createSamlObjectSigner() {
         try {
-            return new SamlObjectSigner(X509CredentialFactory.build(
-                    TEST_RP_PUBLIC_SIGNING_CERT, TEST_RP_PRIVATE_SIGNING_KEY), SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256, 1L);
+            return new SamlObjectSigner(
+                    X509CredentialFactory.build(
+                        STUB_COUNTRY_PUBLIC_SECONDARY_CERT,
+                        STUB_COUNTRY_PUBLIC_SECONDARY_PRIVATE_KEY
+                    ),
+                    SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
+                    1L
+            );
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

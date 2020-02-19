@@ -7,7 +7,7 @@ import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
-import uk.gov.ida.notification.eidassaml.apprule.base.TestMetatronResource;
+import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;

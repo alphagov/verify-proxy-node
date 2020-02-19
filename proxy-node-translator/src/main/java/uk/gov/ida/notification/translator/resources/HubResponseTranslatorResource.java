@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.translator.resources;
 
 import org.glassfish.jersey.internal.util.Base64;
-import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.eidas.logging.EidasAuthnResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
@@ -31,8 +30,6 @@ import java.util.Objects;
 public class HubResponseTranslatorResource {
 
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
-    private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
-
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
 
@@ -47,14 +44,7 @@ public class HubResponseTranslatorResource {
     @Path(Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH)
     public Response hubResponse(@Valid HubResponseTranslatorRequest hubResponseTranslatorRequest) {
 
-        final TranslatedHubResponse translatedHubResponse =
-                verifyServiceProviderProxy.getTranslatedHubResponse(
-                        new VerifyServiceProviderTranslationRequest(
-                                hubResponseTranslatorRequest.getSamlResponse(),
-                                hubResponseTranslatorRequest.getRequestId(),
-                                hubResponseTranslatorRequest.getLevelOfAssurance()
-                        )
-                );
+        final TranslatedHubResponse translatedHubResponse = getAttributesFromVSP(hubResponseTranslatorRequest);
 
         EidasAuthnResponseAttributesHashLogger.logEidasAttributesHash(
                 translatedHubResponse.getAttributes().orElse(null),
@@ -62,15 +52,24 @@ public class HubResponseTranslatorResource {
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl());
 
-        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(
-                new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse),
-                X_509_CERTIFICATE_FACTORY.createCertificate(hubResponseTranslatorRequest.getConnectorEncryptionCertificate()));
+        HubResponseContainer hubResponseContainer = new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse);
+        final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(hubResponseContainer);
 
         logSamlResponse(eidasResponse);
 
         final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
 
         return Response.ok().entity(samlMessage).build();
+    }
+
+    private TranslatedHubResponse getAttributesFromVSP(@Valid HubResponseTranslatorRequest hubResponseTranslatorRequest) {
+        return verifyServiceProviderProxy.getTranslatedHubResponse(
+                new VerifyServiceProviderTranslationRequest(
+                        hubResponseTranslatorRequest.getSamlResponse(),
+                        hubResponseTranslatorRequest.getRequestId(),
+                        hubResponseTranslatorRequest.getLevelOfAssurance()
+                )
+        );
     }
 
     @POST
@@ -81,7 +80,8 @@ public class HubResponseTranslatorResource {
         final org.opensaml.saml.saml2.core.Response failureEidasResponse = eidasResponseGenerator.generateFailureResponse(
                 failureResponseRequest.getResponseStatus(),
                 failureResponseRequest.getEidasRequestId(),
-                failureResponseRequest.getDestinationUrl());
+                failureResponseRequest.getDestinationUrl(),
+                failureResponseRequest.getEntityId());
 
         logSamlResponse(failureEidasResponse);
 

@@ -9,6 +9,7 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.eidas.opensaml.ext.attributes.DateOfBirthType;
 import se.litsec.eidas.opensaml.ext.attributes.PersonIdentifierType;
+import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspLevelOfAssurance;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.VspScenario;
@@ -16,7 +17,6 @@ import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationExce
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.saml.core.domain.NonMatchingVerifiableAttribute;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,27 +28,23 @@ import java.util.stream.Collectors;
 
 public class HubResponseTranslator {
 
-    private String connectorNodeIssuerId;
+    private static final String PID_PREFIX = "GB/%s/%s";
     private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
-    private String pidPrefix;
+
 
     public HubResponseTranslator(
             Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
-            String connectorNodeIssuerId,
-            String proxyNodeMetadataForConnectorNodeUrl,
-            String nationalityCode) {
+            String proxyNodeMetadataForConnectorNodeUrl) {
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
-        this.connectorNodeIssuerId = connectorNodeIssuerId;
         this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
-        this.pidPrefix = String.format("GB/%s/", nationalityCode);
     }
 
-    Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer) {
+    Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer, CountryMetadataResponse countryMetadataResponse) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
         final String pid = hubResponseContainer.getPid()
-                .map(p -> pidPrefix + p)
+                .map(p -> String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), p))
                 .orElse(null);
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
@@ -93,7 +89,7 @@ public class HubResponseTranslator {
                 .withIssueInstant(now)
                 .withDestination(hubResponseContainer.getDestinationURL())
                 .withAssertionSubject(pid)
-                .withAssertionConditions(connectorNodeIssuerId)
+                .withAssertionConditions(countryMetadataResponse.getEntityId())
                 .withLoa(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
                 .addAssertionAttributeStatement(eidasAttributes)
                 .build();
