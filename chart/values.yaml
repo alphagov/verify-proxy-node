@@ -8,6 +8,8 @@ global:
 
 hubFqdn: www.integration.signin.service.gov.uk
 
+forHmrc: false
+
 connector:
   entityID:
   metadata:
