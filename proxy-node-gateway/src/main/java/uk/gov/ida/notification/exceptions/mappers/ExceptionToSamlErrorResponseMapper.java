@@ -65,7 +65,7 @@ public class ExceptionToSamlErrorResponseMapper implements ExceptionMapper<Failu
                         exception.getResponseStatus(),
                         sessionData.getEidasRequestId(),
                         sessionData.getEidasDestination(),
-                        URI.create(sessionData.getEidasIssuer())
+                        URI.create(sessionData.getEidasIssuerEntityId())
                 ));
 
         final SamlFormView samlFormView = samlFormViewBuilder.buildResponse(

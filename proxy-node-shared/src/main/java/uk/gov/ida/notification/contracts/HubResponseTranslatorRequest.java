@@ -5,7 +5,6 @@ import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.ida.notification.validations.ValidBase64Xml;
 import uk.gov.ida.notification.validations.ValidDestinationUri;
 import uk.gov.ida.notification.validations.ValidLOA;
-import uk.gov.ida.notification.validations.ValidPEM;
 import uk.gov.ida.notification.validations.ValidSamlId;
 
 import javax.validation.constraints.NotNull;
@@ -38,14 +37,9 @@ public class HubResponseTranslatorRequest {
     @JsonProperty
     private URI destinationUrl;
 
-    @NotBlank
-    @ValidPEM
-    @JsonProperty
-    private String connectorEncryptionCertificate;
-
     @NotNull
     @JsonProperty
-    private URI eidasIssuer;
+    private URI eidasIssuerEntityId;
 
     @SuppressWarnings("Needed for JSON serialisation")
     public HubResponseTranslatorRequest() {
@@ -57,15 +51,13 @@ public class HubResponseTranslatorRequest {
             String eidasRequestId,
             String levelOfAssurance,
             URI destinationUrl,
-            URI eidasIssuer,
-            String connectorEncryptionCertificate) {
+            URI eidasIssuerEntityId) {
         this.samlResponse = samlResponse;
         this.requestId = requestId;
         this.eidasRequestId = eidasRequestId;
         this.levelOfAssurance = levelOfAssurance;
         this.destinationUrl = destinationUrl;
-        this.eidasIssuer = eidasIssuer;
-        this.connectorEncryptionCertificate = connectorEncryptionCertificate;
+        this.eidasIssuerEntityId = eidasIssuerEntityId;
     }
 
     public String getSamlResponse() {
@@ -80,12 +72,8 @@ public class HubResponseTranslatorRequest {
         return eidasRequestId;
     }
 
-    public URI getEidasIssuer() {
-        return eidasIssuer;
-    }
-
-    public String getConnectorEncryptionCertificate() {
-        return connectorEncryptionCertificate;
+    public URI getEidasIssuerEntityId() {
+        return eidasIssuerEntityId;
     }
 
     public String getLevelOfAssurance() {

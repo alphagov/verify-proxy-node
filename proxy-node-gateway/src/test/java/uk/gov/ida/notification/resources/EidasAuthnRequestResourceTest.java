@@ -41,7 +41,7 @@ import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DES
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_AUTHN_REQUEST;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ISSUER;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ENTITY_ID;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_REQUEST_ID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,7 +107,7 @@ public class EidasAuthnRequestResourceTest {
         when(vspProxy.generateAuthnRequest(any(String.class))).thenReturn(vspResponse);
         when(eidasSamlParserResponse.getConnectorEncryptionPublicCertificate()).thenReturn(UNCHAINED_PUBLIC_PEM);
         when(eidasSamlParserResponse.getDestination()).thenReturn(SAMPLE_DESTINATION_URL);
-        when(eidasSamlParserResponse.getIssuer()).thenReturn(SAMPLE_ISSUER);
+        when(eidasSamlParserResponse.getIssuerEntityId()).thenReturn(SAMPLE_ENTITY_ID);
         when(eidasSamlParserResponse.getRequestId()).thenReturn(SAMPLE_EIDAS_REQUEST_ID);
         when(vspResponse.getRequestId()).thenReturn(SAMPLE_REQUEST_ID);
         when(vspResponse.getSsoLocation()).thenReturn(new URI("http://hub.bub"));
@@ -127,7 +127,7 @@ public class EidasAuthnRequestResourceTest {
         final Map<String, String> mdc = logEvent.getMDCPropertyMap();
 
         assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(SAMPLE_EIDAS_REQUEST_ID);
-        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(SAMPLE_ISSUER);
+        assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(SAMPLE_ENTITY_ID);
         assertThat(mdc.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(SAMPLE_DESTINATION_URL);
         assertThat(mdc.get(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX.name())).isEqualTo(StringUtils.right(UNCHAINED_PUBLIC_PEM, 10));
         assertThat(mdc.get(ProxyNodeMDCKey.HUB_REQUEST_ID.name())).isEqualTo(SAMPLE_REQUEST_ID);

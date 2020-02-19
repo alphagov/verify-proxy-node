@@ -19,6 +19,8 @@ import uk.gov.ida.notification.views.SamlFormView;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.UriBuilder;
 
+import java.net.URI;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,7 +47,7 @@ public class HubResponseResourceTest {
     public void testsHappyPath() {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             "eidas_request_id_in_session",
-            "issuer",
+            "http://entityId",
             "connector_public_cert_in_session",
             "http://connector.node"
         );
@@ -82,7 +84,7 @@ public class HubResponseResourceTest {
         assertThat("hub_request_id_in_session").isEqualTo(request.getRequestId());
         assertThat(HubResponseResource.LEVEL_OF_ASSURANCE).isEqualTo(request.getLevelOfAssurance());
         assertThat("eidas_request_id_in_session").isEqualTo(request.getEidasRequestId());
-        assertThat("connector_public_cert_in_session").isEqualTo(request.getConnectorEncryptionCertificate());
+        assertThat(URI.create("http://entityId")).isEqualTo(request.getEidasIssuerEntityId());
 
         assertThat("http://connector.node").isEqualTo(response.getPostUrl());
         assertThat("SAMLResponse").isEqualTo(response.getSamlMessageType());

@@ -272,7 +272,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         EidasSamlParserResponse espResponse = response.readEntity(EidasSamlParserResponse.class);
 
         assertThat(espResponse.getRequestId()).isEqualTo(eidasAuthnRequest.getID());
-        assertThat(espResponse.getIssuer()).isEqualTo(TestMetadataResource.CONNECTOR_ENTITY_ID);
+        assertThat(espResponse.getIssuerEntityId()).isEqualTo(TestMetadataResource.CONNECTOR_ENTITY_ID);
     }
 
     private void assertErrorResponse(Response response) {

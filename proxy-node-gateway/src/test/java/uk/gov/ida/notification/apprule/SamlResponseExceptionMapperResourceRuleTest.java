@@ -42,7 +42,6 @@ public class SamlResponseExceptionMapperResourceRuleTest {
                         "HubRequestId",
                         "EidasRequestId",
                         "EidasDestination",
-                        "EidasConnectorPublicKey",
                         "EidasRelayState",
                         "EidasIssuer"
                 )

@@ -33,7 +33,7 @@ public class SamlFailureResponseGenerationRequestValidationTests extends Abstrac
                 Response.Status.OK, // null is the only 'malformed' Response.Status
                 ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID,
                 ValidationTestDataUtils.SAMPLE_DESTINATION_URL,
-                URI.create(ValidationTestDataUtils.SAMPLE_ENTITYID)
+                URI.create(ValidationTestDataUtils.SAMPLE_ENTITY_ID)
         );
 
         Map<String, List<ConstraintViolation<SamlFailureResponseGenerationRequest>>> goodViolationsMap = validateAndMap(goodRequest);

@@ -23,7 +23,7 @@ public class HubResponseContainer {
         this.pid = translatedHubResponse.getPid().orElse(null);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
-        this.issuer = hubResponseTranslatorRequest.getEidasIssuer();
+        this.issuer = hubResponseTranslatorRequest.getEidasIssuerEntityId();
         this.attributes = translatedHubResponse.getAttributes().orElse(null);
         this.vspScenario = translatedHubResponse.getScenario();
         this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance().orElse(null);

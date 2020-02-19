@@ -254,7 +254,6 @@ public class HubResponseTranslatorTest {
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create("http://localhost:8081/bob"),
-                URI.create("http://localhost:8081/bob"),
-                STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
+                URI.create("http://localhost:8081/bob"));
     }
 }

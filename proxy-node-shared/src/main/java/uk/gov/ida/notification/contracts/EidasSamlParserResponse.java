@@ -15,7 +15,7 @@ public class EidasSamlParserResponse {
 
     @JsonProperty
     @NotBlank
-    private String issuer;
+    private String issuerEntityId;
 
     @JsonProperty
     @NotBlank
@@ -31,9 +31,9 @@ public class EidasSamlParserResponse {
     public EidasSamlParserResponse() {
     }
 
-    public EidasSamlParserResponse(String requestId, String issuer, String connectorEncryptionPublicCertificate, String destination) {
+    public EidasSamlParserResponse(String requestId, String issuerEntityId, String connectorEncryptionPublicCertificate, String destination) {
         this.requestId = requestId;
-        this.issuer = issuer;
+        this.issuerEntityId = issuerEntityId;
         this.connectorEncryptionPublicCertificate = connectorEncryptionPublicCertificate;
         this.destination = destination;
     }
@@ -42,8 +42,8 @@ public class EidasSamlParserResponse {
         return requestId;
     }
 
-    public String getIssuer() {
-        return issuer;
+    public String getIssuerEntityId() {
+        return issuerEntityId;
     }
 
     public String getConnectorEncryptionPublicCertificate() {

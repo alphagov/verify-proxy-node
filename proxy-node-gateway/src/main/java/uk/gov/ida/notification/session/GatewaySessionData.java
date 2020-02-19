@@ -39,28 +39,21 @@ public class GatewaySessionData {
     @NotNull
     @NotEmpty
     @JsonProperty
-    private final String eidasConnectorPublicKey;
-
-    @NotNull
-    @NotEmpty
-    @JsonProperty
-    private final String eidasIssuer;
+    private final String eidasIssuerEntityId;
 
     @JsonCreator
     public GatewaySessionData(
         @JsonProperty("HUB_REQUEST_ID") String hubRequestId,
         @JsonProperty("EIDAS_REQUEST_ID") String eidasRequestId,
         @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
-        @JsonProperty("eidasConnectorPublicKey") String eidasConnectorPublicKey,
         @JsonProperty("eidasRelayState") String eidasRelayState,
-        @JsonProperty("eidasIssuer") String eidasIssuer
+        @JsonProperty("eidasIssuerEntityId") String eidasIssuerEntityId
     ) {
        this.hubRequestId = hubRequestId;
        this.eidasRequestId = eidasRequestId;
        this.eidasDestination = eidasDestination;
-       this.eidasConnectorPublicKey = eidasConnectorPublicKey;
        this.eidasRelayState = eidasRelayState;
-       this.eidasIssuer = eidasIssuer;
+       this.eidasIssuerEntityId = eidasIssuerEntityId;
     }
 
     public GatewaySessionData(
@@ -72,8 +65,7 @@ public class GatewaySessionData {
         this.eidasRequestId = eidasSamlParserResponse.getRequestId();
         this.eidasDestination = eidasSamlParserResponse.getDestination();
         this.eidasRelayState = eidasRelayState;
-        this.eidasConnectorPublicKey = eidasSamlParserResponse.getConnectorEncryptionPublicCertificate();
-        this.eidasIssuer = eidasSamlParserResponse.getIssuer();
+        this.eidasIssuerEntityId = eidasSamlParserResponse.getIssuerEntityId();
         validate();
     }
 
@@ -104,10 +96,7 @@ public class GatewaySessionData {
 
     public String getEidasRelayState() { return this.eidasRelayState; }
 
-    public String getEidasConnectorPublicKey() {
-        return this.eidasConnectorPublicKey; }
-
-    public String getEidasIssuer() {
-        return eidasIssuer;
+    public String getEidasIssuerEntityId() {
+        return eidasIssuerEntityId;
     }
 }

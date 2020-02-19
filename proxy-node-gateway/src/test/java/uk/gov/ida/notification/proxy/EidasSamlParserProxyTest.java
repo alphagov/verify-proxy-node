@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ISSUER;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ENTITY_ID;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_REQUEST_ID;
 
 public class EidasSamlParserProxyTest {
@@ -56,7 +56,7 @@ public class EidasSamlParserProxyTest {
         @Valid
         @Path("/valid")
         public EidasSamlParserResponse testValidParse(EidasSamlParserRequest eidasSamlParserRequest) {
-            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ISSUER, UNCHAINED_PUBLIC_PEM, SAMPLE_DESTINATION_URL);
+            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, UNCHAINED_PUBLIC_PEM, SAMPLE_DESTINATION_URL);
         }
 
         @POST
@@ -79,7 +79,7 @@ public class EidasSamlParserProxyTest {
         @Path("/test-journey-id-header")
         public EidasSamlParserResponse testJourneyIdHeader(EidasSamlParserRequest eidasSamlParserRequest, @Context HttpHeaders headers) {
             TestESPResource.headers = headers.getRequestHeaders();
-            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ISSUER, UNCHAINED_PUBLIC_PEM, SAMPLE_DESTINATION_URL);
+            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, UNCHAINED_PUBLIC_PEM, SAMPLE_DESTINATION_URL);
         }
     }
 
@@ -94,7 +94,7 @@ public class EidasSamlParserProxyTest {
         EidasSamlParserResponse response = eidasSamlParserService.parse(eidasSamlParserRequest, "session_id");
 
         assertThat(SAMPLE_REQUEST_ID).isEqualTo(response.getRequestId());
-        assertThat(SAMPLE_ISSUER).isEqualTo(response.getIssuer());
+        assertThat(SAMPLE_ENTITY_ID).isEqualTo(response.getIssuerEntityId());
         assertThat(UNCHAINED_PUBLIC_PEM).isEqualTo(response.getConnectorEncryptionPublicCertificate());
         assertThat(SAMPLE_DESTINATION_URL).isEqualTo(response.getDestination());
     }

@@ -35,6 +35,7 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -43,9 +44,9 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.notification.apprule.rules.TestTranslatorClientErrorResource.SAML_ERROR_BLOB;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ENTITY_ID;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
@@ -145,7 +146,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     @Test
-    public void redisCanStoreCertificateInSession() throws Throwable {
+    public void redisCanStoreIssuerEntityIdInSession() throws Throwable {
         Response response = proxyNodeAppRuleEmbeddedRedis
                 .target(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_RESOURCE)
                 .request()
@@ -155,7 +156,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(response.getStatus()).isEqualTo(200);
 
         final List<HubResponseTranslatorRequest> translatorArgs = TEST_TRANSLATOR_RESOURCE.getTranslatorArgs();
-        assertThat(translatorArgs.get(0).getConnectorEncryptionCertificate()).isEqualTo(STUB_COUNTRY_PUBLIC_PRIMARY_CERT);
+        assertThat(translatorArgs.get(0).getEidasIssuerEntityId()).isEqualTo(URI.create(SAMPLE_ENTITY_ID));
         assertThat(translatorArgs.size()).isOne();
     }
 
