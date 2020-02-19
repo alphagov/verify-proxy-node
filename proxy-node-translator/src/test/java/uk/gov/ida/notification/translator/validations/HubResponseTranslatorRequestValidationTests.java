@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_CONNECTOR_ENCRYPTION_CERTIFICATE;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMLPLE_HUB_SAML_RESPONSE;

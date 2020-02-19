@@ -3,7 +3,6 @@ package uk.gov.ida.notification.contracts;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.ida.notification.validations.ValidDestinationUriString;
-import uk.gov.ida.notification.validations.ValidPEM;
 import uk.gov.ida.notification.validations.ValidSamlId;
 
 public class EidasSamlParserResponse {
@@ -19,11 +18,6 @@ public class EidasSamlParserResponse {
 
     @JsonProperty
     @NotBlank
-    @ValidPEM
-    private String connectorEncryptionPublicCertificate;
-
-    @JsonProperty
-    @NotBlank
     @ValidDestinationUriString
     private String destination;
 
@@ -31,10 +25,9 @@ public class EidasSamlParserResponse {
     public EidasSamlParserResponse() {
     }
 
-    public EidasSamlParserResponse(String requestId, String issuerEntityId, String connectorEncryptionPublicCertificate, String destination) {
+    public EidasSamlParserResponse(String requestId, String issuerEntityId, String destination) {
         this.requestId = requestId;
         this.issuerEntityId = issuerEntityId;
-        this.connectorEncryptionPublicCertificate = connectorEncryptionPublicCertificate;
         this.destination = destination;
     }
 
@@ -44,10 +37,6 @@ public class EidasSamlParserResponse {
 
     public String getIssuerEntityId() {
         return issuerEntityId;
-    }
-
-    public String getConnectorEncryptionPublicCertificate() {
-        return connectorEncryptionPublicCertificate;
     }
 
     public String getDestination() {

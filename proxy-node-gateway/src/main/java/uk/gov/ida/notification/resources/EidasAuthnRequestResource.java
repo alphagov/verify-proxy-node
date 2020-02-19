@@ -3,7 +3,6 @@ package uk.gov.ida.notification.resources;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import io.prometheus.client.Counter;
-import org.apache.commons.lang.StringUtils;
 import org.opensaml.saml.saml2.ecp.RelayState;
 import uk.gov.ida.notification.MetricsUtils;
 import uk.gov.ida.notification.SamlFormViewBuilder;
@@ -95,15 +94,9 @@ public class EidasAuthnRequestResource {
             )
         );
 
-        String connectorEncryptionPublicCert = StringUtils.right(
-                eidasSamlParserResponse.getConnectorEncryptionPublicCertificate(),
-                10
-        );
-
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuerEntityId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.CONNECTOR_PUBLIC_ENC_CERT_SUFFIX, connectorEncryptionPublicCert);
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");

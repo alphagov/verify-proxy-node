@@ -20,7 +20,6 @@ public class TestGatewaySessionDataValidator {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
                 "hub-request-id",
                 "issuer",
-                "eidas-connector-public-key",
                 "eidas-destination"
         );
 
@@ -36,7 +35,6 @@ public class TestGatewaySessionDataValidator {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
                 null,
                 "issuer",
-                "eidas-connector-public-key",
                 ""
         );
 
