@@ -10,7 +10,6 @@ import uk.gov.ida.jerseyclient.JsonResponseProcessor;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.exceptions.EidasSamlParserResponseException;
-import uk.gov.ida.notification.helpers.SelfSignedCertificateGenerator;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
@@ -36,17 +35,8 @@ import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_REQ
 
 public class EidasSamlParserProxyTest {
 
-    private static final String UNCHAINED_PUBLIC_PEM;
     private static final String JOURNEY_ID = "this_is_not_a_uuid";
     private static final EidasSamlParserRequest eidasSamlParserRequest = new EidasSamlParserRequest(SAMPLE_HUB_SAML_AUTHN_REQUEST);
-
-    static {
-        try {
-            UNCHAINED_PUBLIC_PEM = new SelfSignedCertificateGenerator("test-cn").getCertificateAsPEM();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Path("/parse")
     @Produces(MediaType.APPLICATION_JSON)
@@ -56,7 +46,7 @@ public class EidasSamlParserProxyTest {
         @Valid
         @Path("/valid")
         public EidasSamlParserResponse testValidParse(EidasSamlParserRequest eidasSamlParserRequest) {
-            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, UNCHAINED_PUBLIC_PEM, SAMPLE_DESTINATION_URL);
+            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, SAMPLE_DESTINATION_URL);
         }
 
         @POST
@@ -79,7 +69,7 @@ public class EidasSamlParserProxyTest {
         @Path("/test-journey-id-header")
         public EidasSamlParserResponse testJourneyIdHeader(EidasSamlParserRequest eidasSamlParserRequest, @Context HttpHeaders headers) {
             TestESPResource.headers = headers.getRequestHeaders();
-            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, UNCHAINED_PUBLIC_PEM, SAMPLE_DESTINATION_URL);
+            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, SAMPLE_DESTINATION_URL);
         }
     }
 
@@ -95,7 +85,6 @@ public class EidasSamlParserProxyTest {
 
         assertThat(SAMPLE_REQUEST_ID).isEqualTo(response.getRequestId());
         assertThat(SAMPLE_ENTITY_ID).isEqualTo(response.getIssuerEntityId());
-        assertThat(UNCHAINED_PUBLIC_PEM).isEqualTo(response.getConnectorEncryptionPublicCertificate());
         assertThat(SAMPLE_DESTINATION_URL).isEqualTo(response.getDestination());
     }
 

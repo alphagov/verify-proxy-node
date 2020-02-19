@@ -1,0 +1,76 @@
+apiVersion: concourse.govsvc.uk/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: smoke-test
+spec:
+  exposed: true
+  config:
+
+    harbor_source: &harbor_source
+      username: ((harbor.harbor_username))
+      password: ((harbor.harbor_password))
+      harbor:
+        prevent_vul: "false"
+      notary:
+        url: ((harbor.notary_url))
+        root_key: ((harbor.root_key))
+        delegate_key: ((harbor.ci_key))
+        passphrase:
+          root: ((harbor.notary_root_passphrase))
+          snapshot: ((harbor.notary_snapshot_passphrase))
+          targets: ((harbor.notary_targets_passphrase))
+          delegation: ((harbor.notary_delegation_passphrase))
+
+    resource_types:
+
+    - name: harbor
+      type: docker-image
+      privileged: true
+      source:
+        repository: ((concourse.harbor-resource-image))
+        tag: ((concourse.harbor-resource-tag))
+
+    resources:
+
+    - name: every-10m-9-5
+      type: time
+      source:
+        interval: 10m
+        start: 9:00 AM
+        stop: 5:00 PM
+
+    - name: tests-image
+      type: harbor
+      source:
+        <<: *harbor_source
+        repository: registry.((cluster.domain))/eidas/acceptance-tests
+
+    jobs:
+
+    - name: smoke-test-integration
+      plan:
+
+      - get: every-10m-9-5
+        trigger: true
+      - get: tests-image
+
+      - task: test-chart-package
+        image: tests-image
+        attempts: 2
+        timeout: 2m
+        config:
+          platform: linux
+          params:
+            PROXY_NODE_URL: "https://test-integration-proxy-node.((cluster.domain))"
+            STUB_CONNECTOR_URL: "https://test-integration-connector.((cluster.domain))"
+            STUB_IDP_USER: "stub-idp-demo-one"
+            SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
+          run:
+            path: /bin/bash
+            args:
+            - -euc
+            - |
+              cd /
+              bundle exec cucumber features/smoke/integration.feature --strict --tags "not @ignore"

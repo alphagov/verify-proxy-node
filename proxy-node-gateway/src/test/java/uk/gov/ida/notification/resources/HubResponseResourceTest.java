@@ -48,7 +48,6 @@ public class HubResponseResourceTest {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             "eidas_request_id_in_session",
             "http://entityId",
-            "connector_public_cert_in_session",
             "http://connector.node"
         );
 

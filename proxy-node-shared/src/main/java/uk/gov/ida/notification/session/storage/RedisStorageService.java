@@ -42,7 +42,7 @@ public class RedisStorageService extends AbstractStorageService {
     }
 
     @Override
-    public StorageRecord read(String context, String key) throws IOException {
+    public StorageRecord read(String context, String key) {
         List<KeyValue<String, String>> result = redis.hmget(key(context, key), "value", "version", "expiration");
         String value = result.get(0).getValueOrElse(null);
         if (value == null) return null;
@@ -99,7 +99,7 @@ public class RedisStorageService extends AbstractStorageService {
             return null;
         } else if (storedVersion != version) {
             redis.unwatch();
-            throw new VersionMismatchException(String.format("Expected version to be %l but it was %l", version, storedVersion));
+            throw new VersionMismatchException(String.format("Expected version to be %d but it was %d", version, storedVersion));
         } else {
             redis.multi();
             redis.hmset(key(context, key), Map.of("value", value, "expiration", Long.toString(expiration), "version", Long.toString(storedVersion + 1)));
@@ -140,7 +140,7 @@ public class RedisStorageService extends AbstractStorageService {
             return false;
         } else if (storedVersion != version) {
             redis.unwatch();
-            throw new VersionMismatchException(String.format("Expected version to be %l but it was %l", version, storedVersion));
+            throw new VersionMismatchException(String.format("Expected version to be %d but it was %d", version, storedVersion));
         } else {
             redis.multi();
             redis.del(key(context, key));

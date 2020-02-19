@@ -83,6 +83,7 @@ subprojects {
         dev_pki
         dropwizard
         dropwizard_assets
+        dropwizard_client
         opensaml
         eidas_saml
         ida_utils
@@ -111,8 +112,8 @@ subprojects {
         )
 
         dropwizard(
+                configurations.dropwizard_client,
                 "io.dropwizard:dropwizard-core:${dropwizard_version}",
-                "io.dropwizard:dropwizard-client:${dropwizard_version}",
                 "io.dropwizard:dropwizard-views-mustache:${dropwizard_version}",
                 "io.dropwizard:dropwizard-json-logging:${dropwizard_version}",
                 "uk.gov.ida:dropwizard-logstash:1.3.5-68"
@@ -120,6 +121,10 @@ subprojects {
 
         dropwizard_assets(
                 "io.dropwizard:dropwizard-assets:${dropwizard_version}",
+        )
+
+        dropwizard_client(
+                "io.dropwizard:dropwizard-client:${dropwizard_version}",
         )
 
         opensaml(
