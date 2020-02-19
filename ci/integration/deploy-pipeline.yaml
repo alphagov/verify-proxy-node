@@ -588,8 +588,6 @@ spec:
                     --app "${RELEASE_NAME}-${APP_NAME}" \
                     --diff-changes \
                     -f ./manifests/
-                  echo "deleting ${RELEASE_NAMESPACE} connector pod"
-                  kubectl -n ${RELEASE_NAMESPACE} delete pod -l app.kubernetes.io/name=connector
 
     - name: deploy-hmrc-integration
       serial: true
