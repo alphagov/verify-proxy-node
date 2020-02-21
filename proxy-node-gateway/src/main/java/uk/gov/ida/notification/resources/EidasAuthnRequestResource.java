@@ -39,6 +39,7 @@ public class EidasAuthnRequestResource {
             MetricsUtils.LABEL_PREFIX + "_requests_total",
             "Number of eIDAS SAML requests to Verify Proxy Node ")
             .register();
+
     private static final Counter REQUESTS_SUCCESSFUL = Counter.build(
             MetricsUtils.LABEL_PREFIX + "_successful_requests_total",
             "Number of successful eIDAS SAML requests to Verify Proxy Node")
@@ -96,7 +97,7 @@ public class EidasAuthnRequestResource {
 
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuerEntityId());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getDestination());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getAssertionConsumerServiceLocation());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");

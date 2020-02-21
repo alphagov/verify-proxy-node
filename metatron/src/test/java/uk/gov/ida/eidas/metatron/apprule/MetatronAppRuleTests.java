@@ -12,12 +12,11 @@ import uk.gov.ida.eidas.metatron.apprule.rules.CountryMetadataClientRule;
 import uk.gov.ida.eidas.metatron.apprule.rules.TestCountryMetadataResource;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
 import uk.gov.ida.notification.apprule.rules.AppRule;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.saml.core.test.OpenSAMLRunner;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -48,7 +47,8 @@ public class MetatronAppRuleTests {
         CountryMetadataResponse actual = response.readEntity(CountryMetadataResponse.class);
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(actual.getCountryCode()).isEqualTo("VO");
-        assertThat(actual.getDestination()).isEqualTo(URI.create("http://foo.com/bar"));
+        assertThat(actual.getAssertionConsumerServices()).hasSize(1);
+        assertThat(actual.getAssertionConsumerServices()).anyMatch(s -> s.getLocation().toString().equals("http://foo.com/bar") && s.getIndex() == 1 && !s.isDefaultService());
         assertThat(actual.getEntityId()).isEqualTo(entityId);
         assertThatCertsMatch(actual.getSamlEncryptionCertX509(), TEST_RP_PUBLIC_ENCRYPTION_CERT);
         assertThatCertsMatch(actual.getSamlSigningCertX509(), TEST_RP_PUBLIC_SIGNING_CERT);
@@ -61,7 +61,9 @@ public class MetatronAppRuleTests {
         CountryMetadataResponse actual = response.readEntity(CountryMetadataResponse.class);
         assertThat(response.getStatusInfo()).isEqualTo(Response.Status.OK);
         assertThat(actual.getCountryCode()).isEqualTo("VT");
-        assertThat(actual.getDestination()).isEqualTo(URI.create("http://foo.com/bar"));
+        assertThat(actual.getAssertionConsumerServices()).hasSize(2);
+        assertThat(actual.getAssertionConsumerServices()).anyMatch(s -> s.getLocation().toString().equals("http://foo.com/bar") && s.getIndex() == 1 && !s.isDefaultService());
+        assertThat(actual.getAssertionConsumerServices()).anyMatch(s -> s.getLocation().toString().equals("http://foo.com/bar2") && s.getIndex() == 0 && s.isDefaultService());
         assertThat(actual.getEntityId()).isEqualTo(entityId);
         assertThatCertsMatch(actual.getSamlEncryptionCertX509(), TEST_RP_PUBLIC_ENCRYPTION_CERT);
         assertThatCertsMatch(actual.getSamlSigningCertX509(), TEST_RP_PUBLIC_SIGNING_CERT);

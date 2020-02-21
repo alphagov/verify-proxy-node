@@ -9,7 +9,6 @@ import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.criterion.EntityRoleCriterion;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
-import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
@@ -19,7 +18,8 @@ import org.opensaml.security.criteria.UsageCriterion;
 import org.opensaml.security.x509.X509Credential;
 import uk.gov.ida.eidas.metatron.exceptions.MetatronClientException;
 import uk.gov.ida.eidas.metatron.exceptions.MetatronServerException;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.saml.metadata.ExpiredCertificateMetadataFilter;
 import uk.gov.ida.saml.metadata.PKIXSignatureValidationFilterProvider;
 import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
@@ -56,14 +56,14 @@ public class MetadataResolverService {
     }
 
     public CountryMetadataResponse getCountryMetadataResponse(URI entityId) {
-        CountryMetadata countryMetadata = getEnabledCountryConfigurationData(entityId);
-        URI location = getAssertionConsumerServiceLocation(countryMetadata);
-        String signingX509 = getCertificateAsX509(countryMetadata, UsageType.SIGNING);
-        String encryptionX509 = getCertificateAsX509(countryMetadata, UsageType.ENCRYPTION);
+        final CountryMetadata countryMetadata = getEnabledCountryConfigurationData(entityId);
+        final List<AssertionConsumerService> assertionsConsumerServices = getAssertionConsumerServices(countryMetadata);
+        final String signingX509 = getCertificateAsX509(countryMetadata, UsageType.SIGNING);
+        final String encryptionX509 = getCertificateAsX509(countryMetadata, UsageType.ENCRYPTION);
         return new CountryMetadataResponse(
                 signingX509,
                 encryptionX509,
-                location,
+                assertionsConsumerServices,
                 countryMetadata.getCountryConfig().getEntityId().toString(),
                 countryMetadata.getCountryConfig().getCountryCode());
     }
@@ -130,26 +130,32 @@ public class MetadataResolverService {
         }
     }
 
-    private URI getAssertionConsumerServiceLocation(CountryMetadata countryMetadata) {
-        MetadataResolver metadataResolver = countryMetadata.getMetadataResolver();
-        String entityId = countryMetadata.getCountryConfig().getEntityId().toString();
-        CriteriaSet criteria = new CriteriaSet(new EntityIdCriterion(entityId));
+    private List<AssertionConsumerService> getAssertionConsumerServices(CountryMetadata countryMetadata) {
+        final MetadataResolver metadataResolver = countryMetadata.getMetadataResolver();
+        final String entityId = countryMetadata.getCountryConfig().getEntityId().toString();
+        final CriteriaSet criteria = new CriteriaSet(new EntityIdCriterion(entityId));
+
         EntityDescriptor entityDescriptor;
         try {
             entityDescriptor = metadataResolver.resolveSingle(criteria);
         } catch (ResolverException e) {
             throw new MetatronServerException(String.format("Unable to resolve entityDescriptor with given criteria for entityId %s", entityId), e);
         }
+
         if (entityDescriptor == null) {
             throw new MetatronServerException(String.format("No entityDescriptor for entityId %s", entityId));
         }
-        SPSSODescriptor spssoDescriptor = entityDescriptor.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
-        return spssoDescriptor.getAssertionConsumerServices().stream()
-                .map(AssertionConsumerService::getLocation)
-                .map(URI::create)
-                .findFirst()
-                .orElseThrow(() -> new MetatronServerException(String.format("Missing Assertion Consumer Service Location for entityId %s", entityId)));
 
+        final SPSSODescriptor spssoDescriptor = entityDescriptor.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
+        final List<org.opensaml.saml.saml2.metadata.AssertionConsumerService> assertionConsumerServices = spssoDescriptor.getAssertionConsumerServices();
+
+        if (assertionConsumerServices.size() == 0) {
+            throw new MetatronServerException(String.format("No Assertion Consumer Services provided in the metadata for entity %s - at least one is required", entityId));
+        }
+
+        return assertionConsumerServices.stream()
+                .map(s -> new AssertionConsumerService(URI.create(s.getLocation()), s.getIndex(), s.isDefault()))
+                .collect(Collectors.toList());
     }
 
     private class CountryMetadata {
@@ -169,5 +175,4 @@ public class MetadataResolverService {
             return metadataResolver;
         }
     }
-
 }
