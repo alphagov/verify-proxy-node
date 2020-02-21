@@ -6,10 +6,12 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
+import uk.gov.ida.eidas.metatron.MetatronApplication;
+import uk.gov.ida.eidas.metatron.MetatronConfiguration;
 import uk.gov.ida.eidas.metatron.apprule.rules.CountryMetadataClientRule;
-import uk.gov.ida.eidas.metatron.apprule.rules.MetatronAppRule;
 import uk.gov.ida.eidas.metatron.apprule.rules.TestCountryMetadataResource;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.saml.core.test.OpenSAMLRunner;
 
@@ -31,7 +33,8 @@ public class MetatronAppRuleTests {
     public static CountryMetadataClientRule countryMetadataClientRule = new CountryMetadataClientRule(new TestCountryMetadataResource());
 
     @ClassRule
-    public static MetatronAppRule metatronAppRule = new MetatronAppRule(
+    public static AppRule<MetatronConfiguration> metatronAppRule = new AppRule<>(
+            MetatronApplication.class,
             ConfigOverride.config("countriesConfig", countryMetadataClientRule.getTempConfigFilePath())
     );
 

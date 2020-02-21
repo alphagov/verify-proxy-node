@@ -17,11 +17,12 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasConstants;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.eidassaml.EidasSamlParserConfiguration;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
-import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -50,7 +51,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     public static final DropwizardClientRule metatronClientRule = createInitialisedClientRule(new TestMetatronResource());
 
     @ClassRule
-    public static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metatronClientRule);
+    public static final AppRule<EidasSamlParserConfiguration> eidasSamlParserAppRule = createEidasSamlParserRule(metatronClientRule);
 
     @ClassRule
     public static final RuleChain orderedRules = RuleChain.outerRule(metatronClientRule).around(eidasSamlParserAppRule);

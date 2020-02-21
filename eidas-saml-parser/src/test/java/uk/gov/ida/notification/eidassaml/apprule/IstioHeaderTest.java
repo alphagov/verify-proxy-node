@@ -5,10 +5,11 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
 import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
+import uk.gov.ida.notification.eidassaml.EidasSamlParserConfiguration;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
-import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 
@@ -33,7 +34,7 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
     public static final DropwizardClientRule metatronClientRule = createInitialisedClientRule(new TestMetatronResource());
 
     @ClassRule
-    public static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metatronClientRule);
+    public static final AppRule<EidasSamlParserConfiguration> eidasSamlParserAppRule = createEidasSamlParserRule(metatronClientRule);
 
     @ClassRule
     public static final RuleChain orderedRules = RuleChain.outerRule(metatronClientRule).around(eidasSamlParserAppRule);

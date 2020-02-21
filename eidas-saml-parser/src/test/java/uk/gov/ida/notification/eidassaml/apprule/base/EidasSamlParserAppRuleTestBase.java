@@ -4,8 +4,10 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
-import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
+import uk.gov.ida.notification.eidassaml.EidasSamlApplication;
+import uk.gov.ida.notification.eidassaml.EidasSamlParserConfiguration;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 
@@ -20,14 +22,14 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
     protected static final SamlObjectSigner SAML_OBJECT_SIGNER = createSamlObjectSigner();
     private static final SamlObjectMarshaller SAML_OBJECT_MARSHALLER = new SamlObjectMarshaller();
 
-    protected static Response postEidasAuthnRequest(EidasSamlParserAppRule eidasSamlParserAppRule, AuthnRequest authnRequest) throws URISyntaxException {
+    protected static Response postEidasAuthnRequest(AppRule<EidasSamlParserConfiguration> eidasSamlParserAppRule, AuthnRequest authnRequest) throws URISyntaxException {
         return eidasSamlParserAppRule
                 .target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(createEspRequest(authnRequest), MediaType.APPLICATION_JSON_TYPE));
     }
 
-    protected Response postBlankEidasAuthnRequest(EidasSamlParserAppRule eidasSamlParserAppRule) throws URISyntaxException {
+    protected Response postBlankEidasAuthnRequest(AppRule<EidasSamlParserConfiguration> eidasSamlParserAppRule) throws URISyntaxException {
         final String eidasAuthnRequest = Base64.getEncoder().encodeToString("".getBytes());
         final EidasSamlParserRequest request = new EidasSamlParserRequest(eidasAuthnRequest);
 
@@ -40,10 +42,12 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
         return new EidasSamlParserRequest(createSamlBase64EncodedRequest(authnRequest));
     }
 
-    protected static EidasSamlParserAppRule createEidasSamlParserRule(DropwizardClientRule metatronClientRule) {
-        return new EidasSamlParserAppRule(
+    protected static AppRule<EidasSamlParserConfiguration> createEidasSamlParserRule(DropwizardClientRule metatronClientRule) {
+        return new AppRule<>(
+                EidasSamlApplication.class,
                 ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
-                ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString())
+                ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString()),
+                ConfigOverride.config("replayChecker.redisUrl", "")
         ) {
             @Override
             protected void before() {

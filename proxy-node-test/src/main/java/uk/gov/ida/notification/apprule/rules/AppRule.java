@@ -1,11 +1,11 @@
-package uk.gov.ida.notification.translator.apprule.rules;
+package uk.gov.ida.notification.apprule.rules;
 
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
-import uk.gov.ida.notification.translator.TranslatorApplication;
-import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -17,12 +17,12 @@ import java.util.List;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
-public class TranslatorAppRule extends DropwizardAppRule<TranslatorConfiguration> {
-    private Client client;
+public class AppRule<T extends Configuration> extends DropwizardAppRule<T> {
+    protected Client client;
 
-    public TranslatorAppRule(ConfigOverride... configOverrides) {
+    public AppRule(Class<? extends Application<T>> applicationClass, ConfigOverride... configOverrides) {
         super(
-                TranslatorApplication.class,
+                applicationClass,
                 resourceFilePath("config.yml"),
                 getConfigOverrides(configOverrides)
         );
