@@ -36,7 +36,7 @@ import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.ws.rs.client.Client;
 
-public class EidasSamlApplication extends Application<EidasSamlParserConfiguration> {
+public class EidasSamlParserApplication extends Application<EidasSamlParserConfiguration> {
 
     public static void main(final String[] args) throws Exception {
         if (args == null || args.length == 0) {
@@ -45,9 +45,9 @@ public class EidasSamlApplication extends Application<EidasSamlParserConfigurati
             if (configFile == null) {
                 throw new RuntimeException("CONFIG_FILE environment variable should be set with path to configuration file");
             }
-            new EidasSamlApplication().run("server", configFile);
+            new EidasSamlParserApplication().run("server", configFile);
         } else {
-            new EidasSamlApplication().run(args);
+            new EidasSamlParserApplication().run(args);
         }
     }
 

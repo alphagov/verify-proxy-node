@@ -11,7 +11,7 @@ group = 'uk.gov.ida.notification.eidassaml'
 version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
 apply plugin: 'application'
-mainClassName = 'uk.gov.ida.notification.eidassaml.EidasSamlApplication'
+mainClassName = 'uk.gov.ida.notification.eidassaml.EidasSamlParserApplication'
 
 run {
     args 'server', './src/dist/config.yml'
