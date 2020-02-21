@@ -22,4 +22,3 @@ replayChecker:
   redisUrl: ${REDIS_SERVER_URI}
 
 proxyNodeAuthnRequestUrl: ${PROXY_NODE_AUTHN_REQUEST_ENDPOINT}
-
