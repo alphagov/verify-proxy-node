@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ENTITY_ID;
-import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 
 @Path(Urls.EidasSamlParserUrls.EIDAS_AUTHN_REQUEST_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,7 +24,6 @@ public class TestEidasSamlResource {
         return new EidasSamlParserResponse(
                 SAMPLE_EIDAS_REQUEST_ID,
                 SAMPLE_ENTITY_ID,
-                STUB_COUNTRY_PUBLIC_PRIMARY_CERT,
                 SAMPLE_DESTINATION_URL
         );
     }

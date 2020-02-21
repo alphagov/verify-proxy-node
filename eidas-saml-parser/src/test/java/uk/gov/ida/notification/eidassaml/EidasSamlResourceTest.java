@@ -37,7 +37,6 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 
-@SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
 public class EidasSamlResourceTest {
 
@@ -94,7 +93,6 @@ public class EidasSamlResourceTest {
 
         assertThat(response.getRequestId()).isEqualTo(requestId);
         assertThat(response.getIssuerEntityId()).isEqualTo(issuerAsString);
-        assertThat(response.getConnectorEncryptionPublicCertificate()).isEqualTo(TEST_RP_PUBLIC_ENCRYPTION_CERT);
         assertThat(response.getDestination()).isEqualTo(TEST_CONNECTOR_DESTINATION);
 
         assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(requestId);

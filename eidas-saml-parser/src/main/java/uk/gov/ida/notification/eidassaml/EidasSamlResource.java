@@ -7,7 +7,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
-import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.event.Level;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.contracts.CountryMetadataResponse;
@@ -49,7 +48,7 @@ public class EidasSamlResource {
 
     @POST
     @Valid
-    public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException, CertificateException, SignatureException {
+    public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException, CertificateException {
 
         AuthnRequest authnRequest = unmarshallRequest(request);
 
@@ -62,7 +61,6 @@ public class EidasSamlResource {
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
-                metatronResponse.getSamlEncryptionCertX509(),
                 metatronResponse.getDestination().toString());
     }
 
