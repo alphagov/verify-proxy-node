@@ -2,12 +2,8 @@ package uk.gov.ida.notification.eidassaml.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -17,32 +13,21 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.function.Supplier;
 
 public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
-    private static final SamlObjectMarshaller SAML_OBJECT_MARSHALLER = new SamlObjectMarshaller();
     protected static final SamlObjectSigner SAML_OBJECT_SIGNER = createSamlObjectSigner();
-    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
-    private static final DropwizardClientRule metatronService = createInitialisedClientRule(new TestMetatronResource());
-    private static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metadataClientRule);
+    private static final SamlObjectMarshaller SAML_OBJECT_MARSHALLER = new SamlObjectMarshaller();
 
-    @ClassRule
-    public static final RuleChain orderedRules = RuleChain
-            .outerRule(metatronService)
-            .around(metadataClientRule)
-            .around(eidasSamlParserAppRule);
-
-    protected static Response postEidasAuthnRequest(AuthnRequest authnRequest) throws URISyntaxException {
+    protected static Response postEidasAuthnRequest(EidasSamlParserAppRule eidasSamlParserAppRule, AuthnRequest authnRequest) throws URISyntaxException {
         return eidasSamlParserAppRule
                 .target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(createEspRequest(authnRequest), MediaType.APPLICATION_JSON_TYPE));
     }
 
-    protected Response postBlankEidasAuthnRequest() throws URISyntaxException {
+    protected Response postBlankEidasAuthnRequest(EidasSamlParserAppRule eidasSamlParserAppRule) throws URISyntaxException {
         final String eidasAuthnRequest = Base64.getEncoder().encodeToString("".getBytes());
         final EidasSamlParserRequest request = new EidasSamlParserRequest(eidasAuthnRequest);
 
@@ -55,27 +40,16 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
         return new EidasSamlParserRequest(createSamlBase64EncodedRequest(authnRequest));
     }
 
-    protected static EidasSamlParserAppRule createEidasSamlParserRule(DropwizardClientRule metadataClientRule) {
-        waitWhile(() -> metatronService.baseUri().getPort() == 0, "Waiting for mockatron to provide a port");
+    protected static EidasSamlParserAppRule createEidasSamlParserRule(DropwizardClientRule metatronClientRule) {
         return new EidasSamlParserAppRule(
                 ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
-                ConfigOverride.config("metatronUri", metatronService.baseUri().toString())
-        )
-        {
+                ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString())
+        ) {
             @Override
             protected void before() {
                 super.before();
             }
         };
-    }
-
-    private static void waitWhile(Supplier<Boolean> condition, String message) {
-        LocalDateTime giveUpAfter = LocalDateTime.now().plusSeconds(15);
-        while(condition.get()) {
-            if ( LocalDateTime.now().isAfter(giveUpAfter)) {
-                Assert.fail("Timed out while " + message);
-            }
-        }
     }
 
     private static String createSamlBase64EncodedRequest(AuthnRequest authnRequest) {

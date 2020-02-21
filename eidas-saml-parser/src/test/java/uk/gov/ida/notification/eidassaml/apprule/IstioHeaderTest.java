@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
-import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
+import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
 import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
@@ -27,16 +27,16 @@ import static uk.gov.ida.notification.shared.istio.IstioHeaders.X_REQUEST_ID;
 
 public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
 
-    private static final String SOME_RANDOM_HEADER = "some-random-header";
-
-    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
-    private static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metadataClientRule);
+    private static final String RANDOM_HEADER = "random-header";
 
     @ClassRule
-    public static final DropwizardClientRule metatronService = createInitialisedClientRule(new TestMetatronResource());
+    public static final DropwizardClientRule metatronClientRule = createInitialisedClientRule(new TestMetatronResource());
 
     @ClassRule
-    public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(eidasSamlParserAppRule);
+    public static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metatronClientRule);
+
+    @ClassRule
+    public static final RuleChain orderedRules = RuleChain.outerRule(metatronClientRule).around(eidasSamlParserAppRule);
 
     @Test
     public void headersShouldPersist() throws Exception {
@@ -58,7 +58,7 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
                 .header(X_B3_FLAGS, X_B3_FLAGS)
                 .header(X_OT_SPAN_CONTEXT, X_OT_SPAN_CONTEXT)
                 .header(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name(), ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name())
-                .header(SOME_RANDOM_HEADER, SOME_RANDOM_HEADER)
+                .header(RANDOM_HEADER, RANDOM_HEADER)
                 .post(Entity.entity(createEspRequest(authnRequest), MediaType.APPLICATION_JSON_TYPE));
 
         assertThat(response.getHeaders().getFirst(X_REQUEST_ID)).isEqualTo(X_REQUEST_ID);
@@ -68,6 +68,6 @@ public class IstioHeaderTest extends EidasSamlParserAppRuleTestBase {
         assertThat(response.getHeaders().getFirst(X_B3_SAMPLED)).isEqualTo(X_B3_SAMPLED);
         assertThat(response.getHeaders().getFirst(X_B3_FLAGS)).isEqualTo(X_B3_FLAGS);
         assertThat(response.getHeaders().getFirst(X_OT_SPAN_CONTEXT)).isEqualTo(X_OT_SPAN_CONTEXT);
-        assertThat(response.getHeaders().containsKey(SOME_RANDOM_HEADER)).isFalse();
+        assertThat(response.getHeaders().containsKey(RANDOM_HEADER)).isFalse();
     }
 }
