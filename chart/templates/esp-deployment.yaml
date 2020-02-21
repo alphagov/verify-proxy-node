@@ -67,6 +67,8 @@ spec:
           value: {{ include "connector.entityID" . }}
         - name: CONNECTOR_NODE_METADATA_URL
           value: {{ include "connector.metadata.url" . }}
+        - name: METATRON_URL
+          value: http://{{ .Release.Name }}-metatron/
 {{- if .Values.stubConnector.enabled }}
         - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
           valueFrom:
