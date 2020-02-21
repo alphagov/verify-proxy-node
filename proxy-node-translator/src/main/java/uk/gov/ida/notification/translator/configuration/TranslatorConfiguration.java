@@ -5,7 +5,6 @@ import engineering.reliability.gds.metrics.config.PrometheusConfiguration;
 import io.dropwizard.Configuration;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
 import uk.gov.ida.notification.configuration.VerifyServiceProviderConfiguration;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;

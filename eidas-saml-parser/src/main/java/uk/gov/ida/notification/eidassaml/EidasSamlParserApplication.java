@@ -3,10 +3,14 @@ package uk.gov.ida.notification.eidassaml;
 import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+
+import javax.ws.rs.client.Client;
+
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -34,10 +38,8 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.MetatronProxy;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
-import javax.ws.rs.client.Client;
-
 public class EidasSamlParserApplication extends Application<EidasSamlParserConfiguration> {
-
+    private MetatronProxy metatronProxy;
     public static void main(final String[] args) throws Exception {
         if (args == null || args.length == 0) {
             String configFile = System.getenv("CONFIG_FILE");
@@ -73,11 +75,12 @@ public class EidasSamlParserApplication extends Application<EidasSamlParserConfi
 
     @Override
     public void run(EidasSamlParserConfiguration configuration, Environment environment) throws Exception {
-
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("parser");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
-        MetatronProxy metatronProxy = createMetatronProxy(configuration, environment);
-        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration, metatronProxy);
+
+        metatronProxy = createMetatronProxy(configuration, environment);
+
+        EidasAuthnRequestValidator eidasAuthnRequestValidator = createEidasAuthnRequestValidator(configuration);
 
         environment.jersey().register(IstioHeaderMapperFilter.class);
         environment.jersey().register(ProxyNodeLoggingFilter.class);
@@ -99,11 +102,16 @@ public class EidasSamlParserApplication extends Application<EidasSamlParserConfi
         environment.jersey().register(new CatchAllExceptionMapper());
     }
 
-    private MetatronProxy createMetatronProxy(EidasSamlParserConfiguration configuration, Environment environment) {
-        return this.buildMetatronProxy(configuration, environment);
+    private void registerInjections(Environment environment) {
+        environment.jersey().register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                bindAsContract(IstioHeaderStorage.class);
+            }
+        });
     }
 
-    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlParserConfiguration configuration, MetatronProxy metatronProxy) throws Exception {
+    private EidasAuthnRequestValidator createEidasAuthnRequestValidator(EidasSamlParserConfiguration configuration) throws Exception {
         MessageReplayChecker replayChecker = configuration.getReplayChecker().createMessageReplayChecker("eidas-saml-parser");
         DestinationValidator destinationValidator = new DestinationValidator(
                 configuration.getProxyNodeAuthnRequestUrl(), configuration.getProxyNodeAuthnRequestUrl().getPath());
@@ -120,22 +128,15 @@ public class EidasSamlParserApplication extends Application<EidasSamlParserConfi
         );
     }
 
-    private void registerInjections(Environment environment) {
-        environment.jersey().register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bindAsContract(IstioHeaderStorage.class);
-            }
-        });
-    }
-
-    private MetatronProxy buildMetatronProxy(EidasSamlParserConfiguration configuration, Environment environment) {
-        Client client = new JerseyClientBuilder(environment).using(environment).build("metatron-client");
-        ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
-                new ErrorHandlingClient(client),
-                new JsonResponseProcessor(environment.getObjectMapper()),
-                new IstioHeaderStorage()
+    private MetatronProxy createMetatronProxy(EidasSamlParserConfiguration configuration, Environment environment) {
+        JerseyClientConfiguration jerseyConfig = new JerseyClientConfiguration();
+        Client client = new JerseyClientBuilder(environment).using(jerseyConfig).build("metatron-client");
+        return new MetatronProxy(configuration.getMetatronUri(),
+            new ProxyNodeJsonClient(
+                    new ErrorHandlingClient(client),
+                    new JsonResponseProcessor(environment.getObjectMapper()),
+                    new IstioHeaderStorage()
+            )
         );
-        return new MetatronProxy(jsonClient, configuration.getMetatronUrl());
     }
 }

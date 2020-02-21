@@ -23,11 +23,11 @@ public class EidasResponseGenerator {
     private final X509CertificateFactory x509CertificateFactory;
 
     public EidasResponseGenerator(
-            HubResponseTranslator hubResponseTranslator,
-            EidasFailureResponseGenerator failureResponseGenerator,
-            SamlObjectSigner samlObjectSigner,
-            MetatronProxy metatronProxy,
-            X509CertificateFactory x509CertificateFactory) {
+            final HubResponseTranslator hubResponseTranslator,
+            final EidasFailureResponseGenerator failureResponseGenerator,
+            final SamlObjectSigner samlObjectSigner,
+            final MetatronProxy metatronProxy,
+            final X509CertificateFactory x509CertificateFactory) {
         this.hubResponseTranslator = hubResponseTranslator;
         this.failureResponseGenerator = failureResponseGenerator;
         this.samlObjectSigner = samlObjectSigner;
@@ -39,29 +39,29 @@ public class EidasResponseGenerator {
         final CountryMetadataResponse countryMetadataResponse = metatronProxy.getCountryMetadata(hubResponseContainer.getIssuer().toString());
         final Response eidasResponse = hubResponseTranslator.getTranslatedHubResponse(hubResponseContainer, countryMetadataResponse);
         final Response encryptedEidasResponse = encryptAssertions(eidasResponse, countryMetadataResponse.getSamlEncryptionCertX509());
+
         return signSamlResponse(encryptedEidasResponse, hubResponseContainer.getEidasRequestId());
     }
 
     public Response generateFailureResponse(
-            javax.ws.rs.core.Response.Status responseStatus,
-            String eidasRequestId,
-            String destinationUrl,
-            URI entityId) {
-        Response eidasResponse = failureResponseGenerator.generateFailureSamlResponse(
+            final javax.ws.rs.core.Response.Status responseStatus,
+            final String eidasRequestId,
+            final String destinationUrl,
+            final URI entityId) {
+
+        final Response eidasResponse = failureResponseGenerator.generateFailureSamlResponse(
                 responseStatus,
                 eidasRequestId,
                 destinationUrl,
-                entityId.toString()
-        );
-
+                entityId.toString());
         return signSamlResponse(eidasResponse, eidasRequestId);
     }
 
     private Response encryptAssertions(final Response eidasResponse, final String encryptionCertificate) {
         return new ResponseAssertionEncrypter(
-            new BasicX509Credential(
-                x509CertificateFactory.createCertificate(encryptionCertificate)
-            )
+                new BasicX509Credential(
+                        x509CertificateFactory.createCertificate(encryptionCertificate)
+                )
         ).encrypt(eidasResponse);
     }
 

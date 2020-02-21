@@ -10,7 +10,6 @@ import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
 import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.exceptions.proxy.MetatronResponseException;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -45,10 +44,8 @@ public class MetatronProxyTest {
     @Test
     public void shouldReturnMetatronResponse() {
         MetatronProxy metatronProxy = new MetatronProxy(
-                jsonClient,
-                UriBuilder
-                        .fromUri(testMetatronClientRule.baseUri())
-                        .build()
+                UriBuilder.fromUri(testMetatronClientRule.baseUri()).build(),
+                jsonClient
         );
 
         CountryMetadataResponse countryMetadata = metatronProxy.getCountryMetadata(TEST_ENTITY_ID);
@@ -64,10 +61,8 @@ public class MetatronProxyTest {
     @Test
     public void shouldThrowMetatronResponseExceptionIfServerIssue() {
         MetatronProxy metatronProxy = new MetatronProxy(
-                jsonClient,
-                UriBuilder
-                        .fromUri(testMetatronServerErrorClientRule.baseUri())
-                        .build()
+            UriBuilder.fromUri(testMetatronServerErrorClientRule.baseUri()).build(),
+            jsonClient
         );
 
         MetatronResponseException metatronResponseException = assertThrows(MetatronResponseException.class, () -> {
@@ -81,10 +76,8 @@ public class MetatronProxyTest {
     @Test
     public void shouldThrowMetatronResponseExceptionIfClientIssue() {
         MetatronProxy metatronProxy = new MetatronProxy(
-                jsonClient,
-                UriBuilder
-                        .fromUri(testMetatronClientErrorClientRule.baseUri())
-                        .build()
+            UriBuilder.fromUri(testMetatronClientErrorClientRule.baseUri()).build(),
+            jsonClient
         );
 
         MetatronResponseException metatronResponseException = assertThrows(MetatronResponseException.class, () -> {

@@ -11,15 +11,17 @@ import java.util.Optional;
 
 public class HubResponseContainer {
 
-    private String pid;
-    private String eidasRequestId;
-    private URI destinationURL;
-    private URI issuer;
-    private Attributes attributes;
-    private VspScenario vspScenario;
-    private VspLevelOfAssurance levelOfAssurance;
+    private final String pid;
+    private final String eidasRequestId;
+    private final URI destinationURL;
+    private final URI issuer;
+    private final Attributes attributes;
+    private final VspScenario vspScenario;
+    private final VspLevelOfAssurance levelOfAssurance;
 
-    public HubResponseContainer(HubResponseTranslatorRequest hubResponseTranslatorRequest, TranslatedHubResponse translatedHubResponse) {
+    public HubResponseContainer(
+            final HubResponseTranslatorRequest hubResponseTranslatorRequest,
+            final TranslatedHubResponse translatedHubResponse) {
         this.pid = translatedHubResponse.getPid().orElse(null);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
