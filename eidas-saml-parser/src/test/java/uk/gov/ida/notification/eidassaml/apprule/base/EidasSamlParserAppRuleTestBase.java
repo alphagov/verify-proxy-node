@@ -22,9 +22,15 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
 
     private static final SamlObjectMarshaller SAML_OBJECT_MARSHALLER = new SamlObjectMarshaller();
     protected static final SamlObjectSigner SAML_OBJECT_SIGNER = createSamlObjectSigner();
-    private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
-    private static final DropwizardClientRule metatronService = createInitialisedClientRule(new TestMetatronResource());
-    private static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metadataClientRule);
+
+    @ClassRule
+    public static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
+
+    @ClassRule
+    public static final DropwizardClientRule metatronService = createInitialisedClientRule(new TestMetatronResource());
+
+    @ClassRule
+    public static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metadataClientRule);
 
     @ClassRule
     public static final RuleChain orderedRules = RuleChain

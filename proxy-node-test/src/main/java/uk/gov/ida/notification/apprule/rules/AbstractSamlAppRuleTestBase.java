@@ -3,6 +3,7 @@ package uk.gov.ida.notification.apprule.rules;
 import com.google.common.base.Stopwatch;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import keystore.KeyStoreResource;
+import org.junit.Assert;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import uk.gov.ida.notification.VerifySamlInitializer;
@@ -13,7 +14,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 import static keystore.builders.KeyStoreResourceBuilder.aKeyStoreResource;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
@@ -93,6 +96,15 @@ public abstract class AbstractSamlAppRuleTestBase {
 
         if (connectorMetadata.equals("")) {
             throw new RuntimeException("Couldn't fetch metadata from " + metadataUrl);
+        }
+    }
+
+    public static void waitWhile(Supplier<Boolean> condition, String message) {
+        LocalDateTime giveUpAfter = LocalDateTime.now().plusSeconds(15);
+        while(condition.get()) {
+            if ( LocalDateTime.now().isAfter(giveUpAfter)) {
+                Assert.fail("Timed out while " + message);
+            }
         }
     }
 

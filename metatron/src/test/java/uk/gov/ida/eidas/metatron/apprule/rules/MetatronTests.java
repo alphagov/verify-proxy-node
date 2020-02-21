@@ -31,16 +31,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT;
+import static uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase.waitWhile;
 
 @RunWith(OpenSAMLRunner.class)
 public class MetatronTests {
@@ -69,15 +68,6 @@ public class MetatronTests {
         metatronAppRule = new MetatronAppRule();
 
         return RuleChain.outerRule(testMetadataServer).around(metatronAppRule);
-    }
-
-    private static void waitWhile(Supplier<Boolean> condition, String message) {
-        LocalDateTime giveUpAfter = LocalDateTime.now().plusSeconds(15);
-        while(condition.get()) {
-            if ( LocalDateTime.now().isAfter(giveUpAfter)) {
-                Assert.fail("Timed out while " + message);
-            }
-        }
     }
 
     @Test
