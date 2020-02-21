@@ -24,7 +24,7 @@ import se.litsec.eidas.opensaml.ext.attributes.CurrentFamilyNameType;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 import se.litsec.opensaml.utils.ObjectUtils;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.helpers.HtmlHelpers;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
@@ -33,6 +33,7 @@ import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.saml.SamlParser;
+import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,7 +50,7 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SI
 public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTestBase {
 
     private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
-    private static final StubConnectorAppRule stubConnectorAppRule = createStubConnectorAppRule(metadataClientRule);
+    private static final AppRule<StubConnectorConfiguration> stubConnectorAppRule = createStubConnectorAppRule(metadataClientRule);
 
     @ClassRule
     public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(stubConnectorAppRule);

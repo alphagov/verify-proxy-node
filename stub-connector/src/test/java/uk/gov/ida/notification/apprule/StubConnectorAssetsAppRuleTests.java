@@ -6,7 +6,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import uk.gov.ida.notification.apprule.base.StubConnectorAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
+import uk.gov.ida.notification.apprule.rules.AppRule;
+import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StubConnectorAssetsAppRuleTests extends StubConnectorAppRuleTestBase {
 
     private static final DropwizardClientRule metadataClientRule = createTestMetadataClientRule();
-    private static final StubConnectorAppRule stubConnectorAppRule = createStubConnectorAppRule(metadataClientRule);
+    private static final AppRule<StubConnectorConfiguration> stubConnectorAppRule = createStubConnectorAppRule(metadataClientRule);
 
     @ClassRule
     public static final RuleChain orderedRules = RuleChain.outerRule(metadataClientRule).around(stubConnectorAppRule);

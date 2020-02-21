@@ -3,6 +3,7 @@ dependencies {
     implementation configurations.opensaml,
             configurations.verify_saml,
             configurations.common,
+            configurations.dropwizard_client,
             project(':proxy-node-shared')
 
     api configurations.verify_saml_test,
