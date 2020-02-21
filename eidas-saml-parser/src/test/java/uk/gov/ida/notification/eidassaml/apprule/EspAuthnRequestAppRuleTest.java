@@ -3,9 +3,12 @@ package uk.gov.ida.notification.eidassaml.apprule;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
@@ -15,8 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasConstants;
 import uk.gov.ida.notification.apprule.rules.TestMetadataResource;
+import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.eidassaml.apprule.base.EidasSamlParserAppRuleTestBase;
+import uk.gov.ida.notification.eidassaml.apprule.rules.EidasSamlParserAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.X509CredentialFactory;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -41,6 +46,15 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
 
     private EidasAuthnRequestBuilder request;
 
+    @ClassRule
+    public static final DropwizardClientRule metatronClientRule = createInitialisedClientRule(new TestMetatronResource());
+
+    @ClassRule
+    public static final EidasSamlParserAppRule eidasSamlParserAppRule = createEidasSamlParserRule(metatronClientRule);
+
+    @ClassRule
+    public static final RuleChain orderedRules = RuleChain.outerRule(metatronClientRule).around(eidasSamlParserAppRule);
+
     @Before
     public void setUp() throws Exception {
         MDC.clear();
@@ -62,7 +76,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         samlObjectSignerIncorrectSigningKey.sign(requestWithIncorrectSigningKey, "response-id");
 
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(requestWithIncorrectSigningKey),
+                postEidasAuthnRequest(eidasSamlParserAppRule, requestWithIncorrectSigningKey),
                 "Signature cryptographic validation not successful"
         );
     }
@@ -72,7 +86,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         AuthnRequest unsignedRequest = request.withRandomRequestId().build();
 
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(unsignedRequest),
+                postEidasAuthnRequest(eidasSamlParserAppRule, unsignedRequest),
                 "Signature cannot be null"
         );
     }
@@ -91,14 +105,14 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         SAML_OBJECT_SIGNER.sign(requestWithoutId, null);
 
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(requestWithoutId),
+                postEidasAuthnRequest(eidasSamlParserAppRule, requestWithoutId),
                 "Bad Authn Request from Connector Node: Missing Request ID"
         );
     }
 
     @Test
     public void shouldReturnHTTP400WhenAuthnRequestIsBlankBase64() throws Exception {
-        Response response = postBlankEidasAuthnRequest();
+        Response response = postBlankEidasAuthnRequest(eidasSamlParserAppRule);
         assertErrorResponse(response);
     }
 
@@ -209,9 +223,9 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         AuthnRequest duplicatedRequest = request.build();
         SAML_OBJECT_SIGNER.sign(duplicatedRequest, "response-id");
 
-        assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(duplicatedRequest));
+        assertGoodResponse(duplicatedRequest, postEidasAuthnRequest(eidasSamlParserAppRule, duplicatedRequest));
         assertErrorResponseWithMessage(
-                postEidasAuthnRequest(duplicatedRequest),
+                postEidasAuthnRequest(eidasSamlParserAppRule, duplicatedRequest),
                 "Bad Authn Request from Connector Node: Replay check of ID"
         );
     }
@@ -225,7 +239,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         AuthnRequest authnRequest = request.withRequestId("request_id").build();
         SAML_OBJECT_SIGNER.sign(authnRequest, "response-id");
 
-        postEidasAuthnRequest(authnRequest);
+        postEidasAuthnRequest(eidasSamlParserAppRule, authnRequest);
 
         ArgumentCaptor<ILoggingEvent> loggingEventArgumentCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(appender, times(5)).doAppend(loggingEventArgumentCaptor.capture());
@@ -250,21 +264,21 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
         SAML_OBJECT_SIGNER.sign(postedRequest, "response-id");
 
-        assertGoodResponse(postedRequest, postEidasAuthnRequest(postedRequest));
+        assertGoodResponse(postedRequest, postEidasAuthnRequest(eidasSamlParserAppRule, postedRequest));
     }
 
     private void assertBadRequest(EidasAuthnRequestBuilder builder) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
         SAML_OBJECT_SIGNER.sign(postedRequest, "response-id");
 
-        assertErrorResponse(postEidasAuthnRequest(postedRequest));
+        assertErrorResponse(postEidasAuthnRequest(eidasSamlParserAppRule, postedRequest));
     }
 
     private void assertBadRequestWithMessage(EidasAuthnRequestBuilder builder, String errorMessageContains) throws Exception {
         AuthnRequest postedRequest = builder.withRandomRequestId().build();
         SAML_OBJECT_SIGNER.sign(postedRequest, "response-id");
 
-        assertErrorResponseWithMessage(postEidasAuthnRequest(postedRequest), errorMessageContains);
+        assertErrorResponseWithMessage(postEidasAuthnRequest(eidasSamlParserAppRule, postedRequest), errorMessageContains);
     }
 
     private void assertGoodResponse(AuthnRequest eidasAuthnRequest, Response response) {
