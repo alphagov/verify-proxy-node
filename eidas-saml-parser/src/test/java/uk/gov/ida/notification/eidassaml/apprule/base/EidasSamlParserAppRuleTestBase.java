@@ -28,8 +28,8 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
 
     @ClassRule
     public static final RuleChain orderedRules = RuleChain
-            .outerRule(metadataClientRule)
-            .around(metatronService)
+            .outerRule(metatronService)
+            .around(metadataClientRule)
             .around(eidasSamlParserAppRule);
 
     protected static Response postEidasAuthnRequest(AuthnRequest authnRequest) throws URISyntaxException {
