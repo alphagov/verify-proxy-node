@@ -2,6 +2,7 @@ package uk.gov.ida.notification.eidassaml.apprule.base;
 
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.rules.RuleChain;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -16,7 +17,9 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.function.Supplier;
 
 public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
@@ -53,6 +56,7 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
     }
 
     protected static EidasSamlParserAppRule createEidasSamlParserRule(DropwizardClientRule metadataClientRule) {
+        waitWhile(() -> metatronService.baseUri().getPort() == 0, "Waiting for mockatron to provide a port");
         return new EidasSamlParserAppRule(
                 ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
                 ConfigOverride.config("metatronUri", metatronService.baseUri().toString())
@@ -63,6 +67,15 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
                 super.before();
             }
         };
+    }
+
+    private static void waitWhile(Supplier<Boolean> condition, String message) {
+        LocalDateTime giveUpAfter = LocalDateTime.now().plusSeconds(15);
+        while(condition.get()) {
+            if ( LocalDateTime.now().isAfter(giveUpAfter)) {
+                Assert.fail("Timed out while " + message);
+            }
+        }
     }
 
     private static String createSamlBase64EncodedRequest(AuthnRequest authnRequest) {
