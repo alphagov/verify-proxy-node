@@ -4,7 +4,7 @@ import io.dropwizard.testing.junit.ResourceTestRule;
 import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +15,10 @@ import org.opensaml.saml.saml2.core.Issuer;
 import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import se.litsec.opensaml.utils.ObjectUtils;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
@@ -29,6 +30,7 @@ import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -50,8 +52,8 @@ public class EidasSamlResourceTest {
             .addResource(new EidasSamlResource(eidasAuthnRequestValidator, mockMetatronProxy))
             .build();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         InitializationService.initialize();
     }
 
@@ -80,7 +82,7 @@ public class EidasSamlResourceTest {
                 new CountryMetadataResponse(
                         METADATA_SIGNING_A_PUBLIC_CERT,
                         TEST_RP_PUBLIC_ENCRYPTION_CERT,
-                        UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(),
+                        Collections.singletonList(new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true)),
                         issuer.getValue(),
                         "EU");
 
@@ -93,7 +95,7 @@ public class EidasSamlResourceTest {
 
         assertThat(response.getRequestId()).isEqualTo(requestId);
         assertThat(response.getIssuerEntityId()).isEqualTo(issuerAsString);
-        assertThat(response.getDestination()).isEqualTo(TEST_CONNECTOR_DESTINATION);
+        assertThat(response.getAssertionConsumerServiceLocation()).isEqualTo(TEST_CONNECTOR_DESTINATION);
 
         assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(requestId);
         assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(destination);

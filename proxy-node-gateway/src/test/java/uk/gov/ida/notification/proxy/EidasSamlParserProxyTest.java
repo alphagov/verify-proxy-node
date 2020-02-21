@@ -85,7 +85,7 @@ public class EidasSamlParserProxyTest {
 
         assertThat(SAMPLE_REQUEST_ID).isEqualTo(response.getRequestId());
         assertThat(SAMPLE_ENTITY_ID).isEqualTo(response.getIssuerEntityId());
-        assertThat(SAMPLE_DESTINATION_URL).isEqualTo(response.getDestination());
+        assertThat(SAMPLE_DESTINATION_URL).isEqualTo(response.getAssertionConsumerServiceLocation());
     }
 
     @Test

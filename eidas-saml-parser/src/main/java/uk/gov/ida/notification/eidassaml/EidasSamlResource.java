@@ -9,9 +9,10 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
 import org.slf4j.event.Level;
 import se.litsec.opensaml.utils.ObjectUtils;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
+import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.shared.Urls;
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
@@ -26,10 +27,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @IngressEgressLogging
@@ -49,19 +52,27 @@ public class EidasSamlResource {
     @POST
     @Valid
     public EidasSamlParserResponse post(@Valid EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException, CertificateException {
-
-        AuthnRequest authnRequest = unmarshallRequest(request);
-
-        CountryMetadataResponse metatronResponse = getMetatronResponse(authnRequest);
+        final AuthnRequest authnRequest = unmarshallRequest(request);
+        final CountryMetadataResponse metatronResponse = getMetatronResponse(authnRequest);
 
         eidasAuthnRequestValidator.validate(authnRequest, this.getSigningCredential(metatronResponse.getSamlSigningCertX509()));
 
-        this.doLogging(authnRequest);
+        final String assertionConsumerServiceURL =
+                authnRequest.getAssertionConsumerServiceURL() != null ?
+                        authnRequest.getAssertionConsumerServiceURL() :
+                        metatronResponse.getAssertionConsumerServices()
+                                .stream()
+                                .filter(AssertionConsumerService::isDefaultService)
+                                .min(Comparator.comparing(AssertionConsumerService::getIndex))
+                                .map(AssertionConsumerService::getLocation)
+                                .map(URI::toString)
+                                .orElseThrow();
 
+        this.logAuthnRequestMdcProperties(authnRequest);
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
-                metatronResponse.getDestination().toString());
+                assertionConsumerServiceURL);
     }
 
     private AuthnRequest unmarshallRequest(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {
@@ -76,7 +87,7 @@ public class EidasSamlResource {
         return metatronProxy.getCountryMetadata(authnRequest.getIssuer().getValue());
     }
 
-    private void doLogging(AuthnRequest authnRequest) {
+    private void logAuthnRequestMdcProperties(AuthnRequest authnRequest) {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, authnRequest.getID());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, authnRequest.getDestination());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, authnRequest.getIssuer().getValue());

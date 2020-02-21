@@ -19,16 +19,16 @@ public class EidasSamlParserResponse {
     @JsonProperty
     @NotBlank
     @ValidDestinationUriString
-    private String destination;
+    private String assertionConsumerServiceLocation;
 
     @SuppressWarnings("Needed for serialisaiton")
     public EidasSamlParserResponse() {
     }
 
-    public EidasSamlParserResponse(String requestId, String issuerEntityId, String destination) {
+    public EidasSamlParserResponse(String requestId, String issuerEntityId, String assertionConsumerServiceLocation) {
         this.requestId = requestId;
         this.issuerEntityId = issuerEntityId;
-        this.destination = destination;
+        this.assertionConsumerServiceLocation = assertionConsumerServiceLocation;
     }
 
     public String getRequestId() {
@@ -39,7 +39,7 @@ public class EidasSamlParserResponse {
         return issuerEntityId;
     }
 
-    public String getDestination() {
-        return destination;
+    public String getAssertionConsumerServiceLocation() {
+        return assertionConsumerServiceLocation;
     }
 }

@@ -7,6 +7,7 @@ import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.xmlsec.signature.Signature;
 import uk.gov.ida.saml.core.test.TestCredentialFactory;
 import uk.gov.ida.saml.core.test.builders.SignatureBuilder;
+import uk.gov.ida.saml.core.test.builders.metadata.AssertionConsumerServiceBuilder;
 import uk.gov.ida.saml.core.test.builders.metadata.EntityDescriptorBuilder;
 import uk.gov.ida.saml.core.test.builders.metadata.KeyDescriptorBuilder;
 import uk.gov.ida.saml.core.test.builders.metadata.SPSSODescriptorBuilder;
@@ -64,7 +65,7 @@ public class TestCountryMetadataResource {
                 .withEntityId(entityId)
                 .withIdpSsoDescriptor(null)
                 .setAddDefaultSpServiceDescriptor(false)
-                .addSpServiceDescriptor(getSpssoDescriptor())
+                .addSpServiceDescriptor(getSpssoDescriptor(entityId))
                 .withValidUntil(DateTime.now().plusWeeks(2))
                 .withSignature(getSignature())
                 .build();
@@ -75,7 +76,7 @@ public class TestCountryMetadataResource {
                 .withEntityId(entityId)
                 .withIdpSsoDescriptor(null)
                 .setAddDefaultSpServiceDescriptor(false)
-                .addSpServiceDescriptor(getSpssoDescriptor())
+                .addSpServiceDescriptor(getSpssoDescriptor(entityId))
                 .withValidUntil(DateTime.now().minusWeeks(2))
                 .withSignature(getSignature())
                 .build();
@@ -86,13 +87,13 @@ public class TestCountryMetadataResource {
                 .withEntityId(entityId)
                 .withIdpSsoDescriptor(null)
                 .setAddDefaultSpServiceDescriptor(false)
-                .addSpServiceDescriptor(getSpssoDescriptor())
+                .addSpServiceDescriptor(getSpssoDescriptor(entityId))
                 .withValidUntil(DateTime.now().plusWeeks(2))
                 .withSignature(null)
                 .build();
     }
 
-    private static SPSSODescriptor getSpssoDescriptor() {
+    private static SPSSODescriptor getSpssoDescriptor(String entityID) {
         KeyDescriptor encryptionKeyDescriptor = KeyDescriptorBuilder.aKeyDescriptor()
                 .withX509ForEncryption(uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_ENCRYPTION_CERT)
                 .build();
@@ -101,12 +102,24 @@ public class TestCountryMetadataResource {
                 .withX509ForSigning(uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_RP_PUBLIC_SIGNING_CERT)
                 .build();
 
-        return SPSSODescriptorBuilder.anSpServiceDescriptor()
+        final SPSSODescriptorBuilder spssoDescriptorBuilder = SPSSODescriptorBuilder.anSpServiceDescriptor()
                 .withoutDefaultSigningKey()
                 .withoutDefaultEncryptionKey()
                 .addKeyDescriptor(signingKeyDescriptor)
                 .addKeyDescriptor(encryptionKeyDescriptor)
-                .build();
+                .addAssertionConsumerService(AssertionConsumerServiceBuilder.anAssertionConsumerService().build());
+
+        if (entityID.contains(VALID_TWO)) {
+            spssoDescriptorBuilder.addAssertionConsumerService(
+                    AssertionConsumerServiceBuilder
+                            .anAssertionConsumerService()
+                            .withLocation("http://foo.com/bar2")
+                            .withIndex(0)
+                            .isDefault()
+                            .build());
+        }
+
+        return spssoDescriptorBuilder.build();
     }
 
     private static Signature getSignature() {

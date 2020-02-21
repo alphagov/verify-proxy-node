@@ -7,7 +7,7 @@ import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.exceptions.hubresponse.ResponseSigningException;
 import uk.gov.ida.notification.saml.ResponseAssertionEncrypter;
 import uk.gov.ida.notification.saml.SamlObjectSigner;

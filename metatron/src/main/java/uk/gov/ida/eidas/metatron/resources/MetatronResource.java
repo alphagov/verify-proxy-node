@@ -1,7 +1,7 @@
 package uk.gov.ida.eidas.metatron.resources;
 
 import uk.gov.ida.eidas.metatron.domain.MetadataResolverService;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.shared.logging.IngressEgressLogging;
 
 import javax.validation.Valid;
@@ -29,5 +29,4 @@ public class MetatronResource {
     public CountryMetadataResponse getCountryMetadataResponse(@PathParam("entityId") URI entityId) {
         return this.metadataResolverService.getCountryMetadataResponse(entityId);
     }
-
 }
