@@ -89,6 +89,8 @@ spec:
               key: hsmPassword
         - name: VERIFY_SERVICE_PROVIDER_URL
           value: http://{{ .Release.Name }}-vsp/
+        - name: METATRON_URL
+          value: http://{{ .Release.Name }}-metatron/
       - name: hsm-client
         image: "{{ .Values.hsm.image.repository }}:{{ .Values.hsm.image.tag }}"
         imagePullPolicy: {{ .Values.hsm.image.pullPolicy }}
