@@ -55,6 +55,54 @@ Given("the user visits the Netherlands Connector Node Stub Page") do
   visit('https://demo-portal.minez.nl/demoportal/etoegang')
 end
 
+Given("the user visits a government service") do
+  visit('https://www.gov.uk/personal-tax-account/sign-in/prove-identity')
+end
+
+And('they choose sign in with a digital identity from another European country') do
+  find('label', text: 'Sign in with a digital identity from another European country').click
+  click_button('Continue')
+end
+
+And('they select Spain') do
+  click_button('Select DNIe')
+end
+
+Then('they should arrive at the Spain Hub') do
+  assert_text('Identificación con DNIe')
+end
+
+And('they select Estonia') do
+  click_button('Select ID-kaart')
+end
+
+Then('they should arrive at the Estonia Hub') do
+  assert_text('Turvaliseks autentimiseks Euroopa e-teenustes')
+end 
+
+And('they select Italy') do
+  click_button('Select SPID')
+end
+
+Then('they should arrive at the Italy Hub') do
+  assert_text('Italian eIDAS Login')
+end 
+
+And('they select Luxembourg') do
+  click_button('Select eAccess')
+end
+
+Then('they should arrive at the Luxembourg Hub') do
+  assert_text('eIDAS Authentication Service')
+end 
+
+And('they navigate through Eidas') do
+  assert_text('YOUR BASIC INFORMATION')
+  click_button('Next')
+  assert_text('YOUR ADDITIONAL INFORMATION')
+  click_button('Next')
+end
+
 And('they choose the UK as the country to verify with') do
   assert_text('Kies hoe u wilt inloggen')
   click_link('English')
