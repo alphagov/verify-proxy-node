@@ -34,11 +34,11 @@ verifyHubConfiguration:
     trustStore:
       type: ${TRUSTSTORE_TYPE:-encoded}
       store: ${HUB_METADATA_TRUSTSTORE:-}
-      password: ${HUB_TRUSTSTORE_PASSWORD:-puppet}
+      password: ${HUB_METADATA_TRUSTSTORE_PASSWORD:-puppet}
     hubTrustStore:
       type: ${TRUSTSTORE_TYPE:-encoded}
       store: ${HUB_METADATA_TRUSTSTORE:-}
-      password: ${HUB_TRUSTSTORE_PASSWORD:-puppet}
+      password: ${HUB_METADATA_TRUSTSTORE_PASSWORD:-puppet}
     idpTrustStore:
       type: ${TRUSTSTORE_TYPE:-encoded}
       store: ${HUB_METADATA_TRUSTSTORE:-}
