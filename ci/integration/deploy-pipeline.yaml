@@ -640,6 +640,11 @@ spec:
                     --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
                     --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
                     --set "stubConnector.enabled=true" \
+                    --set "vsp.hub.ssoLocation=${HUB_SSO_LOCATION}" \
+                    --set "vsp.hub.metadata.url=${HUB_METADATA_URL}" \
+                    --set "vsp.hub.entityID=${HUB_ENTITY_ID}" \
+                    --set "vsp.hub.metadata.truststore=${HUB_METADATA_TRUSTSTORE}" \
+                    --set "vsp.hub.metadata.truststorePassword=${HUB_METADATA_TRUSTSTORE_PASSWORD}" \
                     --output-dir "./manifests/" \
                     ./release/*.tgz
 
