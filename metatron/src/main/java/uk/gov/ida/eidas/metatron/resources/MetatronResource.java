@@ -29,5 +29,4 @@ public class MetatronResource {
     public CountryMetadataResponse getCountryMetadataResponse(@PathParam("entityId") URI entityId) {
         return this.metadataResolverService.getCountryMetadataResponse(entityId);
     }
-
 }

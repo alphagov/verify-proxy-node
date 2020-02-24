@@ -4,9 +4,11 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import org.junit.ClassRule;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.apprule.rules.TestMetatronResource;
+import uk.gov.ida.notification.translator.TranslatorApplication;
 import uk.gov.ida.notification.translator.apprule.rules.StubVspResource;
-import uk.gov.ida.notification.translator.apprule.rules.TranslatorAppRule;
+import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
@@ -15,12 +17,13 @@ public class TranslatorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
     @ClassRule
     public static final DropwizardClientRule vspClientRule = createInitialisedClientRule(new StubVspResource());
-    
+
     @ClassRule
     public static final DropwizardClientRule metatronClientRule = createInitialisedClientRule(new TestMetatronResource());
-    
+
     @ClassRule
-    public static final TranslatorAppRule translatorAppRule = new TranslatorAppRule(
+    public static final AppRule<TranslatorConfiguration> translatorAppRule = new AppRule<>(
+            TranslatorApplication.class,
             ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString()),

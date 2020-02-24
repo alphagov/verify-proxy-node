@@ -5,8 +5,10 @@ import io.dropwizard.testing.junit.DropwizardClientRule;
 import keystore.KeyStoreResource;
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
-import uk.gov.ida.notification.apprule.rules.StubConnectorAppRule;
+import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
+import uk.gov.ida.notification.stubconnector.StubConnectorApplication;
+import uk.gov.ida.notification.stubconnector.StubConnectorConfiguration;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -21,18 +23,19 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 
 public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
-    private static final KeyStoreResource METADATA_TRUSTSTORE = createMetadataTruststore();
+    protected static final String ENTITY_ORG_NAME = "stub country org name";
+    protected static final String ENTITY_ORG_DISPLAY_NAME = "stub country org display name";
+    protected static final String ENTITY_ORG_URL = "http://stub-connector/homepage";
     protected static final String METADATA_CERTS_PUBLISH_PATH = "/proxy-node-md-certs-publish-path";
     protected static final String METADATA_PUBLISH_PATH = "/stub-connector-md-publish-path";
     protected static final String ENTITY_ID = "http://stub-connector/Connector";
     protected static final String ACS_URL = "http://stub-connector/SAML2/Response/POST";
-    public static final String ENTITY_ORG_NAME = "stub country org name";
-    public static final String ENTITY_ORG_DISPLAY_NAME = "stub country org display name";
-    public static final String ENTITY_ORG_URL = "http://stub-connector/homepage";
+
+    private static final KeyStoreResource METADATA_TRUSTSTORE = createMetadataTruststore();
 
     private Map<String, NewCookie> cookies;
 
-    protected String getEidasRequest(StubConnectorAppRule stubConnectorAppRule) throws URISyntaxException {
+    protected String getEidasRequest(AppRule<StubConnectorConfiguration> stubConnectorAppRule) throws URISyntaxException {
         final Response response = stubConnectorAppRule.target("/RequestSubstantial").request().get();
         final String message = response.readEntity(String.class);
         cookies = response.getCookies();
@@ -44,24 +47,25 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
         return message;
     }
 
-    protected String getConnectorMetadata(StubConnectorAppRule stubConnectorAppRule) throws URISyntaxException {
+    protected String getConnectorMetadata(AppRule<StubConnectorConfiguration> stubConnectorAppRule) throws URISyntaxException {
         final Response response = stubConnectorAppRule.target("/ConnectorMetadata").request().get();
         return response.readEntity(String.class);
     }
 
-    protected String postEidasResponse(StubConnectorAppRule stubConnectorAppRule, String samlForm) throws URISyntaxException {
+    protected String postEidasResponse(AppRule<StubConnectorConfiguration> stubConnectorAppRule, String samlForm) throws URISyntaxException {
         final String encodedResponse = Base64.encodeAsString(samlForm);
         return postResponse(stubConnectorAppRule, encodedResponse);
     }
 
-    protected String postMalformedEidasResponse(StubConnectorAppRule stubConnectorAppRule, String samlForm) throws URISyntaxException {
+    protected String postMalformedEidasResponse(AppRule<StubConnectorConfiguration> stubConnectorAppRule, String samlForm) throws URISyntaxException {
         final String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(samlForm);
         return postResponse(stubConnectorAppRule, encodedResponse);
     }
 
-    protected static StubConnectorAppRule createStubConnectorAppRule(DropwizardClientRule metadataClientRule) {
+    protected static AppRule<StubConnectorConfiguration> createStubConnectorAppRule(DropwizardClientRule metadataClientRule) {
         final String proxyNodeMetadataUrl = metadataClientRule.baseUri() + "/proxy-node/Metadata";
-        return new StubConnectorAppRule(
+        return new AppRule<>(
+                StubConnectorApplication.class,
                 ConfigOverride.config("connectorNodeBaseUrl", "http://stub-connector"),
                 ConfigOverride.config("connectorNodeEntityId", ENTITY_ID),
 
@@ -91,8 +95,7 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
                 ConfigOverride.config("connectorNodeTemplateConfig.organization_display_name", ENTITY_ORG_DISPLAY_NAME),
                 ConfigOverride.config("connectorNodeTemplateConfig.organization_url", ENTITY_ORG_URL),
                 ConfigOverride.config("connectorNodeTemplateConfig.want_signed_assertions", "true")
-
-                ) {
+        ) {
             @Override
             protected void before() {
                 waitForMetadata(proxyNodeMetadataUrl);
@@ -107,7 +110,7 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
                 .param("RelayState", "relay");
     }
 
-    private String postResponse(StubConnectorAppRule stubConnectorAppRule, String encodedResponse) throws URISyntaxException {
+    private String postResponse(AppRule<StubConnectorConfiguration> stubConnectorAppRule, String encodedResponse) throws URISyntaxException {
         final Form postForm = createForm(encodedResponse);
         final Invocation.Builder request = stubConnectorAppRule.target("/SAML2/Response/POST").request();
 

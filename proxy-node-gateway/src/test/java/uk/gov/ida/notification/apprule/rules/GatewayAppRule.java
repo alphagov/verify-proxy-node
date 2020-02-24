@@ -2,7 +2,6 @@ package uk.gov.ida.notification.apprule.rules;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
-import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
 import uk.gov.ida.notification.GatewayApplication;
 import uk.gov.ida.notification.GatewayConfiguration;
@@ -15,19 +14,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
-
-public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
+public class GatewayAppRule extends AppRule<GatewayConfiguration> {
 
     public static final String ERROR_PAGE_REDIRECT_URL = "https://proxy-node-error-page";
 
-    private Client client;
     private Client noRedirectClient;
 
     public GatewayAppRule(ConfigOverride... configOverrides) {
         super(
                 GatewayApplication.class,
-                resourceFilePath("config.yml"),
                 getConfigOverrides(configOverrides)
         );
     }
@@ -46,6 +41,7 @@ public class GatewayAppRule extends DropwizardAppRule<GatewayConfiguration> {
         return configOverridesList.toArray(new ConfigOverride[0]);
     }
 
+    @Override
     public WebTarget target(String path) throws URISyntaxException {
         return target(path, getLocalPort());
     }
