@@ -102,3 +102,5 @@ spec:
         - name: hsm-client-crt
           mountPath: /opt/cloudhsm/etc/customerCA.crt
           subPath: hsmCustomerCA.crt
+        - name: METATRON_URI
+          value: http://{{ .Release.Name }}-metatron/

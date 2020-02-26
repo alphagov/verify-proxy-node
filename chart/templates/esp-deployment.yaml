@@ -83,3 +83,5 @@ spec:
 {{- end }}
         - name: REDIS_SERVER_URI
           value: redis://{{ .Release.Name }}-esp-redis:6379/
+        - name: METATRON_URI
+          value: http://{{ .Release.Name }}-metatron/

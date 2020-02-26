@@ -16,7 +16,7 @@ logging:
   appenders:
     - type: ${LOGGING_APPENDER:-logstash-console}
 
-metatronUri: ${METATRON_URL}
+metatronUri: ${METATRON_URI}
 
 replayChecker:
   redisUrl: ${REDIS_SERVER_URI}
