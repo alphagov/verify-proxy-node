@@ -77,3 +77,10 @@ vsp:
     tag: 632143dcb87423ff000b9fcd53a14b101eacfa4d1a19a14f611ee6a6c2ee0e97
     pullPolicy: IfNotPresent
   secretName: vsp
+  hub:
+    ssoLocation:
+    entityID:
+    metadata:
+      url:
+      truststore:
+      truststorePassword:

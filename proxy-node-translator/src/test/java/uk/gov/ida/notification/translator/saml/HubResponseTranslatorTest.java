@@ -5,7 +5,8 @@ import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.VerifySamlInitializer;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder;
@@ -21,6 +22,7 @@ import uk.gov.ida.saml.core.test.builders.ResponseBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,7 +57,7 @@ public class HubResponseTranslatorTest {
         this.countryMetaDataResponse = new CountryMetadataResponse(
                 "samlSigningCert",
                 "samlEncryptionCert",
-                URI.create("http://destination"),
+                Collections.singletonList(new AssertionConsumerService(URI.create("http://assertion-consumer-service-location"), 0, true)),
                 "http://entity_id",
                 "CC"
         );

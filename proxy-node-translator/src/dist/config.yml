@@ -36,5 +36,4 @@ credentialConfiguration:
     type: ${KEY_TYPES:-encoded}
     key: ${TRANSLATOR_SIGNING_KEY}
 
-metatronUri: ${METATRON_URI}
-
+metatronUri: ${METATRON_URL}

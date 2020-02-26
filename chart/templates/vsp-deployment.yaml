@@ -44,6 +44,16 @@ spec:
             secretKeyRef:
               name: {{ .Values.vsp.secretName }}
               key: VSP_SAML_ENCRYPTION_KEY
+        - name: HUB_SSO_LOCATION
+          value: {{ .Values.vsp.hub.ssoLocation }}
+        - name: HUB_ENTITY_ID
+          value: {{ .Values.vsp.hub.entityID }}
+        - name: HUB_METADATA_URL
+          value: {{ .Values.vsp.hub.metadata.url }}
+        - name: HUB_METADATA_TRUSTSTORE
+          value: {{ .Values.vsp.hub.metadata.truststore }}
+        - name: HUB_METADATA_TRUSTSTORE_PASSWORD
+          value: {{ .Values.vsp.hub.metadata.truststorePassword }}
         ports:
           - name: http
             containerPort: 50400

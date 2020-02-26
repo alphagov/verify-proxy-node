@@ -96,7 +96,7 @@ public class EidasAuthnRequestResourceTest {
 
         when(eidasSamlParserService.parse(any(EidasSamlParserRequest.class), any(String.class))).thenReturn(eidasSamlParserResponse);
         when(vspProxy.generateAuthnRequest(any(String.class))).thenReturn(vspResponse);
-        when(eidasSamlParserResponse.getDestination()).thenReturn(SAMPLE_DESTINATION_URL);
+        when(eidasSamlParserResponse.getAssertionConsumerServiceLocation()).thenReturn(SAMPLE_DESTINATION_URL);
         when(eidasSamlParserResponse.getIssuerEntityId()).thenReturn(SAMPLE_ENTITY_ID);
         when(eidasSamlParserResponse.getRequestId()).thenReturn(SAMPLE_EIDAS_REQUEST_ID);
         when(vspResponse.getRequestId()).thenReturn(SAMPLE_REQUEST_ID);

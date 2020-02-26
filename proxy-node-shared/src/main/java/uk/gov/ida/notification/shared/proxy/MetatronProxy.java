@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.shared.proxy;
 
 import uk.gov.ida.exceptions.ApplicationException;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.exceptions.proxy.MetatronResponseException;
 
 import javax.ws.rs.core.UriBuilder;

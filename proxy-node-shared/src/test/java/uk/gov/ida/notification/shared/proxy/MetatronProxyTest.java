@@ -6,7 +6,8 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
 import uk.gov.ida.jerseyclient.JsonResponseProcessor;
-import uk.gov.ida.notification.contracts.CountryMetadataResponse;
+import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
+import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.exceptions.proxy.MetatronResponseException;
 import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 
@@ -21,6 +22,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -53,7 +55,8 @@ public class MetatronProxyTest {
 
         assertThat(countryMetadata.getSamlSigningCertX509()).isEqualTo("SAMLSIGNINGCERTX509");
         assertThat(countryMetadata.getSamlEncryptionCertX509()).isEqualTo("SAMLENCRYPTIONCERTX509");
-        assertThat(countryMetadata.getDestination()).isEqualTo(URI.create("https://destination.gov.uk"));
+        assertThat(countryMetadata.getAssertionConsumerServices()).hasSize(1);
+        assertThat(countryMetadata.getAssertionConsumerServices()).extracting(AssertionConsumerService::getLocation).containsExactly(URI.create("https://destination.gov.uk"));
         assertThat(countryMetadata.getEntityId()).isEqualTo(TEST_ENTITY_ID);
         assertThat(countryMetadata.getCountryCode()).isEqualTo("CC");
     }
@@ -110,7 +113,7 @@ public class MetatronProxyTest {
             return new CountryMetadataResponse(
                     "SAMLSIGNINGCERTX509",
                     "SAMLENCRYPTIONCERTX509",
-                    URI.create("https://destination.gov.uk"),
+                    Collections.singletonList(new AssertionConsumerService(URI.create("https://destination.gov.uk"), 0, true)),
                     URLDecoder.decode(entityId, StandardCharsets.UTF_8.toString()),
                     "CC"
             );
