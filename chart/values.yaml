@@ -1,7 +1,7 @@
 global:
   cluster:
     name:
-    domain:
+    domain: sandbox.signin.service.gov.uk
   cloudHsm:
     enabled: true
     ip: 127.0.0.1
