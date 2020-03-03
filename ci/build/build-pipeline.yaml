@@ -788,6 +788,7 @@ spec:
           params:
             CLUSTER_NAME: ((cluster.name))
             CLUSTER_DOMAIN: ((cluster.domain))
+            CLUSTER_DOMAIN_SIGNIN: signin.service.gov.uk
             CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
             RELEASE_NAMESPACE: ((namespace-deployer.namespace))
             RELEASE_NAME: test
@@ -810,6 +811,7 @@ spec:
                 --namespace "${RELEASE_NAMESPACE}" \
                 --set "global.cluster.name=${CLUSTER_NAME}" \
                 --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                --set "global.cluster.signinDomain=${CLUSTER_DOMAIN_SIGNIN}" \
                 --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
                 --set "stubConnector.enabled=true" \
                 --set "vsp.secretName=vsp" \

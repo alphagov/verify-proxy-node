@@ -11,8 +11,10 @@ metadata:
 spec:
   hosts:
   - {{ include "gateway.host" . }}
+  - {{ include "gateway.host.signin" . }}
   gateways:
   - {{ .Release.Name }}-gateway-ingress
+  - {{ .Release.Name }}-gateway-ingress-signin
   http:
     - route:
       - destination:
