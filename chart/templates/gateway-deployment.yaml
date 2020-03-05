@@ -62,7 +62,7 @@ spec:
         - name: PORT
           value: "80"
         - name: REDIS_SERVER_URI
-          value: redis://{{ .Release.Name }}-gateway-redis:6379/
+          value: redis://{{ .Release.Name }}-redis:6379/
         - name: TRANSLATOR_URL
           value: http://{{ .Release.Name }}-translator/
         - name: EIDAS_SAML_PARSER_URL

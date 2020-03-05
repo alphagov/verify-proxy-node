@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Release.Name }}-esp-redis-network-policy
+  name: {{ .Release.Name }}-redis-network-policy
   namespace: {{ .Release.Namespace }}
   labels:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    app.kubernetes.io/name: esp-redis
+    app.kubernetes.io/name: redis
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: esp-redis
+      app.kubernetes.io/name: redis
       app.kubernetes.io/instance: {{ .Release.Name }}
   policyTypes:
   - Ingress
@@ -24,3 +24,12 @@ spec:
       ports:
       - protocol: TCP
         port: 6379
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gateway
+              app.kubernetes.io/instance: {{ .Release.Name }}
+      ports:
+        - protocol: TCP
+          port: 6379
+
