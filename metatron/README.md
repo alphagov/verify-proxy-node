@@ -14,7 +14,7 @@ A `MetadataResolver` for each country is responsible for fetching a country's me
 
 ## Validating Metadata
 A Countries' Metadata is valid when:
-* it is signed using that country's truststore
+* it is signed with a certificate trusted by that country's truststore
 * it is within its expiry date
 * signing and encryption certificates are present and valid
 * it has an Assertion Consumer Service URL and an Entity Descriptor
