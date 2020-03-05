@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: redis
+    group.access.govsvc.uk: eidas-service-operator-principal
 spec:
   aws:
     nodeType: cache.t3.micro
