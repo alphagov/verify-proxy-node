@@ -9,10 +9,10 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
+import javax.ws.rs.client.Client;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
-
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.jerseyclient.ErrorHandlingClient;
@@ -38,13 +38,10 @@ import uk.gov.ida.notification.translator.saml.EidasFailureResponseGenerator;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
 
-import javax.ws.rs.client.Client;
-
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
-
-    public static void main(final String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         if (args == null || args.length == 0) {
-            String configFile = System.getenv("CONFIG_FILE");
+            final String configFile = System.getenv("CONFIG_FILE");
 
             if (configFile == null) {
                 throw new RuntimeException("CONFIG_FILE environment variable should be set with path to configuration file");
@@ -62,7 +59,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     @Override
-    public void initialize(final Bootstrap<TranslatorConfiguration> bootstrap) {
+    public void initialize(Bootstrap<TranslatorConfiguration> bootstrap) {
         // Needed to correctly interpolate environment variables in config file
         bootstrap.setConfigurationSourceProvider(
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(),
@@ -87,10 +84,10 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     }
 
     @Override
-    public void run(final TranslatorConfiguration configuration, final Environment environment) {
+    public void run(TranslatorConfiguration configuration, Environment environment) {
         environment.jersey().register(IstioHeaderMapperFilter.class);
         environment.jersey().register(ProxyNodeLoggingFilter.class);
-        ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
+        final ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("translator");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
         registerExceptionMappers(environment);
@@ -105,6 +102,15 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         environment.jersey().register(new CatchAllExceptionMapper());
     }
 
+    private void registerInjections(Environment environment) {
+        environment.jersey().register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                bindAsContract(IstioHeaderStorage.class);
+            }
+        });
+    }
+
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
         final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration, environment);
         final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
@@ -115,7 +121,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
     private EidasResponseGenerator createEidasResponseGenerator(TranslatorConfiguration configuration, Environment environment) {
 
-        MetatronProxy metatronProxy = buildMetatronProxy(configuration, environment);
+        MetatronProxy metatronProxy = createMetatronProxy(configuration, environment);
 
         final HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
                 EidasResponseBuilder::instance,
@@ -129,8 +135,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
 
         final CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
         final SamlObjectSigner samlObjectSigner = new SamlObjectSigner(credentialConfiguration.getCredential(),
-                                                                       credentialConfiguration.getAlgorithm(),
-                                                                       credentialConfiguration.getKeyHandle());
+                credentialConfiguration.getAlgorithm(), credentialConfiguration.getKeyHandle());
 
         return new EidasResponseGenerator(
                 hubResponseTranslator,
@@ -141,23 +146,15 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
     }
 
-    private void registerInjections(Environment environment) {
-        environment.jersey().register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bindAsContract(IstioHeaderStorage.class);
-            }
-        });
-    }
-
-    public MetatronProxy buildMetatronProxy(TranslatorConfiguration configuration, Environment environment) {
+    private MetatronProxy createMetatronProxy(TranslatorConfiguration configuration, Environment environment) {
         JerseyClientConfiguration jerseyConfig = new JerseyClientConfiguration();
         Client client = new JerseyClientBuilder(environment).using(jerseyConfig).build("metatron-client");
-        ProxyNodeJsonClient jsonClient = new ProxyNodeJsonClient(
-                new ErrorHandlingClient(client),
-                new JsonResponseProcessor(environment.getObjectMapper()),
-                new IstioHeaderStorage()
+        return new MetatronProxy(configuration.getMetatronUri(),
+            new ProxyNodeJsonClient(
+                    new ErrorHandlingClient(client),
+                    new JsonResponseProcessor(environment.getObjectMapper()),
+                    new IstioHeaderStorage()
+            )
         );
-        return new MetatronProxy(jsonClient, configuration.getMetatronUri());
     }
 }

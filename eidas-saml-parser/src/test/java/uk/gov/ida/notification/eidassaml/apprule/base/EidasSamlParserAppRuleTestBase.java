@@ -6,7 +6,7 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
-import uk.gov.ida.notification.eidassaml.EidasSamlApplication;
+import uk.gov.ida.notification.eidassaml.EidasSamlParserApplication;
 import uk.gov.ida.notification.eidassaml.EidasSamlParserConfiguration;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.saml.SamlObjectSigner;
@@ -44,7 +44,7 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
 
     protected static AppRule<EidasSamlParserConfiguration> createEidasSamlParserRule(DropwizardClientRule metatronClientRule) {
         return new AppRule<>(
-                EidasSamlApplication.class,
+                EidasSamlParserApplication.class,
                 ConfigOverride.config("proxyNodeAuthnRequestUrl", "http://proxy-node/eidasAuthnRequest"),
                 ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString()),
                 ConfigOverride.config("replayChecker.redisUrl", "")

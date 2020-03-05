@@ -3,7 +3,6 @@ package uk.gov.ida.notification.shared.proxy;
 import uk.gov.ida.exceptions.ApplicationException;
 import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.exceptions.proxy.MetatronResponseException;
-
 import javax.ws.rs.core.UriBuilder;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -16,8 +15,8 @@ public class MetatronProxy {
     private static final String METADATA_PATH = "metadata";
 
     public MetatronProxy(
-            ProxyNodeJsonClient metatronClient,
-            URI metatronUri) {
+            URI metatronUri,
+            ProxyNodeJsonClient metatronClient) {
         this.metatronClient = metatronClient;
         this.metatronUri = metatronUri;
     }
