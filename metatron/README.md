@@ -20,7 +20,10 @@ A Countries' Metadata is valid when:
 * it has an Assertion Consumer Service URL and an Entity Descriptor
 
 ## Metadata API
-Metatron clients may call `GET /metadata/{entityId}` to retrieve a json payload of metadata for that entity id (country). The json returned is a marshalled version of the `CountryMetadataResponse`.
+Metatron clients may call `GET /metadata/{entityId}` to retrieve a json payload of metadata for an entity id (country). 
+The `{entityId}` fragment of the url must be url encoded.
+
+The json returned is a marshalled version of the `CountryMetadataResponse`.
 
 The status codes of a successful response is 200.
 
