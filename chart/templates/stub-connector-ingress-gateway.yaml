@@ -5,10 +5,10 @@ metadata:
   name: {{ .Release.Name }}-connector-ingress
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-connector
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: connector-ingress
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
     externaldns.k8s.io/namespace: {{ .Release.Namespace }}
 spec:
