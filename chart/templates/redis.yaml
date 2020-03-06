@@ -1,10 +1,10 @@
 kind: Redis
 apiVersion: database.govsvc.uk/v1beta1
 metadata:
-  name: {{ .Release.Name }}-redis
+  name: {{ .Release.Name }}-db
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: redis
+    app.kubernetes.io/name: db
     group.access.govsvc.uk: eidas-service-operator-principal
 spec:
   aws:
@@ -12,4 +12,4 @@ spec:
     engineVersion: 5.0.6
     numCacheClusters: 2
     preferredMaintenanceWindow: sun:23:30-mon:01:30
-  secret: {{ .Release.Name }}-redis-secret
+  secret: {{ .Release.Name }}-db-secret
