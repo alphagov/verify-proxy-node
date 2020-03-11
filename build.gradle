@@ -5,7 +5,7 @@ buildscript {
             maven { url 'https://dl.bintray.com/alphagov/maven-test' }
             jcenter()
         } else {
-            maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+            maven { url 'https://gds.jfrog.io/artifactory/whitelisted-repos' }
         }
     }
     dependencies {
@@ -68,7 +68,7 @@ subprojects {
             maven { url 'https://build.shibboleth.net/nexus/content/repositories/releases' }
             jcenter()
         } else {
-            maven { url 'https://artifactory.ida.digital.cabinet-office.gov.uk/artifactory/whitelisted-repos' }
+            maven { url 'https://gds.jfrog.io/artifactory/whitelisted-repos' }
         }
     }
 
