@@ -17,7 +17,8 @@ Given("the proxy node is sent a LOA {string} request") do |load_type|
 end
 
 And('they progress through verify') do
-  find('label', :text => 'I’ve used GOV.UK Verify before').click
+  assert_text('Sign in with GOV.UK Verify')
+  choose('start_form_selection_false', allow_label_click: true)
   click_button('Continue')
   find('button', :text => 'Stub Idp Demo One').click
 end
