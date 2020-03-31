@@ -100,10 +100,10 @@ subprojects {
                 substitute module("ca.juliusdavies:not-yet-commons-ssl:0.3.9") because "https://snyk.io/vuln/SNYK-JAVA-CAJULIUSDAVIES-30073" with module("ca.juliusdavies:not-yet-commons-ssl:0.3.11")
                 substitute module("org.apache.santuario:xmlsec") because "https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281" with module("org.apache.santuario:xmlsec:2.1.4")
                 substitute module("com.nimbusds:nimbus-jose-jwt") because "https://snyk.io/vuln/SNYK-JAVA-COMNIMBUSDS-536068" with module("com.nimbusds:nimbus-jose-jwt:8.2.1")
+                substitute module("org.yaml:snakeyaml") because "https://snyk.io/vuln/SNYK-JAVA-ORGYAML-537645" with module("org.yaml:snakeyaml:1.26")
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
-
         common(
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
