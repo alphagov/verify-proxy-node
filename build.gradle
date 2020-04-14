@@ -102,6 +102,7 @@ subprojects {
                 substitute module("com.nimbusds:nimbus-jose-jwt") because "https://snyk.io/vuln/SNYK-JAVA-COMNIMBUSDS-536068" with module("com.nimbusds:nimbus-jose-jwt:8.2.1")
                 substitute module("org.yaml:snakeyaml") because "https://snyk.io/vuln/SNYK-JAVA-ORGYAML-537645" with module("org.yaml:snakeyaml:1.26")
                 substitute module("commons-codec:commons-codec") because "https://snyk.io/vuln/SNYK-JAVA-COMMONSCODEC-561518" with module("commons-codec:commons-codec:1.13")
+                substitute module("io.netty:netty-codec") because "https://snyk.io/vuln/SNYK-JAVA-IONETTY-564897" with module("io.netty:netty-codec:4.1.48.Final")
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
