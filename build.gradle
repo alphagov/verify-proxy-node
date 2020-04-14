@@ -29,9 +29,9 @@ repositories {
 
 ext {
     opensaml_version = '3.4.3'
-    dropwizard_version = '1.3.20'
-    utils_version = '2.0.0-381'
-    saml_lib_version = "${opensaml_version}-237"
+    dropwizard_version = '1.3.22'
+    utils_version = '2.0.0-384'
+    saml_lib_version = "${opensaml_version}-238"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
