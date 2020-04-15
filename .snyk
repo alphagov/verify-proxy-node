@@ -5,9 +5,5 @@ ignore:
   SNYK-JAVA-CAJULIUSDAVIES-30073:
     - '*':
         reason: Fix not available
-        expires: 2020-04-15T00:00:00.000Z
-  SNYK-JAVA-ORGCRYPTACULAR-543303:
-    - '*':
-        reason: Fix merged on repo but no release available. Believed to not currently be effected. See https://govukverify.atlassian.net/browse/EID-1921 for details of investigation.
-        expires: 2020-04-15T00:00:00.000Z
+        expires: 2020-05-15T00:00:00.000Z
 patch: {}
