@@ -107,6 +107,7 @@ subprojects {
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
+
         common(
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
