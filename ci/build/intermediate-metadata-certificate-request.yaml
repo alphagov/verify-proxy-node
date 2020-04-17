@@ -16,3 +16,4 @@ spec:
   certificateAuthority:
     secretName: verify-root-ca-test-a1
     namespace: verify-metadata-controller
+
