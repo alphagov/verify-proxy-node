@@ -4,7 +4,7 @@ kind: CertificateRequest
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: proxy-node-metadata-ca
+  name: proxy-node-metadata-ca-a1
 spec:
   countryCode: GB
   commonName: Proxy Node Test Metadata CA
@@ -14,5 +14,5 @@ spec:
   location: London
   CACert: true
   certificateAuthority:
-    secretName: verify-root-ca-test
+    secretName: verify-root-ca-test-a1
     namespace: verify-metadata-controller
