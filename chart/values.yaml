@@ -27,21 +27,21 @@ connector:
 esp:
   replicaCount: 1
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/parser@sha256
+    repository: 
     tag: f33a370c0a7be474ab84aa0fb882925f299054aff3199d42ba72fc9eb7b2ed6f
     pullPolicy: IfNotPresent
 
 metatron:
   replicaCount: 1
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/metatron@sha256
+    repository: 
     tag:
     pullPolicy: IfNotPresent
 
 gateway:
   replicaCount: 1
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/gateway@sha256
+    repository: 
     tag: 1975031b78f5df2611e00b8cf9e264106d8a43628e52f1499119f33278048bb5
     pullPolicy: IfNotPresent
   errorPageURL: https://www.integration.signin.service.gov.uk/proxy-node-error
@@ -49,14 +49,14 @@ gateway:
 
 hsm:
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/cloudhsm@sha256
+    repository: 
     tag: 0b1adb00b1d65f5dd43449cd12c1f1ccca543455714d3e52bde0972e3bdee3d0
     pullPolicy: IfNotPresent
 
 translator:
   replicaCount: 1
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/translator@sha256
+    repository: 
     tag: fd6ada0159c1cc5415cd51ffcdd41fc3f19c4cb827cafdecf9134a372024bc4a
     pullPolicy: IfNotPresent
   connectorNodeNationalityCode: EU
@@ -66,14 +66,14 @@ stubConnector:
   enabled: false
   replicaCount: 1
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/stub-connector@sha256
+    repository: 
     tag: 4af88e30aa699a3b10da92f54f522fed97f3273520f5ef364bcaa4c6f608d251
     pullPolicy: IfNotPresent
 
 vsp:
   replicaCount: 1
   image:
-    repository: registry.tools.verify.govsvc.uk/eidas/verify-service-provider@sha256
+    repository: 
     tag: 632143dcb87423ff000b9fcd53a14b101eacfa4d1a19a14f611ee6a6c2ee0e97
     pullPolicy: IfNotPresent
   secretName: vsp
