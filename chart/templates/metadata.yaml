@@ -29,5 +29,5 @@ spec:
     organizationUnit: GDS
     location: London
   certificateAuthority:
-    secretName: {{ .Release.Name }}-proxy-node-metadata-signing-cert-a1
+    secretName: {{ .Release.Name }}-proxy-node-metadata-signing-a1
     namespace: {{ .Release.Namespace }}

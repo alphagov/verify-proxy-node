@@ -3,7 +3,7 @@ kind: CertificateRequest
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: {{ .Release.Name }}-proxy-node-metadata-signing-cert-a1
+  name: {{ .Release.Name }}-proxy-node-metadata-signing-a1
   namespace: {{ .Release.Namespace }}
 spec:
   countryCode: GB
@@ -14,5 +14,5 @@ spec:
   location: London
   CACert: false
   certificateAuthority:
-    secretName: proxy-node-metadata-ca-a1
+    secretName: {{ include "metadata.ca.name" . }}
     namespace: {{ .Release.Namespace }}
