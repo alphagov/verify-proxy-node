@@ -31,7 +31,7 @@ ext {
     opensaml_version = '3.4.3'
     dropwizard_version = '1.3.22'
     utils_version = '2.0.0-384'
-    saml_lib_version = "${opensaml_version}-238"
+    saml_lib_version = "${opensaml_version}-239"
     build_version = "$opensaml_version-${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 }
 
@@ -175,7 +175,7 @@ subprojects {
         }
 
         dev_pki(
-                "uk.gov.ida:ida-dev-pki:1.1.0-38"
+                "uk.gov.ida:ida-dev-pki:1.2.0-10"
         )
 
         verify_saml_test(
@@ -199,7 +199,6 @@ subprojects {
                 "com.github.stefanbirkner:system-rules:1.19.0",
                 "com.github.fppt:jedis-mock:0.1.9",
                 "it.ozimov:embedded-redis:0.7.2",
-                "uk.gov.ida:ida-dev-pki:1.1.0-37",
                 "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.25.1",
                 "org.glassfish.jersey.connectors:jersey-jetty-connector:2.25.1",
                 project(':proxy-node-test'),

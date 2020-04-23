@@ -10,8 +10,10 @@ import uk.gov.ida.notification.translator.TranslatorApplication;
 import uk.gov.ida.notification.translator.apprule.rules.StubVspResource;
 import uk.gov.ida.notification.translator.configuration.TranslatorConfiguration;
 
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_EC_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_EC_CERT;
 
 public class TranslatorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
 
@@ -32,4 +34,17 @@ public class TranslatorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
             ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_CERT),
             ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_KEY)
     );
+
+    @ClassRule
+    public static final AppRule<TranslatorConfiguration> translatorAppRuleWithECSigning = new AppRule<>(
+            TranslatorApplication.class,
+            ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
+            ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri().toString()),
+            ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString()),
+            ConfigOverride.config("credentialConfiguration.type", "file"),
+            ConfigOverride.config("credentialConfiguration.publicKey.type", "x509"),
+            ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_EC_CERT),
+            ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_EC_KEY)
+    );
+
 }

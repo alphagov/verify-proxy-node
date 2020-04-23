@@ -42,6 +42,20 @@ public class CredentialConfigurationTest {
         assertThat(actualCredential.getPrivateKey()).isEqualTo(expectedCredential.getPrivateKey());
     }
 
+    @Test
+    public void buildSignerFromECKeyFileSignerConfiguration() throws Exception {
+        String configJson = fixture("key_file_signer_config.yml");
+
+        CredentialConfiguration configuration = mapper.readValue(
+                String.format(configJson, getPath("metadata_signing_ec.pk8"), getPath("metadata_signing_ec.crt")),
+                uk.gov.ida.notification.configuration.CredentialConfiguration.class);
+
+        Credential actualCredential = configuration.getCredential();
+        assertThat(actualCredential.getPublicKey().getAlgorithm()).isEqualTo("EC");
+        assertThat(actualCredential.getPrivateKey().getAlgorithm()).isEqualTo("EC");
+    }
+
+
     private String getPath(String file) {
         return Resources.getResource(file).getPath();
     }

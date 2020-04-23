@@ -2,8 +2,8 @@ package uk.gov.ida.notification.configuration;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.xml.security.signature.XMLSignature;
 import org.opensaml.security.x509.BasicX509Credential;
-import org.opensaml.xmlsec.signature.support.SignatureConstants;
 
 import java.security.interfaces.ECPublicKey;
 
@@ -24,9 +24,9 @@ public abstract class CredentialConfiguration {
     public String getAlgorithm() { return algorithm; }
 
     public void setCredential(BasicX509Credential credential) {
-        this.algorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
+        this.algorithm = XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1;
         if (credential.getPublicKey() instanceof ECPublicKey) {
-            this.algorithm = SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA256;
+            this.algorithm = XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA384;
         }
         this.credential = credential;
     }
