@@ -4,10 +4,11 @@ kind: CertificateRequest
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: proxy-node-metadata-ca-a1
+  name: proxy-node-metadata-integration-ca-a1
+  namespace: verify-eidas-proxy-node-deploy
 spec:
   countryCode: GB
-  commonName: Proxy Node Test Metadata CA
+  commonName: Proxy Node Integration Metadata CA
   expiryMonths: 120
   organization: Cabinet Office
   organizationUnit: GDS
