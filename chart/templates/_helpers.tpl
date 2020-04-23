@@ -38,11 +38,3 @@
 {{ printf "%s" (required "connector.entityID or stubConnector.enabled required" .Values.connector.entityID) }}
 {{- end -}}
 {{- end -}}
-
-{{- define "metadata.ca.name" -}}
-{{- if .Values.stubConnector.enabled -}}
-{{ printf "test-proxy-node-metadata-ca-a1" }}
-{{- else -}}
-{{ printf "production-proxy-node-metadata-ca-a1" }}
-{{- end -}}
-{{- end -}}
