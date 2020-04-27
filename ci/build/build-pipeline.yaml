@@ -857,8 +857,8 @@ spec:
         config:
           platform: linux
           params:
-            PROXY_NODE_URL: "https://proxy-node.eidas.test.((cluster.domain))"
-            STUB_CONNECTOR_URL: "https://stub-connector.eidas.test.((cluster.domain))"
+            PROXY_NODE_URL: "https://proxy-node.test.((namespace-deployer.namespace)).((cluster.domain))"
+            STUB_CONNECTOR_URL: "https://stub-connector.test.((namespace-deployer.namespace)).((cluster.domain))"
             STUB_IDP_USER: "stub-idp-demo-one"
             SELENIUM_HUB_URL: "https://selenium.tools.signin.service.gov.uk/wd/hub"
           run:

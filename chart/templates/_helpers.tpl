@@ -1,6 +1,6 @@
 
 {{- define "gateway.host" -}}
-{{- printf "%s.%s.%s.%s" .Chart.Name "eidas" .Release.Name (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
+{{- printf "%s.%s.%s.%s" .Chart.Name .Release.Name .Release.Namespace (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "gateway.entityID" -}}
@@ -9,7 +9,7 @@
 
 {{- define "stubConnector.host" -}}
 {{- if .Values.stubConnector.enabled -}}
-{{- printf "%s.%s.%s" "stub-connector.eidas" .Release.Name (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
+{{- printf "%s.%s.%s" "stub-connector" .Release.Name .Release.Namespace (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s" .Values.stubConnector.host -}}
 {{- end -}}
