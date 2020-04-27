@@ -61,7 +61,6 @@ spec:
       source:
         uri: https://github.com/alphagov/verify-eidas-config.git
         branch: master
-        paths: [integration]
         username: "re-autom8-ci"
         password: ((github.api-token))
 
@@ -88,7 +87,7 @@ spec:
             outputs:
               - name: eidas-config-integration
             run:
-              dir: eidas-config/tools
+              dir: eidas-config-integration/tools
               path: ./gradlew
               args:
                 - run
