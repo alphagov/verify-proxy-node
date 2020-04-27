@@ -93,7 +93,6 @@ spec:
       source:
         uri: https://github.com/alphagov/verify-eidas-config.git
         branch: master
-        paths: [test]
         username: "re-autom8-ci"
         password: ((github.api-token))
 
