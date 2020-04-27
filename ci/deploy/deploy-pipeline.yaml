@@ -111,7 +111,7 @@ spec:
               args:
                 - -euc
                 - |
-                  cd eidas-config/tools
+                  cd eidas-config-integration/tools
 
                   echo "configuring kubectl"
                   echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
