@@ -12,6 +12,7 @@ metadata:
 spec:
   secretName: {{ .Release.Name }}-connector-ingress-certificate
   dnsNames:
+  - sc.{{ .Release.Namespace }}.{{ .Values.global.cluster.domain }}
   - {{ include "stubConnector.host" . }}
   issuerRef:
     name: letsencrypt-r53
