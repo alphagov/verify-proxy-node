@@ -11,6 +11,7 @@ metadata:
 spec:
   secretName: {{ .Release.Name }}-gateway-ingress-certificate
   dnsNames:
+  - pn.{{ .Release.Namespace }}.{{ .Values.global.cluster.domain }}
   - {{ include "gateway.host" . }}
   issuerRef:
     name: letsencrypt-r53
