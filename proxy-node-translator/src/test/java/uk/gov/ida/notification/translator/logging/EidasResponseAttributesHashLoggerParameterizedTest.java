@@ -54,7 +54,6 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
 
         EidasAuthnResponseAttributesHashLogger.logEidasAttributesHash(
                 translatedHubResponse.getAttributes().orElse(null),
-                translatedHubResponse.getPid().orElse(null),
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl());
 
@@ -78,47 +77,47 @@ public class EidasResponseAttributesHashLoggerParameterizedTest {
                 new Object[][]{
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerified(),
-                                "7ea43365b70f9d94c13bcf27733e57a39f45edaa3a143e93faf15cc5f26226f3"
+                                "ee03bda9f119f2aa08399e1c52f6568aa6fb767d11099f114b932f0280dca35a"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerifiedLOA1(),
-                                "7ea43365b70f9d94c13bcf27733e57a39f45edaa3a143e93faf15cc5f26226f3"
+                                "ee03bda9f119f2aa08399e1c52f6568aa6fb767d11099f114b932f0280dca35a"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseIdentityVerifiedNoAttributes(),
-                                "bff88ccaf63d6700d8112b3a0409b469b6301e2fc5a1adcf1c158d600e62352f"
+                                "b9514b7e03bb06ec0f8dca63de590e63516267c653485fb0ccb9d432da567ecd"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed(),
-                                "bff88ccaf63d6700d8112b3a0409b469b6301e2fc5a1adcf1c158d600e62352f"
+                                "b9514b7e03bb06ec0f8dca63de590e63516267c653485fb0ccb9d432da567ecd"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseFirstNameAttributeOnly(),
-                                "4d11a15b7f8a391b2f5cf4909dde7d68e34b5ac9d11762b848d3f7345bab8b0b"
+                                "f393c25ac8f3936ac1951af11b683c646cdb370eba6bfdaac036253160031b67"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseCancellation(),
-                                "bff88ccaf63d6700d8112b3a0409b469b6301e2fc5a1adcf1c158d600e62352f"
+                                "b9514b7e03bb06ec0f8dca63de590e63516267c653485fb0ccb9d432da567ecd"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseRequestError(),
-                                "bff88ccaf63d6700d8112b3a0409b469b6301e2fc5a1adcf1c158d600e62352f"
+                                "b9514b7e03bb06ec0f8dca63de590e63516267c653485fb0ccb9d432da567ecd"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseAllAttributesMissing(),
-                                "bff88ccaf63d6700d8112b3a0409b469b6301e2fc5a1adcf1c158d600e62352f"
+                                "b9514b7e03bb06ec0f8dca63de590e63516267c653485fb0ccb9d432da567ecd"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseAttributesNullPidNull(),
-                                "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+                                "b9514b7e03bb06ec0f8dca63de590e63516267c653485fb0ccb9d432da567ecd"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseAttributesThreeFirstNamesOnlyLastVerified(),
-                                "bc2b8e0f12328de50702ee62c7140044793cb59582bec34e73f580d55cb25e28"
+                                "f23018e0edc64f39e66bf82e42113f8184a56ad1e53f715a99c9c3c3ce02b177"
                         },
                         {
                                 TranslatedHubResponseBuilder.buildTranslatedHubResponseAttributesMultipleValues(),
-                                "aab9e4c152098e35fb04a9a02783367fb44d0a77359a759b414a6e622ffc0571"
+                                "82b4e032d5e6f712821574d7dd83c380360ac6389938f11b71ef160f171dfb29"
                         }}
         );
     }
