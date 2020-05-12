@@ -108,6 +108,14 @@ subprojects {
             }
         }
 
+        ['ida_utils','verify_saml','dropwizard','dropwizard_assets'].each {
+            configurations.getByName(it) {
+                resolutionStrategy.dependencySubstitution {
+                    substitute module("org.hibernate:hibernate-validator") because "https://snyk.io/vuln/SNYK-JAVA-ORGHIBERNATE-568162" with module("org.hibernate.validator:hibernate-validator:6.0.19.Final")
+                }
+            }
+        }
+
         common(
                 "javax.xml.bind:jaxb-api:2.3.0",
                 "javax.activation:activation:1.1.1",
