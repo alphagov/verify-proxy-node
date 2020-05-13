@@ -59,7 +59,7 @@ spec:
         - name: PORT
           value: "80"
         - name: CONNECTOR_NODE_BASE_URL
-          value: https://{{ include "stubConnector.host" . }}
+          value: https://{{ include "stubConnector.host.govuk" . }}
         - name: CONNECTOR_NODE_ENTITY_ID
           value: {{ include "connector.entityID" . }}
         - name: CONNECTOR_NODE_ACS_URL
