@@ -4,6 +4,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import io.dropwizard.logging.LoggingUtil;
+import io.prometheus.client.Counter;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -24,6 +26,8 @@ import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.VerifyServiceProviderProxy;
 
 import javax.servlet.http.HttpSession;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -32,14 +36,15 @@ import java.util.logging.Level;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_DESTINATION_URL;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_AUTHN_REQUEST;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_EIDAS_REQUEST_ID;
-import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_ENTITY_ID;
+import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_HUB_SAML_AUTHN_REQUEST;
 import static uk.gov.ida.notification.helpers.ValidationTestDataUtils.SAMPLE_REQUEST_ID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,11 +75,28 @@ public class EidasAuthnRequestResourceTest {
     @Captor
     private static ArgumentCaptor<EidasSamlParserRequest> captorEidasSamlParserRequest;
 
+    private Counter REQUESTS;
+    private Counter.Child REQUESTS_CHILD;
+    private Counter REQUESTS_SUCCESSFUL;
+    private Counter.Child REQUESTS_SUCCESSFUL_CHILD;
+
     @InjectMocks
     private EidasAuthnRequestResource resource;
 
     static {
         LoggingUtil.hijackJDKLogging();
+    }
+
+    @Before
+    public void setup() throws Exception {
+        REQUESTS = mock(Counter.class);
+        REQUESTS_CHILD = mock(Counter.Child.class);
+        REQUESTS_SUCCESSFUL = mock(Counter.class);
+        REQUESTS_SUCCESSFUL_CHILD = mock(Counter.Child.class);
+        when(REQUESTS.labels("http://entityId")).thenReturn(REQUESTS_CHILD);
+        when(REQUESTS_SUCCESSFUL.labels("http://entityId")).thenReturn(REQUESTS_SUCCESSFUL_CHILD);
+        setFinalStatic(EidasAuthnRequestResource.class.getDeclaredField("REQUESTS"), REQUESTS);
+        setFinalStatic(EidasAuthnRequestResource.class.getDeclaredField("REQUESTS_SUCCESSFUL"), REQUESTS_SUCCESSFUL);
     }
 
     @Test
@@ -132,5 +154,17 @@ public class EidasAuthnRequestResourceTest {
         verifyNoMoreInteractions(sessionStore);
 
         assertThat(captorEidasSamlParserRequest.getValue().getAuthnRequest()).isEqualTo(SAMPLE_EIDAS_AUTHN_REQUEST);
+        verify(REQUESTS).labels("http://entityId");
+        verify(REQUESTS_CHILD).inc();
+        verify(REQUESTS_SUCCESSFUL).labels("http://entityId");
+        verify(REQUESTS_SUCCESSFUL_CHILD).inc();
+    }
+
+    private static void setFinalStatic(Field field, Object newValue) throws Exception {
+        field.setAccessible(true);
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(null, newValue);
     }
 }

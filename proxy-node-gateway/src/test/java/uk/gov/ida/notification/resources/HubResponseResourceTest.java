@@ -1,5 +1,7 @@
 package uk.gov.ida.notification.resources;
 
+import io.prometheus.client.Counter;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -19,11 +21,14 @@ import uk.gov.ida.notification.views.SamlFormView;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.UriBuilder;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -42,6 +47,23 @@ public class HubResponseResourceTest {
 
     @Captor
     private static ArgumentCaptor<HubResponseTranslatorRequest> requestCaptor;
+
+    private Counter RESPONSES;
+    private Counter.Child RESPONSES_CHILD;
+    private Counter RESPONSES_SUCCESSFUL;
+    private Counter.Child RESPONSES_SUCCESSFUL_CHILD;
+
+    @Before
+    public void setup() throws Exception {
+        RESPONSES = mock(Counter.class);
+        RESPONSES_CHILD = mock(Counter.Child.class);
+        RESPONSES_SUCCESSFUL = mock(Counter.class);
+        RESPONSES_SUCCESSFUL_CHILD = mock(Counter.Child.class);
+        when(RESPONSES.labels("http://entityId")).thenReturn(RESPONSES_CHILD);
+        when(RESPONSES_SUCCESSFUL.labels("http://entityId")).thenReturn(RESPONSES_SUCCESSFUL_CHILD);
+        setFinalStatic(HubResponseResource.class.getDeclaredField("RESPONSES"), RESPONSES);
+        setFinalStatic(HubResponseResource.class.getDeclaredField("RESPONSES_SUCCESSFUL"), RESPONSES_SUCCESSFUL);
+    }
 
     @Test
     public void testsHappyPath() {
@@ -90,6 +112,11 @@ public class HubResponseResourceTest {
         assertThat("translated_eidas_response").isEqualTo(response.getEncodedSamlMessage());
         assertThat("eidas_relay_state_in_session").isEqualTo(response.getRelayState());
 
+        verify(RESPONSES).labels("http://entityId");
+        verify(RESPONSES_CHILD).inc();
+        verify(RESPONSES_SUCCESSFUL).labels("http://entityId");
+        verify(RESPONSES_SUCCESSFUL_CHILD).inc();
+
     }
 
     @Test(expected = SessionMissingException.class)
@@ -103,5 +130,13 @@ public class HubResponseResourceTest {
         );
 
         resource.hubResponse("hub_saml_response", "relay_state", session);
+    }
+
+    private static void setFinalStatic(Field field, Object newValue) throws Exception {
+        field.setAccessible(true);
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(null, newValue);
     }
 }
