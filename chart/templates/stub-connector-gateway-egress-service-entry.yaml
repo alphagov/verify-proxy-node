@@ -12,6 +12,7 @@ metadata:
 spec:
   hosts:
   - {{ include "gateway.host" . }}
+  - {{ include "gateway.host.govuk" . }}
   ports:
   - name: https
     number: 443
