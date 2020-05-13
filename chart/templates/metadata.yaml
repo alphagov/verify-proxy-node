@@ -10,8 +10,8 @@ spec:
   type: proxy
   data:
     entityID: {{ include "gateway.entityID" . }}
-    postURL: https://{{ include "gateway.host" . }}/SAML2/SSO/POST
-    redirectURL: https://{{ include "gateway.host" . }}/Redirect
+    postURL: https://{{ include "gateway.host.govuk" . }}/SAML2/SSO/POST
+    redirectURL: https://{{ include "gateway.host.govuk" . }}/Redirect
     orgName: Government Digital Service
     orgDisplayName: GDS
     orgURL: https://www.gov.uk/verify

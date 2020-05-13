@@ -3,8 +3,12 @@
 {{- printf "%s.%s.%s.%s" .Chart.Name .Release.Name .Release.Namespace (required "global.cluster.domain is required" .Values.global.cluster.domain) | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "gateway.host.govuk" -}}
+{{- printf "%s.%s.%s" .Chart.Name .Release.Name .Values.global.domainGovUK -}}
+{{- end -}}
+
 {{- define "gateway.entityID" -}}
-{{- printf "https://%s%s" (include "gateway.host" .) .Values.gateway.metadataPath -}}
+{{- printf "https://%s%s" (include "gateway.host.govuk" .) .Values.gateway.metadataPath -}}
 {{- end -}}
 
 {{- define "stubConnector.host" -}}
@@ -15,9 +19,13 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "stubConnector.host.govuk" -}}
+{{- printf "%s.%s.%s" "stub-connector" .Release.Name .Values.global.domainGovUK -}}
+{{- end -}}
+
 {{- define "connector.metadata.host" -}}
 {{- if .Values.stubConnector.enabled -}}
-{{- printf "%s" (include "stubConnector.host" .) | trimSuffix "-" -}}
+{{- printf "%s" (include "stubConnector.host.govuk" .) | trimSuffix "-" -}}
 {{- else -}}
 {{ printf "%s" (required "connector.metadata.fqdn or stubConnector.enabled required" .Values.connector.metadata.fqdn) }}
 {{- end -}}
