@@ -2,7 +2,7 @@ require 'yaml'
 require 'uri'
 require 'securerandom'
 
-Given("the proxy node is sent a LOA {string} request") do |load_type|
+Given("the proxy node is sent a LOA {string} request from the stub connector") do |load_type|
   loa_url = case load_type
     when "Low"
       "/RequestLow"
