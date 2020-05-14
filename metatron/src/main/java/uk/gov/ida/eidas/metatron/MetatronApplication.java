@@ -13,15 +13,18 @@ import uk.gov.ida.eidas.metatron.domain.ConfigLoaderUtil;
 import uk.gov.ida.eidas.metatron.domain.EidasConfig;
 import uk.gov.ida.eidas.metatron.domain.KeyStoreModule;
 import uk.gov.ida.eidas.metatron.domain.MetadataResolverService;
-import uk.gov.ida.eidas.metatron.health.MetatronHealthCheck;
 import uk.gov.ida.eidas.metatron.exceptions.MetatronClientExceptionMapper;
-import uk.gov.ida.eidas.metatron.resources.MetatronResource;
 import uk.gov.ida.eidas.metatron.exceptions.MetatronServerExceptionMapper;
+import uk.gov.ida.eidas.metatron.health.CountryMetadataHealthMetrics;
+import uk.gov.ida.eidas.metatron.health.MetatronHealthCheck;
+import uk.gov.ida.eidas.metatron.resources.MetatronResource;
 import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
 import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
 
 import java.io.IOException;
 import java.security.Security;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MetatronApplication extends Application<MetatronConfiguration> {
 
@@ -72,11 +75,21 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
 
         final MetatronHealthCheck healthCheck = new MetatronHealthCheck();
         environment.healthChecks().register("Metatron", healthCheck);
+        scheduleMetadataHealthChecker(environment, resolverService);
 
         environment.jersey().register(new MetatronResource(resolverService));
         environment.jersey().register(MetatronClientExceptionMapper.class);
         environment.jersey().register(MetatronServerExceptionMapper.class);
 
+    }
+
+    private void scheduleMetadataHealthChecker(Environment environment, MetadataResolverService resolverService) {
+        ScheduledExecutorService scheduledExecutorService = environment
+                .lifecycle()
+                .scheduledExecutorService("CountryMetadataHealthMetrics")
+                .build();
+        Runnable metrics = new CountryMetadataHealthMetrics(resolverService);
+        scheduledExecutorService.scheduleWithFixedDelay(metrics, 2, 5, TimeUnit.MINUTES);
     }
 
 }
