@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import com.codahale.metrics.annotation.ResponseMetered;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import io.prometheus.client.Counter;
@@ -57,6 +58,7 @@ public class HubResponseResource {
     @POST
     @Path(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ResponseMetered
     public View hubResponse(
         @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
         @FormParam("RelayState") String relayState,

@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import com.codahale.metrics.annotation.ResponseMetered;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import io.prometheus.client.Counter;
@@ -65,6 +66,7 @@ public class EidasAuthnRequestResource {
 
     @GET
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH)
+    @ResponseMetered
     public View handleRedirectBinding(
             @QueryParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
@@ -75,6 +77,7 @@ public class EidasAuthnRequestResource {
     @POST
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ResponseMetered
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
