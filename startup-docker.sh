@@ -9,8 +9,14 @@ export VERIFY_USE_PUBLIC_BINARIES=${VERIFY_USE_PUBLIC_BINARIES:-false}
 if [[ "$*" =~ "--build" ]]; then BUILD_IMAGES=true; export USE_LOCAL_BUILD=true; else BUILD_IMAGES=false; fi
 if [[ "$*" =~ "--local-hub" ]]; then VSP=verify-service-provider-local-hub; else VSP=verify-service-provider; fi
 
+if ! [[ -d "../verify-service-provider" ]]; then
+  echo "The VSP repository needs to be cloned into $(cd .. && pwd)/verify-service-provider" && exit 1
+fi
+
 if ${BUILD_IMAGES}; then
-  echo "Building apps..." && ./gradlew --parallel installDist
+  echo "Building apps..." &&
+      ./gradlew --parallel installDist &&
+      pushd ../verify-service-provider; ./gradlew --parallel installDist; popd
   echo "Building images..." && docker-compose build --parallel
 fi
 

@@ -1,6 +1,6 @@
 # Custom VSP image using Amazon JDK
 
-FROM registry.london.verify.govsvc.uk/eidas/verify-service-provider
+FROM eidas/verify-service-provider
 WORKDIR /verify-service-provider
 
 # Replace config file with the local version
