@@ -82,7 +82,10 @@ services:
       - ./local-startup/pki/verify-dev-pki:/app/verify-dev-pki
 
   verify-service-provider:
-    image: registry.london.verify.govsvc.uk/eidas/verify-service-provider:latest
+    image: eidas/verify-service-provider
+    build:
+      context: ../verify-service-provider
+      dockerfile: ../verify-proxy-node/proxy-node-vsp-config/Dockerfile
     environment:
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50402"
     entrypoint: ["bin/verify-service-provider"]
@@ -92,7 +95,7 @@ services:
       - "50402:50402"
 
   verify-service-provider-local-hub:
-    image: eidas/verify-service-provider
+    image: eidas/verify-service-provider-local-hub
     build:
       context: local-startup/vsp
     env_file: ./local-startup/docker.env
