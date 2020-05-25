@@ -85,6 +85,7 @@ public class TestRedisSessions {
                 "anEidasRequestId",
                 "anEidasDestination",
                 "anEidasRelayState",
-                "eidasIssuer");
+                "eidasIssuer",
+                false);
     }
 }
