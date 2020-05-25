@@ -31,6 +31,7 @@ public class HubResponseTranslator {
     private static final String PID_PREFIX = "GB/%s/%s";
     private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
+    private static final String TRANSIENT_PREFIX = "_tr_";
 
 
     public HubResponseTranslator(
@@ -43,9 +44,16 @@ public class HubResponseTranslator {
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer, CountryMetadataResponse countryMetadataResponse) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
-        final String pid = hubResponseContainer.getPid()
-                .map(p -> String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), p))
-                .orElse(null);
+        final String pid;
+        if (hubResponseContainer.isEidasTransientPid()){
+            pid = hubResponseContainer.getPid()
+                    .map(p -> String.format(PID_PREFIX, TRANSIENT_PREFIX + countryMetadataResponse.getCountryCode(), p))
+                    .orElse(null);
+        } else {
+            pid = hubResponseContainer.getPid()
+                    .map(p -> String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), p))
+                    .orElse(null);
+        }
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
             var attributes = hubResponseContainer
