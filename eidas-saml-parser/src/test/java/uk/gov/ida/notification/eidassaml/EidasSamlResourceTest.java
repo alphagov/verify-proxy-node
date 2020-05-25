@@ -11,6 +11,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
@@ -20,6 +22,7 @@ import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
 import uk.gov.ida.notification.eidassaml.saml.validation.EidasAuthnRequestValidator;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
 import uk.gov.ida.notification.helpers.ValidationTestDataUtils;
+import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
 import uk.gov.ida.notification.shared.proxy.MetatronProxy;
@@ -78,6 +81,38 @@ public class EidasSamlResourceTest {
         assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(ISSUER);
         assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_ISSUE_INSTANT.name())).isEqualTo(ISSUE_INSTANT.toString());
         assertThat(MDC.get(ProxyNodeMDCKey.EIDAS_LOA.name())).isEqualTo(EidasLoaEnum.LOA_SUBSTANTIAL.getUri());
+    }
+
+    @Test
+    public void shouldReturnFalseWhenNameIdIsNotTransient() throws Exception {
+        final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
+        NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
+        nameIDPolicy.setFormat(NameID.PERSISTENT);
+        eidasAuthnRequest.setNameIDPolicy(nameIDPolicy);
+
+        final CountryMetadataResponse countryMetadataResponse = createCountryMetadataResponse(eidasAuthnRequest, new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true));
+
+        when(mockMetatronProxy.getCountryMetadata(eidasAuthnRequest.getIssuer().getValue())).thenReturn(countryMetadataResponse);
+
+        final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
+
+        assertThat(response.isTransientPid()).isEqualTo(false);
+    }
+
+    @Test
+    public void shouldReturnTrueWhenNameIdIsTransient() throws Exception {
+        final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
+        NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
+        nameIDPolicy.setFormat(NameID.TRANSIENT);
+        eidasAuthnRequest.setNameIDPolicy(nameIDPolicy);
+
+        final CountryMetadataResponse countryMetadataResponse = createCountryMetadataResponse(eidasAuthnRequest, new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true));
+
+        when(mockMetatronProxy.getCountryMetadata(eidasAuthnRequest.getIssuer().getValue())).thenReturn(countryMetadataResponse);
+
+        final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
+
+        assertThat(response.isTransientPid()).isEqualTo(true);
     }
 
     @Test
