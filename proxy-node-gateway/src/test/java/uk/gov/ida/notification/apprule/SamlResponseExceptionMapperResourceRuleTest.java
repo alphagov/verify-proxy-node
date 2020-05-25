@@ -43,7 +43,8 @@ public class SamlResponseExceptionMapperResourceRuleTest {
                         "EidasRequestId",
                         "EidasDestination",
                         "EidasRelayState",
-                        "EidasIssuer"
+                        "EidasIssuer",
+                        false
                 )
         );
 
