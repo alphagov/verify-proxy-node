@@ -21,14 +21,18 @@ public class EidasSamlParserResponse {
     @ValidDestinationUriString
     private String assertionConsumerServiceLocation;
 
+    @JsonProperty
+    private boolean transientPid;
+
     @SuppressWarnings("Needed for serialisaiton")
     public EidasSamlParserResponse() {
     }
 
-    public EidasSamlParserResponse(String requestId, String issuerEntityId, String assertionConsumerServiceLocation) {
+    public EidasSamlParserResponse(String requestId, String issuerEntityId, String assertionConsumerServiceLocation, boolean transientPid) {
         this.requestId = requestId;
         this.issuerEntityId = issuerEntityId;
         this.assertionConsumerServiceLocation = assertionConsumerServiceLocation;
+        this.transientPid = transientPid;
     }
 
     public String getRequestId() {
@@ -41,5 +45,9 @@ public class EidasSamlParserResponse {
 
     public String getAssertionConsumerServiceLocation() {
         return assertionConsumerServiceLocation;
+    }
+
+    public boolean isTransientPid() {
+        return transientPid;
     }
 }

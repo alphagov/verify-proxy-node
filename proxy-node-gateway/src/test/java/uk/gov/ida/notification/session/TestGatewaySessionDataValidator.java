@@ -20,7 +20,8 @@ public class TestGatewaySessionDataValidator {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
                 "hub-request-id",
                 "issuer",
-                "eidas-destination"
+                "eidas-destination",
+                false
         );
 
         new GatewaySessionData(
@@ -35,7 +36,8 @@ public class TestGatewaySessionDataValidator {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
                 null,
                 "issuer",
-                ""
+                "",
+                false
         );
 
         new GatewaySessionData(
