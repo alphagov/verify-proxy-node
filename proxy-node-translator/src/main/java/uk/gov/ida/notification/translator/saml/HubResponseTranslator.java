@@ -1,6 +1,8 @@
 package uk.gov.ida.notification.translator.saml;
 
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.joda.time.DateTime;
+import org.opensaml.saml.saml2.core.Attribute;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
 import se.litsec.eidas.opensaml.common.EidasConstants;
@@ -31,8 +33,7 @@ public class HubResponseTranslator {
     private static final String PID_PREFIX = "GB/%s/%s";
     private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
-    private static final String TRANSIENT_PREFIX = "_tr_";
-
+    private static final String TRANSIENT_PREFIX = "_tr";
 
     public HubResponseTranslator(
             Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
@@ -45,10 +46,10 @@ public class HubResponseTranslator {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
         final String pid;
+        final SecureRandomIdentifierGenerationStrategy idGeneratorStrategy = new SecureRandomIdentifierGenerationStrategy();
+
         if (hubResponseContainer.isEidasTransientPid()){
-            pid = hubResponseContainer.getPid()
-                    .map(p -> String.format(PID_PREFIX, TRANSIENT_PREFIX + countryMetadataResponse.getCountryCode(), p))
-                    .orElse(null);
+            pid = String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), TRANSIENT_PREFIX + idGeneratorStrategy.generateIdentifier(true));
         } else {
             pid = hubResponseContainer.getPid()
                     .map(p -> String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), p))

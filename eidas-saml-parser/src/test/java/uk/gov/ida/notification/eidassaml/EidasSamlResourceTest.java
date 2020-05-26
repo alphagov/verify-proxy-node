@@ -84,10 +84,26 @@ public class EidasSamlResourceTest {
     }
 
     @Test
-    public void shouldReturnFalseWhenNameIdIsNotTransient() throws Exception {
+    public void shouldReturnFalseWhenNameIdIsPersistent() throws Exception {
         final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
         NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
         nameIDPolicy.setFormat(NameID.PERSISTENT);
+        eidasAuthnRequest.setNameIDPolicy(nameIDPolicy);
+
+        final CountryMetadataResponse countryMetadataResponse = createCountryMetadataResponse(eidasAuthnRequest, new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true));
+
+        when(mockMetatronProxy.getCountryMetadata(eidasAuthnRequest.getIssuer().getValue())).thenReturn(countryMetadataResponse);
+
+        final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
+
+        assertThat(response.isTransientPid()).isEqualTo(false);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenNameIdIsUnspecified() throws Exception {
+        final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
+        NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
+        nameIDPolicy.setFormat(NameID.UNSPECIFIED);
         eidasAuthnRequest.setNameIDPolicy(nameIDPolicy);
 
         final CountryMetadataResponse countryMetadataResponse = createCountryMetadataResponse(eidasAuthnRequest, new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true));
@@ -113,6 +129,22 @@ public class EidasSamlResourceTest {
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
         assertThat(response.isTransientPid()).isEqualTo(true);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenNameIdIsNull() throws Exception {
+        final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
+        NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
+        nameIDPolicy.setFormat(null);
+        eidasAuthnRequest.setNameIDPolicy(nameIDPolicy);
+
+        final CountryMetadataResponse countryMetadataResponse = createCountryMetadataResponse(eidasAuthnRequest, new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true));
+
+        when(mockMetatronProxy.getCountryMetadata(eidasAuthnRequest.getIssuer().getValue())).thenReturn(countryMetadataResponse);
+
+        final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
+
+        assertThat(response.isTransientPid()).isEqualTo(false);
     }
 
     @Test
