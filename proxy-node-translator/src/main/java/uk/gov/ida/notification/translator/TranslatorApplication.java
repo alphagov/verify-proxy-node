@@ -10,6 +10,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import javax.ws.rs.client.Client;
+
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -114,7 +116,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
         final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration, environment);
         final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
-        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy);
+        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy, new SecureRandomIdentifierGenerationStrategy());
 
         environment.jersey().register(hubResponseTranslatorResource);
     }

@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.translator.saml;
 
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 public class HubResponseContainer {
 
-    private final String pid;
+    private final Optional<String> pid;
     private final String eidasRequestId;
     private final URI destinationURL;
     private final URI issuer;
@@ -21,8 +22,9 @@ public class HubResponseContainer {
 
     public HubResponseContainer(
             final HubResponseTranslatorRequest hubResponseTranslatorRequest,
-            final TranslatedHubResponse translatedHubResponse) {
-        this.pid = translatedHubResponse.getPid().orElse(null);
+            final TranslatedHubResponse translatedHubResponse,
+            final IdentifierGenerationStrategy identifierGenerator) {
+        this.pid = generatePidForNameID(hubResponseTranslatorRequest, translatedHubResponse, identifierGenerator);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
         this.issuer = hubResponseTranslatorRequest.getEidasIssuerEntityId();
@@ -31,8 +33,18 @@ public class HubResponseContainer {
         this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance().orElse(null);
     }
 
+    private Optional<String> generatePidForNameID(
+            HubResponseTranslatorRequest hubResponseTranslatorRequest,
+            TranslatedHubResponse translatedHubResponse,
+            IdentifierGenerationStrategy identifierGenerator) {
+        if (hubResponseTranslatorRequest.isTransientId()) {
+            return Optional.of(identifierGenerator.generateIdentifier());
+        }
+        return translatedHubResponse.getPid();
+    }
+
     Optional<String> getPid() {
-        return Optional.ofNullable(pid);
+        return pid;
     }
 
     String getEidasRequestId() {
@@ -43,7 +55,7 @@ public class HubResponseContainer {
         return destinationURL.toString();
     }
 
-    public URI getIssuer() {
+    URI getIssuer() {
         return issuer;
     }
 

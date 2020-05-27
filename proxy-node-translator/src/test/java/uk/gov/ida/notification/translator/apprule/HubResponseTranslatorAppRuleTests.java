@@ -246,7 +246,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
-                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION)
+                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                false
             );
 
         return postToTranslator(translatorAppRule, hubResponseTranslatorRequest,  Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH);
@@ -262,7 +263,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
                         URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
-                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION)
+                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                        false
                 );
 
         return postToTranslator(translatorAppRule, hubResponseTranslatorRequest,  Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH);
