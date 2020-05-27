@@ -44,7 +44,8 @@ public class EidasAuthnRequestContextFactory {
         SPTypeEnumeration spType,
         List<String> requestedAttributes,
         EidasLoaEnum loa,
-        SignatureSigningParameters signingParameters) throws ComponentInitializationException, MessageHandlerException {
+        SignatureSigningParameters signingParameters,
+        boolean transientId) throws ComponentInitializationException, MessageHandlerException {
 
         AuthnRequest request = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         request.getNamespaceManager().registerNamespaceDeclaration(new Namespace(EidasConstants.EIDAS_NS, EidasConstants.EIDAS_PREFIX));
@@ -92,7 +93,7 @@ public class EidasAuthnRequestContextFactory {
         // Set the requested NameID policy to "persistent".
         //
         NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
-        nameIDPolicy.setFormat(NameID.PERSISTENT);
+        nameIDPolicy.setFormat(transientId ? NameID.TRANSIENT : NameID.PERSISTENT);
         nameIDPolicy.setAllowCreate(true);
         request.setNameIDPolicy(nameIDPolicy);
 
