@@ -5,6 +5,7 @@ import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
@@ -70,12 +71,15 @@ public class EidasSamlResource {
                                 .orElseThrow();
 
         this.logAuthnRequestMdcProperties(authnRequest);
-        boolean transientPid = NameID.TRANSIENT.equals(authnRequest.getNameIDPolicy().getFormat());
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
                 assertionConsumerServiceURL,
-                transientPid);
+                assignTransientPid(authnRequest));
+    }
+
+    private boolean assignTransientPid(AuthnRequest authnRequest) {
+        return authnRequest.getNameIDPolicy() != null && NameID.TRANSIENT.equals(authnRequest.getNameIDPolicy().getFormat()) ? true : false;
     }
 
     private AuthnRequest unmarshallRequest(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {

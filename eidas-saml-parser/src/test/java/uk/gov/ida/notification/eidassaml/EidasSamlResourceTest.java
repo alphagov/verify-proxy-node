@@ -148,6 +148,20 @@ public class EidasSamlResourceTest {
     }
 
     @Test
+    public void shouldReturnFalseWhenNameIdPolicyIsNull() throws Exception {
+        final AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder().build();
+        eidasAuthnRequest.setNameIDPolicy(null);
+
+        final CountryMetadataResponse countryMetadataResponse = createCountryMetadataResponse(eidasAuthnRequest, new AssertionConsumerService(UriBuilder.fromPath(TEST_CONNECTOR_DESTINATION).build(), 0, true));
+
+        when(mockMetatronProxy.getCountryMetadata(eidasAuthnRequest.getIssuer().getValue())).thenReturn(countryMetadataResponse);
+
+        final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
+
+        assertThat(response.isTransientPid()).isEqualTo(false);
+    }
+
+    @Test
     public void shouldSelectAssertionConsumerServiceFromAuthenticationRequestIfProvided() throws Exception {
         AuthnRequest eidasAuthnRequest = createEidasAuthnRequestBuilder()
                 .withAssertionConsumerServiceURL("http://www.eidas.com/Response/POST")

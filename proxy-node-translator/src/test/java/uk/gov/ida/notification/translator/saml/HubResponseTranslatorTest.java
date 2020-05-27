@@ -1,5 +1,7 @@
 package uk.gov.ida.notification.translator.saml;
 
+import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
@@ -26,6 +28,9 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createDateTime;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createNonMatchingTransliterableAttribute;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed;
@@ -51,6 +56,8 @@ public class HubResponseTranslatorTest {
     private AttributesBuilder attributesBuilder;
     private CountryMetadataResponse countryMetaDataResponse;
 
+    private IdentifierGenerationStrategy identifierGenerator = spy(new SecureRandomIdentifierGenerationStrategy());
+
     @Before
     public void setUp() {
         this.attributesBuilder = new AttributesBuilder();
@@ -73,6 +80,15 @@ public class HubResponseTranslatorTest {
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(identityVerifiedResponse);
+        verifyNoInteractions(identifierGenerator);
+    }
+
+    @Test
+    public void translateShouldUseTransientIdWhenFlagged() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainerwithTransientId(
+                buildTranslatedHubResponseIdentityVerified());
+        TRANSLATOR.getTranslatedHubResponse(hubResponseContainer, countryMetaDataResponse);
+        verify(identifierGenerator).generateIdentifier();
     }
 
     @Test
@@ -241,14 +257,18 @@ public class HubResponseTranslatorTest {
     }
 
     private HubResponseContainer buildHubResponseContainer(NonMatchingAttributes attributes) {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), new TranslatedHubResponseBuilder().withAttributes(attributes).build());
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(false), new TranslatedHubResponseBuilder().withAttributes(attributes).build(), identifierGenerator);
     }
 
     private HubResponseContainer buildHubResponseContainer(TranslatedHubResponse translatedHubResponse) {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), translatedHubResponse);
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(false), translatedHubResponse, identifierGenerator);
     }
 
-    private HubResponseTranslatorRequest buildHubResponseTranslatorRequest() {
+    private HubResponseContainer buildHubResponseContainerwithTransientId(TranslatedHubResponse translatedHubResponse) {
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(true), translatedHubResponse, identifierGenerator);
+    }
+
+    private HubResponseTranslatorRequest buildHubResponseTranslatorRequest(boolean transientId) {
         return new HubResponseTranslatorRequest(
                 "",
                 "_request-id_of-20-chars-or-more",
@@ -256,6 +276,6 @@ public class HubResponseTranslatorTest {
                 "LEVEL_2",
                 URI.create("http://localhost:8081/bob"),
                 URI.create("http://localhost:8081/bob"),
-                false);
+                transientId);
     }
 }
