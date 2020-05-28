@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.translator.resources;
 
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import org.glassfish.jersey.internal.util.Base64;
 import uk.gov.ida.eidas.logging.EidasAuthnResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
@@ -33,14 +32,11 @@ public class HubResponseTranslatorResource {
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private final EidasResponseGenerator eidasResponseGenerator;
     private final VerifyServiceProviderProxy verifyServiceProviderProxy;
-    private final IdentifierGenerationStrategy identifierGenerator;
 
     public HubResponseTranslatorResource(EidasResponseGenerator eidasResponseGenerator,
-                                         VerifyServiceProviderProxy verifyServiceProviderProxy,
-                                         IdentifierGenerationStrategy identifierGenerator) {
+                                         VerifyServiceProviderProxy verifyServiceProviderProxy) {
         this.eidasResponseGenerator = eidasResponseGenerator;
         this.verifyServiceProviderProxy = verifyServiceProviderProxy;
-        this.identifierGenerator = identifierGenerator;
     }
 
     @POST
@@ -55,7 +51,7 @@ public class HubResponseTranslatorResource {
                 hubResponseTranslatorRequest.getRequestId(),
                 hubResponseTranslatorRequest.getDestinationUrl());
 
-        HubResponseContainer hubResponseContainer = new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse, identifierGenerator);
+        HubResponseContainer hubResponseContainer = new HubResponseContainer(hubResponseTranslatorRequest, translatedHubResponse);
         final org.opensaml.saml.saml2.core.Response eidasResponse = eidasResponseGenerator.generateFromHubResponse(hubResponseContainer);
 
         logSamlResponse(eidasResponse);

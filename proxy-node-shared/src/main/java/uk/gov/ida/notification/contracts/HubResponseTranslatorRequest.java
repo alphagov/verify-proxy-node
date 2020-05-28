@@ -42,7 +42,7 @@ public class HubResponseTranslatorRequest {
     private URI eidasIssuerEntityId;
 
     @JsonProperty
-    private boolean eidasTransientPid;
+    private boolean transientPidRequested;
 
     @SuppressWarnings("Needed for JSON serialisation")
     public HubResponseTranslatorRequest() {
@@ -55,14 +55,14 @@ public class HubResponseTranslatorRequest {
             String levelOfAssurance,
             URI destinationUrl,
             URI eidasIssuerEntityId,
-            boolean eidasTransientPid) {
+            boolean transientPidRequested) {
         this.samlResponse = samlResponse;
         this.requestId = requestId;
         this.eidasRequestId = eidasRequestId;
         this.levelOfAssurance = levelOfAssurance;
         this.destinationUrl = destinationUrl;
         this.eidasIssuerEntityId = eidasIssuerEntityId;
-        this.eidasTransientPid = eidasTransientPid;
+        this.transientPidRequested = transientPidRequested;
     }
 
     public String getSamlResponse() {
@@ -89,7 +89,7 @@ public class HubResponseTranslatorRequest {
         return destinationUrl;
     }
 
-    public boolean isEidasTransientPid() {
-        return eidasTransientPid;
+    public boolean isTransientPidRequested() {
+        return transientPidRequested;
     }
 }

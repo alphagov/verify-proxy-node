@@ -41,7 +41,7 @@ public class GatewaySessionData {
     private final String eidasIssuerEntityId;
 
     @JsonProperty
-    private final boolean eidasTransientPid;
+    private final boolean transientPidRequested;
 
     @JsonCreator
     public GatewaySessionData(
@@ -50,13 +50,13 @@ public class GatewaySessionData {
             @JsonProperty("EIDAS_DESTINATION") String eidasDestination,
             @JsonProperty("eidasRelayState") String eidasRelayState,
             @JsonProperty("eidasIssuerEntityId") String eidasIssuerEntityId,
-            @JsonProperty("eidasTransientPid") boolean eidasTransientPid) {
+            @JsonProperty("transientPidRequested") boolean transientPidRequested) {
         this.hubRequestId = hubRequestId;
         this.eidasRequestId = eidasRequestId;
         this.eidasDestination = eidasDestination;
         this.eidasRelayState = eidasRelayState;
         this.eidasIssuerEntityId = eidasIssuerEntityId;
-        this.eidasTransientPid = eidasTransientPid;
+        this.transientPidRequested = transientPidRequested;
     }
 
     public GatewaySessionData(
@@ -68,7 +68,7 @@ public class GatewaySessionData {
         this.eidasDestination = eidasSamlParserResponse.getAssertionConsumerServiceLocation();
         this.eidasRelayState = eidasRelayState;
         this.eidasIssuerEntityId = eidasSamlParserResponse.getIssuerEntityId();
-        this.eidasTransientPid = eidasSamlParserResponse.isTransientPid();
+        this.transientPidRequested = eidasSamlParserResponse.isTransientPidRequested();
         validate();
     }
 
@@ -111,7 +111,7 @@ public class GatewaySessionData {
         return eidasIssuerEntityId;
     }
 
-    public boolean isEidasTransientPid() {
-        return this.eidasTransientPid;
+    public boolean isTransientPidRequested() {
+        return this.transientPidRequested;
     }
 }

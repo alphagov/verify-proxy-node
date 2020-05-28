@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.translator.saml;
 
-import net.shibboleth.utilities.java.support.security.IdentifierGenerationStrategy;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -12,43 +11,31 @@ import java.util.Optional;
 
 public class HubResponseContainer {
 
-    private final Optional<String> pid;
+    private final String pid;
     private final String eidasRequestId;
     private final URI destinationURL;
     private final URI issuer;
     private final Attributes attributes;
     private final VspScenario vspScenario;
     private final VspLevelOfAssurance levelOfAssurance;
-    private final boolean eidasTransientPid;
+    private final boolean transientPidRequested;
 
 
     public HubResponseContainer(
             final HubResponseTranslatorRequest hubResponseTranslatorRequest,
-            final TranslatedHubResponse translatedHubResponse,
-            final IdentifierGenerationStrategy identifierGenerator) {
-        this.pid = generatePidForNameID(hubResponseTranslatorRequest, translatedHubResponse, identifierGenerator);
+            final TranslatedHubResponse translatedHubResponse) {
+        this.pid = translatedHubResponse.getPid().orElse(null);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
         this.issuer = hubResponseTranslatorRequest.getEidasIssuerEntityId();
-        this.eidasTransientPid = hubResponseTranslatorRequest.isEidasTransientPid();
-
+        this.transientPidRequested = hubResponseTranslatorRequest.isTransientPidRequested();
         this.attributes = translatedHubResponse.getAttributes().orElse(null);
         this.vspScenario = translatedHubResponse.getScenario();
         this.levelOfAssurance = translatedHubResponse.getLevelOfAssurance().orElse(null);
     }
 
-    private Optional<String> generatePidForNameID(
-            HubResponseTranslatorRequest hubResponseTranslatorRequest,
-            TranslatedHubResponse translatedHubResponse,
-            IdentifierGenerationStrategy identifierGenerator) {
-        if (hubResponseTranslatorRequest.isEidasTransientPid()) {
-            return Optional.of(identifierGenerator.generateIdentifier());
-        }
-        return translatedHubResponse.getPid();
-    }
-
     Optional<String> getPid() {
-        return pid;
+        return Optional.ofNullable(pid);
     }
 
     String getEidasRequestId() {
@@ -63,8 +50,8 @@ public class HubResponseContainer {
         return issuer;
     }
 
-    public boolean isEidasTransientPid() {
-        return eidasTransientPid;
+    public boolean isTransientPidRequested() {
+        return transientPidRequested;
     }
 
     Optional<Attributes> getAttributes() {

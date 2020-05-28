@@ -9,9 +9,6 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import javax.ws.rs.client.Client;
-
-import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -39,6 +36,8 @@ import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResourc
 import uk.gov.ida.notification.translator.saml.EidasFailureResponseGenerator;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
+
+import javax.ws.rs.client.Client;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
     public static void main(String[] args) throws Exception {
@@ -116,7 +115,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
     private void registerResources(TranslatorConfiguration configuration, Environment environment) {
         final EidasResponseGenerator eidasResponseGenerator = createEidasResponseGenerator(configuration, environment);
         final VerifyServiceProviderProxy vspProxy = configuration.getVspConfiguration().buildVerifyServiceProviderProxy(environment);
-        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy, new SecureRandomIdentifierGenerationStrategy());
+        final HubResponseTranslatorResource hubResponseTranslatorResource = new HubResponseTranslatorResource(eidasResponseGenerator, vspProxy);
 
         environment.jersey().register(hubResponseTranslatorResource);
     }

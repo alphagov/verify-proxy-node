@@ -84,6 +84,17 @@ public class SendAuthnRequestResource {
     }
 
     @GET
+    @Path("/RequestTransientPid")
+    public Response authnRequestSubstantialWithTransientPid(
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
+    ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, configuration.getCredentialConfiguration());
+        encode(httpServletResponse, context);
+        return Response.ok().build();
+    }
+
+    @GET
     @Path("/RequestHigh")
     public Response authnRequestHigh(
             @Session HttpSession session,
@@ -154,9 +165,18 @@ public class SendAuthnRequestResource {
     }
 
     private MessageContext generateAuthnRequestContext(
+            HttpSession session,
+            EidasLoaEnum loaType,
+            ConnectorNodeCredentialConfiguration credentialConfiguration
+    ) throws ResolverException, ComponentInitializationException, MessageHandlerException {
+        return generateAuthnRequestContext(session, loaType, credentialConfiguration, false);
+    }
+
+    private MessageContext generateAuthnRequestContext(
         HttpSession session,
         EidasLoaEnum loaType,
-        ConnectorNodeCredentialConfiguration credentialConfiguration
+        ConnectorNodeCredentialConfiguration credentialConfiguration,
+        boolean transientPidRequested
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
         String connectorEntityId = configuration.getConnectorNodeEntityId().toString();
@@ -179,7 +199,8 @@ public class SendAuthnRequestResource {
             SPTypeEnumeration.PUBLIC,
             requestedAttributes,
             loaType,
-            signingParameters);
+            signingParameters,
+            transientPidRequested);
 
         session.setAttribute("authn_id", context.getSubcontext(SAMLMessageInfoContext.class, true).getMessageId());
         SAMLBindingSupport.setRelayState(context, session.getId());

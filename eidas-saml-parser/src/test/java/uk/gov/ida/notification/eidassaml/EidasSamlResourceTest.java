@@ -96,7 +96,7 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.isTransientPid()).isEqualTo(false);
+        assertThat(response.isTransientPidRequested()).isEqualTo(false);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.isTransientPid()).isEqualTo(false);
+        assertThat(response.isTransientPidRequested()).isEqualTo(false);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.isTransientPid()).isEqualTo(true);
+        assertThat(response.isTransientPidRequested()).isEqualTo(true);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.isTransientPid()).isEqualTo(false);
+        assertThat(response.isTransientPidRequested()).isEqualTo(false);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class EidasSamlResourceTest {
 
         final EidasSamlParserResponse response = postEidasAuthnRequest(eidasAuthnRequest);
 
-        assertThat(response.isTransientPid()).isEqualTo(false);
+        assertThat(response.isTransientPidRequested()).isEqualTo(false);
     }
 
     @Test
