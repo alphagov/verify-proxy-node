@@ -37,7 +37,8 @@ public class EidasAuthnRequestContextFactoryTest {
                     SPTypeEnumeration.PUBLIC,
                     Collections.emptyList(),
                     EidasLoaEnum.LOA_SUBSTANTIAL,
-                    signingParams);
+                    signingParams,
+                    false);
         } catch (Exception e) {
             // expected
         }
