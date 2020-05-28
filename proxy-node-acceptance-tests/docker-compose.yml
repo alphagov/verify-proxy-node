@@ -9,12 +9,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    ports:
+      - "4444:4444"
 
   acceptance-tests:
     build: .
     depends_on:
       - selenium-hub
-    environment:
-      - PROXY_NODE_URL=${PROXY_NODE_URL}
-      - STUB_CONNECTOR_URL=${STUB_CONNECTOR_URL}
-      - STUB_IDP_USER=${STUB_IDP_USER}
+    env_file: ./docker_local.env
