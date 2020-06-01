@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import com.codahale.metrics.annotation.ResponseMetered;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import io.prometheus.client.Counter;
@@ -31,10 +32,12 @@ public class HubResponseResource {
     private static final Counter RESPONSES = Counter.build(
             MetricsUtils.LABEL_PREFIX + "_responses_total",
             "Number of eIDAS SAML responses to Verify Proxy Node")
+            .labelNames("issuer")
             .register();
     private static final Counter RESPONSES_SUCCESSFUL = Counter.build(
             MetricsUtils.LABEL_PREFIX + "_successful_responses_total",
             "Number of successful eIDAS SAML responses To Verify Proxy Node")
+            .labelNames("issuer")
             .register();
 
     static final String LEVEL_OF_ASSURANCE = "LEVEL_2";
@@ -55,12 +58,14 @@ public class HubResponseResource {
     @POST
     @Path(Urls.GatewayUrls.GATEWAY_HUB_RESPONSE_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ResponseMetered
     public View hubResponse(
         @FormParam(SamlFormMessageType.SAML_RESPONSE) @ValidBase64Xml String hubResponse,
         @FormParam("RelayState") String relayState,
         @Session HttpSession session) {
-        RESPONSES.inc();
         GatewaySessionData sessionData = sessionStorage.getSession(session.getId());
+        String issuerEntityId = sessionData.getEidasIssuerEntityId();
+        RESPONSES.labels(issuerEntityId).inc();
 
         ProxyNodeLogger.info("Retrieved GatewaySessionData");
 
@@ -70,7 +75,7 @@ public class HubResponseResource {
             sessionData.getEidasRequestId(),
             LEVEL_OF_ASSURANCE,
             UriBuilder.fromUri(sessionData.getEidasDestination()).build(),
-            UriBuilder.fromUri(sessionData.getEidasIssuerEntityId()).build()
+            UriBuilder.fromUri(issuerEntityId).build()
         );
 
         String eidasResponse = translatorProxy.getTranslatedHubResponse(translatorRequest, session.getId());
@@ -81,7 +86,7 @@ public class HubResponseResource {
                 eidasResponse,
                 sessionData.getEidasRelayState()
         );
-        RESPONSES_SUCCESSFUL.inc();
+        RESPONSES_SUCCESSFUL.labels(issuerEntityId).inc();
         return samlFormView;
     }
 }

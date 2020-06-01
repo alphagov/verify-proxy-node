@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.resources;
 
+import com.codahale.metrics.annotation.ResponseMetered;
 import io.dropwizard.jersey.sessions.Session;
 import io.dropwizard.views.View;
 import io.prometheus.client.Counter;
@@ -38,11 +39,13 @@ public class EidasAuthnRequestResource {
     private static final Counter REQUESTS = Counter.build(
             MetricsUtils.LABEL_PREFIX + "_requests_total",
             "Number of eIDAS SAML requests to Verify Proxy Node ")
+            .labelNames("issuer")
             .register();
 
     private static final Counter REQUESTS_SUCCESSFUL = Counter.build(
             MetricsUtils.LABEL_PREFIX + "_successful_requests_total",
             "Number of successful eIDAS SAML requests to Verify Proxy Node")
+            .labelNames("issuer")
             .register();
 
     private final EidasSamlParserProxy eidasSamlParserService;
@@ -63,6 +66,7 @@ public class EidasAuthnRequestResource {
 
     @GET
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_REDIRECT_PATH)
+    @ResponseMetered
     public View handleRedirectBinding(
             @QueryParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @QueryParam("RelayState") String relayState,
@@ -73,6 +77,7 @@ public class EidasAuthnRequestResource {
     @POST
     @Path(Urls.GatewayUrls.GATEWAY_EIDAS_AUTHN_REQUEST_POST_PATH)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ResponseMetered
     public View handlePostBinding(
             @FormParam(SamlFormMessageType.SAML_REQUEST) @ValidBase64Xml String encodedEidasAuthnRequest,
             @FormParam(RelayState.DEFAULT_ELEMENT_LOCAL_NAME) String eidasRelayState,
@@ -81,9 +86,10 @@ public class EidasAuthnRequestResource {
     }
 
     private View handleAuthnRequest(String encodedEidasAuthnRequest, String eidasRelayState, HttpSession session) {
-        REQUESTS.inc();
         final String sessionId = session.getId();
         final EidasSamlParserResponse eidasSamlParserResponse = parseEidasRequest(encodedEidasAuthnRequest, sessionId);
+        final String issuerEntityId = eidasSamlParserResponse.getIssuerEntityId();
+        REQUESTS.labels(issuerEntityId).inc();
         final AuthnRequestResponse vspResponse = generateHubRequestWithVsp(sessionId);
 
         sessionStorage.createOrUpdateSession(
@@ -96,13 +102,13 @@ public class EidasAuthnRequestResource {
         );
 
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasSamlParserResponse.getRequestId());
-        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasSamlParserResponse.getIssuerEntityId());
+        ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, issuerEntityId);
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_DESTINATION, eidasSamlParserResponse.getAssertionConsumerServiceLocation());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_REQUEST_ID, vspResponse.getRequestId());
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.HUB_URL, vspResponse.getSsoLocation().toString());
         ProxyNodeLogger.info("Authn requests received from ESP and VSP");
         SamlFormView samlFormView = buildSamlFormView(vspResponse, (String) session.getAttribute(ProxyNodeMDCKey.PROXY_NODE_JOURNEY_ID.name()));
-        REQUESTS_SUCCESSFUL.inc();
+        REQUESTS_SUCCESSFUL.labels(issuerEntityId).inc();
         return samlFormView;
     }
 
