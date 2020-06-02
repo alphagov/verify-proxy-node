@@ -70,6 +70,8 @@ stubConnector:
     repository: 
     tag: 4af88e30aa699a3b10da92f54f522fed97f3273520f5ef364bcaa4c6f608d251
     pullPolicy: IfNotPresent
+  trustStore:
+  trustStorePassword:
 
 vsp:
   replicaCount: 1
