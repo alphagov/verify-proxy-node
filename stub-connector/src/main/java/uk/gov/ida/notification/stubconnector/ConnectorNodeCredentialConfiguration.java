@@ -3,6 +3,7 @@ package uk.gov.ida.notification.stubconnector;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.xml.security.signature.XMLSignature;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.security.x509.X509Credential;
@@ -44,7 +45,7 @@ public class ConnectorNodeCredentialConfiguration {
         if (samlSigningCredential.getPublicKey() instanceof ECPublicKey) {
             this.algorithm = SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA256;
         } else {
-            this.algorithm = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
+            this.algorithm = XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1;
         }
 
     }

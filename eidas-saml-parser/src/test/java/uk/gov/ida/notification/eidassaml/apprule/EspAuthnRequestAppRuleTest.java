@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -29,6 +30,8 @@ import uk.gov.ida.notification.saml.SamlObjectSigner;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLogger;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.logging.ProxyNodeMDCKey;
+import uk.gov.ida.saml.core.test.TestCredentialFactory;
+import uk.gov.ida.saml.security.signature.SignatureRSASSAPSS;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -40,6 +43,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PRIVATE_KEY;
+import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_CERT;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_COUNTRY_PUBLIC_PRIMARY_PRIVATE_KEY;
 
@@ -68,6 +73,21 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
     @Test
     public void shouldReturnOKForValidSignedRequest() throws Exception {
         assertGoodRequest(request);
+    }
+
+    @Test
+    public void shouldReturnOKForRequestWithSignatureAlgoThatRequiresBouncyCastle() throws Exception {
+
+        Credential signingCredential = new TestCredentialFactory(METADATA_SIGNING_A_PUBLIC_CERT, METADATA_SIGNING_A_PRIVATE_KEY).getSigningCredential();
+
+        EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder()
+                .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
+                .withDestination("http://proxy-node/eidasAuthnRequest")
+                .withAssertionConsumerServiceURL("http://assertionConsumerService.net")
+                .withSigningCredential(signingCredential)
+                .withSignatureAlgorithm(new SignatureRSASSAPSS());
+
+        assertGoodRequest(builder);
     }
 
     @Test
