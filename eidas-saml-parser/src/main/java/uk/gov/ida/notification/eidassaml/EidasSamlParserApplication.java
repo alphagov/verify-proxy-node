@@ -11,6 +11,7 @@ import io.dropwizard.setup.Environment;
 
 import javax.ws.rs.client.Client;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -37,6 +38,8 @@ import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
 import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.notification.shared.proxy.MetatronProxy;
 import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
+
+import java.security.Security;
 
 public class EidasSamlParserApplication extends Application<EidasSamlParserConfiguration> {
     private MetatronProxy metatronProxy;
@@ -75,6 +78,7 @@ public class EidasSamlParserApplication extends Application<EidasSamlParserConfi
 
     @Override
     public void run(EidasSamlParserConfiguration configuration, Environment environment) throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("parser");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 

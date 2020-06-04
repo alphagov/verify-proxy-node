@@ -6,10 +6,16 @@ import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.algorithm.SignatureAlgorithm;
 import org.opensaml.xmlsec.algorithm.descriptors.SignatureRSASHA256;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.Signer;
-import org.w3c.dom.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import uk.gov.ida.notification.saml.SamlParser;
 import uk.gov.ida.saml.core.test.builders.SignatureBuilder;
 
@@ -18,6 +24,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class EidasAuthnRequestBuilder {
@@ -30,6 +37,7 @@ public class EidasAuthnRequestBuilder {
     private final String eidas = "http://eidas.europa.eu/saml-extensions";
     private HashMap<String, String> namespaceMap;
     private Credential signingCredential;
+    private SignatureAlgorithm signatureAlgorithm;
 
     public EidasAuthnRequestBuilder() throws Exception {
         parser = new SamlParser();
@@ -48,7 +56,7 @@ public class EidasAuthnRequestBuilder {
         if (this.signingCredential != null) {
             SignatureBuilder signatureBuilder = SignatureBuilder
                     .aSignature()
-                    .withSignatureAlgorithm(new SignatureRSASHA256())
+                    .withSignatureAlgorithm(Optional.ofNullable(signatureAlgorithm).orElseGet(SignatureRSASHA256::new))
                     .withSigningCredential(this.signingCredential);
             authnRequest.setSignature(signatureBuilder.build());
             XMLObjectProviderRegistrySupport
@@ -188,6 +196,11 @@ public class EidasAuthnRequestBuilder {
 
     public EidasAuthnRequestBuilder withSigningCredential(Credential credential) {
         this.signingCredential = credential;
+        return this;
+    }
+
+    public EidasAuthnRequestBuilder withSignatureAlgorithm(SignatureAlgorithm signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
         return this;
     }
 
