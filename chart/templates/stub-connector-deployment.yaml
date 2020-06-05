@@ -78,10 +78,10 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-proxy-node-metadata
-              key: metadataSigningTruststoreBase64
+              key: metadataCATruststoreBase64
         - name: PROXY_NODE_METADATA_TRUSTSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-proxy-node-metadata
-              key: metadataSigningTruststorePassword
+              key: metadataCATruststorePassword
 {{- end -}}
