@@ -197,13 +197,13 @@ spec:
 
     groups:
       - name: deployment
-        jobs: [build-vsp-image, build-proxy-node, package, test, release, delete]
+        jobs: [build-vsp-image, build-proxy-node, package, deploy, test, release, delete]
       - name: proxy-node
-        jobs: [build-proxy-node, package, test, release, delete]
+        jobs: [build-proxy-node, package, deploy, test, release, delete]
       - name: components
         jobs: [build-cloudhsm, build-vsp-image]
       - name: all
-        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package, test, release, delete]
+        jobs: [build-cloudhsm, build-vsp-image, build-proxy-node, package, deploy, test, release, delete]
 
     jobs:
 
@@ -701,7 +701,7 @@ spec:
                   --namespace "${RELEASE_NAMESPACE}" \
                   --app "${RELEASE_NAME}-${APP_NAME}"
 
-    - name: test
+    - name: deploy
       serial: true
       serial_groups: [package]
       on_failure: *slack-on-failure
@@ -712,8 +712,6 @@ spec:
           - get: chart
             passed: [delete]
             trigger: true
-          - get: tests-image
-            passed: [build-proxy-node]
           - get: eidas-config
             trigger: true
 
@@ -853,21 +851,34 @@ spec:
                 --diff-changes \
                 -f ./manifests/
 
-      - task: test-chart-package
-        image: tests-image
-        attempts: 2
-        timeout: 5m
-        config:
-          platform: linux
-          params:
-            TEST_ENV: build
-          run:
-            path: /bin/bash
-            args:
-            - -euc
-            - |
-              cd /
-              bundle exec cucumber --strict --tags "not @ignore" features/acceptance/
+    - name: test
+      serial: true
+      serial_groups: [package]
+      on_failure: *slack-on-failure
+      plan:
+
+        - in_parallel:
+            steps:
+              - get: chart
+                passed: [deploy]
+                trigger: true
+              - get: tests-image
+
+        - task: test-chart-package
+          image: tests-image1
+          attempts: 2
+          timeout: 5m
+          config:
+            platform: linux
+            params:
+              TEST_ENV: build
+            run:
+              path: /bin/bash
+              args:
+              - -euc
+              - |
+                cd /
+                bundle exec cucumber --strict --tags "not @ignore" features/acceptance/
 
     - name: release
       serial: true
