@@ -48,13 +48,13 @@ spec:
           httpGet:
             path: /healthcheck
             port: mgmt
-          initialDelaySeconds: 10
-          periodSeconds: 5
+          initialDelaySeconds: 60
+          periodSeconds: 60
         readinessProbe:
           tcpSocket:
             port: http
-          initialDelaySeconds: 10
-          periodSeconds: 5
+          initialDelaySeconds: 60
+          periodSeconds: 60
         env:
         - name: PORT
           value: "80"
