@@ -184,7 +184,7 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
                 .withInResponseTo(authid)
                 .withIssueInstant(now)
                 .withDestination("http://stub-connector/SAML2/Response/POST")
-                .withAssertionSubject(UUID.randomUUID().toString())
+                .withAssertionSubject(UUID.randomUUID().toString(), authid, "http://stub-connector/SAML2/Response/POST")
                 .addAssertionAuthnStatement(EidasConstants.EIDAS_LOA_SUBSTANTIAL, now)
                 .addAssertionAttributeStatement(eidasAttributes)
                 .withAssertionConditions("http://localhost:5000/Metadata")

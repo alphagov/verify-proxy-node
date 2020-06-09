@@ -88,7 +88,7 @@ public class HubResponseTranslator {
                 .withInResponseTo(hubResponseContainer.getEidasRequestId())
                 .withIssueInstant(now)
                 .withDestination(hubResponseContainer.getDestinationURL())
-                .withAssertionSubject(pid)
+                .withAssertionSubject(pid, hubResponseContainer.getEidasRequestId(), hubResponseContainer.getDestinationURL())
                 .withAssertionConditions(countryMetadataResponse.getEntityId())
                 .withLoa(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
                 .addAssertionAttributeStatement(eidasAttributes)
