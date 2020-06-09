@@ -13,6 +13,9 @@ import org.opensaml.saml.saml2.core.Condition;
 import org.opensaml.saml.saml2.core.Conditions;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.Status;
+import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.core.impl.AudienceRestrictionImpl;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
 
@@ -81,7 +84,7 @@ public class EidasResponseBuilderTest {
 
         DateTime now = DateTime.now();
         Response response = EidasResponseBuilder.instance()
-                .withAssertionSubject("an assertion subject")
+                .withAssertionSubject("an assertion subject", "a request id", "an rp recipient url")
                 .withAssertionConditions("some assertion conditions")
                 .addAssertionAttributeStatement(Lists.newArrayList(attribute))
                 .addAssertionAuthnStatement("an authStatement", now)
@@ -93,7 +96,13 @@ public class EidasResponseBuilderTest {
 
         Assertion assertion = assertions.iterator().next();
 
-        assertThat(assertion.getSubject().getNameID().getValue()).contains("an assertion subject");
+        Subject subject = assertion.getSubject();
+        assertThat(subject.getNameID().getValue()).contains("an assertion subject");
+        assertThat(subject.getSubjectConfirmations().size()).isEqualTo(1);
+        SubjectConfirmation subjectConfirmation = subject.getSubjectConfirmations().iterator().next();
+        SubjectConfirmationData subjectConfirmationData = subjectConfirmation.getSubjectConfirmationData();
+        assertThat(subjectConfirmationData.getInResponseTo()).isEqualTo("a request id");
+        assertThat(subjectConfirmationData.getRecipient()).isEqualTo("an rp recipient url");
 
         Conditions conditions = assertion.getConditions();
         assertThat(conditions.getConditions().size()).isEqualTo(1);

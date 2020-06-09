@@ -14,6 +14,8 @@ import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.Subject;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 
 import java.util.List;
 
@@ -30,8 +32,8 @@ public class EidasAssertionBuilder {
         return this;
     }
 
-    public EidasAssertionBuilder withSubject(String pid) {
-        assertion.setSubject(createSubject(pid));
+    public EidasAssertionBuilder withSubject(String pid, String requestId, String destination) {
+        assertion.setSubject(createSubject(pid, requestId, destination));
         return this;
     }
 
@@ -64,12 +66,24 @@ public class EidasAssertionBuilder {
         return assertion;
     }
 
-    private Subject createSubject(String pid) {
+    private Subject createSubject(String pid, String requestId, String destination) {
         Subject subject = SamlBuilder.build(Subject.DEFAULT_ELEMENT_NAME);
         NameID nameID = SamlBuilder.build(NameID.DEFAULT_ELEMENT_NAME);
         nameID.setValue(pid);
         nameID.setFormat(NameIDType.PERSISTENT);
         subject.setNameID(nameID);
+
+        SubjectConfirmationData subjectConfirmationData = SamlBuilder.build(SubjectConfirmationData.DEFAULT_ELEMENT_NAME);
+        subjectConfirmationData.setInResponseTo(requestId);
+        subjectConfirmationData.setNotBefore(DateTime.now());
+        subjectConfirmationData.setNotOnOrAfter(DateTime.now().plusMinutes(5));
+        subjectConfirmationData.setRecipient(destination);
+
+        SubjectConfirmation subjectConfirmation = SamlBuilder.build(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+        subjectConfirmation.setMethod("urn:oasis:names:tc:saml2:2.0:cm:bearer");
+        subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
+
+        subject.getSubjectConfirmations().add(subjectConfirmation);
         return subject;
     }
 

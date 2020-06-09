@@ -60,8 +60,8 @@ public class EidasResponseBuilder {
         return this;
     }
 
-    public EidasResponseBuilder withAssertionSubject(String pid) {
-        assertionBuilder.withSubject(pid);
+    public EidasResponseBuilder withAssertionSubject(String pid, String requestId, String destination) {
+        assertionBuilder.withSubject(pid, requestId, destination);
         return this;
     }
 
