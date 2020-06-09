@@ -14,7 +14,6 @@ import org.opensaml.saml.saml2.core.Conditions;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.Status;
 import org.opensaml.saml.saml2.core.Subject;
-import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml.saml2.core.impl.AudienceRestrictionImpl;
 import se.litsec.eidas.opensaml.ext.attributes.CurrentGivenNameType;
@@ -38,13 +37,13 @@ public class EidasResponseBuilderTest {
     @Test
     public void testAnEidasResponseHasASeparateIdToItsAssertionId() {
         Response response = EidasResponseBuilder.instance().build();
-        assertNotEquals(response.getAssertions().iterator().next().getID(), response.getID());
+        assertNotEquals(response.getAssertions().get(0).getID(), response.getID());
     }
 
     @Test
     public void testAnEidasResponseHasSameIssuerValueAsItsAssertionIssuerValue() {
         Response response = EidasResponseBuilder.instance().withIssuer("issuer").build();
-        assertEquals(response.getAssertions().iterator().next().getIssuer().getValue(), response.getIssuer().getValue());
+        assertEquals(response.getAssertions().get(0).getIssuer().getValue(), response.getIssuer().getValue());
     }
 
     @Test
@@ -70,7 +69,7 @@ public class EidasResponseBuilderTest {
     @Test
     public void testAnEidasResponseAndAssertionHaveSameSuppliedIssueInstant() {
         Response response = EidasResponseBuilder.instance().withIssueInstant(DateTime.now()).build();
-        assertThat(response.getIssueInstant()).isEqualByComparingTo(response.getAssertions().iterator().next().getIssueInstant());
+        assertThat(response.getIssueInstant()).isEqualByComparingTo(response.getAssertions().get(0).getIssueInstant());
     }
 
     @Test
@@ -94,30 +93,30 @@ public class EidasResponseBuilderTest {
         List<Assertion> assertions = response.getAssertions();
         assertThat(assertions.size()).isEqualTo(1);
 
-        Assertion assertion = assertions.iterator().next();
+        Assertion assertion = assertions.get(0);
 
         Subject subject = assertion.getSubject();
         assertThat(subject.getNameID().getValue()).contains("an assertion subject");
         assertThat(subject.getSubjectConfirmations().size()).isEqualTo(1);
-        SubjectConfirmation subjectConfirmation = subject.getSubjectConfirmations().iterator().next();
-        SubjectConfirmationData subjectConfirmationData = subjectConfirmation.getSubjectConfirmationData();
+
+        SubjectConfirmationData subjectConfirmationData = subject.getSubjectConfirmations().get(0).getSubjectConfirmationData();
         assertThat(subjectConfirmationData.getInResponseTo()).isEqualTo("a request id");
         assertThat(subjectConfirmationData.getRecipient()).isEqualTo("an rp recipient url");
 
         Conditions conditions = assertion.getConditions();
         assertThat(conditions.getConditions().size()).isEqualTo(1);
-        Condition condition = conditions.getConditions().iterator().next();
-        assertThat(((AudienceRestrictionImpl) condition).getAudiences().iterator().next().getAudienceURI()).isEqualTo("some assertion conditions");
+        Condition condition = conditions.getConditions().get(0);
+        assertThat(((AudienceRestrictionImpl) condition).getAudiences().get(0).getAudienceURI()).isEqualTo("some assertion conditions");
 
         List<AttributeStatement> attributeStatements = assertion.getAttributeStatements();
         assertThat(attributeStatements.size()).isEqualTo(1);
-        AttributeStatement attributeStatement = attributeStatements.iterator().next();
+        AttributeStatement attributeStatement = attributeStatements.get(0);
         List<Attribute> attributes = attributeStatement.getAttributes();
         assertThat(attributes.size()).isEqualTo(1);
-        assertThat(attributeStatement.getAttributes().iterator().next()).isEqualTo(attribute);
+        assertThat(attributeStatement.getAttributes().get(0)).isEqualTo(attribute);
 
         assertThat(assertion.getAuthnStatements().size()).isEqualTo(1);
-        AuthnStatement authnStatement = assertion.getAuthnStatements().iterator().next();
+        AuthnStatement authnStatement = assertion.getAuthnStatements().get(0);
         assertThat(authnStatement.getAuthnInstant()).isEqualByComparingTo(now);
         assertThat(authnStatement.getAuthnContext().getAuthnContextClassRef().getAuthnContextClassRef()).isEqualTo("an authStatement");
     }

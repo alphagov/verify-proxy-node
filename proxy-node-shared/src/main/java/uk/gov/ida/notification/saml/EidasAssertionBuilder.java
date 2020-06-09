@@ -80,7 +80,7 @@ public class EidasAssertionBuilder {
         subjectConfirmationData.setRecipient(destination);
 
         SubjectConfirmation subjectConfirmation = SamlBuilder.build(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
-        subjectConfirmation.setMethod("urn:oasis:names:tc:saml2:2.0:cm:bearer");
+        subjectConfirmation.setMethod(SubjectConfirmation.METHOD_BEARER);
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
 
         subject.getSubjectConfirmations().add(subjectConfirmation);
