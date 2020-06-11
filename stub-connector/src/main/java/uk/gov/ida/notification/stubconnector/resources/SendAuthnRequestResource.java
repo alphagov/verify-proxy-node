@@ -89,7 +89,7 @@ public class SendAuthnRequestResource {
             @Session HttpSession session,
             @Context HttpServletResponse httpServletResponse
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
-        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, configuration.getCredentialConfiguration());
+        MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, configuration.getCredentialConfiguration(), true);
         encode(httpServletResponse, context);
         return Response.ok().build();
     }
