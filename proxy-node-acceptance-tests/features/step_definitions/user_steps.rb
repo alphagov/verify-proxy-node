@@ -16,6 +16,10 @@ Given("the proxy node is sent a LOA {string} request from the stub connector") d
   visit(ENV.fetch('STUB_CONNECTOR_URL') + loa_url)
 end
 
+Given("the proxy node is sent a transientPid request") do
+  visit(ENV.fetch('STUB_CONNECTOR_URL') + "/RequestTransientPid")
+end
+
 And('they progress through verify') do
   assert_text('Sign in with GOV.UK Verify')
   choose('start_form_selection_false', allow_label_click: true)
@@ -76,6 +80,10 @@ Then('they should arrive at the success page') do
   assert_text('Jack Cornelius')
   assert_text('Bauer')
   assert_text('1984-02-29')
+end
+
+And('they should have a transient id') do
+  assert_text('GB/EU/_tr_')
 end
 
 Then("the user should be presented with a Hub error page indicating IDP could not sign you in") do

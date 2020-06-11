@@ -24,7 +24,8 @@ public class TestEidasSamlResource {
         return new EidasSamlParserResponse(
                 SAMPLE_EIDAS_REQUEST_ID,
                 SAMPLE_ENTITY_ID,
-                SAMPLE_DESTINATION_URL
+                SAMPLE_DESTINATION_URL,
+                false
         );
     }
 }

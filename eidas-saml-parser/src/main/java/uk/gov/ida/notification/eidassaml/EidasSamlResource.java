@@ -4,6 +4,7 @@ import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.saml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.security.credential.BasicCredential;
 import org.opensaml.security.credential.Credential;
 import org.opensaml.security.credential.UsageType;
@@ -72,7 +73,12 @@ public class EidasSamlResource {
         return new EidasSamlParserResponse(
                 authnRequest.getID(),
                 authnRequest.getIssuer().getValue(),
-                assertionConsumerServiceURL);
+                assertionConsumerServiceURL,
+                wantTransientPid(authnRequest));
+    }
+
+    private boolean wantTransientPid(AuthnRequest authnRequest) {
+        return authnRequest.getNameIDPolicy() != null && NameID.TRANSIENT.equals(authnRequest.getNameIDPolicy().getFormat());
     }
 
     private AuthnRequest unmarshallRequest(EidasSamlParserRequest request) throws UnmarshallingException, XMLParserException {

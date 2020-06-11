@@ -9,7 +9,6 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import javax.ws.rs.client.Client;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
@@ -37,6 +36,8 @@ import uk.gov.ida.notification.translator.resources.HubResponseTranslatorResourc
 import uk.gov.ida.notification.translator.saml.EidasFailureResponseGenerator;
 import uk.gov.ida.notification.translator.saml.EidasResponseGenerator;
 import uk.gov.ida.notification.translator.saml.HubResponseTranslator;
+
+import javax.ws.rs.client.Client;
 
 public class TranslatorApplication extends Application<TranslatorConfiguration> {
     public static void main(String[] args) throws Exception {

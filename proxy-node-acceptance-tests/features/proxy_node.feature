@@ -12,6 +12,13 @@ Feature: proxy-node feature
         And they login to stub idp
         Then they should arrive at the success page
 
+    Scenario: Proxy node happy path - TransientPid requested
+        Given the proxy node is sent a transientPid request
+        And they progress through verify
+        And they login to stub idp
+        Then they should arrive at the success page
+        And they should have a transient id
+
     Scenario: Proxy node happy path - LOA High
         Given the proxy node is sent a LOA 'High' request from the stub connector
         Then the user should be presented with an error page

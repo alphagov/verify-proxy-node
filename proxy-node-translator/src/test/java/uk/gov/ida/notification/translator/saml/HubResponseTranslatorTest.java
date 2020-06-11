@@ -5,9 +5,9 @@ import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.core.Response;
 import uk.gov.ida.notification.VerifySamlInitializer;
+import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
 import uk.gov.ida.notification.contracts.metadata.CountryMetadataResponse;
-import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.Attributes;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponse;
@@ -73,6 +73,14 @@ public class HubResponseTranslatorTest {
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(identityVerifiedResponse);
+    }
+
+    @Test
+    public void translateShouldUseTransientPidWhenFlagged() {
+        final HubResponseContainer hubResponseContainer = buildHubResponseContainerWithTransientPid(
+                buildTranslatedHubResponseIdentityVerified());
+        final Response identityVerifiedResponse = TRANSLATOR.getTranslatedHubResponse(hubResponseContainer, countryMetaDataResponse);
+        TranslatedHubResponseTestAssertions.checkPidTransient(identityVerifiedResponse);
     }
 
     @Test
@@ -241,20 +249,25 @@ public class HubResponseTranslatorTest {
     }
 
     private HubResponseContainer buildHubResponseContainer(NonMatchingAttributes attributes) {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), new TranslatedHubResponseBuilder().withAttributes(attributes).build());
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(false), new TranslatedHubResponseBuilder().withAttributes(attributes).build());
     }
 
     private HubResponseContainer buildHubResponseContainer(TranslatedHubResponse translatedHubResponse) {
-        return new HubResponseContainer(buildHubResponseTranslatorRequest(), translatedHubResponse);
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(false), translatedHubResponse);
     }
 
-    private HubResponseTranslatorRequest buildHubResponseTranslatorRequest() {
+    private HubResponseContainer buildHubResponseContainerWithTransientPid(TranslatedHubResponse translatedHubResponse) {
+        return new HubResponseContainer(buildHubResponseTranslatorRequest(true), translatedHubResponse);
+    }
+
+    private HubResponseTranslatorRequest buildHubResponseTranslatorRequest(boolean transientPidRequested) {
         return new HubResponseTranslatorRequest(
                 "",
                 "_request-id_of-20-chars-or-more",
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create("http://localhost:8081/bob"),
-                URI.create("http://localhost:8081/bob"));
+                URI.create("http://localhost:8081/bob"),
+                transientPidRequested);
     }
 }

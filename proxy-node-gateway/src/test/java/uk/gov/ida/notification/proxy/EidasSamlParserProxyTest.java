@@ -46,7 +46,7 @@ public class EidasSamlParserProxyTest {
         @Valid
         @Path("/valid")
         public EidasSamlParserResponse testValidParse(EidasSamlParserRequest eidasSamlParserRequest) {
-            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, SAMPLE_DESTINATION_URL);
+            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, SAMPLE_DESTINATION_URL, false);
         }
 
         @POST
@@ -69,7 +69,7 @@ public class EidasSamlParserProxyTest {
         @Path("/test-journey-id-header")
         public EidasSamlParserResponse testJourneyIdHeader(EidasSamlParserRequest eidasSamlParserRequest, @Context HttpHeaders headers) {
             TestESPResource.headers = headers.getRequestHeaders();
-            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, SAMPLE_DESTINATION_URL);
+            return new EidasSamlParserResponse(SAMPLE_REQUEST_ID, SAMPLE_ENTITY_ID, SAMPLE_DESTINATION_URL, false);
         }
     }
 

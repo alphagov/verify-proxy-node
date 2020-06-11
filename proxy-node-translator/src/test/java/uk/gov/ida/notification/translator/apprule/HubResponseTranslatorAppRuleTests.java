@@ -227,7 +227,6 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 .request()
                 .post(Entity.json(failureResponseGenerationRequest));
         Response response = new SamlParser().parseSamlString(Base64.decodeAsString(failureResponse.readEntity(String.class)));
-        
         assertThat(response.getStatus().getStatusCode().getValue()).isEqualTo("urn:oasis:names:tc:SAML:2.0:status:Requester");
     }
 
@@ -246,7 +245,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
                 URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
-                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION)
+                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                false
             );
 
         return postToTranslator(translatorAppRule, hubResponseTranslatorRequest,  Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH);
@@ -262,7 +262,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
                         URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
-                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION)
+                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                        false
                 );
 
         return postToTranslator(translatorAppRule, hubResponseTranslatorRequest,  Urls.TranslatorUrls.TRANSLATE_HUB_RESPONSE_PATH);

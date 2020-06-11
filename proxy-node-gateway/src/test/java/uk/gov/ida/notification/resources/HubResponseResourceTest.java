@@ -70,7 +70,8 @@ public class HubResponseResourceTest {
         EidasSamlParserResponse eidasSamlParserResponse = new EidasSamlParserResponse(
             "eidas_request_id_in_session",
             "http://entityId",
-            "http://connector.node"
+            "http://connector.node",
+            false
         );
 
         AuthnRequestResponse vspResponse = new AuthnRequestResponse(

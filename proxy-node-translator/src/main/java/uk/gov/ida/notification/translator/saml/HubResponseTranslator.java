@@ -1,5 +1,6 @@
 package uk.gov.ida.notification.translator.saml;
 
+import net.shibboleth.utilities.java.support.security.SecureRandomIdentifierGenerationStrategy;
 import org.joda.time.DateTime;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.core.StatusCode;
@@ -17,6 +18,7 @@ import uk.gov.ida.notification.exceptions.hubresponse.HubResponseTranslationExce
 import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.saml.core.domain.NonMatchingVerifiableAttribute;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 public class HubResponseTranslator {
 
     private static final String PID_PREFIX = "GB/%s/%s";
+    private static final String TRANSIENT_PREFIX = "_tr";
+    private static final SecureRandomIdentifierGenerationStrategy ID_GENERATOR_STRATEGY = new SecureRandomIdentifierGenerationStrategy();
     private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
 
@@ -43,9 +47,7 @@ public class HubResponseTranslator {
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer, CountryMetadataResponse countryMetadataResponse) {
         final List<EidasAttributeBuilder> eidasAttributeBuilders = new ArrayList<>();
 
-        final String pid = hubResponseContainer.getPid()
-                .map(p -> String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), p))
-                .orElse(null);
+        final String pid = getPid(hubResponseContainer, countryMetadataResponse);
 
         if (hubResponseContainer.getVspScenario().equals(VspScenario.IDENTITY_VERIFIED)) {
             var attributes = hubResponseContainer
@@ -93,6 +95,16 @@ public class HubResponseTranslator {
                 .withLoa(getMappedLoa(hubResponseContainer.getLevelOfAssurance()), now)
                 .addAssertionAttributeStatement(eidasAttributes)
                 .build();
+    }
+
+    private String getPid(HubResponseContainer hubResponseContainer, CountryMetadataResponse countryMetadataResponse) {
+        String pid;
+        if (hubResponseContainer.isTransientPidRequested()) {
+            pid = TRANSIENT_PREFIX + ID_GENERATOR_STRATEGY.generateIdentifier(true);
+        } else {
+            pid = hubResponseContainer.getPid().orElse(null);
+        }
+        return pid == null ? null : String.format(PID_PREFIX, countryMetadataResponse.getCountryCode(), pid);
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")

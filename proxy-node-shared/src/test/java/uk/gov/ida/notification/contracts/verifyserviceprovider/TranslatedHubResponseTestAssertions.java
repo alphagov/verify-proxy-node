@@ -49,6 +49,14 @@ public class TranslatedHubResponseTestAssertions {
         assertThat(getAttributeValue(PidAttribute)).isEqualTo("GB/CC/123456");
     }
 
+    public static void checkPidTransient(Response decryptedEidasResponse) {
+        Assertion eidasAssertion = decryptedEidasResponse.getAssertions().get(0);
+        List<Attribute> attributes = eidasAssertion.getAttributeStatements().get(0).getAttributes();
+
+        final Attribute PidAttribute = attributes.get(3);
+        assertThat(getAttributeValue(PidAttribute)).startsWith("GB/CC/_tr");
+    }
+
     public static void checkAssertionStatementsValid(Response decryptedEidasResponse) {
         Assertion eidasAssertion = decryptedEidasResponse.getAssertions().get(0);
 
