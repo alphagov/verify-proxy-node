@@ -1,7 +1,13 @@
 Feature: eidas-proxy-node-smoke-test-integration feature
 
-    Scenario: Integration proxy node happy path - LOA Substantial
-        Given the proxy node is sent a LOA 'Substantial' request from the stub connector
-        And they progress through verify
-        And they login to stub idp
-        Then they should arrive at the success page
+  Scenario: Integration Proxy Node happy path - LOA Substantial
+    Given   the Proxy Node is sent an LOA 'Substantial' request from the Stub Connector
+    And     they progress through Verify
+    And     they login to Stub IDP
+    Then    they should arrive at the Stub Connector success page
+
+  Scenario: Integration Proxy Node happy path - LOA Low
+    Given   the Proxy Node is sent an LOA 'Low' request from the Stub Connector
+    And     they progress through Verify
+    And     they login to Stub IDP
+    Then    they should arrive at the Stub Connector success page
