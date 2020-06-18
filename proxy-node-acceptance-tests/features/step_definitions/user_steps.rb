@@ -2,26 +2,17 @@ require 'yaml'
 require 'uri'
 require 'securerandom'
 
-def country_stub_connector_url(country)
-  case country
-  when 'Netherlands'
-    'https://demo-portal.minez.nl/demoportal/etoegang'
-  else
-    raise ArgumentError.new("Invalid country name: #{country}")
-  end
-end
-
 Given("the Proxy Node is sent an LOA {string} request from the Stub Connector") do |load_type|
   loa_url = case load_type
-    when "Low"
-      "/RequestLow"
-    when "Substantial"
-      "/RequestSubstantial"
-    when "High"
-      "/RequestHigh"
-    else
-      "/BadRequest"
-  end
+            when "Low"
+              "/RequestLow"
+            when "Substantial"
+              "/RequestSubstantial"
+            when "High"
+              "/RequestHigh"
+            else
+              "/BadRequest"
+            end
   visit(ENV.fetch('STUB_CONNECTOR_URL') + loa_url)
 end
 
@@ -69,13 +60,12 @@ Given("the user visits the {string} Stub Connector Node page") do |country|
   visit(country_stub_connector_url(country))
 end
 
-And('they navigate {string} journey to verify with UK identity') do |country|
-  case country
-  when 'Netherlands'
-    navigate_netherlands_journey_to_uk
-  else
-    raise ArgumentError.new("Invalid country name: #{country}")
-  end
+And('they navigate the {string} journey to verify with UK identity') do |country|
+  send("navigate_#{country.downcase}_journey_to_uk")
+end
+
+Then('they should arrive at the {string} success page') do |country|
+  send("arrive_at_#{country.downcase}_success_page")
 end
 
 Then('they should arrive at the Verify Hub start page') do
@@ -84,6 +74,7 @@ end
 
 Then('they should arrive at the Stub Connector success page') do
   assert_text('Response successfully received')
+  assert_text('Saml Validity: VALID')
   assert_text('Jack Cornelius')
   assert_text('Bauer')
   assert_text('1984-02-29')
@@ -101,15 +92,4 @@ end
 Then("the user should be presented with an error page") do
   assert_text('Sorry, something went wrong')
   assert_text('This may be because your session timed out or there was a system error.')
-end
-
-def navigate_netherlands_journey_to_uk
-  assert_text('Kies hoe u wilt inloggen')
-  click_link('English')
-  assert_text('Choose how to log in')
-  select "EU Login", :from => "authnServiceId"
-  click_button('Continue')
-  assert_text('Which country is your ID from?')
-  find('#country-GB').click
-  click_button('Continue')
 end
