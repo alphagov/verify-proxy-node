@@ -30,8 +30,10 @@ import java.net.URI;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MetadataResolverService {
@@ -53,6 +55,10 @@ public class MetadataResolverService {
         this.expiredCertificateMetadataFilter = new ExpiredCertificateMetadataFilter();
         this.countryConfigMap = countriesConfig.getCountries().stream()
                 .collect(Collectors.toMap(EidasCountryConfig::getEntityId, this::createMetadataResolver));
+    }
+
+    public Set<URI> getResolvers() {
+        return Collections.unmodifiableSet(countryConfigMap.keySet());
     }
 
     public CountryMetadataResponse getCountryMetadataResponse(URI entityId) {
