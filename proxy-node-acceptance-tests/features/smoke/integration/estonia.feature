@@ -1,4 +1,4 @@
-Feature: eidas-proxy-node-smoke-test-ee-integration feature
+Feature: eIDAS Proxy Node Smoke Test - Estonia - Integration
 
   Scenario: Proxy Node Estonia happy path - LOA Substantial
     Given   the user visits the "Estonia" Stub Connector Node page

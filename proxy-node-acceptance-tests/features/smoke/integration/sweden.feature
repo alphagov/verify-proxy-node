@@ -1,4 +1,4 @@
-Feature: eidas-proxy-node-smoke-test-se-integration feature
+Feature: eIDAS Proxy Node Smoke Test - Sweden - Integration
 
   Scenario: Proxy Node Sweden happy path - LOA Substantial
     Given   the user visits the "Sweden" Stub Connector Node page
