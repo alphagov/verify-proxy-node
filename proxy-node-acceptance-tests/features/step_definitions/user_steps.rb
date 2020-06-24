@@ -2,22 +2,33 @@ require 'yaml'
 require 'uri'
 require 'securerandom'
 
-Given("the Proxy Node is sent an LOA {string} request from the Stub Connector") do |load_type|
-  loa_url = case load_type
-            when "Low"
-              "/RequestLow"
-            when "Substantial"
-              "/RequestSubstantial"
-            when "High"
-              "/RequestHigh"
-            else
-              "/BadRequest"
-            end
-  visit(ENV.fetch('STUB_CONNECTOR_URL') + loa_url)
+TEST_ENV = ENV.fetch('TEST_ENV', 'local')
+ENVIRONMENTS = YAML.load_file(File.join(__dir__, 'environments.yml'))
+
+def env(key)
+  ENVIRONMENTS.dig(TEST_ENV, key) || ENV[key]
+end
+
+def stub_idp_user
+  ENV['STUB_IDP_USER'] || "stub-idp-demo-one"
+end
+
+Given("the Proxy Node is sent an LOA {string} request from the Stub Connector") do |loa|
+  loa_path = case loa
+    when "Low"
+      "/RequestLow"
+    when "Substantial"
+      "/RequestSubstantial"
+    when "High"
+      "/RequestHigh"
+    else
+      "/BadRequest"
+             end
+  visit(env('STUB_CONNECTOR_URL') + loa_path)
 end
 
 Given("the proxy node is sent a transient PID request") do
-  visit(ENV.fetch('STUB_CONNECTOR_URL') + "/RequestTransientPid")
+  visit(env('STUB_CONNECTOR_URL') + "/RequestTransientPid")
 end
 
 And('they progress through Verify') do
@@ -32,28 +43,28 @@ Given(/^the Stub Connector supplies an authentication request with (.*)$/) do |i
       "a missing signature": "/MissingSignature",
       "an invalid signature": "/InvalidSignature"
   }
-  visit(ENV.fetch('STUB_CONNECTOR_URL') + scenario_path_map[issue.to_sym])
+  visit(env('STUB_CONNECTOR_URL') + scenario_path_map[issue.to_sym])
 end
 
 Given('they login to Stub IDP') do
-  fill_in('username', with: ENV.fetch('STUB_IDP_USER'))
+  fill_in('username', with: stub_idp_user)
   fill_in('password', with: 'bar')
   click_on('SignIn')
   click_on('I Agree')
 end
 
 Given('they login to Stub IDP with error event {string}') do |error_button_text|
-  fill_in('username', with: ENV.fetch('STUB_IDP_USER'))
+  fill_in('username', with: stub_idp_user)
   fill_in('password', with: 'bar')
   click_on(error_button_text)
 end
 
 Given("the user accesses a invalid page") do
-  visit(ENV.fetch('PROXY_NODE_URL') + '/asdfasdfasfsaf')
+  visit(env('PROXY_NODE_URL') + '/asdfasdfasfsaf')
 end
 
 Given("the user accesses the Gateway response URL directly") do
-  visit(ENV.fetch('PROXY_NODE_URL') + '/SAML2/SSO/Response/POST')
+  visit(env('PROXY_NODE_URL') + '/SAML2/SSO/Response/POST')
 end
 
 Given("the user visits the {string} Stub Connector Node page") do |country|

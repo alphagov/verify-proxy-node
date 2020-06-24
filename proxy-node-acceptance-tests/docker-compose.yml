@@ -1,20 +1,23 @@
-version: '3.4'
+version: '3.8'
+
+networks:
+  default:
+    name: proxy-node-acceptance-tests
 
 services:
   selenium-hub:
     image: selenium/standalone-firefox
     container_name: selenium-hub
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4444/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    ports:
+      - "4444:4444"
 
   acceptance-tests:
     build: .
-    depends_on:
-      - selenium-hub
     environment:
-      - PROXY_NODE_URL=${PROXY_NODE_URL}
-      - STUB_CONNECTOR_URL=${STUB_CONNECTOR_URL}
-      - STUB_IDP_USER=${STUB_IDP_USER}
+      - SELENIUM_HUB_URL=http://selenium-hub:4444/wd/hub
+      - TEST_ENV
+      - SHOW_BROWSER
+      - BROWSER
+    working_dir: /tests
+    volumes:
+    - .:/tests
