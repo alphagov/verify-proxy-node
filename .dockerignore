@@ -28,8 +28,7 @@ buildNumber.properties
 # Gradle
 .gradle
 build/
-*/build/*
-!*/build/install/
+*/build/
 */logs/
 */out/
 */.git/

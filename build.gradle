@@ -52,6 +52,12 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
+    afterEvaluate {
+        if (project.tasks.find { t -> t.name == 'installDist' }) {
+            tasks.build.finalizedBy installDist
+        }
+    }
+
     if (project.hasProperty('CI')) {
         test {
             testLogging {
@@ -108,7 +114,7 @@ subprojects {
             }
         }
 
-        ['ida_utils','verify_saml','dropwizard','dropwizard_assets'].each {
+        ['ida_utils', 'verify_saml', 'dropwizard', 'dropwizard_assets'].each {
             configurations.getByName(it) {
                 resolutionStrategy.dependencySubstitution {
                     substitute module("org.hibernate:hibernate-validator") because "https://snyk.io/vuln/SNYK-JAVA-ORGHIBERNATE-568162" with module("org.hibernate.validator:hibernate-validator:6.0.19.Final")
@@ -245,4 +251,4 @@ buildScan {
     termsOfServiceAgree = 'yes'
 }
 
-defaultTasks 'clean', 'test'
+defaultTasks 'clean', 'test', 'installDist'

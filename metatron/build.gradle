@@ -2,13 +2,13 @@ group 'uk.gov.ida.eidas.metadataservice'
 version '1.0-SPIKE'
 
 dependencies {
-    compile configurations.dropwizard,
+    implementation configurations.dropwizard,
             configurations.common,
             configurations.verify_saml,
             configurations.opensaml,
             project(':proxy-node-shared')
 
-    testCompile 'com.github.stefanbirkner:system-rules:1.19.0'
+    testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
 }
 
 apply plugin: 'application'
