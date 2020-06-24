@@ -89,12 +89,12 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
                 ConfigOverride.config("credentialConfiguration.samlSigningPrivateKey.type", "encoded"),
                 ConfigOverride.config("credentialConfiguration.samlEncryptionPrivateKey.type", "encoded"),
 
-                ConfigOverride.config("connectorNodeTemplateConfig.entity_id", ENTITY_ID),
-                ConfigOverride.config("connectorNodeTemplateConfig.acs_url", ACS_URL),
-                ConfigOverride.config("connectorNodeTemplateConfig.organization_name", ENTITY_ORG_NAME),
-                ConfigOverride.config("connectorNodeTemplateConfig.organization_display_name", ENTITY_ORG_DISPLAY_NAME),
-                ConfigOverride.config("connectorNodeTemplateConfig.organization_url", ENTITY_ORG_URL),
-                ConfigOverride.config("connectorNodeTemplateConfig.want_signed_assertions", "true")
+                ConfigOverride.config("connectorNodeTemplateConfig.entityId", ENTITY_ID),
+                ConfigOverride.config("connectorNodeTemplateConfig.assertionConsumerServiceUrl", ACS_URL),
+                ConfigOverride.config("connectorNodeTemplateConfig.organizationName", ENTITY_ORG_NAME),
+                ConfigOverride.config("connectorNodeTemplateConfig.organizationDisplayName", ENTITY_ORG_DISPLAY_NAME),
+                ConfigOverride.config("connectorNodeTemplateConfig.organizationUrl", ENTITY_ORG_URL),
+                ConfigOverride.config("connectorNodeTemplateConfig.wantSignedAssertions", "true")
         ) {
             @Override
             protected void before() {

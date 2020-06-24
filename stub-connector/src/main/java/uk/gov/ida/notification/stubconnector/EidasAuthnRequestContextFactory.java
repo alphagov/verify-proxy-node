@@ -35,28 +35,26 @@ import uk.gov.ida.notification.saml.SamlBuilder;
 import java.util.List;
 
 public class EidasAuthnRequestContextFactory {
-    private final
-    SecureRandomIdentifierGenerationStrategy identifierGenerationStrategy = new SecureRandomIdentifierGenerationStrategy();
+    private final SecureRandomIdentifierGenerationStrategy identifierGenerationStrategy = new SecureRandomIdentifierGenerationStrategy();
 
     public MessageContext generate(
-        Endpoint destinationEndpoint,
-        String connectorEntityId,
-        SPTypeEnumeration spType,
-        List<String> requestedAttributes,
-        EidasLoaEnum loa,
-        SignatureSigningParameters signingParameters, boolean transientPidRequested) throws ComponentInitializationException, MessageHandlerException {
+            Endpoint destinationEndpoint,
+            String connectorEntityId,
+            SPTypeEnumeration spType,
+            List<String> requestedAttributes,
+            EidasLoaEnum loa,
+            SignatureSigningParameters signingParameters,
+            boolean transientPidRequested) throws ComponentInitializationException, MessageHandlerException {
 
         AuthnRequest request = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
         request.getNamespaceManager().registerNamespaceDeclaration(new Namespace(EidasConstants.EIDAS_NS, EidasConstants.EIDAS_PREFIX));
 
         // Add the request attributes.
-        //
         request.setForceAuthn(true);
         request.setID(identifierGenerationStrategy.generateIdentifier(true));
         request.setIssueInstant(new DateTime());
 
         // Add the issuer element (the entity that issues this request).
-        //
         Issuer issuer = SamlBuilder.build(Issuer.DEFAULT_ELEMENT_NAME);
         issuer.setFormat(NameIDType.ENTITY);
         issuer.setValue(connectorEntityId);
@@ -66,18 +64,15 @@ public class EidasAuthnRequestContextFactory {
         Extensions extensions = SamlBuilder.build(Extensions.DEFAULT_ELEMENT_NAME);
 
         // Add the type of SP as an extension.
-        //
         SPType spTypeElement = SamlBuilder.build(SPType.DEFAULT_ELEMENT_NAME);
         spTypeElement.setType(spType);
         extensions.getUnknownXMLObjects().add(spTypeElement);
 
         // Add the eIDAS requested attributes as an extension.
-        //
         if (requestedAttributes != null && !requestedAttributes.isEmpty()) {
             RequestedAttributes requestedAttributesElement = SamlBuilder.build(RequestedAttributes.DEFAULT_ELEMENT_NAME);
 
             // Also see the RequestedAttributeTemplates class ...
-
             for (String attr : requestedAttributes) {
                 RequestedAttribute reqAttr = SamlBuilder.build(RequestedAttribute.DEFAULT_ELEMENT_NAME);
                 reqAttr.setName(attr);
@@ -90,7 +85,6 @@ public class EidasAuthnRequestContextFactory {
         request.setExtensions(extensions);
 
         // Set the requested NameID policy to "persistent".
-        //
         NameIDPolicy nameIDPolicy = SamlBuilder.build(NameIDPolicy.DEFAULT_ELEMENT_NAME);
         nameIDPolicy.setFormat(transientPidRequested ? NameID.TRANSIENT : NameID.PERSISTENT);
         nameIDPolicy.setAllowCreate(true);
@@ -98,7 +92,6 @@ public class EidasAuthnRequestContextFactory {
 
         // Create the requested authentication context and assign the "level of assurance" that we require
         // the authentication to be performed under.
-        //
         RequestedAuthnContext requestedAuthnContext = SamlBuilder.build(RequestedAuthnContext.DEFAULT_ELEMENT_NAME);
         requestedAuthnContext.setComparison(AuthnContextComparisonTypeEnumeration.MINIMUM); // Should be exact!
         AuthnContextClassRef authnContextClassRef = SamlBuilder.build(AuthnContextClassRef.DEFAULT_ELEMENT_NAME);
@@ -110,14 +103,14 @@ public class EidasAuthnRequestContextFactory {
             setMessage(request);
 
             getSubcontext(SAMLPeerEntityContext.class, true)
-                .getSubcontext(SAMLEndpointContext.class, true)
-                .setEndpoint(destinationEndpoint);
+                    .getSubcontext(SAMLEndpointContext.class, true)
+                    .setEndpoint(destinationEndpoint);
 
             getSubcontext(SAMLSelfEntityContext.class, true)
-                .setEntityId(connectorEntityId);
+                    .setEntityId(connectorEntityId);
 
             getSubcontext(SecurityParametersContext.class, true)
-                .setSignatureSigningParameters(signingParameters);
+                    .setSignatureSigningParameters(signingParameters);
         }};
 
         SAMLOutboundProtocolMessageSigningHandler signingHandler = new SAMLOutboundProtocolMessageSigningHandler();

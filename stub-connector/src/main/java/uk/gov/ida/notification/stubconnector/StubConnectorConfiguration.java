@@ -27,6 +27,9 @@ public class StubConnectorConfiguration extends Configuration {
     @JsonProperty
     private Integer connectorNodeMetadataExpiryMonths = 1;
 
+    @JsonProperty
+    private URI metatronUri;
+
     @Valid
     @NotNull
     @JsonProperty
@@ -47,6 +50,14 @@ public class StubConnectorConfiguration extends Configuration {
 
     public URI getConnectorNodeEntityId() {
         return connectorNodeEntityId;
+    }
+
+    public URI getMetatronUri() {
+        if (metatronUri == null) {
+            return null;
+        }
+
+        return URI.create(metatronUri.toString().replace("metatron", "localhost"));
     }
 
     public String getProxyNodeEntityId() {

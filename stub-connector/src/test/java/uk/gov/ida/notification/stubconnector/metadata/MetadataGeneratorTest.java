@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 public class MetadataGeneratorTest {
 
     private static final String ACS_URL = "acs url";
-    private static final String ENTITY_ID = "http://localhost/entity_id";
+    private static final String ENTITY_ID = "http://localhost/entityId";
 
     @Mock
     private StubConnectorConfiguration configuration;
@@ -33,8 +33,8 @@ public class MetadataGeneratorTest {
     public void shouldCreateSignedConnectorNodeMetadata() throws Exception {
 
         var templateConfig = new HashMap<String, String>();
-        templateConfig.put("want_signed_assertions", "true");
-        templateConfig.put("acs_url", ACS_URL);
+        templateConfig.put("wantSignedAssertions", "true");
+        templateConfig.put("assertionConsumerServiceUrl", ACS_URL);
 
         var certConfig = new X509CertificateConfiguration(TestCertificateStrings.METADATA_SIGNING_A_PUBLIC_CERT);
         var privateKeyConfig = new EncodedPrivateKeyConfiguration(TestCertificateStrings.METADATA_SIGNING_A_PRIVATE_KEY);

@@ -11,7 +11,6 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
-import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
 import uk.gov.ida.notification.VerifySamlInitializer;
 import uk.gov.ida.notification.exceptions.mappers.CatchAllExceptionMapper;
@@ -29,8 +28,6 @@ import uk.gov.ida.notification.stubconnector.metadata.MetadataGenerator;
 import uk.gov.ida.notification.stubconnector.resources.MetadataResource;
 import uk.gov.ida.notification.stubconnector.resources.ReceiveResponseResource;
 import uk.gov.ida.notification.stubconnector.resources.SendAuthnRequestResource;
-import uk.gov.ida.saml.metadata.MetadataConfiguration;
-import uk.gov.ida.saml.metadata.MetadataHealthCheck;
 import uk.gov.ida.saml.metadata.bundle.MetadataResolverBundle;
 
 import java.util.Optional;
@@ -97,12 +94,6 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         ProxyNodeHealthCheck proxyNodeHealthCheck = new ProxyNodeHealthCheck("stub-connector");
         environment.healthChecks().register(proxyNodeHealthCheck.getName(), proxyNodeHealthCheck);
 
-        registerMetadataHealthCheck(
-                proxyNodeMetadataResolverBundle.getMetadataResolver(),
-                configuration.getProxyNodeMetadataConfiguration(),
-                environment,
-                "proxy-node-metadata");
-
         environment.jersey().register(new MissingMetadataExceptionMapper());
         environment.jersey().register(new TemplatedResponseWebApplicationExceptionMapper());
         environment.jersey().register(new CatchAllExceptionMapper());
@@ -131,14 +122,6 @@ public class StubConnectorApplication extends Application<StubConnectorConfigura
         environment.jersey().register(new SendAuthnRequestResource(configuration, proxyNodeMetadata));
         environment.jersey().register(new ReceiveResponseResource(configuration, decrypter, proxyNodeMetadataResolverBundle));
         environment.jersey().register(metadataResource);
-    }
-
-    private void registerMetadataHealthCheck(MetadataResolver metadataResolver, MetadataConfiguration connectorMetadataConfiguration, Environment environment, String name) {
-        MetadataHealthCheck metadataHealthCheck = new MetadataHealthCheck(
-                metadataResolver, name, connectorMetadataConfiguration.getExpectedEntityId()
-        );
-
-        environment.healthChecks().register(metadataHealthCheck.getName(), metadataHealthCheck);
     }
 
     private void registerInjections(Environment environment) {

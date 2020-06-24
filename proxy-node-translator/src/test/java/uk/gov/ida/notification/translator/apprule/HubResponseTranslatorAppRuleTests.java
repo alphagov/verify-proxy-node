@@ -220,7 +220,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     @Test
     public void failureResponseEndpointShouldReturnASamlFailureResponse() throws Exception {
         var failureResponseGenerationRequest = new SamlFailureResponseGenerationRequest(
-                BAD_REQUEST, "this_a_badly_generated_saml_request", "http://destinationUrl", URI.create("http://entity_id")
+                BAD_REQUEST, "this_a_badly_generated_saml_request", "http://destinationUrl", URI.create("http://entityId")
         );
         var failureResponse = translatorAppRule
                 .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.GENERATE_FAILURE_RESPONSE_PATH)
