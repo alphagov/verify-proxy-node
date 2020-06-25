@@ -3,6 +3,8 @@ package uk.gov.ida.eidas.metatron.domain;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.saml.common.xml.SAMLConstants;
@@ -75,9 +77,12 @@ public class MetadataResolverService {
     }
 
     private Client getClient(EidasCountryConfig country) {
-        return country.getTlsTruststore().isPresent()
-                ? JerseyClientBuilder.newBuilder().trustStore(country.getTlsTruststore().get()).build()
-                : JerseyClientBuilder.newClient();
+        ClientConfig configuration = new ClientConfig();
+        configuration.property(ClientProperties.CONNECT_TIMEOUT, 10000);
+        configuration.property(ClientProperties.READ_TIMEOUT, 10000);
+        return country.getTlsTruststore()
+                .map(ts -> JerseyClientBuilder.newBuilder().trustStore(ts).withConfig(configuration).build())
+                .orElse(JerseyClientBuilder.newClient(configuration));
     }
 
     private List<MetadataFilter> getFilters(EidasCountryConfig country) {

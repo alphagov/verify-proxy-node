@@ -6,8 +6,8 @@ import uk.gov.ida.eidas.metatron.domain.MetadataResolverService;
 public class CountryMetadataHealthMetrics implements Runnable {
 
     private static final io.prometheus.client.Gauge METADATA_FETCH_GAUGE = Gauge
-            .build("country_metadata_health_metrics",
-                    "Country Metadata Health Metrics")
+            .build("verify_eidas_connector_metadata_health",
+                    "Connector Country Metadata Health Metrics")
             .labelNames("entity")
             .register();
 
