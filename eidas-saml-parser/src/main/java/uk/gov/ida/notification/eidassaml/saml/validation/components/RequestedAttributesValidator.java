@@ -41,14 +41,18 @@ public class RequestedAttributesValidator {
     }
 
     private RequestedAttribute validateRequestedAttribute(RequestedAttribute requestedAttribute) {
-        if(!RequestedAttribute.URI_REFERENCE.equals(requestedAttribute.getNameFormat()))
+
+        if (!RequestedAttribute.URI_REFERENCE.equals(requestedAttribute.getNameFormat())) {
             throw new InvalidAuthnRequestException(nameFormatError(requestedAttribute));
+        }
 
-        if(mandatoryAttributes.contains(requestedAttribute.getName()) && !requestedAttribute.isRequired())
+        if (mandatoryAttributes.contains(requestedAttribute.getName()) && !requestedAttribute.isRequired()) {
             throw new InvalidAuthnRequestException(mandatoryAttributeError(requestedAttribute));
+        }
 
-        if(!mandatoryAttributes.contains(requestedAttribute.getName()) && requestedAttribute.isRequired())
+        if (!mandatoryAttributes.contains(requestedAttribute.getName()) && requestedAttribute.isRequired()) {
             throw new InvalidAuthnRequestException(optionalAttributeError(requestedAttribute));
+        }
 
         return requestedAttribute;
     }
