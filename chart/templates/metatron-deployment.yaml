@@ -40,12 +40,12 @@ spec:
           httpGet:
             path: /healthcheck
             port: mgmt
-          initialDelaySeconds: 20
+          initialDelaySeconds: 60
           periodSeconds: 5
         readinessProbe:
           tcpSocket:
             port: http
-          initialDelaySeconds: 20
+          initialDelaySeconds: 60
           periodSeconds: 5
         env:
         - name: PORT
