@@ -58,7 +58,7 @@ public class HubResponseTranslatorTest {
                 "samlSigningCert",
                 "samlEncryptionCert",
                 Collections.singletonList(new AssertionConsumerService(URI.create("http://assertion-consumer-service-location"), 0, true)),
-                "http://entity_id",
+                "http://entityId",
                 "CC"
         );
     }

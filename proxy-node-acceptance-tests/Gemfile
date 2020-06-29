@@ -1,9 +1,10 @@
-ruby '2.5.3'
+ruby '2.6.5'
 
 source 'https://rubygems.org'
 
-gem 'capybara', '>= 3.18.0'
+gem 'capybara', '>= 3.32.2'
 gem 'cucumber'
 gem 'selenium-webdriver'
 gem 'geckodriver-helper'
-gem 'capybara-screenshot', '>= 1.0.22'
+gem 'webdrivers', '~> 4.0'
+gem 'capybara-screenshot', '>= 1.0.24'

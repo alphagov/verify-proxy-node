@@ -1,0 +1,15 @@
+local:
+  PROXY_NODE_URL: http://localhost:6600
+  STUB_CONNECTOR_URL: http://localhost:6610
+
+docker-local:
+  PROXY_NODE_URL: http://host.docker.internal:6600
+  STUB_CONNECTOR_URL: http://host.docker.internal:6610
+
+build:
+  PROXY_NODE_URL: https://proxy-node.test.eidas.signin.service.gov.uk
+  STUB_CONNECTOR_URL: https://stub-connector.test.eidas.signin.service.gov.uk
+
+integration:
+  PROXY_NODE_URL: https://proxy-node.integration.eidas.signin.service.gov.uk
+  STUB_CONNECTOR_URL: https://stub-connector.integration.eidas.signin.service.gov.uk

@@ -66,6 +66,12 @@ public class EidasResponseValidatorAppRuleTests extends StubConnectorAppRuleTest
     }
 
     @Test
+    public void shouldDisplayMainPage() throws URISyntaxException {
+        final javax.ws.rs.core.Response response = stubConnectorAppRule.target("/").request().get();
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
     public void shouldUseCorrectEntityIdInAuthnRequest() throws IOException, URISyntaxException {
         final AuthnRequest authnRequest = getEidasAuthnRequest();
 

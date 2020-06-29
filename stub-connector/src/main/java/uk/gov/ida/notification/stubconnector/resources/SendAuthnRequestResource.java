@@ -42,7 +42,6 @@ import java.util.List;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PRIVATE_KEY;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.TEST_PUBLIC_CERT;
 
-
 @Path("/")
 public class SendAuthnRequestResource {
     private final StubConnectorConfiguration configuration;
@@ -58,7 +57,10 @@ public class SendAuthnRequestResource {
     @GET
     @Path("/")
     public View startPage() {
-        return new StartPageView();
+        return new StartPageView(
+                configuration.getProxyNodeMetadataConfiguration().getUri(),
+                configuration.getConnectorNodeEntityId(),
+                configuration.getMetatronUri());
     }
 
     @GET
@@ -108,8 +110,8 @@ public class SendAuthnRequestResource {
     @GET
     @Path("/MissingSignature")
     public Response invalidAuthnRequest(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException, MessageEncodingException {
         MessageContext context = generateAuthnRequestContext(session, EidasLoaEnum.LOA_SUBSTANTIAL, configuration.getCredentialConfiguration());
 
@@ -124,10 +126,9 @@ public class SendAuthnRequestResource {
     @GET
     @Path("/InvalidSignature")
     public Response invalidSignature(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse
     ) throws Throwable {
-
         ConnectorNodeCredentialConfiguration invalidCredentialConfiguration = new ConnectorNodeCredentialConfiguration(
                 new X509CertificateConfiguration(TEST_PUBLIC_CERT),
                 new X509CertificateConfiguration(TEST_PUBLIC_CERT),
@@ -147,8 +148,8 @@ public class SendAuthnRequestResource {
     @GET
     @Path("/listSecurityProviders")
     public String listSecurityProviders(
-        @Session HttpSession session,
-        @Context HttpServletResponse httpServletResponse) {
+            @Session HttpSession session,
+            @Context HttpServletResponse httpServletResponse) {
         return listSecurityProvidersAsHtml();
     }
 
@@ -158,10 +159,10 @@ public class SendAuthnRequestResource {
             providers.append("<p>" + provider.getName() + ": " + provider.getInfo() + "</p>");
         }
         return
-            "<html><body>"
-                + "<p>JCEProvider.getProviderId: " + JCEMapper.getProviderId() + "</p>"
-                + "<pre>" + providers.toString() + "</pre>"
-                + "</body></html>";
+                "<html><body>"
+                        + "<p>JCEProvider.getProviderId: " + JCEMapper.getProviderId() + "</p>"
+                        + "<pre>" + providers.toString() + "</pre>"
+                        + "</body></html>";
     }
 
     private MessageContext generateAuthnRequestContext(
@@ -173,34 +174,34 @@ public class SendAuthnRequestResource {
     }
 
     private MessageContext generateAuthnRequestContext(
-        HttpSession session,
-        EidasLoaEnum loaType,
-        ConnectorNodeCredentialConfiguration credentialConfiguration,
-        boolean transientPidRequested
+            HttpSession session,
+            EidasLoaEnum loaType,
+            ConnectorNodeCredentialConfiguration credentialConfiguration,
+            boolean transientPidRequested
     ) throws ResolverException, ComponentInitializationException, MessageHandlerException {
         String proxyNodeEntityId = configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId();
         String connectorEntityId = configuration.getConnectorNodeEntityId().toString();
         Endpoint proxyNodeEndpoint = proxyNodeMetadata.getEndpoint(proxyNodeEntityId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
         List<String> requestedAttributes = Arrays.asList(
-            AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
-            AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME,
-            AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME,
-            AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME
+                AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME,
+                AttributeConstants.EIDAS_CURRENT_FAMILY_NAME_ATTRIBUTE_NAME,
+                AttributeConstants.EIDAS_CURRENT_GIVEN_NAME_ATTRIBUTE_NAME,
+                AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME
         );
 
         SignatureSigningParameters signingParameters = SignatureSigningParametersHelper.build(
-            credentialConfiguration.getSamlSigningCredential(),
-            credentialConfiguration.getAlgorithm());
+                credentialConfiguration.getSamlSigningCredential(),
+                credentialConfiguration.getAlgorithm());
 
         MessageContext context = contextFactory.generate(
-            proxyNodeEndpoint,
-            connectorEntityId,
-            SPTypeEnumeration.PUBLIC,
-            requestedAttributes,
-            loaType,
-            signingParameters,
-            transientPidRequested);
+                proxyNodeEndpoint,
+                connectorEntityId,
+                SPTypeEnumeration.PUBLIC,
+                requestedAttributes,
+                loaType,
+                signingParameters,
+                transientPidRequested);
 
         session.setAttribute("authn_id", context.getSubcontext(SAMLMessageInfoContext.class, true).getMessageId());
         SAMLBindingSupport.setRelayState(context, session.getId());

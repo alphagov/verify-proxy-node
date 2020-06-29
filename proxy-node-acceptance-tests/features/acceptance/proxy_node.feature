@@ -1,4 +1,4 @@
-Feature: proxy-node feature
+Feature: Proxy Node acceptance tests
 
   Scenario: Proxy Node happy path - LOA LOW
     Given the Proxy Node is sent an LOA 'Low' request from the Stub Connector

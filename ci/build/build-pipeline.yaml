@@ -867,7 +867,7 @@ spec:
             - -euc
             - |
               cd /
-              bundle exec cucumber --strict --tags "not @ignore" --exclude "smoke/"
+              bundle exec cucumber --strict --tags "not @ignore" features/acceptance/
 
     - name: release
       serial: true

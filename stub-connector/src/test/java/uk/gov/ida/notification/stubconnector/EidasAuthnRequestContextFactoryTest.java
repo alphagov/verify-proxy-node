@@ -1,6 +1,5 @@
 package uk.gov.ida.notification.stubconnector;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.saml.saml2.metadata.Endpoint;
@@ -19,17 +18,22 @@ public class EidasAuthnRequestContextFactoryTest {
 
     private static final EidasAuthnRequestContextFactory factory = new EidasAuthnRequestContextFactory();
 
-    @BeforeClass
-    public static void classSetup() throws Throwable {
-        InitializationService.initialize();
-        VerifySamlInitializer.init();
+    static {
+        try {
+            InitializationService.initialize();
+            VerifySamlInitializer.init();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     public void testThatEidasAuthnRequestSetsARequestDestination() {
-        SignatureSigningParameters signingParams = mock(SignatureSigningParameters.class);
-        Endpoint destinationEndpoint = mock(Endpoint.class);
+        final SignatureSigningParameters signingParams = mock(SignatureSigningParameters.class);
+        final Endpoint destinationEndpoint = mock(Endpoint.class);
+
         when(destinationEndpoint.getLocation()).thenReturn("a location");
+
         try {
             factory.generate(
                     destinationEndpoint,
@@ -42,6 +46,7 @@ public class EidasAuthnRequestContextFactoryTest {
         } catch (Exception e) {
             // expected
         }
+
         verify(destinationEndpoint).getLocation();
     }
 }

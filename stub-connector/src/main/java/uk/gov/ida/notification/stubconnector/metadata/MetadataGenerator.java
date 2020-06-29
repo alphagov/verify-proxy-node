@@ -34,8 +34,8 @@ import java.util.UUID;
 
 public class MetadataGenerator {
 
-    public static final String CONNECTOR_TEMPLATE_XML_MUSTACHE = "connector_template.xml.mustache";
-    public static final String TEMPLATE_KEY_ENTITY_ID = "entity_id";
+    private static final String CONNECTOR_TEMPLATE_XML_MUSTACHE = "connector-metadata.xml.mustache";
+    private static final String TEMPLATE_KEY_ENTITY_ID = "entityId";
     private final X509KeyInfoGeneratorFactory keyInfoGeneratorFactory;
     private final StubConnectorConfiguration configuration;
 
@@ -110,5 +110,4 @@ public class MetadataGenerator {
     private KeyInfo buildKeyInfo(Credential credential) throws SecurityException {
         return keyInfoGeneratorFactory.newInstance().generate(credential);
     }
-
 }
