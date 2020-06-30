@@ -35,7 +35,6 @@ public class RequestedAttributesValidatorTest {
 
     @Test
     public void nonMandatoryAttributesCannotBeRequired() {
-
         RequestedAttributes requestedAttributes = mock(RequestedAttributes.class);
         List<RequestedAttribute> mandatoryPlusGenderRequestedAttributes = List.of(
                 setupAttribute(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME),
@@ -53,7 +52,6 @@ public class RequestedAttributesValidatorTest {
 
     @Test
     public void allMandatoryAttributesMustBeRequested() {
-
         RequestedAttributes requestedAttributes = mock(RequestedAttributes.class);
         List<RequestedAttribute> incompleteMandatoryAttributes = List.of(
                 setupAttribute(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME),
@@ -70,7 +68,6 @@ public class RequestedAttributesValidatorTest {
 
     @Test
     public void allMandatoryAttributesMustBeRequired() {
-
         RequestedAttributes requestedAttributes = mock(RequestedAttributes.class);
         List<RequestedAttribute> attributes = List.of(
                 setupAttribute(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME),
