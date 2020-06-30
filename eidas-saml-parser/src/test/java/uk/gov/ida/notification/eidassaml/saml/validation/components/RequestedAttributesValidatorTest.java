@@ -20,7 +20,6 @@ public class RequestedAttributesValidatorTest {
 
     @Test
     public void ignoreNonMandatoryAttributesThatAreNotRequired() {
-
         RequestedAttributes requestedAttributes = mock(RequestedAttributes.class);
         List<RequestedAttribute> mandatoryPlusGenderRequestedAttributes = List.of(
                 setupAttribute(EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME),
