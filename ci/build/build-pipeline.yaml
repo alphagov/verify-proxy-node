@@ -304,7 +304,6 @@ spec:
               params:
                 image: cloudhsm-jce-image-file/image.tar
                 additional_tags: cloudhsm-config/.git/short_ref
-
     - name: build-proxy-node
       serial: true
       serial_groups: [build-proxy-node]
@@ -357,7 +356,6 @@ spec:
               - -elc
               - |
                 cd src
-                rm -f .dockerignore
                 export GRADLE_USER_HOME=$(pwd)/home/gradle/.gradle
                 ./gradlew --console verbose --parallel -Pcloudhsm -PCI installDist
 
