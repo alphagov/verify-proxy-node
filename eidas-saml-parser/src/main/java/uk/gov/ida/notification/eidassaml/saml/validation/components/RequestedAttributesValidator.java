@@ -41,7 +41,6 @@ public class RequestedAttributesValidator {
     }
 
     private RequestedAttribute validateRequestedAttribute(RequestedAttribute requestedAttribute) {
-
         if (!RequestedAttribute.URI_REFERENCE.equals(requestedAttribute.getNameFormat())) {
             throw new InvalidAuthnRequestException(nameFormatError(requestedAttribute));
         }
@@ -69,4 +68,3 @@ public class RequestedAttributesValidator {
         return MessageFormat.format("Non-mandatory RequestedAttribute should not be required ''{0}''", requestedAttribute.getName());
     }
 }
-
