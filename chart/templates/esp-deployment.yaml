@@ -8,8 +8,6 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-  annotations:
-    timestamp: {{ .Release.Time }}
 spec:
   replicas: {{ .Values.esp.replicaCount }}
   strategy:
@@ -23,6 +21,8 @@ spec:
       labels:
         app.kubernetes.io/name: esp
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        timestamp: {{ .Release.Time }}
     spec:
       affinity:
         podAntiAffinity:

@@ -8,8 +8,6 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-  annotations:
-    timestamp: {{ .Release.Time }}
 spec:
   replicas: {{ .Values.vsp.replicaCount }}
   selector:
@@ -21,6 +19,8 @@ spec:
       labels:
         app.kubernetes.io/name: vsp
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        timestamp: {{ .Release.Time }}
     spec:
       containers:
       - name: vsp

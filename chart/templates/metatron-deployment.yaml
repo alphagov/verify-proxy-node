@@ -21,6 +21,8 @@ spec:
       labels:
         app.kubernetes.io/name: metatron
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        timestamp: {{ .Release.Time }}
     spec:
       restartPolicy: Always
       volumes:
