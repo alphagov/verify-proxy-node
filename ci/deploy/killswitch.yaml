@@ -1,0 +1,63 @@
+---
+apiVersion: concourse.govsvc.uk/v1beta1
+kind: Pipeline
+metadata:
+  name: killswitch
+  labels:
+    controller-tools.k8s.io: "1.0"
+spec:
+  exposed: false
+  paused: true
+  config:
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: ((concourse.task-toolbox-image))
+        tag: ((concourse.task-toolbox-tag))
+
+    resource_types:
+
+      - name: slack-notification
+        type: docker-image
+        source:
+          repository: cfcommunity/slack-notification-resource
+
+    resources:
+
+      - name: slack-on-kill
+        type: slack-notification
+        source:
+          url: ((slack-notification.url))
+
+    jobs:
+
+      - name: kill-integration
+        plan:
+          - task: kill
+            timeout: 10m
+            config:
+              platform: linux
+              image_resource: *task_toolbox
+              params:
+                KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+                KUBERNETES_TOKEN: ((namespace-deployer.token))
+                NAMESPACE: ((namespace-deployer.namespace))
+              run:
+                path: /bin/bash
+                args:
+                  - -euc
+                  - |
+                    echo "configuring kubectl"
+                    echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                    kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                    kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                    kubectl config set-context deployer --user deployer --cluster self
+                    kubectl config use-context deployer
+                    kubectl -n "${NAMESPACE}" delete virtualservices,deployments -l app.kubernetes.io/instance=integration
+        on_success:
+          put: slack-on-kill
+          params:
+            text: |
+              ☠️☠️ Proxy Node Integration Deployent was killed.
+              ❕❕Now pause the Integration Deployment at $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/deploy
