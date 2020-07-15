@@ -9,7 +9,9 @@ docker-local:
 build:
   PROXY_NODE_URL: https://proxy-node.test.eidas.signin.service.gov.uk
   STUB_CONNECTOR_URL: https://stub-connector.test.eidas.signin.service.gov.uk
+  SELENIUM_HUB_URL: https://selenium.tools.signin.service.gov.uk/wd/hub
 
 integration:
   PROXY_NODE_URL: https://proxy-node.integration.eidas.signin.service.gov.uk
   STUB_CONNECTOR_URL: https://stub-connector.integration.eidas.signin.service.gov.uk
+  SELENIUM_HUB_URL: https://selenium.tools.signin.service.gov.uk/wd/hub
