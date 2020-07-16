@@ -2,13 +2,21 @@ require 'capybara/cucumber'
 require 'capybara-screenshot/cucumber'
 require 'selenium/webdriver'
 require 'webdrivers/chromedriver'
+require 'yaml'
+
+ENVIRONMENTS = YAML.load_file(File.join(__dir__, 'environments.yml'))
+
+def env(key)
+  test_env = ENV.fetch('TEST_ENV', 'local')
+  ENVIRONMENTS.dig(test_env, key) || ENV[key]
+end
 
 Capybara.configure do |cfg|
   cfg.default_max_wait_time = 20
 end
 
 show_browser = ENV['SHOW_BROWSER'] == 'true'
-use_browser = !ENV['SELENIUM_HUB_URL']
+use_browser = !env('SELENIUM_HUB_URL')
 local_env = ENV['TEST_ENV'] == 'local'
 
 ### Driver config ###
@@ -29,7 +37,7 @@ if local_env || use_browser
 
   Capybara.javascript_driver = :driver
 else
-  selenium_hub_url = ENV['SELENIUM_HUB_URL'] || 'http://selenium-hub:4444/wd/hub'
+  selenium_hub_url = env('SELENIUM_HUB_URL') || 'http://selenium-hub:4444/wd/hub'
   Capybara.register_driver :selenium_remote_firefox do |app|
     Capybara::Selenium::Driver.new(app, browser: :remote, url: selenium_hub_url, desired_capabilities: :firefox)
   end
