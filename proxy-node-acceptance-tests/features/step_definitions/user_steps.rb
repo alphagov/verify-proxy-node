@@ -1,16 +1,8 @@
-require 'yaml'
 require 'uri'
 require 'securerandom'
 
-TEST_ENV = ENV.fetch('TEST_ENV', 'local')
-ENVIRONMENTS = YAML.load_file(File.join(__dir__, 'environments.yml'))
-
-def env(key)
-  ENVIRONMENTS.dig(TEST_ENV, key) || ENV[key]
-end
-
 def stub_idp_user
-  ENV['STUB_IDP_USER'] || "stub-idp-demo-one"
+  env('STUB_IDP_USER') || "stub-idp-demo-one"
 end
 
 Given("the Proxy Node is sent an LOA {string} request from the Stub Connector") do |loa|
