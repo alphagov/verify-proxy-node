@@ -200,135 +200,135 @@ spec:
                     -f ./manifests/
     
     - name: deploy-production
-        serial: true
-        plan:
+      serial: true
+      plan:
 
-          - get: release
-            trigger: true
+        - get: release
+          trigger: true
 
-          - get: daily
-            trigger: true
+        - get: daily
+          trigger: true
 
-          - get: verify-eidas-config
-            trigger: true
+        - get: verify-eidas-config
+          trigger: true
 
-          - task: generate-eidas-config
-            config:
-              platform: linux
-              image_resource: *openjdk_image
-              inputs:
-                - name: verify-eidas-config
-              outputs:
-                - name: verify-eidas-config
-              run:
-                dir: verify-eidas-config/tools
-                path: ./gradlew
-                args:
-                  - run
-                  - --args
-                  - "generate-config --environment=production"
+        - task: generate-eidas-config
+          config:
+            platform: linux
+            image_resource: *openjdk_image
+            inputs:
+              - name: verify-eidas-config
+            outputs:
+              - name: verify-eidas-config
+            run:
+              dir: verify-eidas-config/tools
+              path: ./gradlew
+              args:
+                - run
+                - --args
+                - "generate-config --environment=production"
 
-          - task: create-eidas-config-map
-            config:
-              platform: linux
-              image_resource: *task_toolbox
-              inputs:
-                - name: verify-eidas-config
-              outputs:
-                - name: manifests
-              params:
-                KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
-                KUBERNETES_TOKEN: ((namespace-deployer.token))
-                NAMESPACE: ((namespace-deployer.namespace))
-              run:
-                path: /bin/sh
-                args:
-                  - -euc
-                  - |
-                    cd verify-eidas-config/tools
+        - task: create-eidas-config-map
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: verify-eidas-config
+            outputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              NAMESPACE: ((namespace-deployer.namespace))
+            run:
+              path: /bin/sh
+              args:
+                - -euc
+                - |
+                  cd verify-eidas-config/tools
 
-                    echo "configuring kubectl"
-                    echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
-                    kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
-                    kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
-                    kubectl config set-context deployer --user deployer --cluster self
-                    kubectl config use-context deployer
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
 
-                    echo "generating configMap resource definition from file"
-                    kubectl -n "${NAMESPACE}" create configmap production-countries-config --from-file=countriesConfig.yaml -o yaml --dry-run \
-                      | yq -y '.metadata += {"annotations": {"kapp.k14s.io/versioned": "", "kapp.k14s.io/num-versions":"5"}}' \
-                      | tee ../../manifests/countriesConfigMap.yaml
+                  echo "generating configMap resource definition from file"
+                  kubectl -n "${NAMESPACE}" create configmap production-countries-config --from-file=countriesConfig.yaml -o yaml --dry-run \
+                    | yq -y '.metadata += {"annotations": {"kapp.k14s.io/versioned": "", "kapp.k14s.io/num-versions":"5"}}' \
+                    | tee ../../manifests/countriesConfigMap.yaml
 
-          - task: render-manifests
-            config:
-              platform: linux
-              image_resource: *task_toolbox
-              inputs:
-                - name: release
-                - name: manifests
-              outputs:
-                - name: manifests
-              params:
-                CLUSTER_NAME: ((cluster.name))
-                CLUSTER_DOMAIN: ((cluster.domain))
-                CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
-                RELEASE_NAMESPACE: ((namespace-deployer.namespace))
-                RELEASE_NAME: production
-                CLOUDHSM_IP: ((cluster.cloudHsmIp))
-              run:
-                path: /bin/bash
-                args:
-                  - -euc
-                  - |
-                    echo "preparing keyring..."
-                    echo "${CLUSTER_PUBLIC_KEY}" > key
-                    gpg --import key
-                    gpg --export > ~/.gnupg/pubring.gpg
-                    echo "verifying package"
-                    helm verify ./release/*.tgz
-                    echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
-                    helm template \
-                      --name "${RELEASE_NAME}" \
-                      --namespace "${RELEASE_NAMESPACE}" \
-                      --set "global.cluster.name=${CLUSTER_NAME}" \
-                      --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
-                      --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
-                      --set "stubConnector.enabled=false" \
-                      --set "vsp.secretName=vsp-production" \
-                      --output-dir "./manifests/" \
-                      ./release/*.tgz
+        - task: render-manifests
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: release
+              - name: manifests
+            outputs:
+              - name: manifests
+            params:
+              CLUSTER_NAME: ((cluster.name))
+              CLUSTER_DOMAIN: ((cluster.domain))
+              CLUSTER_PUBLIC_KEY: ((artefact-signing-key.publicKey))
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: production
+              CLOUDHSM_IP: ((cluster.cloudHsmIp))
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "preparing keyring..."
+                  echo "${CLUSTER_PUBLIC_KEY}" > key
+                  gpg --import key
+                  gpg --export > ~/.gnupg/pubring.gpg
+                  echo "verifying package"
+                  helm verify ./release/*.tgz
+                  echo "rendering chart with release name '${RELEASE_NAME}' and namespace '${RELEASE_NAMESPACE}'..."
+                  helm template \
+                    --name "${RELEASE_NAME}" \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --set "global.cluster.name=${CLUSTER_NAME}" \
+                    --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
+                    --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                    --set "stubConnector.enabled=false" \
+                    --set "vsp.secretName=vsp-production" \
+                    --output-dir "./manifests/" \
+                    ./release/*.tgz
 
-          - task: deploy-manifests
-            timeout: 10m
-            config:
-              platform: linux
-              image_resource: *task_toolbox
-              inputs:
-                - name: manifests
-              params:
-                KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
-                KUBERNETES_TOKEN: ((namespace-deployer.token))
-                KUBERNETES_API: kubernetes.default.svc
-                RELEASE_NAMESPACE: ((namespace-deployer.namespace))
-                RELEASE_NAME: production
-                APP_NAME: proxy-node
-              run:
-                path: /bin/bash
-                args:
-                  - -euc
-                  - |
-                    echo "configuring kubectl"
-                    echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
-                    kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
-                    kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
-                    kubectl config set-context deployer --user deployer --cluster self
-                    kubectl config use-context deployer
+        - task: deploy-manifests
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            inputs:
+              - name: manifests
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+              RELEASE_NAME: production
+              APP_NAME: proxy-node
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
 
-                    echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
-                    kapp deploy \
-                      -y \
-                      --namespace "${RELEASE_NAMESPACE}" \
-                      --allow-ns "${RELEASE_NAMESPACE}" \
-                      --app "${RELEASE_NAME}-${APP_NAME}" \
-                      --diff-changes \
-                      -f ./manifests/
+                  echo "applying chart to ${RELEASE_NAMESPACE} namespace..."
+                  kapp deploy \
+                    -y \
+                    --namespace "${RELEASE_NAMESPACE}" \
+                    --allow-ns "${RELEASE_NAMESPACE}" \
+                    --app "${RELEASE_NAME}-${APP_NAME}" \
+                    --diff-changes \
+                    -f ./manifests/
