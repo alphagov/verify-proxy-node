@@ -63,25 +63,7 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-proxy-node-metadata
               key: postURL
-        - name: CONNECTOR_NODE_ENTITY_ID
-          value: {{ include "connector.entityID" . }}
-        - name: CONNECTOR_NODE_METADATA_URL
-          value: {{ include "connector.metadata.url" . }}
         - name: METATRON_URL
           value: http://{{ .Release.Name }}-metatron/
-{{- if .Values.stubConnector.enabled }}
-        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
-          valueFrom:
-            configMapKeyRef:
-              name: test-pki-configmap
-              key: stub_connector.truststore.base64
-        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
-          value: {{ .Values.connector.metadataSigningTruststorePassword }}
-{{- else }}
-        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE
-          value: {{ .Values.connector.metadataSigningTruststoreBase64 }}
-        - name: CONNECTOR_NODE_METADATA_TRUSTSTORE_PASSWORD
-          value: {{ .Values.connector.metadataSigningTruststorePassword }}
-{{- end }}
         - name: REDIS_SERVER_URI
           value: redis://{{ .Release.Name }}-esp-redis:6379/
