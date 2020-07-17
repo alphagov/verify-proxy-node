@@ -45,8 +45,7 @@ public class HubResponseTranslatorTest {
         }
     }
 
-    private static final HubResponseTranslator TRANSLATOR = new HubResponseTranslator(EidasResponseBuilder::instance,
-            "Issuer");
+    private static final HubResponseTranslator TRANSLATOR = new HubResponseTranslator(EidasResponseBuilder::instance);
 
     private AttributesBuilder attributesBuilder;
     private CountryMetadataResponse countryMetaDataResponse;

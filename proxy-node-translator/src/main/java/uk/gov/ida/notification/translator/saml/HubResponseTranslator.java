@@ -33,15 +33,12 @@ public class HubResponseTranslator {
     private static final String PID_PREFIX = "GB/%s/%s";
     private static final String TRANSIENT_PREFIX = "_tr";
     private static final SecureRandomIdentifierGenerationStrategy ID_GENERATOR_STRATEGY = new SecureRandomIdentifierGenerationStrategy();
-    private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
 
 
     public HubResponseTranslator(
-            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
-            String proxyNodeMetadataForConnectorNodeUrl) {
+            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier) {
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
-        this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
     }
 
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer, CountryMetadataResponse countryMetadataResponse) {
@@ -85,7 +82,7 @@ public class HubResponseTranslator {
                 .collect(Collectors.toList());
 
         return eidasResponseBuilderSupplier.get()
-                .withIssuer(proxyNodeMetadataForConnectorNodeUrl)
+                .withIssuer(hubResponseContainer.getIssuer().toString())
                 .withStatus(getMappedStatusCode(hubResponseContainer.getVspScenario()))
                 .withInResponseTo(hubResponseContainer.getEidasRequestId())
                 .withIssueInstant(now)
