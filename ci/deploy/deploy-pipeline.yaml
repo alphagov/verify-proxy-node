@@ -19,6 +19,12 @@ spec:
       approvers: ((trusted-developers.github-accounts))
       required_approval_count: 2
 
+    country_config:  &country_config
+      uri: https://github.com/alphagov/verify-eidas-config.git
+      branch: master
+      username: "re-autom8-ci"
+      password: ((github.api-token))
+
     task_toolbox: &task_toolbox
       type: docker-image
       source:
@@ -56,13 +62,17 @@ spec:
         start: 8:00 AM
         stop: 8:00 PM
 
-    - name: verify-eidas-config
+    - name: verify-eidas-config-integration
       type: git
       source:
-        uri: https://github.com/alphagov/verify-eidas-config.git
-        branch: master
-        username: "re-autom8-ci"
-        password: ((github.api-token))
+        <<: *country_config
+        paths: [proxy-node/integration]
+
+    - name: verify-eidas-config-production
+      type: git
+      source:
+        <<: *country_config
+        paths: [proxy-node/production]
 
     jobs:
     - name: deploy-integration
@@ -75,7 +85,7 @@ spec:
         - get: daily
           trigger: true
 
-        - get: verify-eidas-config
+        - get: verify-eidas-config-integration
           trigger: true
 
         - task: generate-eidas-config
@@ -83,11 +93,11 @@ spec:
             platform: linux
             image_resource: *openjdk_image
             inputs:
-              - name: verify-eidas-config
+              - name: verify-eidas-config-integration
             outputs:
-              - name: verify-eidas-config
+              - name: verify-eidas-config-integration
             run:
-              dir: verify-eidas-config/tools
+              dir: verify-eidas-config-integration/tools
               path: ./gradlew
               args:
                 - run
@@ -99,7 +109,7 @@ spec:
             platform: linux
             image_resource: *task_toolbox
             inputs:
-              - name: verify-eidas-config
+              - name: verify-eidas-config-integration
             outputs:
               - name: manifests
             params:
@@ -111,7 +121,7 @@ spec:
               args:
                 - -euc
                 - |
-                  cd verify-eidas-config/tools
+                  cd verify-eidas-config-integration/tools
 
                   echo "configuring kubectl"
                   echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
@@ -209,7 +219,7 @@ spec:
         - get: daily
           trigger: true
 
-        - get: verify-eidas-config
+        - get: verify-eidas-config-production
           trigger: true
 
         - task: generate-eidas-config
@@ -217,11 +227,11 @@ spec:
             platform: linux
             image_resource: *openjdk_image
             inputs:
-              - name: verify-eidas-config
+              - name: verify-eidas-config-production
             outputs:
-              - name: verify-eidas-config
+              - name: verify-eidas-config-production
             run:
-              dir: verify-eidas-config/tools
+              dir: verify-eidas-config-production/tools
               path: ./gradlew
               args:
                 - run
@@ -233,7 +243,7 @@ spec:
             platform: linux
             image_resource: *task_toolbox
             inputs:
-              - name: verify-eidas-config
+              - name: verify-eidas-config-production
             outputs:
               - name: manifests
             params:
@@ -245,7 +255,7 @@ spec:
               args:
                 - -euc
                 - |
-                  cd verify-eidas-config/tools
+                  cd verify-eidas-config-production/tools
 
                   echo "configuring kubectl"
                   echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt

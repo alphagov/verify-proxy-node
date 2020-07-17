@@ -95,6 +95,7 @@ spec:
         branch: master
         username: "re-autom8-ci"
         password: ((github.api-token))
+        paths: [proxy-node/test]
 
     - name: cloudhsm-config
       type: github
