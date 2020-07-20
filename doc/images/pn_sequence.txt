@@ -1,0 +1,77 @@
+title Proxy Node Journey Diagram
+
+bottomparticipants
+fontfamily arial
+
+participantgroup #lightgreen **EU Country**
+participant Country Connector
+end
+actor User
+participantgroup #lightyellow **Proxy Node**
+participant Gateway
+database Gateway-redis
+participant ESP
+database ESP-redis
+participant VSP
+participant Translator
+participant HSM
+participant Metatron
+end
+participantgroup #lightblue **Verify Hub**
+participant Verify Hub
+end
+
+autonumber 1
+
+note over User:(Browser)
+Country Connector<#blue-User:choose UK ID Scheme
+Country Connector--#blue>User:eIDAS\nAuthn Request
+User-#blue>Gateway:eIDAS\nAuthn Request
+activate Gateway
+Gateway->ESP:Authn Request
+activate ESP
+ESP->ESP:Parse Request
+ESP->Metatron:Get Metadata for country
+activate Metatron
+ESP<--Metatron:Metadata
+deactivate Metatron
+ESP->ESP:Validate Request
+ESP->ESP-redis:check replays
+Gateway<--ESP:request data
+deactivate ESP
+Gateway->VSP:build Hub Authn Request
+activate VSP
+Gateway<--VSP:Hub Authn Request
+deactivate VSP
+Gateway->Gateway-redis:save session
+
+User<#blue--Gateway:Hub Authn Request
+deactivate Gateway
+
+group Verify Hub Journey
+User-#blue>Verify Hub:Hub Authn Request
+
+
+Verify Hub->Verify Hub:Hub logic with IDP response
+User<#blue--Verify Hub:Hub response
+end
+User-#blue>Gateway:Hub response
+activate Gateway
+Gateway->Gateway-redis:get sesssion
+Gateway->Translator:Hub response & \nsession
+activate Translator
+Translator->VSP:decrypt Hub attributes
+activate VSP
+Translator<--VSP:user attributes
+deactivate VSP
+Translator->Metatron:Get Metadata for country
+activate Metatron
+Translator<--Metatron:Metadata
+deactivate Metatron
+Translator->Translator:build encrypted\neIDAS response
+Translator->HSM:sign response
+Gateway<-Translator:eIDAS response
+deactivate Translator
+User<#blue--Gateway:eIDAS response
+deactivate Gateway
+Country Connector<#blue--User:eIDAS response
