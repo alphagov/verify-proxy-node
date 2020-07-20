@@ -125,8 +125,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         MetatronProxy metatronProxy = createMetatronProxy(configuration, environment);
 
         final HubResponseTranslator hubResponseTranslator = new HubResponseTranslator(
-                EidasResponseBuilder::instance,
-                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
+                EidasResponseBuilder::instance
         );
 
         final EidasFailureResponseGenerator failureResponseGenerator = new EidasFailureResponseGenerator(
