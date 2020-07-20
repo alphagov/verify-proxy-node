@@ -865,7 +865,7 @@ spec:
               - get: tests-image
 
         - task: test-chart-package
-          image: tests-image1
+          image: tests-image
           attempts: 2
           timeout: 5m
           config:
