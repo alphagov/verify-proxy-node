@@ -16,8 +16,6 @@ logging:
   appenders:
     - type: ${LOGGING_APPENDER:-logstash-console}
 
-proxyNodeMetadataForConnectorNodeUrl: ${PROXY_NODE_METADATA_FOR_CONNECTOR_NODE_URL}
-
 vspConfiguration:
   url: ${VERIFY_SERVICE_PROVIDER_URL}
   clientConfig:

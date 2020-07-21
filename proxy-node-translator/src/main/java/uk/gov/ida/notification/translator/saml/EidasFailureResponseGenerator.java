@@ -10,23 +10,22 @@ import java.util.function.Supplier;
 
 public class EidasFailureResponseGenerator {
 
-    private String proxyNodeMetadataForConnectorNodeUrl;
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
 
     public EidasFailureResponseGenerator(
-            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
-            String proxyNodeMetadataForConnectorNodeUrl) {
-        this.proxyNodeMetadataForConnectorNodeUrl = proxyNodeMetadataForConnectorNodeUrl;
+            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier
+    ) {
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
     }
 
     Response generateFailureSamlResponse(
+            String issuer,
             Status responseStatus,
             String eidasRequestId,
             String destinationUrl,
             String entityID) {
         return eidasResponseBuilderSupplier.get()
-                .withIssuer(proxyNodeMetadataForConnectorNodeUrl)
+                .withIssuer(issuer)
                 .withStatus(getMappedStatusCode(responseStatus))
                 .withInResponseTo(eidasRequestId)
                 .withIssueInstant(DateTime.now())

@@ -26,7 +26,6 @@ public class TranslatorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
     @ClassRule
     public static final AppRule<TranslatorConfiguration> translatorAppRule = new AppRule<>(
             TranslatorApplication.class,
-            ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString()),
             ConfigOverride.config("credentialConfiguration.type", "file"),
@@ -38,7 +37,6 @@ public class TranslatorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
     @ClassRule
     public static final AppRule<TranslatorConfiguration> translatorAppRuleWithECSigning = new AppRule<>(
             TranslatorApplication.class,
-            ConfigOverride.config("proxyNodeMetadataForConnectorNodeUrl", "http://proxy-node.uk"),
             ConfigOverride.config("vspConfiguration.url", vspClientRule.baseUri().toString()),
             ConfigOverride.config("metatronUri", metatronClientRule.baseUri().toString()),
             ConfigOverride.config("credentialConfiguration.type", "file"),
