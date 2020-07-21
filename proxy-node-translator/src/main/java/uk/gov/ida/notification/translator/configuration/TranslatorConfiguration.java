@@ -14,11 +14,6 @@ public class TranslatorConfiguration extends Configuration implements Prometheus
     @Valid
     @NotNull
     @JsonProperty
-    private URI proxyNodeMetadataForConnectorNodeUrl;
-
-    @Valid
-    @NotNull
-    @JsonProperty
     private VerifyServiceProviderConfiguration vspConfiguration;
 
     @Valid
@@ -29,10 +24,6 @@ public class TranslatorConfiguration extends Configuration implements Prometheus
     @NotNull
     @JsonProperty
     private URI metatronUri;
-
-    public URI getProxyNodeMetadataForConnectorNodeUrl() {
-        return proxyNodeMetadataForConnectorNodeUrl;
-    }
 
     public VerifyServiceProviderConfiguration getVspConfiguration() {
         return vspConfiguration;
