@@ -44,5 +44,4 @@ public class TranslatorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
             ConfigOverride.config("credentialConfiguration.publicKey.cert", TEST_PUBLIC_EC_CERT),
             ConfigOverride.config("credentialConfiguration.privateKey.key", TEST_PRIVATE_EC_KEY)
     );
-
 }
