@@ -50,6 +50,7 @@ public class EidasResponseGenerator {
             final URI entityId) {
 
         final Response eidasResponse = failureResponseGenerator.generateFailureSamlResponse(
+                entityId.toString(),
                 responseStatus,
                 eidasRequestId,
                 destinationUrl,

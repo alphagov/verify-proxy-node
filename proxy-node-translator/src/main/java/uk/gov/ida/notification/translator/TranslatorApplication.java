@@ -129,8 +129,7 @@ public class TranslatorApplication extends Application<TranslatorConfiguration> 
         );
 
         final EidasFailureResponseGenerator failureResponseGenerator = new EidasFailureResponseGenerator(
-                EidasResponseBuilder::instance,
-                configuration.getProxyNodeMetadataForConnectorNodeUrl().toString()
+                EidasResponseBuilder::instance
         );
 
         final CredentialConfiguration credentialConfiguration = configuration.getCredentialConfiguration();
