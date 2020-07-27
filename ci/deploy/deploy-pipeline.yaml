@@ -303,6 +303,7 @@ spec:
                     --set "global.cluster.name=${CLUSTER_NAME}" \
                     --set "global.cluster.domain=${CLUSTER_DOMAIN}" \
                     --set "global.cloudHsm.ip=${CLOUDHSM_IP}" \
+                    --set "global.qwacCertificate.enabled=true" \
                     --set "stubConnector.enabled=false" \
                     --set "vsp.secretName=vsp-production" \
                     --output-dir "./manifests/" \
