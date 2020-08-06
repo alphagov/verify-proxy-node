@@ -55,7 +55,7 @@ public class MetadataResolverService {
         this.metadataResolverFactory = metadataResolverFactory;
         this.credentialResolverFactory = credentialResolverFactory;
         this.expiredCertificateMetadataFilter = new ExpiredCertificateMetadataFilter();
-        this.countryConfigMap = countriesConfig.getCountries().stream()
+        this.countryConfigMap = countriesConfig.getCountries().parallelStream()
                 .collect(Collectors.toMap(EidasCountryConfig::getEntityId, this::createMetadataResolver));
     }
 
@@ -78,8 +78,8 @@ public class MetadataResolverService {
 
     private Client getClient(EidasCountryConfig country) {
         ClientConfig configuration = new ClientConfig();
-        configuration.property(ClientProperties.CONNECT_TIMEOUT, 10000);
-        configuration.property(ClientProperties.READ_TIMEOUT, 10000);
+        configuration.property(ClientProperties.CONNECT_TIMEOUT, 5_000);
+        configuration.property(ClientProperties.READ_TIMEOUT, 5_000);
         return country.getTlsTruststore()
                 .map(ts -> JerseyClientBuilder.newBuilder().trustStore(ts).withConfig(configuration).build())
                 .orElse(JerseyClientBuilder.newClient(configuration));
