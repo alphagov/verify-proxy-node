@@ -6,6 +6,8 @@ global:
     enabled: true
     ip: 127.0.0.1
   domainGovUK: eidas.signin.service.gov.uk
+  qwacCertificate:
+    enabled: false
 
 hubFqdn: www.integration.signin.service.gov.uk
 
