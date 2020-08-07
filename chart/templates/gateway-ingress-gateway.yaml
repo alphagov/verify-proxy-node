@@ -26,7 +26,7 @@ spec:
       number: 443
       name: https
       protocol: HTTPS
-{{- if .Values.global.qwacCertificate.enabled -}}
+{{- if .Values.global.qwacCertificate.enabled }}
     tls:
       mode: SIMPLE
       serverCertificate: sds
@@ -34,7 +34,7 @@ spec:
       credentialName: gateway-ingress-certificate-for-signin-sealed-secret
     hosts:
     - {{ include "gateway.host.govuk" . }}
-{{- else -}}
+{{- else }}
     tls:
       mode: SIMPLE
       serverCertificate: sds
