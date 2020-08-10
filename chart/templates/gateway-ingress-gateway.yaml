@@ -21,7 +21,11 @@ spec:
     tls:
       httpsRedirect: true
     hosts:
+{{- if .Values.global.qwacCertificate.enabled }}
+    - {{ include "gateway.host.govuk" . }}
+{{- else }}
     - {{ include "gateway.host" . }}
+{{- end -}}
   - port:
       number: 443
       name: https
