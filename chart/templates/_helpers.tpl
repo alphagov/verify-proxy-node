@@ -4,7 +4,11 @@
 {{- end -}}
 
 {{- define "gateway.host.govuk" -}}
+{{- if eq .Release.Name "production" -}}
+{{- printf "%s.%s" .Chart.Name .Values.global.domainGovUK -}}
+{{- else -}}
 {{- printf "%s.%s.%s" .Chart.Name .Release.Name .Values.global.domainGovUK -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "gateway.entityID" -}}
