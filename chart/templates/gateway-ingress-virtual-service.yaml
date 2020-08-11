@@ -10,7 +10,11 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   hosts:
+{{- if .Values.global.qwacCertificate.enabled }}
+  - {{ include "gateway.host.govuk" . }}
+{{- else }}
   - {{ include "gateway.host" . }}
+{{- end -}}
   gateways:
   - {{ .Release.Name }}-gateway-ingress
   http:
