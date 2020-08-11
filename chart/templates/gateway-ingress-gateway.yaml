@@ -25,7 +25,7 @@ spec:
     - {{ include "gateway.host.govuk" . }}
 {{- else }}
     - {{ include "gateway.host" . }}
-{{- end -}}
+{{- end }}
   - port:
       number: 443
       name: https
