@@ -14,7 +14,7 @@ spec:
   - {{ include "gateway.host.govuk" . }}
 {{- else }}
   - {{ include "gateway.host" . }}
-{{- end -}}
+{{- end }}
   gateways:
   - {{ .Release.Name }}-gateway-ingress
   http:
