@@ -6,6 +6,7 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
 import uk.gov.ida.dropwizard.logstash.LogstashBundle;
@@ -18,6 +19,9 @@ import uk.gov.ida.eidas.metatron.exceptions.MetatronServerExceptionMapper;
 import uk.gov.ida.eidas.metatron.health.CountryMetadataHealthMetrics;
 import uk.gov.ida.eidas.metatron.health.MetatronHealthCheck;
 import uk.gov.ida.eidas.metatron.resources.MetatronResource;
+import uk.gov.ida.notification.shared.istio.IstioHeaderMapperFilter;
+import uk.gov.ida.notification.shared.istio.IstioHeaderStorage;
+import uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter;
 import uk.gov.ida.saml.metadata.factories.CredentialResolverFactory;
 import uk.gov.ida.saml.metadata.factories.MetadataResolverFactory;
 
@@ -81,6 +85,11 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
         environment.jersey().register(MetatronClientExceptionMapper.class);
         environment.jersey().register(MetatronServerExceptionMapper.class);
 
+        environment.jersey().register(IstioHeaderMapperFilter.class);
+        environment.jersey().register(ProxyNodeLoggingFilter.class);
+        registerInjections(environment);
+
+
     }
 
     private void scheduleMetadataHealthChecker(Environment environment, MetadataResolverService resolverService) {
@@ -92,4 +101,13 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
         scheduledExecutorService.scheduleWithFixedDelay(metrics, 2, 5, TimeUnit.MINUTES);
     }
 
+
+    private void registerInjections(Environment environment) {
+        environment.jersey().register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                bindAsContract(IstioHeaderStorage.class);
+            }
+        });
+    }
 }
