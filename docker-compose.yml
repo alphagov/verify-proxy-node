@@ -83,6 +83,7 @@ services:
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6612"
     ports:
       - "6610:6610"
+      - "6611:6611"
       - "6612:6612"
     volumes:
       - ./stub-connector/build/install/stub-connector:/app/local

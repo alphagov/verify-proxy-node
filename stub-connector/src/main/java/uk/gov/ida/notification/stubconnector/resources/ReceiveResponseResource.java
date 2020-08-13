@@ -125,7 +125,7 @@ public class ReceiveResponseResource {
         params.put(CoreValidatorParameters.RECEIVE_URL, responseDestination);
 
         CriteriaSet criteria = new CriteriaSet();
-        criteria.add(new EntityIdCriterion(configuration.getProxyNodeEntityId()));
+        criteria.add(new EntityIdCriterion(configuration.getProxyNodeMetadataConfiguration().getExpectedEntityId()));
         criteria.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
         criteria.add(new UsageCriterion(UsageType.SIGNING));
         criteria.add(new ProtocolCriterion(SAMLConstants.SAML20P_NS));
