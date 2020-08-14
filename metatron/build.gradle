@@ -8,7 +8,8 @@ dependencies {
             configurations.opensaml,
             project(':proxy-node-shared')
 
-    testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
+    testImplementation 'com.github.stefanbirkner:system-rules:1.19.0',
+            configurations.ida_utils
 }
 
 apply plugin: 'application'
