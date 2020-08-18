@@ -6,6 +6,7 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.glassfish.jersey.client.ClientProperties;
+import uk.gov.ida.notification.shared.proxy.ProxyNodeJsonClient;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -39,6 +40,10 @@ public class AppRule<T extends Configuration> extends DropwizardAppRule<T> {
 
     public WebTarget target(String path) throws URISyntaxException {
         return target(path, getLocalPort());
+    }
+
+    public <T> T get(String path, ProxyNodeJsonClient client, Class<T> clazz) throws URISyntaxException {
+        return client.get(new URI(path), clazz);
     }
 
     private WebTarget target(String path, int port) throws URISyntaxException {
