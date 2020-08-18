@@ -1,0 +1,207 @@
+---
+apiVersion: concourse.govsvc.uk/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: killswitch
+spec:
+  exposed: false
+  paused: true
+  config:
+
+    resource_types:
+      - name: paas-s3
+        type: docker-image
+        source:
+          repository: governmentpaas/s3-resource
+          tag: latest
+      - name: pipeline-lock-metadata
+        type: docker-image
+        source:
+          repository: mastertinner/build-metadata-resource
+          tag: latest
+      - name: slack-notification
+        type: docker-image
+        source:
+          repository: cfcommunity/slack-notification-resource
+
+    resources:
+      - name: verify-slack
+        type: slack-notification
+        source:
+          url: ((slack-webhook))
+
+      - name: pipeline-lock-metadata
+        type: pipeline-lock-metadata
+
+      - name: proxy-node-pipeline-lock
+        type: paas-s3
+        source:
+          bucket: gds-verify-tools-platform-deployer
+          region_name: eu-west-2
+          regexp: proxy-node-pipeline-lock/(.*).lock
+          initial_path: 0.lock
+          initial_content_text: |
+            {
+              "is_locked": false
+            }
+
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: ((concourse.task-toolbox-image))
+        tag: ((concourse.task-toolbox-tag))
+
+    jobs:
+
+
+    - name: lock-proxy-node-pipeline
+      serial: true
+      plan:
+        - do: &lock-proxy-node-pipeline
+            - get: pipeline-lock-metadata
+            - task: create-lockfile
+              config:
+                platform: linux
+                image_resource:
+                  type: docker-image
+                  source:
+                    repository: gdsre/aws-ruby
+                    tag: 2.6.1-3.0.1
+                inputs:
+                  - name: pipeline-lock-metadata
+                outputs:
+                  - name: lock-dir
+                run:
+                  path: ruby
+                  args:
+                    - -e
+                    - |
+                      require 'json'
+
+                      atc_external_url    = File.read('pipeline-lock-metadata/atc-external-url').chomp
+                      build_team_name     = File.read('pipeline-lock-metadata/build-team-name').chomp
+                      build_pipeline_name = File.read('pipeline-lock-metadata/build-pipeline-name').chomp
+                      build_job_name      = File.read('pipeline-lock-metadata/build-job-name').chomp
+                      build_name          = File.read('pipeline-lock-metadata/build-name').chomp
+                      build_id            = File.read('pipeline-lock-metadata/build-id').chomp
+
+                      build_url = [atc_external_url,
+                                   'teams', build_team_name,
+                                   'pipelines', build_pipeline_name,
+                                   'jobs', build_job_name,
+                                   'builds', build_name,
+                                  ].join('/')
+
+                      content = {
+                        is_locked: true,
+                        reason: "The Killswitch was pulled at #{Time.now}"
+                      }
+
+                      File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+
+                      puts 'Writing to lock file the following lock:'
+                      pp content
+            - put: proxy-node-pipeline-lock
+              params:
+                file: lock-dir/*.lock
+            - put: verify-slack
+              params:
+                channel: "#verify-2ndline"
+                text: "The proxy-node :skull: killswitch :skull: has been pulled and the pipeline has been locked"
+                silent: true
+                icon_emoji: ':lock:'
+
+    - name: unlock-proxy-node-pipeline
+      serial: true
+      plan:
+        - do: &unlock-proxy-node-pipeline
+            - task: create-lockfile
+              config:
+                platform: linux
+                image_resource:
+                  type: docker-image
+                  source:
+                    repository: gdsre/aws-ruby
+                    tag: 2.6.1-3.0.1
+                outputs:
+                  - name: lock-dir
+                params:
+                  FORCE: 'false'
+                run: &run-create-lockfile
+                  path: ruby
+                  args:
+                    - -e
+                    - |
+                      require 'json'
+
+                      content = {
+                        is_locked: false,
+                        force: ENV['FORCE'] == 'true',
+                      }
+
+                      puts "Lock file content is now: #{content.to_json}"
+
+                      File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+            - put: proxy-node-pipeline-lock
+              params:
+                file: lock-dir/*.lock
+        - put: verify-slack
+          params:
+            channel: "#verify-2ndline"
+            text: "The proxy-node pipeline has been unlocked"
+            silent: true
+            icon_emoji: ':unlock:'
+
+    - name: force-unlock-proxy-node-pipeline
+      serial: true
+      plan:
+        - task: create-force-lockfile
+          config:
+            platform: linux
+            image_resource:
+              type: docker-image
+              source:
+                repository: gdsre/aws-ruby
+                tag: 2.6.1-3.0.1
+            outputs:
+              - name: lock-dir
+            params:
+              FORCE: 'true'
+            run: *run-create-lockfile
+        - put: proxy-node-pipeline-lock
+          params:
+            file: lock-dir/*.lock
+        - put: verify-slack
+          params:
+            channel: "#verify-2ndline"
+            text: "The proxy-node pipeline has been FORCE unlocked"
+            silent: true
+            icon_emoji: ':vader:'
+
+    - name: kill
+      plan:
+        - task: delete-resources
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              NAMESPACE: ((namespace-deployer.namespace))
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  kubectl -n "${NAMESPACE}" delete virtualservices,deployments --all
+        - task: *lock-proxy-node-pipeline
