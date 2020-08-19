@@ -1,0 +1,15 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: verify-2nd-line-slack-webhook
+  namespace: verify-eidas-proxy-node-deploy
+spec:
+  encryptedData:
+    url: AgA3850ZtOx3UgsuLxymWuaDSdg9KqAI0HURHe7CCt3Pid7bvfu7tdKXnhe4YCXMqMKnlTZyuDKjujkRQWPX0lU0Q7K5XodrORqLXMEVz0BJVSfWl5zX6vvpu4rbe13Mq19xfDRXWwivrb2Vqdb7hV7L8tNC1dAeNgnDAt5mDaIcxG5mcVPzCRWXHCiCTiVkiFRBMNoO61vzIU8THAl64zA8xSWdYB3zmAJJsfqmIi677E5tZulhtIFsIdj3vmHgvWiZ3QAr5kKM//lX7U/3y6ZYDWnb1Tki2bJLpFSyb+C4x9whj3+Yo0lMrmSrld4k6lIXpl8+tLTsqfIUQSmKMRZOwgLllUhWumDv17msMo6q/tk9Y3AXJm6NTScJedSjMstL8uhkcdVpEoaE5cBYr1iCjrDz4dm6/pKvYptZIsqC/OWlordamMYI0QVY/I1n3YqKxiUFXE5u8vGjmd/g/Um21DOn1tNmnlTZ4Yz2skgjsOwZuBK3aDCjxvz1udksIHvco4NOPUBT+9epGiN7sPXW3LgIo0NYsg1tpOWqPAsY7Lxhz4Pvuh+f6EbuQ9OpImh8oOR19C5nkbG0tO4Y0wGoe9Jj8MWMQHk5m95C4dd7jIHdH8NhO9W4N9w6ooQZOtkjs2MJ3DdSIYVjubCPkINKKASb9Wmrqkqp/hF3gg4iRXrDB4v2FHXpOFIzd85mJN0njb/v/YYvMIJXWmBcYbH9dBzKczRkkzq0UM92wwDmU40E8qW9gVkBGI7JbTOJorbEccnbmb1N3xmaxHe+4kok8T76/oMVnjdR10KTNg==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: verify-2nd-line-slack-webhook
+      namespace: verify-eidas-proxy-node-deploy
+
