@@ -25,7 +25,7 @@ spec:
       - name: verify-slack
         type: slack-notification
         source:
-          url: ((slack-webhook))
+          url: ((verify-2nd-line-slack-webhook.url))
 
       - name: proxy-node-pipeline-lock
         type: paas-s3
