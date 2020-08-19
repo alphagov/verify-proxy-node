@@ -52,46 +52,46 @@ spec:
       serial: true
       plan:
         - do: &lock-proxy-node-pipeline
-            - task: create-lockfile
-              config:
-                platform: linux
-                image_resource:
-                  type: docker-image
-                  source:
-                    repository: gdsre/aws-ruby
-                    tag: 2.6.1-3.0.1
-                outputs:
-                  - name: lock-dir
-                run:
-                  path: ruby
-                  args:
-                    - -e
-                    - |
-                      require 'json'
+          - task: create-lockfile
+            config:
+              platform: linux
+              image_resource:
+                type: docker-image
+                source:
+                  repository: gdsre/aws-ruby
+                  tag: 2.6.1-3.0.1
+              outputs:
+                - name: lock-dir
+              run:
+                path: ruby
+                args:
+                  - -e
+                  - |
+                    require 'json'
 
-                      content = {
-                        is_locked: true,
-                        reason: "The Killswitch was pulled at #{Time.now}"
-                      }
+                    content = {
+                      is_locked: true,
+                      reason: "The Killswitch was pulled at #{Time.now}"
+                    }
 
-                      File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+                    File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
 
-                      puts 'Writing to lock file the following lock:'
-                      pp content
-            - put: proxy-node-pipeline-lock
-              params:
-                file: lock-dir/*.lock
-            - put: verify-slack
-              params:
-                channel: "#verify-2ndline"
-                text: "The proxy-node :skull: killswitch :skull: has been pulled and the pipeline has been locked"
-                silent: true
-                icon_emoji: ':lock:'
+                    puts 'Writing to lock file the following lock:'
+                    pp content
+          - put: proxy-node-pipeline-lock
+            params:
+              file: lock-dir/*.lock
+          - put: verify-slack
+            params:
+              channel: "#verify-2ndline"
+              text: "The proxy-node prod :skull: killswitch :skull: has been pulled and the prod deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
+              silent: true
+              icon_emoji: ':lock:'
 
     - name: unlock-proxy-node-pipeline
       serial: true
       plan:
-        - do: &unlock-proxy-node-pipeline
+        - do:
             - task: create-lockfile
               config:
                 platform: linux
@@ -125,7 +125,7 @@ spec:
         - put: verify-slack
           params:
             channel: "#verify-2ndline"
-            text: "The proxy-node pipeline has been unlocked"
+            text: "The proxy-node deploy pipeline has been unlocked"
             silent: true
             icon_emoji: ':unlock:'
 
@@ -151,7 +151,7 @@ spec:
         - put: verify-slack
           params:
             channel: "#verify-2ndline"
-            text: "The proxy-node pipeline has been FORCE unlocked"
+            text: "The proxy-node prod deploy pipeline has been FORCE unlocked"
             silent: true
             icon_emoji: ':vader:'
 
@@ -179,4 +179,4 @@ spec:
                   kubectl config use-context deployer
 
                   kubectl -n "${NAMESPACE}" delete virtualservices,deployments --all
-        - task: *lock-proxy-node-pipeline
+        - do: *lock-proxy-node-pipeline
