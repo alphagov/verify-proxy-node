@@ -1,0 +1,72 @@
+---
+apiVersion: concourse.govsvc.uk/v1beta1
+kind: Pipeline
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: killswitch-test
+  namespace: sandbox-proxy-node-dev
+spec:
+  exposed: false
+  paused: true
+  config:
+
+    resource_types:
+      - name: paas-s3
+        type: docker-image
+        source:
+          repository: governmentpaas/s3-resource
+          tag: latest
+
+    resources:
+      - name: s3-bucket
+        type: paas-s3
+        source:
+          bucket: ((s3-service-account.S3BucketName))
+          region_name: ((s3-service-account.S3BucketRegion))
+          access_key_id: ((pipeline.AccessKeyID))
+          secret_access_key: ((pipeline.SecretAccessKey))
+          regexp: test1/(.*).lock
+          initial_path: 0.lock
+          initial_content_text: |
+            {
+              "is_locked": false
+            }
+
+
+    jobs:
+
+      - name: test-lock-16
+        serial: true
+        plan:
+          - task: create-lockfile
+            config:
+              platform: linux
+              image_resource:
+                type: docker-image
+                source:
+                  repository: gdsre/aws-ruby
+                  tag: 2.6.1-3.0.1
+              outputs:
+                - name: lock-dir
+              run:
+                path: ruby
+                args:
+                  - -e
+                  - |
+                    require 'json'
+
+                    content = {
+                      is_locked: true,
+                      reason: "The Killswitch was pulled at #{Time.now}"
+                    }
+
+                    puts "writing file 1"
+
+                    File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+
+                    puts 'Writing to lock file the following lock:'
+                    pp content
+          - put: s3-bucket
+            params:
+              file: lock-dir/*.lock
