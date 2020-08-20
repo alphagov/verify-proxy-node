@@ -10,14 +10,15 @@ import java.net.URI;
 
 public class EidasSamlParserConfiguration extends Configuration implements PrometheusConfiguration {
 
-    @JsonProperty
     @Valid
     @NotNull
+    @JsonProperty
     private URI proxyNodeAuthnRequestUrl;
 
-    @JsonProperty
     @Valid
-    private final ReplayCheckerConfiguration replayChecker = new ReplayCheckerConfiguration();
+    @NotNull
+    @JsonProperty
+    private ReplayCheckerConfiguration replayChecker;
 
     @Valid
     @NotNull

@@ -12,12 +12,10 @@ import se.litsec.opensaml.saml2.common.response.MessageReplayCheckerImpl;
 import uk.gov.ida.notification.session.storage.RedisStorageService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 public class ReplayCheckerConfiguration {
 
     @Valid
-    @NotNull
     @JsonProperty
     private String redisUrl = "";
 
@@ -30,7 +28,7 @@ public class ReplayCheckerConfiguration {
     }
 
     private StorageService createStorageService(String name) throws ComponentInitializationException {
-        if (redisUrl.isEmpty()) {
+        if (redisUrl == null || redisUrl.isEmpty()) {
             return createMemoryCacheStorage(name + "-cache-storage");
         } else {
             RedisCommands<String, String> sync = RedisClient

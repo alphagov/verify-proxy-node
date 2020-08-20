@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="7a845c01-5da6-4d6d-a004-876884a8e35f" entityID="http://proxy-node-gateway:6600/ServiceMetadata" validUntil="2020-07-18T16:20:10.172Z"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="7a845c01-5da6-4d6d-a004-876884a8e35f" entityID="http://proxy-node-gateway:6600/ServiceMetadata" validUntil="2120-07-18T16:20:10.172Z"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
 <ds:SignedInfo>
 <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
@@ -8,15 +8,15 @@
 <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-<ds:DigestValue>83f4ZLFMKdFizJZSTUUpqlL+KNZjhlwun5+6aVwpf0Y=</ds:DigestValue>
+<ds:DigestValue>0+0Em/0QwlDu9RNextYRLj727fjRgjR5N3hjuxAvjcU=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
 <ds:SignatureValue>
-hkEeg5HKKtj90hbvgh0HqbaIMNLP5a0odR8yVqEbwwU5viPzcSEtS9Ex00hMvvi8W3fJ5+py4IVL
-KawfVRHn1zsaaH9PdTvp48ZVu+FbwDo6mZdMVZffDFFkssd+8K8q09Ts3ju6jl6DedZANOinkywr
-SO/CsGpLDftU8uIWSzqX+ynuOOuOnyiXj1Pfz9pEMJjHe1d6Qe10IjUr/UXkg/MYhcawTWu+v6Ko
-XZRX+DnaGH+LAcymyBq+1Mnicj9pQOVt63ZQUQABgzKN71mBlZOjt+blLgb0xaTeLx/h9AJWizA1
-vnEqDITUebu/FkHaarlMuIiX6LYHiOvZf7hegw==
+LiC1Wqyq+P/L/prCG52CBn71dDz0pRwjjDtI0f/5OsvW1y614nVX6oMQPDpzdnZaSQ1hmAYBRhAF
+WrMi72pVpZl9RlVFIiIri8L3SuqKSAXHC4g1WKBhRhOOW4j3MtFof9dzwOE9VNH5UO/qu98DBm7n
+w478mhktLk0xHAsmJFyePX9pHHRPnCuJDJKoQpymqXmf4ee1RBS5sEUyO0vscMuyu5yvPy/7Q6XE
+vmX4C/U+RTMWgtKedqR15MF9aHDgtiEhACAZ9uXPUMWmpocj2zlYSe1Xf1L4EAzgeACbt05mg159
+WtkynnY6dmiCthxO/iZ3IMdwIaw7etx15bkrVg==
 </ds:SignatureValue>
 <ds:KeyInfo>
 <ds:KeyValue>
@@ -95,9 +95,7 @@ n3OR0p1+IXuZuxJHmudM0pUAOcgrP4dsuYs=
                 </ds:X509Data>
             </ds:KeyInfo>
         </md:KeyDescriptor>
-        <md:NameIDFormat>
-            urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
-        </md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
         <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:6600/SAML2/SSO/POST"/>
         <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:6600/SAML2/SSO/Redirect"/>
         <saml2:Attribute FriendlyName="PersonIdentifier" Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>

@@ -60,10 +60,6 @@ public class StubConnectorConfiguration extends Configuration {
         return URI.create(metatronUri.toString().replace("metatron", "localhost"));
     }
 
-    public String getProxyNodeEntityId() {
-        return proxyNodeMetadataConfiguration.getExpectedEntityId();
-    }
-
     public TrustStoreBackedMetadataConfiguration getProxyNodeMetadataConfiguration() {
         return proxyNodeMetadataConfiguration;
     }
