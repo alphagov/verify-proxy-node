@@ -5,7 +5,7 @@ metadata:
   name: s3-service-account
   namespace: sandbox-proxy-node-dev
   labels:
-    group.access.govsvc.uk: principal
+    group.access.govsvc.uk: pipeline
 ---
 apiVersion: storage.govsvc.uk/v1beta1
 kind: S3Bucket
@@ -13,6 +13,6 @@ metadata:
   name: kill-switch-bucket
   namespace: sandbox-proxy-node-dev
   labels:
-    group.access.govsvc.uk: principal
+    group.access.govsvc.uk: pipeline
 spec:
   secret: s3-service-account
