@@ -10,3 +10,7 @@ ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-cli
 RUN yum install -y ./cloudhsm-client-*.rpm \
  && rm ./cloudhsm-client-*.rpm \
  && sed -i 's/UNIXSOCKET/TCPSOCKET/g' /opt/cloudhsm/data/application.cfg
+
+RUN rm /opt/cloudhsm/java/cloudhsm-test*.jar && \
+    rm /opt/cloudhsm/java/hamcrest*.jar && \
+    rm /opt/cloudhsm/java/junit*.jar
