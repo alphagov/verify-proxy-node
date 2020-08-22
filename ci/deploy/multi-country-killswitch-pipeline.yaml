@@ -10,6 +10,12 @@ spec:
   paused: true
   config:
 
+    task_toolbox: &task_toolbox
+      type: docker-image
+      source:
+        repository: ((concourse.task-toolbox-image))
+        tag: ((concourse.task-toolbox-tag))
+
     resource_types:
       - name: paas-s3
         type: docker-image
@@ -38,12 +44,6 @@ spec:
             {
               "is_locked": false
             }
-
-    task_toolbox: &task_toolbox
-      type: docker-image
-      source:
-        repository: ((concourse.task-toolbox-image))
-        tag: ((concourse.task-toolbox-tag))
 
     jobs:
 
