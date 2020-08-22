@@ -16,6 +16,11 @@ spec:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
 
+    slack_params: &slack_defaults
+      channel: "#verify-2ndline"
+      silent: true
+      icon_emoji: ':lock:'
+
     resource_types:
       - name: paas-s3
         type: docker-image
@@ -81,12 +86,10 @@ spec:
           - put: proxy-node-pipeline-lock
             params:
               file: lock-dir/*.lock
-          - put: verify-slack
-            params:
-              channel: "#verify-2ndline"
-              text: "The proxy-node prod :skull: killswitch :skull: has been pulled and the prod deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
-              silent: true
-              icon_emoji: ':lock:'
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node Production deploy pipeline has been locked"
 
     - name: unlock-prod-deploy
       serial: true
@@ -124,9 +127,8 @@ spec:
                 file: lock-dir/*.lock
         - put: verify-slack
           params:
-            channel: "#verify-2ndline"
-            text: "The proxy-node deploy pipeline has been unlocked"
-            silent: true
+            << : *slack_defaults
+            text: "The Proxy-Node Production deploy pipeline has been unlocked"
             icon_emoji: ':unlock:'
 
     - name: force-unlock-proxy-deploy
@@ -150,9 +152,8 @@ spec:
             file: lock-dir/*.lock
         - put: verify-slack
           params:
-            channel: "#verify-2ndline"
-            text: "The proxy-node prod deploy pipeline has been FORCE unlocked"
-            silent: true
+            << : *slack_defaults
+            text: "The Proxy-Node Production deploy pipeline has been FORCE unlocked"
             icon_emoji: ':vader:'
 
     - name: kill-and-lock-prod
@@ -180,3 +181,7 @@ spec:
 
                   kubectl -n "${NAMESPACE}" delete virtualservices,deployments --all
         - do: *lock-proxy-node-pipeline
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node Production :skull: killswitch :skull: has been pulled, which means the Production instance has been deleted and the Production deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
