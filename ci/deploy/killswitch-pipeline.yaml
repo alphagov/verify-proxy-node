@@ -48,7 +48,7 @@ spec:
     jobs:
 
 
-    - name: lock-proxy-node-pipeline
+    - name: lock-prod-deploy
       serial: true
       plan:
         - do: &lock-proxy-node-pipeline
@@ -88,7 +88,7 @@ spec:
               silent: true
               icon_emoji: ':lock:'
 
-    - name: unlock-proxy-node-pipeline
+    - name: unlock-prod-deploy
       serial: true
       plan:
         - do:
@@ -129,7 +129,7 @@ spec:
             silent: true
             icon_emoji: ':unlock:'
 
-    - name: force-unlock-proxy-node-pipeline
+    - name: force-unlock-proxy-deploy
       serial: true
       plan:
         - task: create-force-lockfile
@@ -155,7 +155,7 @@ spec:
             silent: true
             icon_emoji: ':vader:'
 
-    - name: kill
+    - name: kill-and-lock-prod
       plan:
         - task: delete-resources
           timeout: 10m
