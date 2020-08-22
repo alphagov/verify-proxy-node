@@ -21,6 +21,22 @@ spec:
       silent: true
       icon_emoji: ':lock:'
 
+    run: &create-lock-file
+      path: ruby
+      args:
+        - -e
+        - |
+          require 'json'
+
+          content = {
+            is_locked: ENV['IS_LOCKED'] == 'true',
+            force: ENV['FORCE'] == 'true',
+          }
+
+          puts "Lock file content is now: #{content.to_json}"
+
+          File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+
     resource_types:
       - name: paas-s3
         type: docker-image
@@ -67,22 +83,10 @@ spec:
                   tag: 2.6.1
               outputs:
                 - name: lock-dir
-              run:
-                path: ruby
-                args:
-                  - -e
-                  - |
-                    require 'json'
-
-                    content = {
-                      is_locked: true,
-                      reason: "The Killswitch was pulled at #{Time.now}"
-                    }
-
-                    File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
-
-                    puts 'Writing to lock file the following lock:'
-                    pp content
+              params:
+                FORCE: 'false'
+                IS_LOCKED: 'true'
+              run: *create-lock-file
           - put: proxy-node-pipeline-lock
             params:
               file: lock-dir/*.lock
@@ -107,21 +111,8 @@ spec:
                   - name: lock-dir
                 params:
                   FORCE: 'false'
-                run: &run-create-lockfile
-                  path: ruby
-                  args:
-                    - -e
-                    - |
-                      require 'json'
-
-                      content = {
-                        is_locked: false,
-                        force: ENV['FORCE'] == 'true',
-                      }
-
-                      puts "Lock file content is now: #{content.to_json}"
-
-                      File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+                  IS_LOCKED: 'false'
+                run: *create-lock-file
             - put: proxy-node-pipeline-lock
               params:
                 file: lock-dir/*.lock
@@ -146,6 +137,7 @@ spec:
               - name: lock-dir
             params:
               FORCE: 'true'
+              IS_LOCKED: 'false'
             run: *run-create-lockfile
         - put: proxy-node-pipeline-lock
           params:
