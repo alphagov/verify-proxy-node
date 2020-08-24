@@ -37,6 +37,12 @@ spec:
 
           File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
 
+    resource_types:
+      - name: slack-notification
+        type: docker-image
+        source:
+          repository: cfcommunity/slack-notification-resource
+
     resources:
       -
       - name: verify-slack
