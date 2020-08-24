@@ -29,8 +29,7 @@ spec:
           require 'json'
 
           content = {
-            is_locked: ENV['IS_LOCKED'] == 'true',
-            force: ENV['FORCE'] == 'true',
+            is_locked: ENV['IS_LOCKED'] == 'true'
           }
 
           puts "Lock file content is now: #{content.to_json}"
@@ -44,7 +43,7 @@ spec:
           repository: cfcommunity/slack-notification-resource
 
     resources:
-      -
+
       - name: verify-slack
         type: slack-notification
         source:
@@ -82,7 +81,6 @@ spec:
               outputs:
                 - name: lock-dir
               params:
-                FORCE: 'false'
                 IS_LOCKED: 'true'
               run: *create-lock-file
           - put: production-lock
@@ -108,7 +106,6 @@ spec:
                 outputs:
                   - name: lock-dir
                 params:
-                  FORCE: 'false'
                   IS_LOCKED: 'false'
                 run: *create-lock-file
             - put: production-lock
@@ -119,32 +116,6 @@ spec:
             << : *slack_defaults
             text: "The Proxy-Node Production deploy pipeline has been unlocked"
             icon_emoji: ':unlock:'
-
-    - name: force-unlock-proxy-deploy
-      serial: true
-      plan:
-        - task: create-force-lockfile
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: govsvc/aws-ruby
-                tag: 2.6.1
-            outputs:
-              - name: lock-dir
-            params:
-              FORCE: 'true'
-              IS_LOCKED: 'false'
-            run: *create-lock-file
-        - put: production-lock
-          params:
-            file: lock-dir/*.lock
-        - put: verify-slack
-          params:
-            << : *slack_defaults
-            text: "The Proxy-Node Production deploy pipeline has been FORCE unlocked"
-            icon_emoji: ':vader:'
 
     - name: kill-and-lock-prod
       plan:
