@@ -10,45 +10,58 @@ spec:
   paused: true
   config:
 
-    resource_types:
-      - name: paas-s3
-        type: docker-image
-        source:
-          repository: governmentpaas/s3-resource
-          tag: latest
-      - name: slack-notification
-        type: docker-image
-        source:
-          repository: cfcommunity/slack-notification-resource
-
-    resources:
-      - name: verify-slack
-        type: slack-notification
-        source:
-          url: ((verify-2nd-line-slack-webhook.url))
-
-      - name: proxy-node-pipeline-lock
-        type: paas-s3
-        source:
-          bucket: gds-verify-tools-platform-deployer
-          region_name: eu-west-2
-          regexp: proxy-node-pipeline-lock/(.*).lock
-          initial_path: 0.lock
-          initial_content_text: |
-            {
-              "is_locked": false
-            }
-
     task_toolbox: &task_toolbox
       type: docker-image
       source:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
 
+    slack_defaults: &slack_defaults
+      channel: "#verify-2ndline"
+      silent: true
+      icon_emoji: ':lock:'
+
+    run: &create-lock-file
+      path: ruby
+      args:
+        - -e
+        - |
+          require 'json'
+
+          content = {
+            is_locked: ENV['IS_LOCKED'] == 'true',
+            force: ENV['FORCE'] == 'true',
+          }
+
+          puts "Lock file content is now: #{content.to_json}"
+
+          File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
+
+    resources:
+      -
+      - name: verify-slack
+        type: slack-notification
+        source:
+          url: ((verify-2nd-line-slack-webhook.url))
+
+      - name: production-lock
+        type: s3
+        source:
+          bucket: ((production-lock.S3BucketName))
+          region_name: ((production-lock.S3BucketRegion))
+          access_key_id: ((pipeline.AccessKeyID))
+          secret_access_key: ((pipeline.SecretAccessKey))
+          session_token: ((pipeline.SessionToken))
+          regexp: lock/(.*).lock
+          initial_path: 0.lock
+          initial_content_text: |
+            {
+              "is_locked": false
+            }
+
     jobs:
 
-
-    - name: lock-proxy-node-pipeline
+    - name: lock-prod-deploy
       serial: true
       plan:
         - do: &lock-proxy-node-pipeline
@@ -62,33 +75,19 @@ spec:
                   tag: 2.6.1
               outputs:
                 - name: lock-dir
-              run:
-                path: ruby
-                args:
-                  - -e
-                  - |
-                    require 'json'
-
-                    content = {
-                      is_locked: true,
-                      reason: "The Killswitch was pulled at #{Time.now}"
-                    }
-
-                    File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
-
-                    puts 'Writing to lock file the following lock:'
-                    pp content
-          - put: proxy-node-pipeline-lock
+              params:
+                FORCE: 'false'
+                IS_LOCKED: 'true'
+              run: *create-lock-file
+          - put: production-lock
             params:
               file: lock-dir/*.lock
-          - put: verify-slack
-            params:
-              channel: "#verify-2ndline"
-              text: "The proxy-node prod :skull: killswitch :skull: has been pulled and the prod deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
-              silent: true
-              icon_emoji: ':lock:'
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node Production deploy pipeline has been locked"
 
-    - name: unlock-proxy-node-pipeline
+    - name: unlock-prod-deploy
       serial: true
       plan:
         - do:
@@ -104,32 +103,18 @@ spec:
                   - name: lock-dir
                 params:
                   FORCE: 'false'
-                run: &run-create-lockfile
-                  path: ruby
-                  args:
-                    - -e
-                    - |
-                      require 'json'
-
-                      content = {
-                        is_locked: false,
-                        force: ENV['FORCE'] == 'true',
-                      }
-
-                      puts "Lock file content is now: #{content.to_json}"
-
-                      File.write("lock-dir/#{Time.now.to_i}.lock", content.to_json)
-            - put: proxy-node-pipeline-lock
+                  IS_LOCKED: 'false'
+                run: *create-lock-file
+            - put: production-lock
               params:
                 file: lock-dir/*.lock
         - put: verify-slack
           params:
-            channel: "#verify-2ndline"
-            text: "The proxy-node deploy pipeline has been unlocked"
-            silent: true
+            << : *slack_defaults
+            text: "The Proxy-Node Production deploy pipeline has been unlocked"
             icon_emoji: ':unlock:'
 
-    - name: force-unlock-proxy-node-pipeline
+    - name: force-unlock-proxy-deploy
       serial: true
       plan:
         - task: create-force-lockfile
@@ -144,18 +129,18 @@ spec:
               - name: lock-dir
             params:
               FORCE: 'true'
-            run: *run-create-lockfile
-        - put: proxy-node-pipeline-lock
+              IS_LOCKED: 'false'
+            run: *create-lock-file
+        - put: production-lock
           params:
             file: lock-dir/*.lock
         - put: verify-slack
           params:
-            channel: "#verify-2ndline"
-            text: "The proxy-node prod deploy pipeline has been FORCE unlocked"
-            silent: true
+            << : *slack_defaults
+            text: "The Proxy-Node Production deploy pipeline has been FORCE unlocked"
             icon_emoji: ':vader:'
 
-    - name: kill
+    - name: kill-and-lock-prod
       plan:
         - task: delete-resources
           timeout: 10m
@@ -180,3 +165,7 @@ spec:
 
                   kubectl -n "${NAMESPACE}" delete virtualservices,deployments --all
         - do: *lock-proxy-node-pipeline
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node Production :skull: killswitch :skull: has been pulled, which means the Production instance has been deleted and the Production deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
