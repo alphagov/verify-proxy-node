@@ -267,6 +267,7 @@ spec:
               args:
                 - -e
                 - |
+                  # encoding: utf-8
                   require 'json'
                   most_recent_lockfile = JSON.parse(File.read(Dir.glob('lock-dir/*.lock').sort.reverse.first))
                   if most_recent_lockfile["is_locked"] == true
