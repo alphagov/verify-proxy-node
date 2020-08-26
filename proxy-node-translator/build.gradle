@@ -1,3 +1,9 @@
+repositories {
+    // cloudhsm libraries downloaded from AWS
+    flatDir {
+        dirs '/opt/cloudhsm/java'
+    }
+}
 
 dependencies {
     implementation configurations.dropwizard,
@@ -8,7 +14,9 @@ dependencies {
             project(':proxy-node-shared')
 
     if (project.hasProperty('cloudhsm')) {
-        fileTree(include: ['*.jar'], dir: '/opt/cloudhsm/java')
+        implementation name: 'cloudhsm-3.0.0'
+        implementation name: 'log4j-api-2.8'
+        implementation name: 'log4j-core-2.8'
     }
 
     testImplementation configurations.verify_saml_test,
