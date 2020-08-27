@@ -140,7 +140,7 @@ spec:
                   kubectl config set-context deployer --user deployer --cluster self
                   kubectl config use-context deployer
 
-                  kubectl -n "${NAMESPACE}" delete virtualservices,deployments --all
+                  kubectl -n "${NAMESPACE}" delete virtualservices,deployments,gateways -l app.kubernetes.io/instance=production
         - do: *lock-proxy-node-pipeline
         - put: verify-slack
           params:
