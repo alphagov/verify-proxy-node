@@ -110,6 +110,7 @@ subprojects {
                 substitute module("commons-codec:commons-codec") because "https://snyk.io/vuln/SNYK-JAVA-COMMONSCODEC-561518" with module("commons-codec:commons-codec:1.13")
                 substitute module("io.netty:netty-codec") because "https://snyk.io/vuln/SNYK-JAVA-IONETTY-564897" with module("io.netty:netty-codec:4.1.48.Final")
                 substitute module("org.cryptacular:cryptacular") because "https://snyk.io/vuln/SNYK-JAVA-ORGCRYPTACULAR-543303" with module("org.cryptacular:cryptacular:1.2.4")
+                substitute module("org.glassfish.jersey.media:jersey-media-jaxb") because "https://snyk.io/vuln/SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972" with module("org.glassfish.jersey.media:jersey-media-jaxb:2.31")
                 exclude group: "commons-beanutils", module: "commons-beanutils"
             }
         }
