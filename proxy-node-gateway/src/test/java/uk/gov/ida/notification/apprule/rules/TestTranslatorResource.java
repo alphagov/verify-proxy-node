@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.apprule.rules;
 
-import org.glassfish.jersey.internal.util.Base64;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
 import uk.gov.ida.notification.shared.Urls;
@@ -20,7 +20,7 @@ import static uk.gov.ida.notification.apprule.rules.TestTranslatorClientErrorRes
 @Produces(MediaType.APPLICATION_JSON)
 public class TestTranslatorResource {
 
-    public static final String SAML_SUCCESS_BLOB = Base64.encodeAsString("encoded-saml-success-message");
+    public static final String SAML_SUCCESS_BLOB = Base64.encodeToString("encoded-saml-success-message");
 
     private final List<HubResponseTranslatorRequest> translatorArgs;
 

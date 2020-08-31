@@ -50,7 +50,7 @@ public class EidasSamlParserAppRuleTestBase extends AbstractSamlAppRuleTestBase 
                 ConfigOverride.config("replayChecker.redisUrl", "")
         ) {
             @Override
-            protected void before() {
+            protected void before() throws Exception {
                 super.before();
             }
         };

@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.translator.resources;
 
-import org.glassfish.jersey.internal.util.Base64;
+import uk.gov.ida.Base64;
 import uk.gov.ida.eidas.logging.EidasAuthnResponseAttributesHashLogger;
 import uk.gov.ida.notification.contracts.HubResponseTranslatorRequest;
 import uk.gov.ida.notification.contracts.SamlFailureResponseGenerationRequest;
@@ -56,7 +56,7 @@ public class HubResponseTranslatorResource {
 
         logSamlResponse(eidasResponse);
 
-        final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(eidasResponse));
+        final String samlMessage = Base64.encodeToString(MARSHALLER.transformToString(eidasResponse));
 
         return Response.ok().entity(samlMessage).build();
     }
@@ -84,7 +84,7 @@ public class HubResponseTranslatorResource {
 
         logSamlResponse(failureEidasResponse);
 
-        final String samlMessage = Base64.encodeAsString(MARSHALLER.transformToString(failureEidasResponse));
+        final String samlMessage = Base64.encodeToString(MARSHALLER.transformToString(failureEidasResponse));
 
         return Response.ok().entity(samlMessage).build();
     }

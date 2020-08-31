@@ -1,8 +1,8 @@
 package uk.gov.ida.notification.apprule.base;
 
 import com.github.fppt.jedismock.RedisServer;
-import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.saml.saml2.core.AuthnRequest;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.GatewayAppRule;
 import uk.gov.ida.notification.helpers.EidasAuthnRequestBuilder;
@@ -29,19 +29,19 @@ public class GatewayAppRuleTestBase extends AbstractSamlAppRuleTestBase {
     }
 
     protected Response postEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule, boolean followRedirects) throws URISyntaxException {
-        String encodedRequest = Base64.encodeAsString(SAML_OBJECT_MARSHALLER.transformToString(eidasAuthnRequest));
+        String encodedRequest = Base64.encodeToString(SAML_OBJECT_MARSHALLER.transformToString(eidasAuthnRequest));
         Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest).param("RelayState", "relay-state");
         return proxyNodeAppRule.target("/SAML2/SSO/POST", followRedirects).request().post(Entity.form(postForm));
     }
 
     protected Response postInvalidEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule, boolean followRedirects) throws URISyntaxException {
-        String encodedRequest = "not-a-base64-xml-opening-tag" + Base64.encodeAsString(SAML_OBJECT_MARSHALLER.transformToString(eidasAuthnRequest));
+        String encodedRequest = "not-a-base64-xml-opening-tag" + Base64.encodeToString(SAML_OBJECT_MARSHALLER.transformToString(eidasAuthnRequest));
         Form postForm = new Form().param(SamlFormMessageType.SAML_REQUEST, encodedRequest).param("RelayState", "relay-state");
         return proxyNodeAppRule.target("/SAML2/SSO/POST", followRedirects).request().post(Entity.form(postForm));
     }
 
     protected Response redirectEidasAuthnRequest(AuthnRequest eidasAuthnRequest, GatewayAppRule proxyNodeAppRule) throws URISyntaxException {
-        String encodedRequest = Base64.encodeAsString(SAML_OBJECT_MARSHALLER.transformToString(eidasAuthnRequest));
+        String encodedRequest = Base64.encodeToString(SAML_OBJECT_MARSHALLER.transformToString(eidasAuthnRequest));
         return proxyNodeAppRule.target("/SAML2/SSO/Redirect")
                 .queryParam(SamlFormMessageType.SAML_REQUEST, encodedRequest)
                 .queryParam("RelayState", "relay-state")

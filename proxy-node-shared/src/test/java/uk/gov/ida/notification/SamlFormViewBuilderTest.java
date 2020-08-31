@@ -1,9 +1,9 @@
 package uk.gov.ida.notification;
 
-import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Test;
 import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.Response;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.saml.SamlBuilder;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
 import uk.gov.ida.notification.saml.SamlObjectMarshaller;
@@ -20,7 +20,7 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
     public void shouldGenerateSAMLRequestForm() {
         AuthnRequest authnRequest = SamlBuilder.build(AuthnRequest.DEFAULT_ELEMENT_NAME);
 
-        String encodedAuthnRequest = Base64.encodeAsString(MARSHALLER.transformToString(authnRequest));
+        String encodedAuthnRequest = Base64.encodeToString(MARSHALLER.transformToString(authnRequest));
 
         SamlFormView view = SAML_FORM_VIEW_BUILDER.buildRequest("url", authnRequest, "relay");
 
@@ -32,7 +32,7 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
     @Test
     public void shouldGenerateSAMLRequestFormFromEncodedSAMLMessage() {
-        String encodedAuthnRequest = Base64.encodeAsString("a saml blob");
+        String encodedAuthnRequest = Base64.encodeToString("a saml blob");
         SamlFormView view = SAML_FORM_VIEW_BUILDER.buildRequest("url", encodedAuthnRequest, "relay");
         assertThat(SamlFormMessageType.SAML_REQUEST).isEqualTo(view.getSamlMessageType());
         assertThat(encodedAuthnRequest).isEqualTo(view.getEncodedSamlMessage());
@@ -44,7 +44,7 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
     public void shouldGenerateSAMLResponseForm() {
         Response response = SamlBuilder.build(Response.DEFAULT_ELEMENT_NAME);
 
-        String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(response));
+        String encodedResponse = Base64.encodeToString(MARSHALLER.transformToString(response));
 
         SamlFormView view = SAML_FORM_VIEW_BUILDER.buildResponse("url", response, "relay");
 
@@ -56,7 +56,7 @@ public class SamlFormViewBuilderTest extends SamlInitializedTest {
 
     @Test
     public void shouldGenerateSAMLResponseFormFromEncodedSAMLMessage() {
-        String encodedResponse = Base64.encodeAsString("a response saml blob");
+        String encodedResponse = Base64.encodeToString("a response saml blob");
 
         SamlFormView view = SAML_FORM_VIEW_BUILDER.buildResponse("url", encodedResponse, "relay");
 

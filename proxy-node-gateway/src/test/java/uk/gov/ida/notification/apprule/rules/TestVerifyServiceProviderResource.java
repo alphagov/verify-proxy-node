@@ -1,6 +1,6 @@
 package uk.gov.ida.notification.apprule.rules;
 
-import org.glassfish.jersey.internal.util.Base64;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestGenerationBody;
 import uk.gov.ida.notification.contracts.verifyserviceprovider.AuthnRequestResponse;
 import uk.gov.ida.notification.shared.Urls;
@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
 public class TestVerifyServiceProviderResource {
 
     public static final String REQUEST_ID_HUB = "a hub request id";
-    public static final String ENCODED_SAML_BLOB = Base64.encodeAsString("Encoded SAML blob!");
+    public static final String ENCODED_SAML_BLOB = Base64.encodeToString("Encoded SAML blob!");
 
     @POST
     @Valid

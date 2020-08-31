@@ -1,7 +1,6 @@
 package uk.gov.ida.notification.eidassaml;
 
 import io.dropwizard.testing.junit.ResourceTestRule;
-import org.glassfish.jersey.internal.util.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.BeforeClass;
@@ -15,6 +14,7 @@ import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.NameIDPolicy;
 import org.slf4j.MDC;
 import se.litsec.eidas.opensaml.common.EidasLoaEnum;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.contracts.EidasSamlParserRequest;
 import uk.gov.ida.notification.contracts.EidasSamlParserResponse;
 import uk.gov.ida.notification.contracts.metadata.AssertionConsumerService;
@@ -196,7 +196,7 @@ public class EidasSamlResourceTest {
     }
 
     private EidasSamlParserResponse postEidasAuthnRequest(AuthnRequest eidasAuthnRequest) {
-        final EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeAsString(new SamlObjectMarshaller().transformToString(eidasAuthnRequest)));
+        final EidasSamlParserRequest request = new EidasSamlParserRequest(Base64.encodeToString(new SamlObjectMarshaller().transformToString(eidasAuthnRequest)));
         return resources.target("/eidasAuthnRequest")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE))

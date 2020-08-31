@@ -3,7 +3,7 @@ package uk.gov.ida.notification.apprule.base;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardClientRule;
 import keystore.KeyStoreResource;
-import org.glassfish.jersey.internal.util.Base64;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.apprule.rules.AbstractSamlAppRuleTestBase;
 import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.saml.SamlFormMessageType;
@@ -53,12 +53,12 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
     }
 
     protected String postEidasResponse(AppRule<StubConnectorConfiguration> stubConnectorAppRule, String samlForm) throws URISyntaxException {
-        final String encodedResponse = Base64.encodeAsString(samlForm);
+        final String encodedResponse = Base64.encodeToString(samlForm);
         return postResponse(stubConnectorAppRule, encodedResponse);
     }
 
     protected String postMalformedEidasResponse(AppRule<StubConnectorConfiguration> stubConnectorAppRule, String samlForm) throws URISyntaxException {
-        final String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeAsString(samlForm);
+        final String encodedResponse = "not-a-base64-encoded-xml-start-tag" + Base64.encodeToString(samlForm);
         return postResponse(stubConnectorAppRule, encodedResponse);
     }
 
@@ -97,7 +97,7 @@ public class StubConnectorAppRuleTestBase extends AbstractSamlAppRuleTestBase {
                 ConfigOverride.config("connectorNodeTemplateConfig.wantSignedAssertions", "true")
         ) {
             @Override
-            protected void before() {
+            protected void before() throws Exception {
                 waitForMetadata(proxyNodeMetadataUrl);
                 super.before();
             }

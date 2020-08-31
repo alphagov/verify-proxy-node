@@ -1,8 +1,7 @@
 package uk.gov.ida.notification.helpers;
 
-import org.bouncycastle.util.Strings;
-import org.glassfish.jersey.internal.util.Base64;
 import org.opensaml.security.credential.BasicCredential;
+import uk.gov.ida.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +42,7 @@ public class BasicCredentialBuilder {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(publicCert.getBytes(StandardCharsets.UTF_8));
         X509Certificate x509certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(byteArrayInputStream);
         PublicKey publicKey = x509certificate.getPublicKey();
-        PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(Strings.toByteArray(privateSigningKey))));
+        PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decodeToByteArray(privateSigningKey)));
         return new BasicCredential(publicKey, privateKey);
     }
 

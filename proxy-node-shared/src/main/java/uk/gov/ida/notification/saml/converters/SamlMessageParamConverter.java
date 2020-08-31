@@ -2,7 +2,7 @@ package uk.gov.ida.notification.saml.converters;
 
 import com.google.common.base.Strings;
 import io.dropwizard.jersey.errors.ErrorMessage;
-import org.glassfish.jersey.internal.util.Base64;
+import uk.gov.ida.Base64;
 import uk.gov.ida.notification.saml.SamlParser;
 
 import javax.ws.rs.core.Response;
@@ -21,7 +21,7 @@ class SamlMessageParamConverter<T> implements ParamConverter<T> {
             return null;
         }
 
-        String decodedSaml = Base64.decodeAsString(value);
+        String decodedSaml = Base64.decodeToString(value);
         T parsedSaml = samlParser.parseSamlString(decodedSaml);
         return parsedSaml;
     }

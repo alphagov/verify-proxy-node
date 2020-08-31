@@ -1,7 +1,7 @@
 package uk.gov.ida.notification.validations;
 
 import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.internal.util.Base64;
+import uk.gov.ida.Base64;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -18,7 +18,7 @@ public class Base64NotBlankValidator implements ConstraintValidator<ValidBase64X
         if (StringUtils.isBlank(potentialBase64)) { return true; }
 
         try {
-            String decoded = Base64.decodeAsString(potentialBase64);
+            String decoded = Base64.decodeToString(potentialBase64);
             return StringUtils.isNotBlank(decoded);
 
         } catch (RuntimeException e) {

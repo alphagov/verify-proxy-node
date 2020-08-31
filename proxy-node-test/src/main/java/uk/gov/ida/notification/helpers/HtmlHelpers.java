@@ -5,12 +5,12 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HTMLParser;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import org.glassfish.jersey.internal.util.Base64;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.w3c.dom.Document;
+import uk.gov.ida.Base64;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -30,7 +30,7 @@ public class HtmlHelpers {
             HtmlPage page = HTMLParser.parseHtml(webResponse, client.getCurrentWindow());
             HtmlForm samlForm = page.getForms().get(0);
             String encodedEidasResponse = samlForm.getInputByName(inputName).getValueAttribute();
-            return Base64.decodeAsString(encodedEidasResponse);
+            return Base64.decodeToString(encodedEidasResponse);
         }
     }
 

@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.apache.xml.security.signature.XMLSignature;
-import org.glassfish.jersey.internal.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +21,7 @@ import org.opensaml.security.credential.Credential;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.slf4j.LoggerFactory;
+import uk.gov.ida.Base64;
 import uk.gov.ida.common.shared.security.X509CertificateFactory;
 import uk.gov.ida.notification.apprule.rules.AppRule;
 import uk.gov.ida.notification.configuration.CredentialConfiguration;
@@ -233,7 +233,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 .target(Urls.TranslatorUrls.TRANSLATOR_ROOT + Urls.TranslatorUrls.GENERATE_FAILURE_RESPONSE_PATH)
                 .request()
                 .post(Entity.json(failureResponseGenerationRequest));
-        Response response = new SamlParser().parseSamlString(Base64.decodeAsString(failureResponse.readEntity(String.class)));
+        Response response = new SamlParser().parseSamlString(Base64.decodeToString(failureResponse.readEntity(String.class)));
         assertThat(response.getStatus().getStatusCode().getValue()).isEqualTo("urn:oasis:names:tc:SAML:2.0:status:Requester");
     }
 
@@ -260,11 +260,11 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     private Response extractEidasResponseFromTranslator(AppRule<TranslatorConfiguration> translatorAppRule, Response hubResponse, URI eidasIssuerEntityId) throws Exception {
         String translatorResponse = postHubResponseToTranslator(translatorAppRule, hubResponse, eidasIssuerEntityId).readEntity(String.class);
-        return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
+        return new SamlParser().parseSamlString(Base64.decodeToString(translatorResponse));
     }
 
     private javax.ws.rs.core.Response postMalformedHubResponseToTranslator(Response hubResponse) throws Exception {
-        String encodedResponse = Base64.encodeAsString("");
+        String encodedResponse = Base64.encodeToString("");
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
             new HubResponseTranslatorRequest(
@@ -283,7 +283,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     private javax.ws.rs.core.Response postHubResponseToTranslator(AppRule<TranslatorConfiguration> translatorAppRule,
                                                                   Response hubResponse,
                                                                   URI eidasIssuerEntityId) throws Exception {
-        String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
+        String encodedResponse = Base64.encodeToString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
                 new HubResponseTranslatorRequest(
