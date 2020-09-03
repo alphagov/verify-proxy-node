@@ -1,5 +1,6 @@
 package uk.gov.ida.eidas.metatron;
 
+import engineering.reliability.gds.metrics.bundle.PrometheusBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -62,6 +63,7 @@ public class MetatronApplication extends Application<MetatronConfiguration> {
 
         bootstrap.addBundle(new LogstashBundle());
         bootstrap.getObjectMapper().registerModule(new KeyStoreModule());
+        bootstrap.addBundle(new PrometheusBundle());
     }
 
     @Override
