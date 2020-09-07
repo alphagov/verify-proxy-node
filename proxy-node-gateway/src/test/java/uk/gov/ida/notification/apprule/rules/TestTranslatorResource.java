@@ -25,6 +25,12 @@ public class TestTranslatorResource {
     private final List<HubResponseTranslatorRequest> translatorArgs;
 
     public TestTranslatorResource() {
+        System.out.println("TestTranslatorResource");
+        System.out.println("TestTranslatorResource");
+        System.out.println("TestTranslatorResource");
+        System.out.println("TestTranslatorResource");
+        System.out.println("TestTranslatorResource");
+        System.out.println("TestTranslatorResource");
         this.translatorArgs = new ArrayList<>();
     }
 

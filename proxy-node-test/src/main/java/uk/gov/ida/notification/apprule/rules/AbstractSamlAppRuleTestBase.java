@@ -2,6 +2,7 @@ package uk.gov.ida.notification.apprule.rules;
 
 import com.google.common.base.Stopwatch;
 import io.dropwizard.testing.junit.DropwizardClientRule;
+import io.dropwizard.testing.junit5.DropwizardClientExtension;
 import keystore.KeyStoreResource;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
@@ -39,6 +40,16 @@ public abstract class AbstractSamlAppRuleTestBase {
     protected static DropwizardClientRule createInitialisedClientRule(Object resource) {
         try {
             return new DropwizardClientRule(resource) {{
+                this.before();
+            }};
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    protected static DropwizardClientExtension createInitialisedClientExtension(Object... resources) {
+        try {
+            return new DropwizardClientExtension(resources) {{
                 this.before();
             }};
         } catch (Throwable throwable) {

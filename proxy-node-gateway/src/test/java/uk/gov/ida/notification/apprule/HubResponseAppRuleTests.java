@@ -260,7 +260,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
     }
 
     private NewCookie postSAMLRequest(GatewayAppRule appRule) throws Exception {
-        return postEidasAuthnRequest(buildAuthnRequest(), appRule).getCookies().get("gateway-session");
+        return postEidasAuthnRequest(buildAuthnRequest(), appRule.client(), appRule.getLocalPort()).getCookies().get("gateway-session");
     }
 
     private void assertGoodSamlErrorResponse(Response response) throws XPathExpressionException, ParserConfigurationException {

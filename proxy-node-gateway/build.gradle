@@ -14,6 +14,10 @@ dependencies {
         }
 }
 
+test {
+    useJUnitPlatform()
+}
+
 group = 'uk.gov.ida.notification.gateway'
 version = "${System.env.BUILD_NUMBER ?: 'SNAPSHOT'}"
 
