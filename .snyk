@@ -9,5 +9,5 @@ ignore:
   SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
     - '*':
         reason: Not used directly by us; Fix not available
-        expires: 2020-09-07
+        expires: 2020-10-07
 patch: {}
