@@ -341,6 +341,7 @@ spec:
               RELEASE_NAMESPACE: ((namespace-deployer.namespace))
               RELEASE_NAME: production
               CLOUDHSM_IP: ((cluster.cloudHsmIp))
+              ERROR_PAGE_URL: https://www.signin.service.gov.uk/proxy-node-error
             run:
               path: /bin/bash
               args:
@@ -362,6 +363,7 @@ spec:
                     --set "global.qwacCertificate.enabled=true" \
                     --set "stubConnector.enabled=false" \
                     --set "vsp.secretName=vsp-production" \
+                    --set "gateway.errorPageURL=${ERROR_PAGE_URL}" \
                     --output-dir "./manifests/" \
                     ./release/*.tgz
 
