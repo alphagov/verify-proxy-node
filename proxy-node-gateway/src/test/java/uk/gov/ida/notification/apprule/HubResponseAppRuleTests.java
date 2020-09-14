@@ -156,7 +156,7 @@ public class HubResponseAppRuleTests extends GatewayAppRuleTestBase {
         assertThat(response.getStatus()).isEqualTo(200);
 
         final List<HubResponseTranslatorRequest> translatorArgs = TEST_TRANSLATOR_RESOURCE.getTranslatorArgs();
-        assertThat(translatorArgs.get(0).getEidasIssuerEntityId()).isEqualTo(URI.create(SAMPLE_ENTITY_ID));
+        assertThat(translatorArgs.get(0).getConnectorEntityId()).isEqualTo(URI.create(SAMPLE_ENTITY_ID));
         assertThat(translatorArgs.size()).isOne();
     }
 
