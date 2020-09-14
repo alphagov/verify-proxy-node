@@ -14,7 +14,7 @@ public class HubResponseContainer {
     private final String pid;
     private final String eidasRequestId;
     private final URI destinationURL;
-    private final URI issuer;
+    private final URI connectorEntityId;
     private final Attributes attributes;
     private final VspScenario vspScenario;
     private final VspLevelOfAssurance levelOfAssurance;
@@ -27,7 +27,7 @@ public class HubResponseContainer {
         this.pid = translatedHubResponse.getPid().orElse(null);
         this.eidasRequestId = hubResponseTranslatorRequest.getEidasRequestId();
         this.destinationURL = hubResponseTranslatorRequest.getDestinationUrl();
-        this.issuer = hubResponseTranslatorRequest.getEidasIssuerEntityId();
+        this.connectorEntityId = hubResponseTranslatorRequest.getConnectorEntityId();
         this.transientPidRequested = hubResponseTranslatorRequest.isTransientPidRequested();
         this.attributes = translatedHubResponse.getAttributes().orElse(null);
         this.vspScenario = translatedHubResponse.getScenario();
@@ -46,8 +46,8 @@ public class HubResponseContainer {
         return destinationURL.toString();
     }
 
-    URI getIssuer() {
-        return issuer;
+    URI getConnectorEntityId() {
+        return connectorEntityId;
     }
 
     public boolean isTransientPidRequested() {

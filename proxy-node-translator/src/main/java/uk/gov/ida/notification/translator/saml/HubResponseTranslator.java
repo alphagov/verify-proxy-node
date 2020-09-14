@@ -19,6 +19,7 @@ import uk.gov.ida.notification.saml.EidasAttributeBuilder;
 import uk.gov.ida.notification.saml.EidasResponseBuilder;
 import uk.gov.ida.saml.core.domain.NonMatchingVerifiableAttribute;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,11 +35,14 @@ public class HubResponseTranslator {
     private static final String TRANSIENT_PREFIX = "_tr";
     private static final SecureRandomIdentifierGenerationStrategy ID_GENERATOR_STRATEGY = new SecureRandomIdentifierGenerationStrategy();
     private Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier;
+    private final URI issuerId;
 
 
     public HubResponseTranslator(
-            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier) {
+            Supplier<EidasResponseBuilder> eidasResponseBuilderSupplier,
+            URI issuerId) {
         this.eidasResponseBuilderSupplier = eidasResponseBuilderSupplier;
+        this.issuerId = issuerId;
     }
 
     Response getTranslatedHubResponse(HubResponseContainer hubResponseContainer, CountryMetadataResponse countryMetadataResponse) {
@@ -82,7 +86,7 @@ public class HubResponseTranslator {
                 .collect(Collectors.toList());
 
         return eidasResponseBuilderSupplier.get()
-                .withIssuer(hubResponseContainer.getIssuer().toString())
+                .withIssuer(issuerId.toString())
                 .withStatus(getMappedStatusCode(hubResponseContainer.getVspScenario()))
                 .withInResponseTo(hubResponseContainer.getEidasRequestId())
                 .withIssueInstant(now)
