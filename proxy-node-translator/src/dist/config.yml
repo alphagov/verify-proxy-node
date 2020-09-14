@@ -35,3 +35,5 @@ credentialConfiguration:
     key: ${TRANSLATOR_SIGNING_KEY}
 
 metatronUri: ${METATRON_URL}
+
+proxyNodeEntityId: ${PROXY_NODE_ENTITY_ID}

@@ -25,6 +25,10 @@ public class TranslatorConfiguration extends Configuration implements Prometheus
     @JsonProperty
     private URI metatronUri;
 
+    @NotNull
+    @JsonProperty
+    private URI proxyNodeEntityId;
+
     public VerifyServiceProviderConfiguration getVspConfiguration() {
         return vspConfiguration;
     }
@@ -40,5 +44,9 @@ public class TranslatorConfiguration extends Configuration implements Prometheus
 
     public URI getMetatronUri() {
         return metatronUri;
+    }
+
+    public URI getProxyNodeEntityId() {
+        return proxyNodeEntityId;
     }
 }
