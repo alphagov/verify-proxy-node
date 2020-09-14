@@ -73,6 +73,7 @@ public class HubResponseTranslatorTest {
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(identityVerifiedResponse);
+        TranslatedHubResponseTestAssertions.checkResponseIssuer(identityVerifiedResponse);
     }
 
     @Test
