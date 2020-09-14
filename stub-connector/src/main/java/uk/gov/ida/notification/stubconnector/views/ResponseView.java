@@ -10,14 +10,16 @@ public class ResponseView extends View {
     private final String loa;
     private final String validity;
     private final String eidasRequestId;
+    private final String issuerId;
     private String samlMessage;
 
-    public ResponseView(List<Entry<String, String>> attributes, String loa, String validity, String eidasRequestId, String samlMessage) {
+    public ResponseView(List<Entry<String, String>> attributes, String loa, String validity, String eidasRequestId, String issuerId, String samlMessage) {
         super("response.mustache");
         this.attributes = attributes;
         this.loa = loa;
         this.validity = validity;
         this.eidasRequestId = eidasRequestId;
+        this.issuerId = issuerId;
         this.samlMessage = samlMessage;
     }
 

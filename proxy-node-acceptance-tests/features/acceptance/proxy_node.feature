@@ -5,12 +5,14 @@ Feature: Proxy Node acceptance tests
     And   they progress through Verify
     And   they login to Stub IDP
     Then  they should arrive at the Stub Connector success page
+    And  they should have a response issued by the Proxy Node
 
   Scenario: Proxy Node happy path - LOA Substantial
     Given the Proxy Node is sent an LOA 'Substantial' request from the Stub Connector
     And   they progress through Verify
     And   they login to Stub IDP
     Then  they should arrive at the Stub Connector success page
+    And  they should have a response issued by the Proxy Node
 
   Scenario: Proxy Node happy path - Transient PID requested
     Given the proxy node is sent a transient PID request
@@ -18,6 +20,7 @@ Feature: Proxy Node acceptance tests
     And   they login to Stub IDP
     Then  they should arrive at the Stub Connector success page
     And   they should have a transient PID
+    And  they should have a response issued by the Proxy Node
 
   Scenario: Proxy Node happy path - LOA High
     Given the Proxy Node is sent an LOA 'High' request from the Stub Connector

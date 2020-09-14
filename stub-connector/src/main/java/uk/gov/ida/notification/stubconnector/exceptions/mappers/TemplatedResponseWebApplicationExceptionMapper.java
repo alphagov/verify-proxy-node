@@ -26,7 +26,7 @@ public class TemplatedResponseWebApplicationExceptionMapper implements Exception
 
         attributesByName.add(new AbstractMap.SimpleEntry<String,String>("response", exception.getMessage()));
 
-        ResponseView rv = new ResponseView(attributesByName, null, ValidationResult.INVALID.toString(), null, null);
+        ResponseView rv = new ResponseView(attributesByName, null, ValidationResult.INVALID.toString(), null, null, null);
         Response r = Response.status(400).entity(rv).build();
         return r;
     }
