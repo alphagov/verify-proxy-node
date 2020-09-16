@@ -19,6 +19,7 @@ import static se.litsec.eidas.opensaml.ext.attributes.AttributeConstants.EIDAS_D
 import static se.litsec.eidas.opensaml.ext.attributes.AttributeConstants.EIDAS_DATE_OF_BIRTH_ATTRIBUTE_NAME;
 import static se.litsec.eidas.opensaml.ext.attributes.AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_FRIENDLY_NAME;
 import static se.litsec.eidas.opensaml.ext.attributes.AttributeConstants.EIDAS_PERSON_IDENTIFIER_ATTRIBUTE_NAME;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.PROXY_NODE_ENTITY_ID;
 
 public class TranslatedHubResponseTestAssertions {
 
@@ -86,5 +87,9 @@ public class TranslatedHubResponseTestAssertions {
 
     private static String getAttributeValue(Attribute attribute) {
         return AttributeUtils.getAttributeStringValue(attribute);
+    }
+
+    public static void checkResponseIssuer(Response response) {
+        assertThat(response.getIssuer().getValue()).isEqualTo(PROXY_NODE_ENTITY_ID);
     }
 }

@@ -26,6 +26,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.PROXY_NODE_ENTITY_ID;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createDateTime;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.AttributesBuilder.createNonMatchingTransliterableAttribute;
 import static uk.gov.ida.notification.contracts.verifyserviceprovider.TranslatedHubResponseBuilder.buildTranslatedHubResponseAuthenticationFailed;
@@ -45,7 +46,7 @@ public class HubResponseTranslatorTest {
         }
     }
 
-    private static final HubResponseTranslator TRANSLATOR = new HubResponseTranslator(EidasResponseBuilder::instance);
+    private static final HubResponseTranslator TRANSLATOR = new HubResponseTranslator(EidasResponseBuilder::instance, URI.create(PROXY_NODE_ENTITY_ID));
 
     private AttributesBuilder attributesBuilder;
     private CountryMetadataResponse countryMetaDataResponse;
@@ -72,6 +73,7 @@ public class HubResponseTranslatorTest {
         TranslatedHubResponseTestAssertions.checkAssertionStatementsValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkAllAttributesValid(identityVerifiedResponse);
         TranslatedHubResponseTestAssertions.checkResponseStatusCodeValidForIdentityVerifiedStatus(identityVerifiedResponse);
+        TranslatedHubResponseTestAssertions.checkResponseIssuer(identityVerifiedResponse);
     }
 
     @Test

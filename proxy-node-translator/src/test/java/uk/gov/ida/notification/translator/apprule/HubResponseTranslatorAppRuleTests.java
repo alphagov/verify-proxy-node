@@ -55,6 +55,10 @@ import java.util.Map;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.CONNECTOR_ENTITY_DESTINATION;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.CONNECTOR_ENTITY_ID;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.CONNECTOR_ENTITY_ID_2;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.CONNECTOR_ENTITY_ID_2_DESTINATION;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.HUB_TEST_PRIVATE_SIGNING_KEY;
@@ -69,8 +73,6 @@ import static uk.gov.ida.saml.core.test.TestCertificateStrings.STUB_IDP_PUBLIC_P
 public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase {
 
     private static final String PROXY_NODE_ENTITY_ID = "http://proxy-node.uk";
-    private static final String EIDAS_TEST_CONNECTOR_DESTINATION = "http://proxy-node/SAML2/SSO/Response";
-    private static final String ALTERNATIVE_EIDAS_TEST_CONNECTOR_DESTINATION = "http://alternative-proxy-node/SAML2/SSO/Response";
 
     private static final SamlObjectMarshaller MARSHALLER = new SamlObjectMarshaller();
     private static final X509CertificateFactory X_509_CERTIFICATE_FACTORY = new X509CertificateFactory();
@@ -140,7 +142,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         CredentialFactorySignatureValidator signatureValidator = new CredentialFactorySignatureValidator(new SigningCredentialFactory(
                 entityId -> Collections.singletonList(signingCredential.getPublicKey())));
 
-        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(EIDAS_TEST_CONNECTOR_DESTINATION));
+        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(CONNECTOR_ENTITY_ID), URI.create(CONNECTOR_ENTITY_DESTINATION));
 
         Signature signature = eidasResponse.getSignature();
 
@@ -157,7 +159,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     @Test
     public void shouldReturnAnEncryptedEidasResponse() throws Exception {
-        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(EIDAS_TEST_CONNECTOR_DESTINATION));
+        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(CONNECTOR_ENTITY_ID), URI.create(CONNECTOR_ENTITY_DESTINATION));
 
         assertThat(eidasResponse.getEncryptedAssertions()).hasSize(1);
         assertThat(eidasResponse.getAssertions()).isEmpty();
@@ -165,7 +167,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     @Test
     public void shouldReturnAnEncryptedEidasResponseForECSigning() throws Exception {
-        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRuleWithECSigning, buildSignedHubResponse(), URI.create(EIDAS_TEST_CONNECTOR_DESTINATION));
+        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRuleWithECSigning, buildSignedHubResponse(), URI.create(CONNECTOR_ENTITY_ID), URI.create(CONNECTOR_ENTITY_DESTINATION));
         assertThat(
                 eidasResponse.getSignature().getSignatureAlgorithm())
                 .isEqualTo(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA384);
@@ -181,7 +183,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     @Test
     public void shouldDecryptAndReadEidasAssertion() throws Exception {
         Response hubResponse = buildSignedHubResponse();
-        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, hubResponse, URI.create(EIDAS_TEST_CONNECTOR_DESTINATION));
+        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, hubResponse, URI.create(CONNECTOR_ENTITY_ID), URI.create(CONNECTOR_ENTITY_DESTINATION));
         Response decryptedEidasResponse = decryptResponse(eidasResponse, eidasDecryptingCredential);
 
         assertThat(hubResponse.getInResponseTo()).isEqualTo(eidasResponse.getInResponseTo());
@@ -193,7 +195,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
     public void eidasResponseShouldContainCorrectAttributes() throws Exception {
         Response decryptedEidasResponse =
                 decryptResponse(
-                        extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(EIDAS_TEST_CONNECTOR_DESTINATION)),
+                        extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(CONNECTOR_ENTITY_ID), URI.create(CONNECTOR_ENTITY_DESTINATION)),
                         eidasDecryptingCredential
                 );
 
@@ -205,7 +207,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         Logger logger = (Logger) LoggerFactory.getLogger(ProxyNodeLogger.class);
         logger.addAppender(appender);
 
-        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(EIDAS_TEST_CONNECTOR_DESTINATION));
+        Response eidasResponse = extractEidasResponseFromTranslator(translatorAppRule, buildSignedHubResponse(), URI.create(CONNECTOR_ENTITY_ID), URI.create(CONNECTOR_ENTITY_DESTINATION));
 
         verify(appender, Mockito.times(4)).doAppend(loggingEventArgumentCaptor.capture());
 
@@ -216,7 +218,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 .map(ILoggingEvent::getMDCPropertyMap)
                 .orElseThrow();
 
-        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(EIDAS_TEST_CONNECTOR_DESTINATION);
+        assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_DESTINATION.name())).isEqualTo(CONNECTOR_ENTITY_DESTINATION);
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_REQUEST_ID.name())).isEqualTo(ResponseBuilder.DEFAULT_REQUEST_ID);
         assertThat(mdcPropertyMap.get(ProxyNodeMDCKey.EIDAS_ISSUER.name())).isEqualTo(eidasResponse.getIssuer().getValue());
 
@@ -239,27 +241,30 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     @Test
     public void shouldRespondWithDifferentEidasIssuerEntityIds() throws Exception {
-        String firstEidasIssuerEntityId =
-                extractEidasResponseFromTranslator(
-                        translatorAppRule,
-                        buildSignedHubResponse(),
-                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION)
-                ).getIssuer().getValue();
+        Response response1 = extractEidasResponseFromTranslator(
+                translatorAppRule,
+                buildSignedHubResponse(),
+                URI.create(CONNECTOR_ENTITY_ID),
+                URI.create(CONNECTOR_ENTITY_DESTINATION)
+        );
 
         buildAssertions();
-        String secondEidasIssuerEntityId =
-                extractEidasResponseFromTranslator(
-                        translatorAppRule,
-                        buildSignedHubResponse(),
-                        URI.create(ALTERNATIVE_EIDAS_TEST_CONNECTOR_DESTINATION)
-                ).getIssuer().getValue();
 
-        assertThat(firstEidasIssuerEntityId).isNotEqualTo(secondEidasIssuerEntityId);
+        Response response2 = extractEidasResponseFromTranslator(
+                translatorAppRule,
+                buildSignedHubResponse(),
+                URI.create(CONNECTOR_ENTITY_ID_2),
+                URI.create(CONNECTOR_ENTITY_ID_2_DESTINATION)
+        );
+
+        assertThat(response1.getIssuer().getValue()).isEqualTo(response2.getIssuer().getValue());
+        assertThat(response1.getDestination()).isEqualTo(CONNECTOR_ENTITY_DESTINATION);
+        assertThat(response2.getDestination()).isEqualTo(CONNECTOR_ENTITY_ID_2_DESTINATION);
     }
 
 
-    private Response extractEidasResponseFromTranslator(AppRule<TranslatorConfiguration> translatorAppRule, Response hubResponse, URI eidasIssuerEntityId) throws Exception {
-        String translatorResponse = postHubResponseToTranslator(translatorAppRule, hubResponse, eidasIssuerEntityId).readEntity(String.class);
+    private Response extractEidasResponseFromTranslator(AppRule<TranslatorConfiguration> translatorAppRule, Response hubResponse, URI eidasIssuerEntityId, URI destination) throws Exception {
+        String translatorResponse = postHubResponseToTranslator(translatorAppRule, hubResponse, eidasIssuerEntityId, destination).readEntity(String.class);
         return new SamlParser().parseSamlString(Base64.decodeAsString(translatorResponse));
     }
 
@@ -272,8 +277,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                 "_request-id_of-20-characters-or-more",
                 ResponseBuilder.DEFAULT_REQUEST_ID,
                 "LEVEL_2",
-                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
-                URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                URI.create(CONNECTOR_ENTITY_DESTINATION),
+                URI.create(CONNECTOR_ENTITY_ID),
                 false
             );
 
@@ -282,7 +287,8 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
 
     private javax.ws.rs.core.Response postHubResponseToTranslator(AppRule<TranslatorConfiguration> translatorAppRule,
                                                                   Response hubResponse,
-                                                                  URI eidasIssuerEntityId) throws Exception {
+                                                                  URI eidasIssuerEntityId,
+                                                                  URI destination) throws Exception {
         String encodedResponse = Base64.encodeAsString(MARSHALLER.transformToString(hubResponse));
 
         HubResponseTranslatorRequest hubResponseTranslatorRequest =
@@ -291,7 +297,7 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
                         "_request-id_of-20-characters-or-more",
                         ResponseBuilder.DEFAULT_REQUEST_ID,
                         "LEVEL_2",
-                        URI.create(EIDAS_TEST_CONNECTOR_DESTINATION),
+                        destination,
                         eidasIssuerEntityId,
                         false
                 );
@@ -315,14 +321,10 @@ public class HubResponseTranslatorAppRuleTests extends TranslatorAppRuleTestBase
         return getHubResponseBuilder().buildSigned(hubSigningCredential);
     }
 
-    private Response buildSignedHubResponse(BasicCredential credential) throws MarshallingException, SignatureException {
-        return getHubResponseBuilder().buildSigned(credential);
-    }
-
     private HubResponseBuilder getHubResponseBuilder() {
         return new HubResponseBuilder()
                 .withIssuer(TestEntityIds.HUB_ENTITY_ID)
-                .withDestination(EIDAS_TEST_CONNECTOR_DESTINATION)
+                .withDestination(CONNECTOR_ENTITY_DESTINATION)
                 .addEncryptedAssertion(authnAssertion)
                 .addEncryptedAssertion(matchingDatasetAssertion);
     }

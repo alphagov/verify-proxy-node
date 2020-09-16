@@ -106,7 +106,7 @@ public class HubResponseResourceTest {
         assertThat("hub_request_id_in_session").isEqualTo(request.getRequestId());
         assertThat(HubResponseResource.LEVEL_OF_ASSURANCE).isEqualTo(request.getLevelOfAssurance());
         assertThat("eidas_request_id_in_session").isEqualTo(request.getEidasRequestId());
-        assertThat(URI.create("http://entityId")).isEqualTo(request.getEidasIssuerEntityId());
+        assertThat(URI.create("http://entityId")).isEqualTo(request.getConnectorEntityId());
 
         assertThat("http://connector.node").isEqualTo(response.getPostUrl());
         assertThat("SAMLResponse").isEqualTo(response.getSamlMessageType());

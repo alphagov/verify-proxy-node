@@ -36,7 +36,7 @@ public class EidasResponseGenerator {
     }
 
     public Response generateFromHubResponse(final HubResponseContainer hubResponseContainer) {
-        final CountryMetadataResponse countryMetadataResponse = metatronProxy.getCountryMetadata(hubResponseContainer.getIssuer().toString());
+        final CountryMetadataResponse countryMetadataResponse = metatronProxy.getCountryMetadata(hubResponseContainer.getConnectorEntityId().toString());
         final Response eidasResponse = hubResponseTranslator.getTranslatedHubResponse(hubResponseContainer, countryMetadataResponse);
         final Response encryptedEidasResponse = encryptAssertions(eidasResponse, countryMetadataResponse.getSamlEncryptionCertX509());
 

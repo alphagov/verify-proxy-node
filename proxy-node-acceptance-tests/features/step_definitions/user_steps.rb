@@ -87,6 +87,10 @@ And('they should have a transient PID') do
   assert_text('GB/EU/_tr_')
 end
 
+And('they should have a response issued by the Proxy Node') do
+  assert_text('Issuer: ' + env('PROXY_NODE_URL') + '/ServiceMetadata')
+end
+
 Then("the user should be presented with a Hub error page indicating IDP could not sign them in") do
   assert_text('Stub Idp Demo One couldn’t sign you in')
   assert_text('You may have selected the wrong company. Check your emails and text messages for confirmation of who verified you.')

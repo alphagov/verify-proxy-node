@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ida.notification.apprule.rules.TestMetadataResource.CONNECTOR_ENTITY_DESTINATION;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_EGRESS;
 import static uk.gov.ida.notification.shared.logging.ProxyNodeLoggingFilter.MESSAGE_INGRESS;
 import static uk.gov.ida.saml.core.test.TestCertificateStrings.METADATA_SIGNING_A_PRIVATE_KEY;
@@ -67,7 +68,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         request = new EidasAuthnRequestBuilder()
                 .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest")
-                .withAssertionConsumerServiceURL("http://assertionConsumerService.net");
+                .withAssertionConsumerServiceURL(CONNECTOR_ENTITY_DESTINATION);
     }
 
     @Test
@@ -83,7 +84,7 @@ public class EspAuthnRequestAppRuleTest extends EidasSamlParserAppRuleTestBase {
         EidasAuthnRequestBuilder builder = new EidasAuthnRequestBuilder()
                 .withIssuer(TestMetadataResource.CONNECTOR_ENTITY_ID)
                 .withDestination("http://proxy-node/eidasAuthnRequest")
-                .withAssertionConsumerServiceURL("http://assertionConsumerService.net")
+                .withAssertionConsumerServiceURL(CONNECTOR_ENTITY_DESTINATION)
                 .withSigningCredential(signingCredential)
                 .withSignatureAlgorithm(new SignatureRSASSAPSS());
 

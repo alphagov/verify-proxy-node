@@ -104,15 +104,17 @@ public class ReceiveResponseResource {
         ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_REQUEST_ID, eidasRequestId);
 
         Issuer issuer = response.getIssuer();
+        String issuerId = "";
         if (issuer != null) {
-            ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, eidasRequestId);
+            issuerId = response.getIssuer().getValue();
+            ProxyNodeLogger.addContext(ProxyNodeMDCKey.EIDAS_ISSUER, issuerId);
         }
 
         ProxyNodeLogger.info(format(
                 "Response from Proxy Node with decrypted attributes: {0}",
                 String.join(",", attributesByName.toString())));
 
-        return new ResponseView(attributesByName, loa, validate.toString(), eidasRequestId, SAML_OBJECT_MARSHALLER.transformToString(decrypted));
+        return new ResponseView(attributesByName, loa, validate.toString(), eidasRequestId, issuerId, SAML_OBJECT_MARSHALLER.transformToString(decrypted));
     }
 
     private Map<String, Object> buildStaticParameters(String authnRequestId) {
