@@ -88,7 +88,7 @@ And('they should have a transient PID') do
 end
 
 And('they should have a response issued by the Proxy Node') do
-  assert_text(env('PROXY_NODE_URL') + '/ServiceMetadata')
+  assert_text('Issuer: ' + env('PROXY_NODE_URL') + '/ServiceMetadata')
 end
 
 Then("the user should be presented with a Hub error page indicating IDP could not sign them in") do
