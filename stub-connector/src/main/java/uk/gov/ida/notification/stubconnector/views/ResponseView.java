@@ -42,4 +42,8 @@ public class ResponseView extends View {
     public String getSamlMessage() {
         return samlMessage;
     }
+
+    public String getIssuerId() {
+        return issuerId;
+    }
 }
