@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 public class MetadataTest {
 
     private static final String TEST_CONNECTOR_NODE_METADATA_FILE = "connector_node_metadata_template.xml";
+    private static final String TEST_EXPIRED_CONNECTOR_NODE_METADATA_FILE = "expired_connector_node_metadata_template.xml";
     private static final String TEST_CONNECTOR_NODE_METADATA_ENTITY_ID = "http://connector-node:8080/ConnectorResponderMetadata";
     private static final String TEST_HUB_METADATA_FILE = "hub_metadata.xml";
     private static final String TEST_HUB_METADATA_ENTITY_ID = "http://stub-idp-one.local/SSO/POST";
@@ -46,6 +47,22 @@ public class MetadataTest {
         PublicKey connectorNodeEncryptionPublicKey = metadata.getCredential(UsageType.ENCRYPTION, TEST_CONNECTOR_NODE_METADATA_ENTITY_ID, IDPSSODescriptor.DEFAULT_ELEMENT_NAME).getPublicKey();
 
         assertThat(expectedPublicKey).isEqualTo(connectorNodeEncryptionPublicKey);
+    }
+
+    @Test(expected = InvalidMetadataException.class)
+    public void shouldErrorIfMetadataEntityDescriptorIsExpired() throws Exception {
+        X509Certificate encryptionCert = new TestKeyPair().certificate;
+
+        MetadataResolver metadataResolver = new TestMetadataBuilder(TEST_EXPIRED_CONNECTOR_NODE_METADATA_FILE)
+                .withEncryptionCert(encryptionCert)
+                .buildResolver("someId");
+        MetadataCredentialResolver metadataCredentialResolver = new MetadataCredentialResolverInitializer(metadataResolver).initialize();
+
+        new Metadata(metadataCredentialResolver).getCredential(
+                UsageType.ENCRYPTION,
+                TEST_CONNECTOR_NODE_METADATA_ENTITY_ID,
+                IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+
     }
 
     @Test
