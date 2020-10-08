@@ -3,7 +3,11 @@ version: v1.13.5
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JAVA-CAJULIUSDAVIES-30073:
+      - '*':
+          reason: Fix not available
+          expires: 2020-12-15T00:00:00.000Z
+  SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
     - '*':
-        reason: Fix not available
-        expires: 2020-06-15T00:00:00.000Z
+        reason: Not used directly by us; Fix not available
+        expires: 2020-11-07
 patch: {}
