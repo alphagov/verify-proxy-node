@@ -225,3 +225,36 @@ spec:
                     -f ./manifests/
                   echo "deleting ${RELEASE_NAMESPACE} connector pod"
                   kubectl -n ${RELEASE_NAMESPACE} delete pod -l app.kubernetes.io/name=connector
+
+    - name: delete-prod-deployments
+      serial: true
+      plan:
+        - task: delete-deployments
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              KUBERNETES_API: kubernetes.default.svc
+              RELEASE_NAMESPACE: ((namespace-deployer.namespace))
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "cz-integration-proxy-node"
+                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "dk-integration-proxy-node"
+                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "hmrc-integration-proxy-node"
+                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "it-integration-proxy-node"
+                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "mt-integration-proxy-node"
+                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "se-integration-proxy-node"
+
