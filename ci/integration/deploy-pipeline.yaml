@@ -226,7 +226,7 @@ spec:
                   echo "deleting ${RELEASE_NAMESPACE} connector pod"
                   kubectl -n ${RELEASE_NAMESPACE} delete pod -l app.kubernetes.io/name=connector
 
-    - name: delete-prod-deployments
+    - name: delete-integration-deployments
       serial: true
       plan:
         - task: delete-deployments
@@ -251,10 +251,10 @@ spec:
                   kubectl config set-context deployer --user deployer --cluster self
                   kubectl config use-context deployer
 
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "cz-integration-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "dk-integration-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "hmrc-integration-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "it-integration-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "mt-integration-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "se-integration-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "cz-integration-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "dk-integration-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "hmrc-integration-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "it-integration-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "mt-integration-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "se-integration-proxy-node"
 

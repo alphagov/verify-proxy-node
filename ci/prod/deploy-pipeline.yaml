@@ -172,7 +172,7 @@ spec:
                   kubectl config set-context deployer --user deployer --cluster self
                   kubectl config use-context deployer
 
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "cz-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "it-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "mt-proxy-node"
-                  kapp delete --namespace "${RELEASE_NAMESPACE}" --app "se-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "cz-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "it-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "mt-proxy-node"
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "se-proxy-node"
