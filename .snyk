@@ -9,9 +9,5 @@ ignore:
   SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
     - '*':
         reason: Not used directly by us; Fix not available
-        expires: 2021-01-01
-  SNYK-JAVA-ORGAPACHEHTTPCOMPONENTS-1016906:
-    - '*':
-        reason: Not used directly by user input, fix not available unless we move to Dropwizard 2
-        expires: 2021-01-01
+        expires: 2020-10-07
 patch: {}
