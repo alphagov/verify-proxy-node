@@ -29,6 +29,8 @@ spec:
       - name: metatron-country-config-volume
         configMap:
           name: {{ .Release.Name }}-countries-config
+      imagePullSecrets:
+      - name: dockerhubpull
       containers:
       - name: metatron
         image: "{{ .Values.metatron.image.repository }}:{{ .Values.metatron.image.tag }}"
