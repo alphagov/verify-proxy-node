@@ -30,6 +30,8 @@ spec:
       - name: hsm-client-crt
         secret:
           secretName: {{ .Release.Name }}-proxy-node-metadata
+      imagePullSecrets:
+      - name: dockerhubpull
       containers:
       - name: translator
         image: "{{ .Values.translator.image.repository }}:{{ .Values.translator.image.tag }}"

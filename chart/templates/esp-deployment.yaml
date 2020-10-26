@@ -33,6 +33,8 @@ spec:
                 operator: Exists
             topologyKey: "kubernetes.io/hostname"
       restartPolicy: Always
+      imagePullSecrets:
+      - name: dockerhubpull
       containers:
       - name: esp
         image: "{{ .Values.esp.image.repository }}:{{ .Values.esp.image.tag }}"
