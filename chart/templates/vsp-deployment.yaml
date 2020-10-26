@@ -22,6 +22,8 @@ spec:
       annotations:
         timestamp: {{ .Release.Time }}
     spec:
+      imagePullSecrets:
+      - name: dockerhubpull
       containers:
       - name: vsp
         image: "{{ .Values.vsp.image.repository }}:{{ .Values.vsp.image.tag }}"

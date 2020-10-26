@@ -30,6 +30,8 @@ spec:
       - name: test-pki-volume
         configMap:
           name: test-pki-configmap
+      imagePullSecrets:
+      - name: dockerhubpull
       containers:
       - name: connector
         image: "{{ .Values.stubConnector.image.repository }}:{{ .Values.stubConnector.image.tag }}"
