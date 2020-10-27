@@ -55,6 +55,8 @@ spec:
       type: docker-image
       source:
         repository: cfcommunity/slack-notification-resource
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     resources:
 
@@ -265,6 +267,8 @@ spec:
               source:
                 repository: govsvc/aws-ruby
                 tag: 2.6.1
+                username: ((dockerhubpull-concourse.username))
+                password: ((dockerhubpull-concourse.password))
             inputs:
               - name: production-lock
                 path: lock-dir

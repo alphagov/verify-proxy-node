@@ -28,6 +28,8 @@ spec:
       source:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     gradle_cache_path: &gradle_cache_path
       path: home/gradle/.gradle
@@ -37,6 +39,8 @@ spec:
       source:
         repository: amazoncorretto
         tag: 11
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     build_config: &build_config
       platform: linux
@@ -44,6 +48,8 @@ spec:
         type: registry-image
         source:
           repository: vito/oci-build-task
+          username: ((dockerhubpull-concourse.username))
+          password: ((dockerhubpull-concourse.password))
         version:
           digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
       caches:
@@ -58,11 +64,15 @@ spec:
       source:
         repository: ((concourse.github-resource-image))
         tag: ((concourse.github-resource-tag))
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     - name: slack-notification
       type: docker-image
       source:
         repository: cfcommunity/slack-notification-resource
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     resources:
 
@@ -637,6 +647,8 @@ spec:
             type: registry-image
             source:
               repository: vito/oci-build-task
+              username: ((dockerhubpull-concourse.username))
+              password: ((dockerhubpull-concourse.password))
             version:
               digest: sha256:cfb2983956145f54a4996c2aff5fc598856c8722922a6e73f9ebfa3d9b3f9813
           caches:
