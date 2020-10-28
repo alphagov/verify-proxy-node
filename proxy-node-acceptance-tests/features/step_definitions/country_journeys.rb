@@ -9,6 +9,8 @@ def country_stub_connector_url(country)
     'https://tara-demo.herokuapp.com/auth?scope=eidas'
   when 'Sweden'
     'https://qa.test.swedenconnect.se/'
+  when 'Spain'
+    'https://eidas.redsara.es/demosp/'
   else
     raise ArgumentError.new("Invalid country name: #{country}")
   end
@@ -57,4 +59,16 @@ def arrive_at_sweden_success_page
   assert_text("1984-02-29")
   assert_text("GB")
   assert_text('Your authentication was made according to eIDAS assurance level "Substantial".')
+end
+
+# Spain
+
+def navigate_spain_journey_to_uk
+  assert_text('Demo Service Provider')
+  find('#submit_button').click
+  assert_text('Select an identification method')
+  find("#tooltip4").find(".css3").click
+  assert_text("European authentication with foreign eID")
+  find(".countrySelectorButtons option[value='UK']").select_option
+  find('input[value="Login"]').click
 end
