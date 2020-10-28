@@ -23,6 +23,8 @@ spec:
       source:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     resource_types:
 
@@ -31,6 +33,8 @@ spec:
       source:
         repository: ((concourse.github-resource-image))
         tag: ((concourse.github-resource-tag))
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     resources:
 

@@ -14,6 +14,8 @@ spec:
       source:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     resources:
 
@@ -35,6 +37,8 @@ spec:
             source:
               repository: openjdk
               tag: 11
+              username: ((dockerhubpull-concourse.username))
+              password: ((dockerhubpull-concourse.password))
           inputs:
             - name: verify-dev-pki
           outputs:

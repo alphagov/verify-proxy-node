@@ -15,6 +15,8 @@ spec:
       source:
         repository: ((concourse.task-toolbox-image))
         tag: ((concourse.task-toolbox-tag))
+        username: ((dockerhubpull-concourse.username))
+        password: ((dockerhubpull-concourse.password))
 
     jobs:
 
