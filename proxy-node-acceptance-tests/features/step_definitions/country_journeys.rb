@@ -68,6 +68,7 @@ def navigate_spain_journey_to_uk
   assert_text('Select an identification method')
   find("#tooltip4").find(".css3").click
   assert_text("European authentication with foreign eID")
-  find(".countrySelectorButtons option[value='UK']").select_option
+  click_button("Belgium")
+  find('li', text: 'United Kingdom').click 
   find('input[value="Login"]').click
 end
