@@ -3,7 +3,7 @@
 def country_stub_connector_url(country)
   case country
   when 'Netherlands'
-    'https://demo-portal.minez.nl/demoportal/etoegang'
+    'https://demo-portal.minez.nl/demoportal/etoegang/service/eb'
   when 'Estonia'
     # 'https://tara-demo.herokuapp.com/first'
     'https://tara-demo.herokuapp.com/auth?scope=eidas'
@@ -17,11 +17,10 @@ end
 # Netherlands
 
 def navigate_netherlands_journey_to_uk
-  assert_text('Kies hoe u wilt inloggen')
-  click_link('English')
-  assert_text('Choose how to log in')
-  select "EU Login", :from => "authnServiceId"
-  click_button('Continue')
+  assert_text('EU Login')
+  find('.select-dropdown').click
+  find('span', text: 'Demo portaal - PseudoID - 21').click
+  click_link('Log in')
   assert_text('Which country is your ID from?')
   find('#country-GB').click
   click_button('Continue')
