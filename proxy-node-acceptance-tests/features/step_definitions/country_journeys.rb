@@ -21,7 +21,7 @@ end
 def navigate_netherlands_journey_to_uk
   assert_text('EU Login')
   find('.select-dropdown').click
-  find('span', text: 'Demo portaal - PseudoID - 21').click
+  find('li span', text: 'Demo portaal - PseudoID - 21').click
   click_link('Log in')
   assert_text('Which country is your ID from?')
   find('#country-GB').click
