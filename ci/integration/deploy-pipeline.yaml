@@ -255,10 +255,4 @@ spec:
                   kubectl config set-context deployer --user deployer --cluster self
                   kubectl config use-context deployer
 
-                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "cz-integration-proxy-node"
-                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "dk-integration-proxy-node"
-                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "hmrc-integration-proxy-node"
-                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "it-integration-proxy-node"
-                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "mt-integration-proxy-node"
-                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "se-integration-proxy-node"
-
+                  kapp delete -y --namespace "${RELEASE_NAMESPACE}" --app "nl-integration-proxy-node"
