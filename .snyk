@@ -14,4 +14,8 @@ ignore:
     - '*':
         reason: Not used directly by user input, fix not available unless we move to Dropwizard 2
         expires: 2021-01-01
+  SNYK-JAVA-ORGECLIPSEJETTY-1021614:
+    - '*':
+        reason: fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
 patch: {}
