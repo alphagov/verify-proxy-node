@@ -11,6 +11,8 @@ def country_stub_connector_url(country)
     'https://qa.test.swedenconnect.se/'
   when 'Spain'
     'https://eidas.redsara.es/demosp/'
+  when 'SwedenProduction'
+    'https://test.swedenconnect.se/'
   else
     raise ArgumentError.new("Invalid country name: #{country}")
   end
