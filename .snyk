@@ -3,11 +3,19 @@ version: v1.13.5
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JAVA-CAJULIUSDAVIES-30073:
-      - '*':
-          reason: Fix not available
-          expires: 2020-12-15T00:00:00.000Z
+    - '*':
+        reason: Fix not available
+        expires: 2020-12-15T00:00:00.000Z
   SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
     - '*':
         reason: Not used directly by us; Fix not available
-        expires: 2020-11-07
+        expires: 2021-01-01
+  SNYK-JAVA-ORGAPACHEHTTPCOMPONENTS-1016906:
+    - '*':
+        reason: Not used directly by user input, fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
+  SNYK-JAVA-ORGECLIPSEJETTY-1021614:
+    - '*':
+        reason: fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
 patch: {}
