@@ -13,6 +13,8 @@ def country_stub_connector_url(country)
     'https://eidas.redsara.es/demosp/'
   when 'SwedenProduction'
     'https://test.swedenconnect.se/'
+  when 'Italy'
+    'https://www.impresainungiorno.gov.it/sso/go'
   else
     raise ArgumentError.new("Invalid country name: #{country}")
   end
@@ -73,4 +75,17 @@ def navigate_spain_journey_to_uk
   click_button("Belgium")
   find('li', text: 'United Kingdom').click 
   find('input[value="Login"]').click
+end
+
+# Italy
+
+def navigate_italy_journey_to_uk
+  assert_text('Cittadini Europei')
+  find('#lang_en').click
+  assert_text('European citizens')
+  find('.button-eidas').click
+  assert_text('Select your country')
+  find(:label, for: '13').click
+  page.execute_script('document.getElementsByName("submitButton")[0].disabled = false')
+  find_button('submitButton').click
 end
