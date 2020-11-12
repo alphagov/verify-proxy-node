@@ -58,13 +58,17 @@ Once the eIDAS SAML response is signed, the Translator service passes it on to t
 The Verify Service Provider (VSP) generates and translates Security Assertion Markup Language (SAML) messages to and from the GOV.UK Verify Hub. 
 The Gateway service uses the VSP to generate SAML requests to send to the Verify Hub. For responses, the Translator service uses the VSP to validate SAML responses and translate them to JSON. 
 
+### Metatron
+
+The Metatron evaluates Connector Node metadata supplied by each connected EU Member State, which allows services to have data on how to validate eIDAS SAML requests and encrypt eIDAS SAML responses for each Connector. 
+
 ## Connecting to Countries
 
-We will host one instance of the proxy node services and infrastructure isolation per requesting Country connector node. All instances will share a single hardware security module (HSM) but will each have independent credentials to access the HSM, and an independent signing key held by the HSM.
+We host one instance of the UK Proxy Node for all Country Connector Nodes. The [Metatron](#metatron) provides data on how to communicate with each Connector Node.
 
 ## Infrastructure
 
-The eIDAS Proxy Node is hosted on an Amazon AWS cloud infrastructure and runs on Kubernetes. This is isolated from all Verify Hub deployments to ensure that it is treated as a separate component. Public and private subnets are used to isolate the Translator service. Access to environments and deployments is controlled using AWS’s identity and access management permissions.
+The eIDAS Proxy Node is hosted on an Amazon AWS cloud infrastructure and runs on the [GDS Supported Platform (GSP)](https://github.com/alphagov/gsp). This is isolated from all Verify Hub deployments to ensure that it is treated as a separate component. Public and private subnets are used to isolate the Translator service. Access to environments and deployments is controlled using AWS’s identity and access management permissions.
 
 ## Security operations monitoring
 
@@ -72,9 +76,9 @@ Security operations within the organisation will monitor transactions and access
 
 ## UK Proxy Node key management
 
-SAML responses going to EU member state connector nodes will be signed with keys stored on an HSM. These are keys with self-signed certificates. The same key will be used to sign the proxy node metadata. 
+SAML responses for EU member state connector nodes will be signed with keys stored on an HSM. These are keys with self-signed certificates. The same key will be used to sign the proxy node metadata. 
 
-The Verify Service Provider will be responsible for signing AuthnRequests and decrypting Responses from the Verify Hub. The keys it uses to do this will be stored as sealed secrets.
+The Verify Service Provider is responsible for signing AuthnRequests and decrypting Responses from the Verify Hub. The keys it uses to do this will be stored as sealed secrets. The certificates are managed in the [Verify Manage Certificates Service](https://github.com/alphagov/verify-self-service).
 
 |           Key type.          |        Key location        |
 | ---------------------------- | -------------------------- |
