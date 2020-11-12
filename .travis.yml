@@ -18,7 +18,7 @@ before_install:
   - curl -u ida-codacy-bot:$GITHUB_PAT -LSs $(curl -u ida-codacy-bot:$GITHUB_PAT -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets[] | select(.browser_download_url | contains("codacy-coverage-reporter-assembly"))'.browser_download_url) -o codacy-coverage-reporter-assembly.jar
 
 install:
-  - npm install -g snyk@1.305.0
+  - npm install -g snyk@1.425.3
 
 script:
   - ./gradlew --no-daemon --parallel test
