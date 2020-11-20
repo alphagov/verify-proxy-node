@@ -2,10 +2,11 @@
 
 FROM amazoncorretto:11
 ENV LANG C.UTF-8
+ENV CLOUDHSM_CLIENT_VERSION=3.2.1-1.el7
 
 # Install AWS CloudHSM client and libs
-ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-latest.el7.x86_64.rpm .
-ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-latest.el7.x86_64.rpm .
+ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-${CLOUDHSM_CLIENT_VERSION}.x86_64.rpm .
+ADD https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-${CLOUDHSM_CLIENT_VERSION}.x86_64.rpm .
 
 RUN yum install -y ./cloudhsm-client-*.rpm \
  && rm ./cloudhsm-client-*.rpm \

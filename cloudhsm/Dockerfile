@@ -2,10 +2,11 @@
 
 FROM amazonlinux:2
 WORKDIR /cloudhsm
+ENV CLOUDHSM_CLIENT_VERSION=3.2.1-1.el7
 
 # Install AWS CloudHSM client
 RUN yum install -y wget \
- && wget --progress=bar:force https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-latest.el7.x86_64.rpm \
+ && wget --progress=bar:force https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-${CLOUDHSM_CLIENT_VERSION}.x86_64.rpm \
  && yum install -y ./cloudhsm-client-*.rpm
 
 COPY init.sh .
