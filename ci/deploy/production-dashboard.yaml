@@ -24,8 +24,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 39,
-      "iteration": 1602575569499,
+      "id": 40,
+      "iteration": 1606470737180,
       "links": [],
       "panels": [
         {
@@ -40,7 +40,6 @@ data:
               "custom": {},
               "decimals": 0,
               "mappings": [],
-              "max": 2,
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
@@ -73,7 +72,7 @@ data:
               "fields": "",
               "values": false
             },
-            "showUnfilled": true
+            "showUnfilled": false
           },
           "pluginVersion": "7.0.3",
           "targets": [
@@ -165,7 +164,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "semi-dark-green",
                     "value": null
                   }
                 ]
@@ -531,6 +530,6 @@ data:
       },
       "timezone": "",
       "title": "Proxy Node Prod Monitoring",
-      "uid": "px6iyxFGk",
-      "version": 4
+      "uid": "qTmj_IpGz",
+      "version": 2
     }
