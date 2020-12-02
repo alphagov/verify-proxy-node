@@ -88,4 +88,8 @@ def navigate_italy_journey_to_uk
   find(:label, for: '13').click
   page.execute_script('document.getElementsByName("submitButton")[0].disabled = false')
   find_button('submitButton').click
+  # We've seen the Italian page refuse to auto-submit its form, possibly a race condition. If the journey stalls, give it a kick
+  if page.has_title? 'eIDAS Authentication Service'
+    page.execute_script('document.getElementsByName("redirectForm")[0].submit()')
+  end
 end
