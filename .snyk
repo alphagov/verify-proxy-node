@@ -5,7 +5,7 @@ ignore:
   SNYK-JAVA-CAJULIUSDAVIES-30073:
     - '*':
         reason: Fix not available
-        expires: 2020-12-15T00:00:00.000Z
+        expires: 2021-01-01
   SNYK-JAVA-ORGGLASSFISHJERSEYMEDIA-595972:
     - '*':
         reason: Not used directly by us; Fix not available
@@ -15,6 +15,22 @@ ignore:
         reason: Not used directly by user input, fix not available unless we move to Dropwizard 2
         expires: 2021-01-01
   SNYK-JAVA-ORGECLIPSEJETTY-1021614:
+    - '*':
+        reason: fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-1048302:
+    - '*':
+        reason: fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
+  SNYK-JAVA-ORGAPACHEHTTPCOMPONENTS-1048058:
+    - '*':
+        reason: fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
+  SNYK-JAVA-ORGECLIPSEJETTY-1047304:
+    - '*':
+        reason: fix not available unless we move to Dropwizard 2
+        expires: 2021-01-01
+  SNYK-JAVA-IONETTY-1042268:
     - '*':
         reason: fix not available unless we move to Dropwizard 2
         expires: 2021-01-01
