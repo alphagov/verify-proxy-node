@@ -1,0 +1,10 @@
+apiVersion: storage.govsvc.uk/v1beta1
+kind: S3Bucket
+metadata:
+  name: integration-lock
+  namespace: verify-eidas-proxy-node-deploy
+  labels:
+    group.access.govsvc.uk: pipeline
+spec:
+  aws: {}
+  secret: integration-lock
