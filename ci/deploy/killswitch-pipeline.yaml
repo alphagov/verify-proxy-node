@@ -68,12 +68,28 @@ spec:
               "is_locked": false
             }
 
+      - name: integration-lock
+        type: s3
+        source:
+          bucket: ((integration-lock.S3BucketName))
+          region_name: ((integration-lock.S3BucketRegion))
+          access_key_id: ((pipeline.AccessKeyID))
+          secret_access_key: ((pipeline.SecretAccessKey))
+          session_token: ((pipeline.SessionToken))
+          regexp: lock/(.*).lock
+          initial_path: 0.lock
+          initial_content_text: |
+            {
+              "is_locked": false
+            }
+
+
     jobs:
 
     - name: lock-prod-deploy
       serial: true
       plan:
-        - do: &lock-proxy-node-pipeline
+        - do: &lock-proxy-node-pipeline-production
           - task: create-lockfile
             config:
               platform: linux
@@ -149,8 +165,93 @@ spec:
                   kubectl config use-context deployer
 
                   kubectl -n "${NAMESPACE}" delete virtualservices,deployments,gateways -l app.kubernetes.io/instance=production
-        - do: *lock-proxy-node-pipeline
+        - do: *lock-proxy-node-pipeline-production
         - put: verify-slack
           params:
             << : *slack_defaults
             text: "The Proxy-Node Production :skull: killswitch :skull: has been pulled, which means the Production instance has been deleted and the Production deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
+
+    - name: lock-integration-deploy
+      serial: true
+      plan:
+        - do: &lock-proxy-node-pipeline-integration
+            - task: create-lockfile
+              config:
+                platform: linux
+                image_resource:
+                  type: docker-image
+                  source:
+                    repository: govsvc/aws-ruby
+                    tag: 2.6.1
+                    username: ((dockerhubpull-concourse.username))
+                    password: ((dockerhubpull-concourse.password))
+                outputs:
+                  - name: lock-dir
+                params:
+                  IS_LOCKED: 'true'
+                run: *create-lock-file
+            - put: integration-lock
+              params:
+                file: lock-dir/*.lock
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node integration deploy pipeline has been locked"
+
+    - name: unlock-integration-deploy
+      serial: true
+      plan:
+        - do:
+            - task: create-lockfile
+              config:
+                platform: linux
+                image_resource:
+                  type: docker-image
+                  source:
+                    repository: govsvc/aws-ruby
+                    tag: 2.6.1
+                    username: ((dockerhubpull-concourse.username))
+                    password: ((dockerhubpull-concourse.password))
+                outputs:
+                  - name: lock-dir
+                params:
+                  IS_LOCKED: 'false'
+                run: *create-lock-file
+            - put: integration-lock
+              params:
+                file: lock-dir/*.lock
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node integration deploy pipeline has been unlocked"
+            icon_emoji: ':unlock:'
+
+    - name: kill-and-lock-integration
+      plan:
+        - task: delete-resources
+          timeout: 10m
+          config:
+            platform: linux
+            image_resource: *task_toolbox
+            params:
+              KUBERNETES_SERVICE_ACCOUNT: ((namespace-deployer))
+              KUBERNETES_TOKEN: ((namespace-deployer.token))
+              NAMESPACE: ((namespace-deployer.namespace))
+            run:
+              path: /bin/bash
+              args:
+                - -euc
+                - |
+                  echo "configuring kubectl"
+                  echo "${KUBERNETES_SERVICE_ACCOUNT}" | jq -r .["ca.crt"] > ca.crt
+                  kubectl config set-cluster self --server=https://kubernetes.default --certificate-authority=ca.crt
+                  kubectl config set-credentials deployer --token "${KUBERNETES_TOKEN}"
+                  kubectl config set-context deployer --user deployer --cluster self
+                  kubectl config use-context deployer
+
+                  kubectl -n "${NAMESPACE}" delete virtualservices,deployments,gateways -l app.kubernetes.io/instance=integration
+        - do: *lock-proxy-node-pipeline-integration
+        - put: verify-slack
+          params:
+            << : *slack_defaults
+            text: "The Proxy-Node integration :skull: killswitch :skull: has been pulled, which means the integration instance has been deleted and the integration deploy pipeline has been locked. See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME"
