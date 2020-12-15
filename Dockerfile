@@ -8,10 +8,11 @@ WORKDIR /app
 ARG TALKS_TO_HSM=false
 ENV LD_LIBRARY_PATH=/opt/cloudhsm/lib
 ENV HSM_PARTITION=PARTITION_1
+ENV CLOUDHSM_CLIENT_VERSION=3.2.1-1.el7
 
 RUN if ${TALKS_TO_HSM}; then echo "Installing CloudHSM libs" \
-    && curl -Os https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-latest.el7.x86_64.rpm \
-    && curl -Os https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-latest.el7.x86_64.rpm \
+    && curl -Os https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-${CLOUDHSM_CLIENT_VERSION}.x86_64.rpm \
+    && curl -Os https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/EL7/cloudhsm-client-jce-${CLOUDHSM_CLIENT_VERSION}.x86_64.rpm \
     && yum install -y -q ./cloudhsm-client-*.rpm \
     && sed -i 's/UNIXSOCKET/TCPSOCKET/g' /opt/cloudhsm/data/application.cfg \
     && rm ./cloudhsm-client-*.rpm ; fi
