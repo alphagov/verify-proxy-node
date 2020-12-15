@@ -97,6 +97,17 @@ spec:
         session_token: ((pipeline.SessionToken))
         regexp: lock/(.*).lock
 
+    - name: integration-lock
+      type: s3
+      source:
+        bucket: ((integration-lock.S3BucketName))
+        region_name: ((integration-lock.S3BucketRegion))
+        access_key_id: ((pipeline.AccessKeyID))
+        secret_access_key: ((pipeline.SecretAccessKey))
+        session_token: ((pipeline.SessionToken))
+        regexp: lock/(.*).lock
+
+
     - name: slack-2nd-line
       type: slack-notification
       source:
@@ -115,6 +126,44 @@ spec:
 
         - get: verify-eidas-config-integration
           trigger: true
+
+        - get: integration-lock
+
+        - task: check-lockfile
+          on_failure:
+            put: slack-2nd-line
+            params:
+              text: |
+                Proxy Node Integration Deploy stopped as the pipeline is locked.
+                See $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+              icon_emoji: ':stop:'
+          config:
+            platform: linux
+            image_resource:
+              type: docker-image
+              source:
+                repository: govsvc/aws-ruby
+                tag: 2.6.1
+                username: ((dockerhubpull-concourse.username))
+                password: ((dockerhubpull-concourse.password))
+            inputs:
+              - name: integration-lock
+                path: lock-dir
+            run:
+              path: ruby
+              args:
+                - -e
+                - |
+                  # encoding: utf-8
+                  require 'json'
+                  most_recent_lockfile = JSON.parse(File.read(Dir.glob('lock-dir/*.lock').sort.reverse.first))
+                  if most_recent_lockfile["is_locked"] == true
+                    puts '🛑 Integration Deploy Pipeline is locked.'
+                    exit 1
+                  else
+                    puts '👍 Integration Deploy Pipeline is unlocked.'
+                    exit 0
+                  end
 
         - task: generate-eidas-config
           config:
