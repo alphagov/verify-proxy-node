@@ -3,7 +3,7 @@ ruby '2.6.5'
 source 'https://rubygems.org'
 
 gem 'capybara', '>= 3.32.2'
-gem 'cucumber'
+gem 'cucumber', '>= 4.0.0'
 gem 'selenium-webdriver'
 gem 'geckodriver-helper'
 gem 'webdrivers', '~> 4.0'
